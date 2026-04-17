@@ -1,147 +1,148 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wurstrand Challenge</title>
 
 <style>
-body {
+body{
   margin:0;
-  font-family: Arial;
-  background: linear-gradient(#020617,#0f172a);
-  color:white;
+  font-family:Arial;
+  background:linear-gradient(180deg,#020617,#0f172a);
+  color:#f8fafc;
 }
 
-.wrap {
-  max-width:1100px;
+.wrap{
+  max-width:1200px;
   margin:auto;
   padding:20px;
 }
 
-.hero {
-  background:#111827;
-  padding:20px;
-  border-radius:20px;
+/* HEADER */
+.hero{
+  background:rgba(17,24,39,.95);
   border:1px solid #334155;
+  border-radius:22px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
-h1 { margin:0; }
+h1{
+  margin:0;
+  font-size:32px;
+}
 
-.overlay {
+.sub{
+  color:#94a3b8;
+  margin-top:5px;
+}
+
+/* OVERLAY */
+.overlay{
   margin-top:20px;
-  padding:20px;
-  border-radius:20px;
-  background:linear-gradient(135deg,#111827,#374151);
+  padding:25px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#111827,#1f2937);
   border:1px solid #475569;
 }
 
-.badge {
-  background:#1e293b;
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:12px;
+.badge{
   display:inline-block;
-  margin-bottom:10px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#1e293b;
+  font-size:12px;
+  margin-bottom:15px;
 }
 
-.challenge-row {
+.challenge-row{
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
 
-.progress-bar {
-  height:12px;
+.progress-bar{
+  height:14px;
   background:#1e293b;
   border-radius:10px;
   overflow:hidden;
-  margin-top:10px;
+  margin-top:15px;
 }
 
-.progress {
+.progress{
   height:100%;
   background:linear-gradient(90deg,#22c55e,#84cc16);
+  transition:.3s;
 }
 
-.grid {
+/* GRID */
+.grid{
   display:grid;
-  gap:10px;
+  gap:15px;
   margin-top:20px;
 }
 
-.grid-4 {
-  grid-template-columns: repeat(4,1fr);
+.grid-4{
+  grid-template-columns:repeat(4,1fr);
 }
 
-.mini {
-  background:#1f2937;
+.mini{
+  padding:15px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  text-align:center;
+  font-size:18px;
+}
+
+/* FORM */
+.card{
+  margin-top:25px;
+  padding:25px;
+  border-radius:22px;
+  background:#111827;
+  border:1px solid #334155;
+}
+
+input,select{
+  width:100%;
   padding:10px;
+  margin-top:8px;
+  margin-bottom:15px;
   border-radius:12px;
   border:1px solid #334155;
+  background:#0f172a;
+  color:white;
 }
 
-.tabs {
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-
-.tab {
-  padding:8px 12px;
-  border-radius:10px;
-  background:#1f2937;
-  cursor:pointer;
-}
-
-.active {
-  background:#22c55e;
-}
-
-.card {
-  margin-top:20px;
-  padding:20px;
-  background:#111827;
-  border-radius:20px;
-  border:1px solid #334155;
-}
-
-input, select {
-  padding:8px;
-  border-radius:10px;
-  border:none;
+button{
+  padding:12px;
   width:100%;
-  margin-top:5px;
-}
-
-button {
-  margin-top:10px;
-  padding:10px;
   border:none;
-  border-radius:10px;
+  border-radius:14px;
   background:#22c55e;
-  color:black;
+  font-weight:bold;
   cursor:pointer;
 }
+
 </style>
 </head>
 
 <body>
 <div class="wrap">
 
-<!-- HEADER -->
 <div class="hero">
   <h1>🔥 Wurstrand Challenge</h1>
-  <p>Gemeinsam stärker. Jeden Tag.</p>
+  <div class="sub">Gemeinsam stärker. Jeden Tag.</div>
 
-  <!-- OVERLAY -->
   <div class="overlay">
 
     <div class="badge">APRIL CHALLENGE</div>
 
     <div class="challenge-row">
       <div>
-        <h2 id="zielText">0 / 1600 Punkte</h2>
+        <h2 id="points">0 / 1600 Punkte</h2>
         <div id="percent">0%</div>
       </div>
       <div>🏁 Ziel: 1600</div>
@@ -152,29 +153,19 @@ button {
     </div>
 
     <div class="grid grid-4">
-      <div class="mini">👣 Schritte<br><span id="steps">0</span></div>
-      <div class="mini">🚴 KM<br><span id="bike">0</span></div>
-      <div class="mini">💪 Kraft<br><span id="kraft">0</span></div>
-      <div class="mini">🎁 Bonus<br><span id="bonus">0</span></div>
+      <div class="mini">👣<br><span id="steps">0</span></div>
+      <div class="mini">🚴<br><span id="bike">0</span></div>
+      <div class="mini">💪<br><span id="kraft">0</span></div>
+      <div class="mini">🎁<br><span id="bonus">0</span></div>
     </div>
 
   </div>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active">Übersicht</div>
-    <div class="tab">Eintrag</div>
-    <div class="tab">Statistik</div>
-  </div>
-
-  <!-- INPUT -->
   <div class="card">
-    <h3>Eintrag hinzufügen</h3>
+    <h3>Eintrag</h3>
 
-    <label>Datum</label>
-    <input type="date" id="datum">
-
-    <label>Person</label>
+    <input type="date" id="date">
+    
     <select id="person">
       <option>Thorsten</option>
       <option>Basti</option>
@@ -182,74 +173,66 @@ button {
       <option>Fabi</option>
     </select>
 
-    <label>Schritte</label>
-    <input type="number" id="stepsInput">
+    <input type="number" id="stepsInput" placeholder="Schritte">
+    <input type="number" id="bikeInput" placeholder="Rad KM">
+    <input type="number" id="squatInput" placeholder="Kniebeugen">
+    <input type="number" id="pushInput" placeholder="Liegestütze">
 
-    <label>Rad KM</label>
-    <input type="number" id="bikeInput">
+    <label><input type="checkbox" id="bonusInput"> Bonus</label>
 
-    <label>Kniebeugen</label>
-    <input type="number" id="squatInput">
-
-    <label>Liegestütze</label>
-    <input type="number" id="pushInput">
-
-    <label>Bonus</label>
-    <input type="checkbox" id="bonusInput">
-
-    <button onclick="addEntry()">Speichern</button>
+    <button onclick="add()">Speichern</button>
   </div>
 
 </div>
-
 </div>
 
 <script>
-let entries = [];
+let data=[];
 
-// 🔥 Punkte berechnen
-function calculatePoints(e){
+function calc(e){
   return Math.floor(e.steps/1000)
     + e.bike
     + Math.floor(e.squats/5)
     + Math.floor(e.pushups/3)
-    + (e.bonus ? 4 : 0);
+    + (e.bonus?4:0);
 }
 
-// ➕ Eintrag
-function addEntry(){
-  const e = {
-    steps: Number(stepsInput.value||0),
-    bike: Number(bikeInput.value||0),
-    squats: Number(squatInput.value||0),
-    pushups: Number(pushInput.value||0),
-    bonus: bonusInput.checked
+function add(){
+  const e={
+    steps:+stepsInput.value||0,
+    bike:+bikeInput.value||0,
+    squats:+squatInput.value||0,
+    pushups:+pushInput.value||0,
+    bonus:bonusInput.checked
   };
-  entries.push(e);
+  data.push(e);
   update();
 }
 
-// 🔄 UI aktualisieren
 function update(){
-  let steps = entries.reduce((a,b)=>a+b.steps,0);
-  let bike = entries.reduce((a,b)=>a+b.bike,0);
-  let kraft = entries.reduce((a,b)=>a+b.squats + b.pushups,0);
-  let bonus = entries.filter(e=>e.bonus).length;
+  let steps=data.reduce((a,b)=>a+b.steps,0);
+  let bike=data.reduce((a,b)=>a+b.bike,0);
+  let kraft=data.reduce((a,b)=>a+b.squats+b.pushups,0);
+  let bonus=data.filter(e=>e.bonus).length;
 
-  let points = entries.reduce((a,b)=>a+calculatePoints(b),0);
+  let pts=data.reduce((a,b)=>a+calc(b),0);
+  let goal=1600;
+  let p=Math.round(pts/goal*100);
 
-  let goal = 1600;
-  let percent = Math.round(points/goal*100);
+  stepsEl.innerText=steps;
+  bikeEl.innerText=bike;
+  kraftEl.innerText=kraft;
+  bonusEl.innerText=bonus;
 
-  document.getElementById("steps").innerText = steps;
-  document.getElementById("bike").innerText = bike;
-  document.getElementById("kraft").innerText = kraft;
-  document.getElementById("bonus").innerText = bonus;
-
-  document.getElementById("zielText").innerText = points + " / " + goal + " Punkte";
-  document.getElementById("percent").innerText = percent + "%";
-  document.getElementById("bar").style.width = percent + "%";
+  document.getElementById("points").innerText=pts+" / "+goal;
+  document.getElementById("percent").innerText=p+"%";
+  document.getElementById("bar").style.width=p+"%";
 }
+
+const stepsEl=document.getElementById("steps");
+const bikeEl=document.getElementById("bike");
+const kraftEl=document.getElementById("kraft");
+const bonusEl=document.getElementById("bonus");
 </script>
 
 </body>
