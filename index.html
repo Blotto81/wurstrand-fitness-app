@@ -138,4 +138,684 @@
       color:#cbd5e1;
     }
 
-   
+    .mini .value{
+      margin-top:8px;
+      font-size:24px;
+      font-weight:700;
+      color:white;
+    }
+
+    .bar-wrap{
+      margin-top:14px;
+    }
+
+    .bar-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      color:#e5e7eb;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+    }
+
+    .bar{
+      height:16px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--green),var(--green2));
+      transition:width .35s ease;
+    }
+
+    .tabbar{
+      display:flex;
+      gap:8px;
+      padding:8px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .tab{
+      border:none;
+      cursor:pointer;
+      background:#111827;
+      color:#e2e8f0;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:700;
+    }
+
+    .tab.active{
+      background:#334155;
+      color:white;
+    }
+
+    .panel{display:none}
+    .panel.active{display:block}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .stat-box{
+      background:#111827;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .stat-box .t{
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .stat-box .v{
+      font-size:28px;
+      font-weight:700;
+      margin-top:10px;
+    }
+
+    .card{
+      padding:18px;
+    }
+
+    .section-title{
+      font-size:20px;
+      margin-bottom:14px;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid #1e293b;
+    }
+
+    .row:last-child{border-bottom:none}
+    .muted{color:var(--muted)}
+    .tiny{font-size:12px;color:var(--muted);margin-top:4px}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .check{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#0f172a;
+      color:white;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:700;
+    }
+
+    .primary{background:var(--green);color:#052e16}
+    .secondary{background:#334155;color:white}
+    .danger{background:var(--red);color:white}
+
+    .entries{
+      display:grid;
+      gap:12px;
+    }
+
+    .entry{
+      border:1px solid var(--line);
+      background:#0f172a;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .entry-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .entry-grid{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:10px;
+    }
+
+    .chip{
+      background:#111827;
+      border:1px solid #1f2937;
+      border-radius:14px;
+      padding:10px;
+    }
+
+    .chip .k{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .chip .v{
+      font-weight:700;
+      margin-top:6px;
+    }
+
+    .empty{
+      padding:30px;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed var(--line);
+      border-radius:18px;
+    }
+
+    @media (max-width: 900px){
+      .grid-4,.stats,.form-grid,.entry-grid,.grid-3,.grid-2{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      .grid-4,.stats,.form-grid,.entry-grid,.grid-3,.grid-2{
+        grid-template-columns:1fr;
+      }
+      .mini .value,.stat-box .v{
+        font-size:22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="topline">
+        <div>
+          <h1>🔥 Wurstrand Challenge</h1>
+          <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+        </div>
+        <div class="hero-badge"><span id="entryCount">0</span> Einträge gespeichert</div>
+      </div>
+
+      <div class="overlay">
+        <div class="badge">Monats-Challenge</div>
+
+        <div class="challenge-row">
+          <div>
+            <h2 id="challengeTitle">Aktiver April</h2>
+            <p id="challengeText" class="sub" style="color:#e2e8f0;">🔥 Ihr seid richtig unterwegs.</p>
+          </div>
+
+          <div style="width:100%;max-width:300px;">
+            <label for="monthSelect">Monat</label>
+            <select id="monthSelect"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-4" style="margin-top:16px;">
+          <div class="mini">
+            <div class="label">Ziel</div>
+            <div class="value" id="goalTarget">-</div>
+          </div>
+          <div class="mini">
+            <div class="label">Aktuell</div>
+            <div class="value" id="goalCurrent">-</div>
+          </div>
+          <div class="mini">
+            <div class="label">Fortschritt</div>
+            <div class="value" id="goalProgress">-</div>
+          </div>
+          <div class="mini">
+            <div class="label">Rest</div>
+            <div class="value" id="goalRest">-</div>
+          </div>
+        </div>
+
+        <div class="bar-wrap">
+          <div class="bar-head">
+            <span>Fortschrittsbalken</span>
+            <span id="goalBarText">0 / 0</span>
+          </div>
+          <div class="bar">
+            <div class="bar-fill" id="goalBar"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-4" style="margin-top:16px;">
+          <div class="mini">
+            <div class="label">Schritte-Punkte</div>
+            <div class="value" id="monthStepsPts">0</div>
+          </div>
+          <div class="mini">
+            <div class="label">Rad-Punkte</div>
+            <div class="value" id="monthBikePts">0</div>
+          </div>
+          <div class="mini">
+            <div class="label">Kraft-Punkte</div>
+            <div class="value" id="monthStrengthPts">0</div>
+          </div>
+          <div class="mini">
+            <div class="label">Bonus</div>
+            <div class="value" id="monthBonusPts">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="eintragen">Eintragen</button>
+      <button class="tab" data-tab="liste">Einträge</button>
+    </div>
+
+    <div id="dashboard" class="panel active">
+      <div class="stats">
+        <div class="stat-box">
+          <div class="t">Gesamt Schritte</div>
+          <div class="v" id="totalSteps">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="t">Gesamt Fahrrad-KM</div>
+          <div class="v" id="totalBike">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="t">Bonuspunkte</div>
+          <div class="v" id="totalBonus">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="t">Kniebeugen / Liegestütze</div>
+          <div class="v" id="totalStrength">0 / 0</div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <h3 class="section-title">Team-Statistiken</h3>
+          <div class="row"><span class="muted">Wie oft über 10.000 Schritte</span><strong id="over10k">0</strong></div>
+          <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps">0</strong></div>
+          <div class="row"><span class="muted">Ø Rad-KM pro aktivem Eintrag</span><strong id="avgBike">0</strong></div>
+          <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount">0</strong></div>
+          <div class="row"><span class="muted">Kniebeugen gesamt</span><strong id="squatsTotal">0</strong></div>
+          <div class="row"><span class="muted">Liegestütze gesamt</span><strong id="pushupsTotal">0</strong></div>
+          <div class="row"><span class="muted">Kniebeugen-Punkte</span><strong id="squatPts">0</strong></div>
+          <div class="row"><span class="muted">Liegestütz-Punkte</span><strong id="pushupPts">0</strong></div>
+          <div class="row"><span class="muted">Verhältnis Schritte : Rad</span><strong id="ratio">-</strong></div>
+          <div class="row"><span class="muted">Anteil Schritte / Rad</span><strong id="ratioPct">-</strong></div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Rekorde</h3>
+          <div class="row"><span class="muted">Meiste Schritte an einem Tag</span><strong id="maxStepsDay">-</strong></div>
+          <div class="row"><span class="muted">Meiste Fahrrad-KM an einem Tag</span><strong id="maxBikeDay">-</strong></div>
+          <div class="row"><span class="muted">Punkte ohne Bonus</span><strong id="pointsWithoutBonus">0</strong></div>
+          <div class="row"><span class="muted">Teamscore gesamt</span><strong id="teamScore">0</strong></div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Punkte-Mix</h3>
+          <div class="row"><span class="muted">Schritte-Punkte</span><strong id="mixSteps">0</strong></div>
+          <div class="row"><span class="muted">Rad-Punkte</span><strong id="mixBike">0</strong></div>
+          <div class="row"><span class="muted">Kniebeugen-Punkte</span><strong id="mixSquat">0</strong></div>
+          <div class="row"><span class="muted">Liegestütz-Punkte</span><strong id="mixPushup">0</strong></div>
+          <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="eintragen" class="panel">
+      <div class="card">
+        <h3 class="section-title">Neuen Tageseintrag erfassen</h3>
+
+        <div class="form-grid">
+          <div>
+            <label for="date">Datum</label>
+            <input id="date" type="date">
+          </div>
+
+          <div>
+            <label for="person">Person</label>
+            <select id="person"></select>
+          </div>
+
+          <div>
+            <label for="steps">Schritte</label>
+            <input id="steps" type="number" placeholder="z. B. 10452">
+          </div>
+
+          <div>
+            <label for="bikeKm">Fahrrad-KM</label>
+            <input id="bikeKm" type="number" step="0.1" placeholder="z. B. 7.5">
+          </div>
+
+          <div>
+            <label for="squats">Kniebeugen</label>
+            <input id="squats" type="number" placeholder="z. B. 30">
+            <div class="tiny">5 Kniebeugen = 1 Punkt</div>
+          </div>
+
+          <div>
+            <label for="pushups">Liegestütze</label>
+            <input id="pushups" type="number" placeholder="z. B. 15">
+            <div class="tiny">3 Liegestütze = 1 Punkt</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top:14px;">
+          <label class="check"><input id="bonus" type="checkbox"> Bonus erreicht (+4)</label>
+          <label class="check"><input id="exercise" type="checkbox"> Individuelle Übung gemacht</label>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="saveBtn">Eintrag speichern</button>
+          <button class="secondary" id="resetBtn">Zurücksetzen</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="liste" class="panel">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+          <h3 class="section-title" style="margin-bottom:0;">Gespeicherte Einträge</h3>
+          <button class="danger" id="clearBtn">Alle löschen</button>
+        </div>
+        <div id="entriesList" class="entries"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PEOPLE = ["Thorsten","Basti","Marian","Fabi"];
+    const STORAGE_KEY = "wurstrand-overlay-v1";
+    const SQUAT_POINTS_UNIT = 5;
+    const PUSHUP_POINTS_UNIT = 3;
+
+    const MONTHLY_GOALS = {
+      "2026-02": { title: "Fit Februar", target: 650, type: "steps" },
+      "2026-03": { title: "Mächtiger März", target: 1600, type: "points" },
+      "2026-04": { title: "Aktiver April", target: 1600, type: "points" },
+      "2026-05": { title: "Mission Mai", target: 1800, type: "points" }
+    };
+
+    const INITIAL_ENTRIES = [];
+
+    const $ = (id) => document.getElementById(id);
+
+    function todayISO() {
+      return new Date().toISOString().slice(0,10);
+    }
+
+    function monthKeyFromDate(dateString) {
+      return String(dateString || "").slice(0,7);
+    }
+
+    function monthLabel(monthKey) {
+      if (!monthKey) return "-";
+      const [year, month] = monthKey.split("-");
+      const names = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+      return `${names[Number(month)-1] || month} ${year}`;
+    }
+
+    function monthMotivation(progress) {
+      if (progress >= 100) return "👑 Monatsziel geknackt. Starkes Ding.";
+      if (progress >= 85) return "🚀 Endspurt. Das Ziel ist greifbar nah.";
+      if (progress >= 60) return "🔥 Ihr seid richtig unterwegs.";
+      if (progress >= 35) return "🙂 Solide Basis. Jetzt weiter einsammeln.";
+      return "⚡ Monat läuft – aber da geht noch einiges.";
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Number(value) || 0);
+    }
+
+    function formatDecimal(value, digits = 2) {
+      return new Intl.NumberFormat("de-DE", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(Number(value) || 0);
+    }
+
+    function pointsFromEntry(entry) {
+      const stepPoints = (Number(entry.steps) || 0) / 1000;
+      const bikePoints = Number(entry.bikeKm) || 0;
+      const bonusPoints = entry.bonus ? 4 : 0;
+      const squatPoints = (Number(entry.squats) || 0) / SQUAT_POINTS_UNIT;
+      const pushupPoints = (Number(entry.pushups) || 0) / PUSHUP_POINTS_UNIT;
+      return stepPoints + bikePoints + bonusPoints + squatPoints + pushupPoints;
+    }
+
+    let entries = [];
+    let selectedMonth = "2026-04";
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          entries = JSON.parse(raw);
+        } else {
+          entries = INITIAL_ENTRIES;
+        }
+      } catch {
+        entries = INITIAL_ENTRIES;
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function setupForm() {
+      $("date").value = todayISO();
+      $("person").innerHTML = PEOPLE.map(p => `<option value="${p}">${p}</option>`).join("");
+    }
+
+    function buildMonthSelect() {
+      const months = [...new Set(entries.map(e => monthKeyFromDate(e.date)).filter(Boolean))].sort();
+      const fallback = Object.keys(MONTHLY_GOALS);
+      const allMonths = [...new Set([...months, ...fallback])].sort();
+
+      $("monthSelect").innerHTML = allMonths.map(month => {
+        const name = MONTHLY_GOALS[month]?.title || monthLabel(month);
+        return `<option value="${month}" ${month === selectedMonth ? "selected" : ""}>${name}</option>`;
+      }).join("");
+
+      $("monthSelect").onchange = (e) => {
+        selectedMonth = e.target.value;
+        render();
+      };
+    }
+
+    function render() {
+      buildMonthSelect();
+
+      const totalSteps = entries.reduce((s,e)=>s+(Number(e.steps)||0),0);
+      const totalBikeKm = entries.reduce((s,e)=>s+(Number(e.bikeKm)||0),0);
+      const totalBonusPoints = entries.reduce((s,e)=>s+(e.bonus?4:0),0);
+      const totalSquats = entries.reduce((s,e)=>s+(Number(e.squats)||0),0);
+      const totalPushups = entries.reduce((s,e)=>s+(Number(e.pushups)||0),0);
+      const squatPoints = totalSquats / SQUAT_POINTS_UNIT;
+      const pushupPoints = totalPushups / PUSHUP_POINTS_UNIT;
+      const over10kCount = entries.filter(e => (Number(e.steps)||0) > 10000).length;
+      const avgSteps = entries.length ? totalSteps / entries.length : 0;
+      const bikeActive = entries.filter(e => (Number(e.bikeKm)||0) > 0);
+      const avgBike = bikeActive.length ? totalBikeKm / bikeActive.length : 0;
+      const bonusCount = entries.filter(e => e.bonus).length;
+      const ratio = totalBikeKm > 0 ? (totalSteps / 1000) / totalBikeKm : 0;
+      const stepsPct = totalBikeKm > 0 ? ((totalSteps/1000)/((totalSteps/1000)+totalBikeKm))*100 : 0;
+      const bikePct = totalBikeKm > 0 ? (totalBikeKm/((totalSteps/1000)+totalBikeKm))*100 : 0;
+
+      const maxStepsEntry = entries.reduce((best,e)=> (Number(e.steps)||0) > (Number(best?.steps)||0) ? e : best, null);
+      const maxBikeEntry = entries.reduce((best,e)=> (Number(e.bikeKm)||0) > (Number(best?.bikeKm)||0) ? e : best, null);
+
+      const monthEntries = entries.filter(e => monthKeyFromDate(e.date) === selectedMonth);
+      const monthSteps = monthEntries.reduce((s,e)=>s+(Number(e.steps)||0),0);
+      const monthBike = monthEntries.reduce((s,e)=>s+(Number(e.bikeKm)||0),0);
+      const monthBonus = monthEntries.reduce((s,e)=>s+(e.bonus?4:0),0);
+      const monthSquatPts = monthEntries.reduce((s,e)=>s+(Number(e.squats)||0),0) / SQUAT_POINTS_UNIT;
+      const monthPushupPts = monthEntries.reduce((s,e)=>s+(Number(e.pushups)||0),0) / PUSHUP_POINTS_UNIT;
+      const monthPoints = monthSteps/1000 + monthBike + monthSquatPts + monthPushupPts + monthBonus;
+
+      const currentGoal = MONTHLY_GOALS[selectedMonth] || null;
+      const goalValue = currentGoal?.type === "steps" ? monthSteps/1000 : monthPoints;
+      const progress = currentGoal?.target ? Math.min((goalValue/currentGoal.target)*100,100) : 0;
+      const remaining = currentGoal?.target ? Math.max(currentGoal.target - goalValue, 0) : 0;
+
+      $("entryCount").textContent = entries.length;
+      $("challengeTitle").textContent = currentGoal?.title || monthLabel(selectedMonth);
+      $("challengeText").textContent = monthMotivation(progress);
+      $("goalTarget").textContent = currentGoal ? `${formatDecimal(currentGoal.target,0)} ${currentGoal.type === "steps" ? "Schritte-Punkte" : "Punkte"}` : "-";
+      $("goalCurrent").textContent = formatDecimal(goalValue,2);
+      $("goalProgress").textContent = currentGoal ? `${Math.round(progress)}%` : "-";
+      $("goalRest").textContent = currentGoal ? formatDecimal(remaining,2) : "-";
+      $("goalBarText").textContent = currentGoal ? `${formatDecimal(goalValue,2)} / ${formatDecimal(currentGoal.target,0)}` : "Kein Ziel hinterlegt";
+      $("goalBar").style.width = `${progress}%`;
+
+      $("monthStepsPts").textContent = formatDecimal(monthSteps/1000,2);
+      $("monthBikePts").textContent = formatDecimal(monthBike,2);
+      $("monthStrengthPts").textContent = formatDecimal(monthSquatPts + monthPushupPts,2);
+      $("monthBonusPts").textContent = formatDecimal(monthBonus,0);
+
+      $("totalSteps").textContent = formatNumber(totalSteps);
+      $("totalBike").textContent = formatDecimal(totalBikeKm,2);
+      $("totalBonus").textContent = String(totalBonusPoints);
+      $("totalStrength").textContent = `${formatNumber(totalSquats)} / ${formatNumber(totalPushups)}`;
+
+      $("over10k").textContent = String(over10kCount);
+      $("avgSteps").textContent = formatNumber(Math.round(avgSteps));
+      $("avgBike").textContent = formatDecimal(avgBike,2);
+      $("bonusCount").textContent = String(bonusCount);
+      $("squatsTotal").textContent = formatNumber(totalSquats);
+      $("pushupsTotal").textContent = formatNumber(totalPushups);
+      $("squatPts").textContent = formatDecimal(squatPoints,2);
+      $("pushupPts").textContent = formatDecimal(pushupPoints,2);
+      $("ratio").textContent = totalBikeKm > 0 ? `${formatDecimal(ratio,2)} : 1` : "-";
+      $("ratioPct").textContent = totalBikeKm > 0 ? `${Math.round(stepsPct)}% / ${Math.round(bikePct)}%` : "-";
+
+      $("maxStepsDay").textContent = maxStepsEntry ? `${formatNumber(maxStepsEntry.steps)} · ${maxStepsEntry.date}` : "-";
+      $("maxBikeDay").textContent = maxBikeEntry ? `${formatDecimal(maxBikeEntry.bikeKm,2)} · ${maxBikeEntry.date}` : "-";
+      $("pointsWithoutBonus").textContent = formatDecimal(totalSteps/1000 + totalBikeKm + squatPoints + pushupPoints,2);
+      $("teamScore").textContent = formatDecimal(totalSteps/1000 + totalBikeKm + squatPoints + pushupPoints + totalBonusPoints,2);
+
+      $("mixSteps").textContent = formatDecimal(totalSteps/1000,2);
+      $("mixBike").textContent = formatDecimal(totalBikeKm,2);
+      $("mixSquat").textContent = formatDecimal(squatPoints,2);
+      $("mixPushup").textContent = formatDecimal(pushupPoints,2);
+      $("mixBonus").textContent = String(totalBonusPoints);
+
+      renderEntries();
+    }
+
+    function renderEntries() {
+      const list = $("entriesList");
+      const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
+      if (!sorted.length) {
+        list.innerHTML = `<div class="empty">Noch keine Einträge vorhanden.</div>`;
+        return;
+      }
+
+      list.innerHTML = sorted.map(entry => `
+        <div class="entry">
+          <div class="entry-top">
+            <div>
+              <div style="font-weight:700">${entry.person}</div>
+              <div class="tiny">${entry.date}</div>
+            </div>
+            <button class="danger" onclick="deleteEntry('${entry.id}')">Löschen</button>
+          </div>
+          <div class="entry-grid">
+            <div class="chip"><div class="k">Schritte</div><div class="v">${formatNumber(entry.steps)}</div></div>
+            <div class="chip"><div class="k">Rad</div><div class="v">${formatDecimal(entry.bikeKm,2)}</div></div>
+            <div class="chip"><div class="k">Knie / Liege</div><div class="v">${formatNumber(entry.squats)} / ${formatNumber(entry.pushups)}</div></div>
+            <div class="chip"><div class="k">Bonus</div><div class="v">${entry.bonus ? "Ja" : "Nein"}</div></div>
+            <div class="chip"><div class="k">Übung</div><div class="v">${entry.exercise ? "Ja" : "Nein"}</div></div>
+            <div class="chip"><div class="k">Punkte</div><div class="v">${formatDecimal(entry.points,2)}</div></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function addEntry() {
+      const entry = {
+        id: `entry-${Date.now()}`,
+        date: $("date").value,
+        person: $("person").value,
+        steps: Number($("steps").value) || 0,
+        bikeKm: Number($("bikeKm").value) || 0,
+        squats: Number($("squats").value) || 0,
+        pushups: Number($("pushups").value) || 0,
+        bonus: $("bonus").checked,
+        exercise: $("exercise").checked || (Number($("squats").value) > 0) || (Number($("pushups").value) > 0)
+      };
+      entry.points = pointsFromEntry(entry);
+      entries.push(entry);
+      saveEntries();
+      resetForm();
+      render();
+      switchTab("liste");
+    }
+
+    function resetForm() {
+      $("date").value = todayISO();
+      $("person").value = PEOPLE[0];
+      $("steps").value = "";
+      $("bikeKm").value = "";
+      $("squats").value = "";
+      $("pushups").value = "";
+      $("bonus").checked = false;
+      $("exercise").checked = false;
+    }
+
+    function deleteEntry(id) {
+      entries = entries.filter(e => e.id !== id);
+      saveEntries();
+      render();
+    }
+
+    function clearAll() {
+      if (!confirm("Wirklich alle Einträge löschen?")) return;
+      entries = [];
+      saveEntries();
+      render();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
+      document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === tabId));
+    }
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    $("saveBtn").addEventListener("click", addEntry);
+    $("resetBtn").addEventListener("click", resetForm);
+    $("clearBtn").addEventListener("click", clearAll);
+
+    loadEntries();
+    setupForm();
+    render();
+  </script>
+</body>
+</html>
