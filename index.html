@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wurstrand Challenge</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body style="font-family: Arial; background:#111; color:white; text-align:center; padding:20px;">
+
+  <h1>🔥 Wurstrand Challenge 🔥</h1>
+  <p>Deine App läuft! 💪</p>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+      const [count, setCount] = React.useState(0);
+
+      return (
+        <div>
+          <h2>Punkte: {count}</h2>
+          <button onClick={() => setCount(count + 1)}>
+            +1 Punkt
+          </button>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+
+</body>
+</html>
