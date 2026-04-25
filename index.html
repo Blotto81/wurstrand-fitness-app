@@ -47,11 +47,15 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
 .muted{color:#cbd5e1}
 .entry{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:14px;margin-bottom:12px}
 .entrytop{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 .chip{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:10px}
 .chip small{color:#94a3b8}
 .empty{border:1px dashed #334155;border-radius:18px;padding:30px;text-align:center;color:#94a3b8}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
+.toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #475569;color:white;padding:14px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9999;opacity:0;transform:translateY(20px);transition:.3s;max-width:330px}
+.toast.show{opacity:1;transform:translateY(0)}
+.confetti{position:fixed;top:-10px;width:10px;height:10px;background:#22c55e;z-index:9999;animation:fall 2.8s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
 @media(max-width:800px){.grid4,.grid3,.grid2,.formgrid,.chips{grid-template-columns:1fr}.mini .v,.stat .v{font-size:22px}}
 </style>
 </head>
@@ -99,8 +103,13 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
     <div class="grid grid4">
       <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts">0</div></div>
       <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts">0</div></div>
-      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts">0</div></div>
+      <div class="mini"><div class="l">Kraft + Übung</div><div class="v" id="powerPts">0</div></div>
       <div class="mini"><div class="l">Bonus</div><div class="v" id="bonusPts">0</div></div>
+    </div>
+
+    <div class="grid grid2">
+      <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay">0</div></div>
+      <div class="mini"><div class="l">Resttage im Monat</div><div class="v" id="daysLeft">0</div></div>
     </div>
   </div>
 </div>
@@ -126,7 +135,7 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
     <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps">0</div></div>
     <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike">0</div></div>
     <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus">0</div></div>
-    <div class="stat"><div class="l">Kniebeugen / Liegestütze</div><div class="v" id="totalPower">0 / 0</div></div>
+    <div class="stat"><div class="l">Knie / Liege / Übung</div><div class="v" id="totalPower">0 / 0 / 0</div></div>
   </div>
 
   <div class="grid grid3">
@@ -149,7 +158,7 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
       <h3>Punkte-Mix</h3>
       <div class="row"><span class="muted">Schritte</span><strong id="mixSteps">0</strong></div>
       <div class="row"><span class="muted">Rad</span><strong id="mixBike">0</strong></div>
-      <div class="row"><span class="muted">Kraft</span><strong id="mixPower">0</strong></div>
+      <div class="row"><span class="muted">Kraft + Übung</span><strong id="mixPower">0</strong></div>
       <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
     </div>
   </div>
@@ -166,7 +175,8 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
       <div><label>Kniebeugen</label><input type="number" id="squats" placeholder="z. B. 30"></div>
       <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
     </div>
-    <label style="margin-top:14px"><input type="checkbox" id="bonus"> Bonus erreicht (+4)</label>
+    <label style="margin-top:14px;display:block"><input type="checkbox" id="exercise"> Individuelle Übung gemacht (+5)</label>
+    <p class="sub">Bonus wird automatisch vergeben, wenn 3 von 4 Kategorien geschafft sind: Schritte, Rad, Kraft, individuelle Übung.</p>
     <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
     <button class="secondary" onclick="resetForm()" style="margin-top:10px">Abbrechen / zurücksetzen</button>
   </div>
@@ -174,14 +184,14 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
 
 <div id="liste" class="panel">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-      <h3>Gespeicherte Einträge</h3>
-    </div>
+    <h3>Gespeicherte Einträge</h3>
     <div id="entriesList"></div>
   </div>
 </div>
 
 </div>
+
+<div id="toast" class="toast"></div>
 
 <script>
 const supabaseUrl = "https://ythcpltiujpnxedtgjmr.supabase.co";
@@ -198,12 +208,50 @@ const GOALS={
 let selectedMonth="2026-05";
 let entries=[];
 let editingId=null;
+let lastProgress=0;
+let goalCelebrated=false;
 
 function $(id){return document.getElementById(id)}
 function fmt(n,d=0){return new Intl.NumberFormat("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d}).format(Number(n)||0)}
 function monthKey(date){return String(date||"").slice(0,7)}
-function points(e){return (Number(e.steps)||0)/1000+(Number(e.bike)||0)+(Number(e.squats)||0)/5+(Number(e.pushups)||0)/3+(e.bonus?4:0)}
+function autoBonus(e){
+  const cats=[
+    (Number(e.steps)||0)>0,
+    (Number(e.bike)||0)>0,
+    ((Number(e.squats)||0)+(Number(e.pushups)||0))>0,
+    !!e.exercise
+  ];
+  return cats.filter(Boolean).length>=3;
+}
+function points(e){
+  return (Number(e.steps)||0)/1000+
+    (Number(e.bike)||0)+
+    (Number(e.squats)||0)/5+
+    (Number(e.pushups)||0)/3+
+    (e.exercise?5:0)+
+    (autoBonus(e)?4:0);
+}
 function motivate(p){if(p>=100)return"👑 Monatsziel geknackt. Starkes Ding.";if(p>=85)return"🚀 Endspurt. Das Ziel ist greifbar nah.";if(p>=60)return"🔥 Ihr seid richtig unterwegs.";if(p>=35)return"🙂 Solide Basis. Weiter einsammeln.";return"⚡ Monat läuft – aber da geht noch einiges."}
+function toast(msg){
+  const t=$("toast");
+  t.innerHTML=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3600);
+}
+function confetti(){
+  for(let i=0;i<70;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=["#22c55e","#84cc16","#38bdf8","#facc15","#f472b6"][Math.floor(Math.random()*5)];
+    c.style.animationDelay=(Math.random()*0.8)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+function monthScore(month){
+  return entries.filter(e=>monthKey(e.date)===month).reduce((s,e)=>s+points(e),0);
+}
 
 async function loadEntries(){
   const {data,error}=await db.from("entries").select("*").order("date",{ascending:false});
@@ -217,7 +265,7 @@ function init(){
   $("person").innerHTML=PEOPLE.map(p=>`<option>${p}</option>`).join("");
   $("monthSelect").innerHTML=Object.keys(GOALS).map(m=>`<option value="${m}">${GOALS[m].title}</option>`).join("");
   $("monthSelect").value=selectedMonth;
-  $("monthSelect").onchange=e=>{selectedMonth=e.target.value;render()}
+  $("monthSelect").onchange=e=>{selectedMonth=e.target.value;lastProgress=0;goalCelebrated=false;render()}
   loadEntries();
 
   db.channel("entries-changes")
@@ -226,6 +274,10 @@ function init(){
 }
 
 async function saveEntry(){
+  const beforeScore=monthScore(selectedMonth);
+  const beforePct=GOALS[selectedMonth] ? beforeScore/GOALS[selectedMonth].target*100 : 0;
+  const beforeRecords=getRecords();
+
   const entry={
     date:$("date").value,
     person:$("person").value,
@@ -233,8 +285,9 @@ async function saveEntry(){
     bike:+$("bike").value||0,
     squats:+$("squats").value||0,
     pushups:+$("pushups").value||0,
-    bonus:$("bonus").checked
+    exercise:$("exercise").checked
   };
+  entry.bonus=autoBonus(entry);
 
   const result = editingId
     ? await db.from("entries").update(entry).eq("id",editingId)
@@ -244,6 +297,22 @@ async function saveEntry(){
 
   resetForm();
   await loadEntries();
+
+  const afterScore=monthScore(selectedMonth);
+  const afterPct=GOALS[selectedMonth] ? afterScore/GOALS[selectedMonth].target*100 : 0;
+  const afterRecords=getRecords();
+
+  if(entry.steps>=10000) toast("🔥 10.000 Schritte geknackt! Wurstrand läuft.");
+  if(entry.bike>=20) toast("🚴 Radtag eskaliert – die Wade lebt.");
+  if(entry.bonus) toast("🎁 Bonus automatisch eingesammelt! 3 von 4 Kategorien geschafft.");
+  if(beforePct<50 && afterPct>=50) toast("🔥 50% geschafft – der Monat nimmt Fahrt auf.");
+  if(beforePct<75 && afterPct>=75) toast("🚀 75% geschafft – jetzt nicht nachlassen!");
+  if(beforePct<90 && afterPct>=90) toast("👀 90% – das Ziel riecht schon nach Schweiß und Ruhm.");
+  if(beforePct<100 && afterPct>=100){toast("👑 Monatsziel geknackt! Wurstrand liefert."); confetti();}
+  if(afterRecords.steps.value>beforeRecords.steps.value) toast("👣 Neuer Team-Schritte-Rekord!");
+  if(afterRecords.bike.value>beforeRecords.bike.value) toast("🚴 Neuer Team-Rad-Rekord!");
+  if(afterRecords.points.value>beforeRecords.points.value) toast("⚡ Neuer Team-Punkte-Rekord!");
+
   showTab("liste",document.querySelectorAll(".tab")[2]);
 }
 
@@ -257,7 +326,7 @@ function editEntry(id){
   $("bike").value=e.bike||0;
   $("squats").value=e.squats||0;
   $("pushups").value=e.pushups||0;
-  $("bonus").checked=!!e.bonus;
+  $("exercise").checked=!!e.exercise;
   $("formTitle").textContent="Eintrag bearbeiten";
   $("saveButton").textContent="Änderung speichern";
   showTab("eintrag",document.querySelectorAll(".tab")[1]);
@@ -270,7 +339,7 @@ function resetForm(){
   $("bike").value="";
   $("squats").value="";
   $("pushups").value="";
-  $("bonus").checked=false;
+  $("exercise").checked=false;
   $("formTitle").textContent="Neuen Tageseintrag erfassen";
   $("saveButton").textContent="Eintrag speichern";
 }
@@ -290,11 +359,19 @@ function render(){
   const monthBike=monthEntries.reduce((s,e)=>s+(Number(e.bike)||0),0);
   const monthSquats=monthEntries.reduce((s,e)=>s+(Number(e.squats)||0),0);
   const monthPushups=monthEntries.reduce((s,e)=>s+(Number(e.pushups)||0),0);
-  const monthBonus=monthEntries.filter(e=>e.bonus).length*4;
+  const monthExercises=monthEntries.filter(e=>e.exercise).length;
+  const monthBonus=monthEntries.filter(e=>autoBonus(e)).length*4;
   const stepPoints=monthSteps/1000;
-  const powerPoints=monthSquats/5+monthPushups/3;
+  const powerPoints=monthSquats/5+monthPushups/3+(monthExercises*5);
   const score=monthEntries.reduce((s,e)=>s+points(e),0);
   const pct=goal.target?Math.min(score/goal.target*100,100):0;
+
+  const now=new Date();
+  const [y,m]=selectedMonth.split("-").map(Number);
+  const lastDay=new Date(y,m,0).getDate();
+  const dayNow=(now.getFullYear()===y && now.getMonth()+1===m) ? now.getDate() : 1;
+  const restDays=Math.max(lastDay-dayNow+1,1);
+  const needed=Math.max(goal.target-score,0)/restDays;
 
   $("entryCount").textContent=entries.length;
   $("monthTitle").textContent=goal.title;
@@ -305,6 +382,8 @@ function render(){
   $("goalRest").textContent=fmt(Math.max(goal.target-score,0),2);
   $("barText").textContent=fmt(score,2)+" / "+fmt(goal.target,0);
   $("barFill").style.width=pct+"%";
+  $("neededPerDay").textContent=fmt(needed,2);
+  $("daysLeft").textContent=fmt(restDays,0);
 
   $("stepPts").textContent=fmt(stepPoints,2);
   $("bikePts").textContent=fmt(monthBike,2);
@@ -314,12 +393,12 @@ function render(){
   $("totalSteps").textContent=fmt(monthSteps,0);
   $("totalBike").textContent=fmt(monthBike,2);
   $("totalBonus").textContent=fmt(monthBonus,0);
-  $("totalPower").textContent=fmt(monthSquats,0)+" / "+fmt(monthPushups,0);
-  $("over10k").textContent=monthEntries.filter(e=>e.steps>10000).length;
+  $("totalPower").textContent=fmt(monthSquats,0)+" / "+fmt(monthPushups,0)+" / "+fmt(monthExercises,0);
+  $("over10k").textContent=monthEntries.filter(e=>e.steps>=10000).length;
   $("avgSteps").textContent=fmt(monthEntries.length?monthSteps/monthEntries.length:0,0);
   const activeBike=monthEntries.filter(e=>e.bike>0);
   $("avgBike").textContent=fmt(activeBike.length?monthBike/activeBike.length:0,2);
-  $("bonusCount").textContent=monthEntries.filter(e=>e.bonus).length;
+  $("bonusCount").textContent=monthEntries.filter(e=>autoBonus(e)).length;
 
   const maxS=monthEntries.reduce((a,b)=>b.steps>(a?.steps||0)?b:a,null);
   const maxB=monthEntries.reduce((a,b)=>b.bike>(a?.bike||0)?b:a,null);
@@ -335,7 +414,7 @@ function render(){
   renderList(monthEntries);
 }
 
-function updateRecords(){
+function getRecords(){
   const byDate={};
   entries.forEach(e=>{
     const d=e.date;
@@ -355,12 +434,17 @@ function updateRecords(){
     if(v.points>pointRec.value)pointRec={value:v.points,date};
   });
 
-  $("recordSteps").textContent=fmt(stepRec.value,0);
-  $("recordStepsDate").textContent=stepRec.date;
-  $("recordBike").textContent=fmt(bikeRec.value,1)+" km";
-  $("recordBikeDate").textContent=bikeRec.date;
-  $("recordPoints").textContent=fmt(pointRec.value,2);
-  $("recordPointsDate").textContent=pointRec.date;
+  return {steps:stepRec,bike:bikeRec,points:pointRec};
+}
+
+function updateRecords(){
+  const r=getRecords();
+  $("recordSteps").textContent=fmt(r.steps.value,0);
+  $("recordStepsDate").textContent=r.steps.date;
+  $("recordBike").textContent=fmt(r.bike.value,1)+" km";
+  $("recordBikeDate").textContent=r.bike.date;
+  $("recordPoints").textContent=fmt(r.points.value,2);
+  $("recordPointsDate").textContent=r.points.date;
 }
 
 function renderList(list){
@@ -379,6 +463,7 @@ function renderList(list){
         <div class="chip"><small>Rad</small><br><b>${fmt(e.bike,2)}</b></div>
         <div class="chip"><small>Knie</small><br><b>${fmt(e.squats,0)}</b></div>
         <div class="chip"><small>Liege</small><br><b>${fmt(e.pushups,0)}</b></div>
+        <div class="chip"><small>Übung</small><br><b>${e.exercise?"Ja":"Nein"}</b></div>
         <div class="chip"><small>Punkte</small><br><b>${fmt(points(e),2)}</b></div>
       </div>
     </div>`).join("");
