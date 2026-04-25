@@ -75,7 +75,19 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .toast.show{opacity:1;transform:translateY(0)}
 .confetti{position:fixed;top:-10px;width:10px;height:10px;background:#22c55e;z-index:9999;animation:fall 2.8s linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@media(max-width:800px){
+.logo-header{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.logo-header img{
+  width:130px;
+  max-width:35vw;
+  height:auto;
+  border-radius:18px;
+}
+  @media(max-width:800px){
   .wrap{padding:12px}
   .hero,.card{padding:18px;border-radius:20px}
   h1{font-size:28px}
@@ -104,10 +116,13 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   <div class="overlay">
     <div class="badge">Monats-Challenge</div>
 
-    <div class="challenge-row">
-      <div>
-        <h2 id="monthTitle">Mission Mai</h2>
-        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
+   <div class="logo-header">
+  <img src="wurstrand-logo.png" alt="Wurstrand Challenge Logo">
+  <div>
+    <h1>Wurstrand Challenge</h1>
+    <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+  </div>
+</div>
       </div>
 
       <div style="width:100%;max-width:300px">
