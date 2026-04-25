@@ -1,131 +1,63 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Wurstrand Challenge</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(180deg,#020617,#0f172a);
-  color:#f8fafc;
-}
+body{margin:0;font-family:Arial;background:linear-gradient(180deg,#020617,#0f172a);color:#f8fafc}
+.wrap{max-width:1200px;margin:auto;padding:20px}
+.hero,.card,.tabs{background:rgba(17,24,39,.95);border:1px solid #334155;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.hero{padding:25px;margin-bottom:18px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap}
+h1,h2,h3,p{margin:0}
+h1{font-size:34px}
+.sub{color:#94a3b8;margin-top:6px}
+.badgebox{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:12px 16px;color:#e2e8f0}
 
-.wrap{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
-}
+.overlay{margin-top:22px;padding:24px;border-radius:24px;background:linear-gradient(135deg,#111827,#374151);border:1px solid #475569}
+.badge{display:inline-block;background:rgba(255,255,255,.1);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:bold;margin-bottom:14px}
+.challenge-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+select,input{width:100%;padding:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:white;margin-top:6px}
+label{font-size:14px;color:#cbd5e1}
 
-/* HEADER */
-.hero{
-  background:rgba(17,24,39,.95);
-  border:1px solid #334155;
-  border-radius:22px;
-  padding:25px;
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-}
+.grid{display:grid;gap:14px;margin-top:16px}
+.grid4{grid-template-columns:repeat(4,1fr)}
+.grid3{grid-template-columns:repeat(3,1fr)}
+.grid2{grid-template-columns:repeat(2,1fr)}
+.mini,.stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:15px}
+.mini .l,.stat .l{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#cbd5e1}
+.mini .v,.stat .v{font-size:26px;font-weight:bold;margin-top:8px}
 
-h1{
-  margin:0;
-  font-size:32px;
-}
+.barhead{display:flex;justify-content:space-between;color:#e5e7eb;font-size:13px;margin-top:16px;margin-bottom:8px}
+.bar{height:18px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);width:0%;transition:.3s}
 
-.sub{
-  color:#94a3b8;
-  margin-top:5px;
-}
+.tabs{display:flex;gap:8px;padding:8px;margin-bottom:18px}
+.tab{background:#111827;color:white;border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:pointer}
+.tab.active{background:#475569}
 
-/* OVERLAY */
-.overlay{
-  margin-top:20px;
-  padding:25px;
-  border-radius:22px;
-  background:linear-gradient(135deg,#111827,#1f2937);
-  border:1px solid #475569;
-}
+.panel{display:none}
+.panel.active{display:block}
+.card{padding:22px;margin-bottom:18px}
+.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:pointer}
+.primary{background:#22c55e;color:#052e16;width:100%;margin-top:14px}
+.secondary{background:#334155;color:white}
+.danger{background:#ef4444;color:white}
 
-.badge{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:999px;
-  background:#1e293b;
-  font-size:12px;
-  margin-bottom:15px;
-}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #1e293b;padding:10px 0}
+.row:last-child{border-bottom:0}
+.muted{color:#cbd5e1}
+.entry{background:#0f172a;border:1px solid #334155;border-radius:18px;padding:14px;margin-bottom:12px}
+.entrytop{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.chip{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:10px}
+.chip small{color:#94a3b8}
+.empty{border:1px dashed #334155;border-radius:18px;padding:30px;text-align:center;color:#94a3b8}
 
-.challenge-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.progress-bar{
-  height:14px;
-  background:#1e293b;
-  border-radius:10px;
-  overflow:hidden;
-  margin-top:15px;
-}
-
-.progress{
-  height:100%;
-  background:linear-gradient(90deg,#22c55e,#84cc16);
-  transition:.3s;
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  gap:15px;
-  margin-top:20px;
-}
-
-.grid-4{
-  grid-template-columns:repeat(4,1fr);
-}
-
-.mini{
-  padding:15px;
-  border-radius:18px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  text-align:center;
-  font-size:18px;
-}
-
-/* FORM */
-.card{
-  margin-top:25px;
-  padding:25px;
-  border-radius:22px;
-  background:#111827;
-  border:1px solid #334155;
-}
-
-input,select{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  margin-bottom:15px;
-  border-radius:12px;
-  border:1px solid #334155;
-  background:#0f172a;
-  color:white;
-}
-
-button{
-  padding:12px;
-  width:100%;
-  border:none;
-  border-radius:14px;
-  background:#22c55e;
-  font-weight:bold;
-  cursor:pointer;
-}
-
+@media(max-width:800px){.grid4,.grid3,.grid2,.formgrid,.chips{grid-template-columns:1fr}.mini .v,.stat .v{font-size:22px}}
 </style>
 </head>
 
@@ -133,106 +65,238 @@ button{
 <div class="wrap">
 
 <div class="hero">
-  <h1>🔥 Wurstrand Challenge</h1>
-  <div class="sub">Gemeinsam stärker. Jeden Tag.</div>
+  <div class="top">
+    <div>
+      <h1>🔥 Wurstrand Challenge</h1>
+      <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+    </div>
+    <div class="badgebox"><span id="entryCount">0</span> Einträge gespeichert</div>
+  </div>
 
   <div class="overlay">
-
-    <div class="badge">APRIL CHALLENGE</div>
+    <div class="badge">Monats-Challenge</div>
 
     <div class="challenge-row">
       <div>
-        <h2 id="points">0 / 1600 Punkte</h2>
-        <div id="percent">0%</div>
+        <h2 id="monthTitle">Mission Mai</h2>
+        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
       </div>
-      <div>🏁 Ziel: 1600</div>
+
+      <div style="width:100%;max-width:300px">
+        <label>Monat</label>
+        <select id="monthSelect"></select>
+      </div>
     </div>
 
-    <div class="progress-bar">
-      <div id="bar" class="progress" style="width:0%"></div>
+    <div class="grid grid4">
+      <div class="mini"><div class="l">Ziel</div><div class="v" id="goalTarget">-</div></div>
+      <div class="mini"><div class="l">Aktuell</div><div class="v" id="goalCurrent">0</div></div>
+      <div class="mini"><div class="l">Fortschritt</div><div class="v" id="goalPercent">0%</div></div>
+      <div class="mini"><div class="l">Rest</div><div class="v" id="goalRest">0</div></div>
     </div>
 
-    <div class="grid grid-4">
-      <div class="mini">👣<br><span id="steps">0</span></div>
-      <div class="mini">🚴<br><span id="bike">0</span></div>
-      <div class="mini">💪<br><span id="kraft">0</span></div>
-      <div class="mini">🎁<br><span id="bonus">0</span></div>
+    <div class="barhead">
+      <span>Fortschrittsbalken</span>
+      <span id="barText">0 / 1700</span>
     </div>
+    <div class="bar"><div class="fill" id="barFill"></div></div>
 
+    <div class="grid grid4">
+      <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts">0</div></div>
+      <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts">0</div></div>
+      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts">0</div></div>
+      <div class="mini"><div class="l">Bonus</div><div class="v" id="bonusPts">0</div></div>
+    </div>
   </div>
-
-  <div class="card">
-    <h3>Eintrag</h3>
-
-    <input type="date" id="date">
-    
-    <select id="person">
-      <option>Thorsten</option>
-      <option>Basti</option>
-      <option>Marian</option>
-      <option>Fabi</option>
-    </select>
-
-    <input type="number" id="stepsInput" placeholder="Schritte">
-    <input type="number" id="bikeInput" placeholder="Rad KM">
-    <input type="number" id="squatInput" placeholder="Kniebeugen">
-    <input type="number" id="pushInput" placeholder="Liegestütze">
-
-    <label><input type="checkbox" id="bonusInput"> Bonus</label>
-
-    <button onclick="add()">Speichern</button>
-  </div>
-
 </div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
+  <button class="tab" onclick="showTab('eintrag',this)">Eintragen</button>
+  <button class="tab" onclick="showTab('liste',this)">Einträge</button>
+</div>
+
+<div id="dashboard" class="panel active">
+  <div class="grid grid4">
+    <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps">0</div></div>
+    <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike">0</div></div>
+    <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus">0</div></div>
+    <div class="stat"><div class="l">Kniebeugen / Liegestütze</div><div class="v" id="totalPower">0 / 0</div></div>
+  </div>
+
+  <div class="grid grid3">
+    <div class="card">
+      <h3>Team-Statistiken</h3>
+      <div class="row"><span class="muted">Über 10.000 Schritte</span><strong id="over10k">0</strong></div>
+      <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps">0</strong></div>
+      <div class="row"><span class="muted">Ø Rad-KM aktiv</span><strong id="avgBike">0</strong></div>
+      <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h3>Rekorde</h3>
+      <div class="row"><span class="muted">Meiste Schritte</span><strong id="maxSteps">-</strong></div>
+      <div class="row"><span class="muted">Meiste Rad-KM</span><strong id="maxBike">-</strong></div>
+      <div class="row"><span class="muted">Monatspunkte</span><strong id="monthScore">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h3>Punkte-Mix</h3>
+      <div class="row"><span class="muted">Schritte</span><strong id="mixSteps">0</strong></div>
+      <div class="row"><span class="muted">Rad</span><strong id="mixBike">0</strong></div>
+      <div class="row"><span class="muted">Kraft</span><strong id="mixPower">0</strong></div>
+      <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
+    </div>
+  </div>
+</div>
+
+<div id="eintrag" class="panel">
+  <div class="card">
+    <h3>Neuen Tageseintrag erfassen</h3>
+    <div class="formgrid">
+      <div><label>Datum</label><input type="date" id="date"></div>
+      <div><label>Person</label><select id="person"></select></div>
+      <div><label>Schritte</label><input type="number" id="steps" placeholder="z. B. 10452"></div>
+      <div><label>Fahrrad-KM</label><input type="number" step="0.1" id="bike" placeholder="z. B. 7.5"></div>
+      <div><label>Kniebeugen</label><input type="number" id="squats" placeholder="z. B. 30"></div>
+      <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
+    </div>
+    <label style="margin-top:14px"><input type="checkbox" id="bonus"> Bonus erreicht (+4)</label>
+    <button class="primary" onclick="addEntry()">Eintrag speichern</button>
+  </div>
+</div>
+
+<div id="liste" class="panel">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <h3>Gespeicherte Einträge</h3>
+      <button class="danger" onclick="clearAll()">Alle löschen</button>
+    </div>
+    <div id="entriesList"></div>
+  </div>
+</div>
+
 </div>
 
 <script>
-let data=[];
+const PEOPLE=["Thorsten","Basti","Marian","Fabi"];
+const STORAGE_KEY="wurstrand-mai-juni-juli-v1";
 
-function calc(e){
-  return Math.floor(e.steps/1000)
-    + e.bike
-    + Math.floor(e.squats/5)
-    + Math.floor(e.pushups/3)
-    + (e.bonus?4:0);
+const GOALS={
+  "2026-05":{title:"Mission Mai",target:1700},
+  "2026-06":{title:"Juni zieht durch",target:1750},
+  "2026-07":{title:"Juli wird wild",target:1800}
+};
+
+let selectedMonth="2026-05";
+let entries=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+
+function $(id){return document.getElementById(id)}
+function fmt(n,d=0){return new Intl.NumberFormat("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d}).format(Number(n)||0)}
+function monthKey(date){return String(date||"").slice(0,7)}
+function points(e){return (e.steps||0)/1000+(e.bike||0)+(e.squats||0)/5+(e.pushups||0)/3+(e.bonus?4:0)}
+function motivate(p){if(p>=100)return"👑 Monatsziel geknackt. Starkes Ding.";if(p>=85)return"🚀 Endspurt. Das Ziel ist greifbar nah.";if(p>=60)return"🔥 Ihr seid richtig unterwegs.";if(p>=35)return"🙂 Solide Basis. Weiter einsammeln.";return"⚡ Monat läuft – aber da geht noch einiges."}
+
+function init(){
+  $("date").value=new Date().toISOString().slice(0,10);
+  $("person").innerHTML=PEOPLE.map(p=>`<option>${p}</option>`).join("");
+  $("monthSelect").innerHTML=Object.keys(GOALS).map(m=>`<option value="${m}">${GOALS[m].title}</option>`).join("");
+  $("monthSelect").value=selectedMonth;
+  $("monthSelect").onchange=e=>{selectedMonth=e.target.value;render()}
+  render();
 }
 
-function add(){
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(entries))}
+
+function addEntry(){
   const e={
-    steps:+stepsInput.value||0,
-    bike:+bikeInput.value||0,
-    squats:+squatInput.value||0,
-    pushups:+pushInput.value||0,
-    bonus:bonusInput.checked
+    id:"e"+Date.now(),
+    date:$("date").value,
+    person:$("person").value,
+    steps:+$("steps").value||0,
+    bike:+$("bike").value||0,
+    squats:+$("squats").value||0,
+    pushups:+$("pushups").value||0,
+    bonus:$("bonus").checked
   };
-  data.push(e);
-  update();
+  entries.push(e); save(); clearForm(); render(); showTab("liste",document.querySelectorAll(".tab")[2]);
 }
 
-function update(){
-  let steps=data.reduce((a,b)=>a+b.steps,0);
-  let bike=data.reduce((a,b)=>a+b.bike,0);
-  let kraft=data.reduce((a,b)=>a+b.squats+b.pushups,0);
-  let bonus=data.filter(e=>e.bonus).length;
-
-  let pts=data.reduce((a,b)=>a+calc(b),0);
-  let goal=1600;
-  let p=Math.round(pts/goal*100);
-
-  stepsEl.innerText=steps;
-  bikeEl.innerText=bike;
-  kraftEl.innerText=kraft;
-  bonusEl.innerText=bonus;
-
-  document.getElementById("points").innerText=pts+" / "+goal;
-  document.getElementById("percent").innerText=p+"%";
-  document.getElementById("bar").style.width=p+"%";
+function clearForm(){
+  $("steps").value="";$("bike").value="";$("squats").value="";$("pushups").value="";$("bonus").checked=false;
 }
 
-const stepsEl=document.getElementById("steps");
-const bikeEl=document.getElementById("bike");
-const kraftEl=document.getElementById("kraft");
-const bonusEl=document.getElementById("bonus");
+function render(){
+  const monthEntries=entries.filter(e=>monthKey(e.date)===selectedMonth);
+  const goal=GOALS[selectedMonth];
+  const monthSteps=monthEntries.reduce((s,e)=>s+e.steps,0);
+  const monthBike=monthEntries.reduce((s,e)=>s+e.bike,0);
+  const monthSquats=monthEntries.reduce((s,e)=>s+e.squats,0);
+  const monthPushups=monthEntries.reduce((s,e)=>s+e.pushups,0);
+  const monthBonus=monthEntries.filter(e=>e.bonus).length*4;
+  const stepPoints=monthSteps/1000;
+  const powerPoints=monthSquats/5+monthPushups/3;
+  const score=monthEntries.reduce((s,e)=>s+points(e),0);
+  const pct=goal.target?Math.min(score/goal.target*100,100):0;
+
+  $("entryCount").textContent=entries.length;
+  $("monthTitle").textContent=goal.title;
+  $("motivation").textContent=motivate(pct);
+  $("goalTarget").textContent=fmt(goal.target,0);
+  $("goalCurrent").textContent=fmt(score,2);
+  $("goalPercent").textContent=Math.round(pct)+"%";
+  $("goalRest").textContent=fmt(Math.max(goal.target-score,0),2);
+  $("barText").textContent=fmt(score,2)+" / "+fmt(goal.target,0);
+  $("barFill").style.width=pct+"%";
+
+  $("stepPts").textContent=fmt(stepPoints,2);
+  $("bikePts").textContent=fmt(monthBike,2);
+  $("powerPts").textContent=fmt(powerPoints,2);
+  $("bonusPts").textContent=fmt(monthBonus,0);
+
+  $("totalSteps").textContent=fmt(monthSteps,0);
+  $("totalBike").textContent=fmt(monthBike,2);
+  $("totalBonus").textContent=fmt(monthBonus,0);
+  $("totalPower").textContent=fmt(monthSquats,0)+" / "+fmt(monthPushups,0);
+  $("over10k").textContent=monthEntries.filter(e=>e.steps>10000).length;
+  $("avgSteps").textContent=fmt(monthEntries.length?monthSteps/monthEntries.length:0,0);
+  const activeBike=monthEntries.filter(e=>e.bike>0);
+  $("avgBike").textContent=fmt(activeBike.length?monthBike/activeBike.length:0,2);
+
+  $("bonusCount").textContent=monthEntries.filter(e=>e.bonus).length;
+  const maxS=monthEntries.reduce((a,b)=>b.steps>(a?.steps||0)?b:a,null);
+  const maxB=monthEntries.reduce((a,b)=>b.bike>(a?.bike||0)?b:a,null);
+  $("maxSteps").textContent=maxS?fmt(maxS.steps,0)+" · "+maxS.date:"-";
+  $("maxBike").textContent=maxB?fmt(maxB.bike,2)+" · "+maxB.date:"-";
+  $("monthScore").textContent=fmt(score,2);
+  $("mixSteps").textContent=fmt(stepPoints,2);
+  $("mixBike").textContent=fmt(monthBike,2);
+  $("mixPower").textContent=fmt(powerPoints,2);
+  $("mixBonus").textContent=fmt(monthBonus,0);
+
+  renderList(monthEntries);
+}
+
+function renderList(list){
+  if(!list.length){$("entriesList").innerHTML='<div class="empty">Noch keine Einträge für diesen Monat.</div>';return}
+  $("entriesList").innerHTML=[...list].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e=>`
+    <div class="entry">
+      <div class="entrytop"><strong>${e.person}</strong><span>${e.date}</span><button class="danger" onclick="del('${e.id}')">Löschen</button></div>
+      <div class="chips">
+        <div class="chip"><small>Schritte</small><br><b>${fmt(e.steps,0)}</b></div>
+        <div class="chip"><small>Rad</small><br><b>${fmt(e.bike,2)}</b></div>
+        <div class="chip"><small>Knie</small><br><b>${fmt(e.squats,0)}</b></div>
+        <div class="chip"><small>Liege</small><br><b>${fmt(e.pushups,0)}</b></div>
+        <div class="chip"><small>Punkte</small><br><b>${fmt(points(e),2)}</b></div>
+      </div>
+    </div>`).join("");
+}
+
+function del(id){entries=entries.filter(e=>e.id!==id);save();render()}
+function clearAll(){if(confirm("Wirklich alle gespeicherten Einträge löschen?")){entries=[];save();render()}}
+function showTab(id,btn){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));btn.classList.add("active")}
+
+init();
 </script>
 
 </body>
