@@ -19,7 +19,7 @@ h1{font-size:34px}
 .overlay{margin-top:22px;padding:24px;border-radius:24px;background:linear-gradient(135deg,#111827,#374151);border:1px solid #475569}
 .badge{display:inline-block;background:rgba(255,255,255,.1);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:bold;margin-bottom:14px}
 .challenge-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-select,input{width:100%;padding:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:white;margin-top:6px}
+select,input{width:100%;padding:14px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:white;margin-top:6px;font-size:16px}
 label{font-size:14px;color:#cbd5e1}
 .grid{display:grid;gap:14px;margin-top:16px}
 .grid4{grid-template-columns:repeat(4,1fr)}
@@ -31,14 +31,14 @@ label{font-size:14px;color:#cbd5e1}
 .barhead{display:flex;justify-content:space-between;color:#e5e7eb;font-size:13px;margin-top:16px;margin-bottom:8px}
 .bar{height:18px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);width:0%;transition:.3s}
-.tabs{display:flex;gap:8px;padding:8px;margin-bottom:18px}
-.tab{background:#111827;color:white;border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:pointer;width:auto}
+.tabs{display:flex;gap:8px;padding:8px;margin-bottom:18px;position:sticky;top:0;z-index:50}
+.tab{background:#111827;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:pointer;width:auto}
 .tab.active{background:#475569}
 .panel{display:none}
 .panel.active{display:block}
 .card{padding:22px;margin-bottom:18px}
 .formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:pointer}
+button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:pointer;font-size:16px}
 .primary{background:#22c55e;color:#052e16;width:100%;margin-top:14px}
 .secondary{background:#334155;color:white;width:auto}
 .danger{background:#ef4444;color:white;width:auto}
@@ -52,6 +52,10 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
 .chip small{color:#94a3b8}
 .empty{border:1px dashed #334155;border-radius:18px;padding:30px;text-align:center;color:#94a3b8}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.quickgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.quickbtn{background:#1e293b;color:white;border:1px solid #334155}
+.quickbtn:hover{background:#334155}
 
 .exercise-toggle{
   margin-top:18px;
@@ -77,11 +81,32 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
   border-color:#22c55e;
 }
 
+.sticky-save{
+  position:sticky;
+  bottom:10px;
+  z-index:40;
+  background:rgba(15,23,42,.92);
+  backdrop-filter:blur(10px);
+  border:1px solid #334155;
+  border-radius:20px;
+  padding:10px;
+  margin-top:18px;
+}
+
 .toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #475569;color:white;padding:14px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9999;opacity:0;transform:translateY(20px);transition:.3s;max-width:330px}
 .toast.show{opacity:1;transform:translateY(0)}
 .confetti{position:fixed;top:-10px;width:10px;height:10px;background:#22c55e;z-index:9999;animation:fall 2.8s linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@media(max-width:800px){.grid4,.grid3,.grid2,.formgrid,.chips{grid-template-columns:1fr}.mini .v,.stat .v{font-size:22px}}
+
+@media(max-width:800px){
+  .wrap{padding:12px}
+  .hero,.card{padding:18px;border-radius:20px}
+  h1{font-size:28px}
+  .grid4,.grid3,.grid2,.formgrid,.chips,.quickgrid{grid-template-columns:1fr}
+  .mini .v,.stat .v{font-size:22px}
+  .tabs{overflow-x:auto}
+  .tab{flex:1;min-width:110px}
+}
 </style>
 </head>
 
@@ -201,13 +226,24 @@ button{border:0;border-radius:14px;padding:12px 16px;font-weight:bold;cursor:poi
       <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
     </div>
 
+    <div class="quickgrid">
+      <button class="quickbtn" onclick="addQuick('steps',10000)">+10.000 Schritte</button>
+      <button class="quickbtn" onclick="addQuick('bike',20)">+20 km Rad</button>
+      <button class="quickbtn" onclick="addQuick('squats',30)">+30 Kniebeugen</button>
+      <button class="quickbtn" onclick="addQuick('pushups',15)">+15 Liegestütze</button>
+    </div>
+
     <label class="exercise-toggle" id="exerciseBox">
       <input type="checkbox" id="exercise">
       <span id="exerciseText">❌ Individuelle Übung: Nein</span>
     </label>
 
     <p class="sub">Bonus wird automatisch vergeben, wenn 3 von 4 Kategorien geschafft sind: Schritte, Rad, Kraft, individuelle Übung.</p>
-    <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
+
+    <div class="sticky-save">
+      <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
+    </div>
+
     <button class="secondary" onclick="resetForm()" style="margin-top:10px">Abbrechen / zurücksetzen</button>
   </div>
 </div>
@@ -279,6 +315,12 @@ function confetti(){
 }
 function monthScore(month){
   return entries.filter(e=>monthKey(e.date)===month).reduce((s,e)=>s+points(e),0);
+}
+
+function addQuick(id,value){
+  const input=$(id);
+  input.value=(Number(input.value)||0)+value;
+  toast("⚡ Schnellwert hinzugefügt.");
 }
 
 async function loadEntries(){
