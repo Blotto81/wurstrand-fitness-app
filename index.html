@@ -57,41 +57,25 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .quickbtn{background:#1e293b;color:white;border:1px solid #334155}
 .quickbtn:hover{background:#334155}
 
-.exercise-toggle{
-  margin-top:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:14px;
-  padding:18px;
-  border-radius:18px;
-  border:1px solid #334155;
-  background:#0f172a;
-  cursor:pointer;
-  font-size:18px;
-  font-weight:bold;
-}
-.exercise-toggle input{
-  width:auto;
-  margin:0;
-  transform:scale(1.5);
-}
-.exercise-toggle.active{
-  background:rgba(34,197,94,.18);
-  border-color:#22c55e;
-}
+.exercise-toggle{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:14px;padding:18px;border-radius:18px;border:1px solid #334155;background:#0f172a;cursor:pointer;font-size:18px;font-weight:bold}
+.exercise-toggle input{width:auto;margin:0;transform:scale(1.5)}
+.exercise-toggle.active{background:rgba(34,197,94,.18);border-color:#22c55e}
 
-.sticky-save{
-  position:sticky;
-  bottom:10px;
-  z-index:40;
-  background:rgba(15,23,42,.92);
-  backdrop-filter:blur(10px);
-  border:1px solid #334155;
-  border-radius:20px;
-  padding:10px;
-  margin-top:18px;
-}
+.sticky-save{position:sticky;bottom:10px;z-index:40;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:20px;padding:10px;margin-top:18px}
+
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px}
+.daybox{min-height:72px;border-radius:14px;border:1px solid #334155;background:#111827;padding:8px;font-size:12px}
+.daybox strong{display:block;font-size:14px;margin-bottom:5px}
+.day-low{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4)}
+.day-mid{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.4)}
+.day-high{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45)}
+.day-fire{background:rgba(249,115,22,.25);border-color:rgba(249,115,22,.7)}
+
+.achievement{display:flex;gap:10px;align-items:center;background:#0f172a;border:1px solid #334155;border-radius:16px;padding:12px}
+.achievement.done{background:rgba(34,197,94,.14);border-color:#22c55e}
+.achievement .icon{font-size:24px}
+.achievement b{display:block}
+.achievement span{color:#94a3b8;font-size:13px}
 
 .toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #475569;color:white;padding:14px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9999;opacity:0;transform:translateY(20px);transition:.3s;max-width:330px}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -106,6 +90,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   .mini .v,.stat .v{font-size:22px}
   .tabs{overflow-x:auto}
   .tab{flex:1;min-width:110px}
+  .heatmap{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -132,7 +117,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
       </div>
 
       <div style="width:100%;max-width:300px">
-        <label>Monat</label>
+        <label>Monat / Archiv</label>
         <select id="monthSelect"></select>
       </div>
     </div>
@@ -159,7 +144,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
     <div class="grid grid2">
       <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay">0</div></div>
-      <div class="mini"><div class="l">Resttage im Monat</div><div class="v" id="daysLeft">0</div></div>
+      <div class="mini"><div class="l">Prognose Monatsende</div><div class="v" id="forecast">0</div></div>
     </div>
   </div>
 </div>
@@ -168,6 +153,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
   <button class="tab" onclick="showTab('eintrag',this)">Eintragen</button>
   <button class="tab" onclick="showTab('liste',this)">Einträge</button>
+  <button class="tab" onclick="showTab('analyse',this)">Analyse</button>
 </div>
 
 <div id="dashboard" class="panel active">
@@ -238,7 +224,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
       <span id="exerciseText">❌ Individuelle Übung: Nein</span>
     </label>
 
-    <p class="sub">Bonus wird automatisch vergeben, wenn 3 von 4 Kategorien geschafft sind: Schritte, Rad, Kraft, individuelle Übung.</p>
+    <p class="sub">Bonus automatisch: 3 von 4 Kategorien geschafft = +4 Punkte.</p>
 
     <div class="sticky-save">
       <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
@@ -252,6 +238,31 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   <div class="card">
     <h3>Gespeicherte Einträge</h3>
     <div id="entriesList"></div>
+  </div>
+</div>
+
+<div id="analyse" class="panel">
+  <div class="card">
+    <h3>🗓️ Team-Heatmap</h3>
+    <p class="sub">Rot = mau, gelb = solide, grün = stark, 🔥 = Wurstrand-Tag.</p>
+    <div id="heatmap" class="heatmap"></div>
+  </div>
+
+  <div class="grid grid2">
+    <div class="card">
+      <h3>😂 Fun Facts</h3>
+      <div id="funFacts"></div>
+    </div>
+
+    <div class="card">
+      <h3>🏆 Team-Achievements</h3>
+      <div id="achievements" class="grid"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🚨 Teamalarm</h3>
+    <div id="teamAlarm"></div>
   </div>
 </div>
 
@@ -271,29 +282,24 @@ const GOALS={
   "2026-07":{title:"Juli wird wild",target:1800}
 };
 
-let selectedMonth="2026-05";
+let selectedMonth=getCurrentMonthKey();
 let entries=[];
 let editingId=null;
 
 function $(id){return document.getElementById(id)}
 function fmt(n,d=0){return new Intl.NumberFormat("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d}).format(Number(n)||0)}
 function monthKey(date){return String(date||"").slice(0,7)}
+function getCurrentMonthKey(){
+  const now=new Date();
+  const key=now.toISOString().slice(0,7);
+  return GOALS[key] ? key : "2026-05";
+}
 function autoBonus(e){
-  const cats=[
-    (Number(e.steps)||0)>0,
-    (Number(e.bike)||0)>0,
-    ((Number(e.squats)||0)+(Number(e.pushups)||0))>0,
-    !!e.exercise
-  ];
+  const cats=[(Number(e.steps)||0)>0,(Number(e.bike)||0)>0,((Number(e.squats)||0)+(Number(e.pushups)||0))>0,!!e.exercise];
   return cats.filter(Boolean).length>=3;
 }
 function points(e){
-  return (Number(e.steps)||0)/1000+
-    (Number(e.bike)||0)+
-    (Number(e.squats)||0)/5+
-    (Number(e.pushups)||0)/3+
-    (e.exercise?5:0)+
-    (autoBonus(e)?4:0);
+  return (Number(e.steps)||0)/1000+(Number(e.bike)||0)+(Number(e.squats)||0)/5+(Number(e.pushups)||0)/3+(e.exercise?5:0)+(autoBonus(e)?4:0);
 }
 function motivate(p){if(p>=100)return"👑 Monatsziel geknackt. Starkes Ding.";if(p>=85)return"🚀 Endspurt. Das Ziel ist greifbar nah.";if(p>=60)return"🔥 Ihr seid richtig unterwegs.";if(p>=35)return"🙂 Solide Basis. Weiter einsammeln.";return"⚡ Monat läuft – aber da geht noch einiges."}
 function toast(msg){
@@ -313,9 +319,9 @@ function confetti(){
     setTimeout(()=>c.remove(),3500);
   }
 }
-function monthScore(month){
-  return entries.filter(e=>monthKey(e.date)===month).reduce((s,e)=>s+points(e),0);
-}
+function monthEntries(){return entries.filter(e=>monthKey(e.date)===selectedMonth)}
+function monthScore(month){return entries.filter(e=>monthKey(e.date)===month).reduce((s,e)=>s+points(e),0)}
+function dayKeyToGerman(date){return new Date(date+"T12:00:00").toLocaleDateString("de-DE",{weekday:"long"})}
 
 function addQuick(id,value){
   const input=$(id);
@@ -333,10 +339,9 @@ async function loadEntries(){
 function init(){
   $("date").value=new Date().toISOString().slice(0,10);
   $("person").innerHTML=PEOPLE.map(p=>`<option>${p}</option>`).join("");
-  $("monthSelect").innerHTML=Object.keys(GOALS).map(m=>`<option value="${m}">${GOALS[m].title}</option>`).join("");
+  $("monthSelect").innerHTML=Object.keys(GOALS).map(m=>`<option value="${m}">${GOALS[m].title}${m===getCurrentMonthKey()?" · aktuell":" · Archiv"}</option>`).join("");
   $("monthSelect").value=selectedMonth;
   $("monthSelect").onchange=e=>{selectedMonth=e.target.value;render()}
-
   $("exercise").onchange=updateExerciseToggle;
 
   loadEntries();
@@ -433,26 +438,28 @@ async function del(id){
 }
 
 function render(){
-  const monthEntries=entries.filter(e=>monthKey(e.date)===selectedMonth);
+  const list=monthEntries();
   const goal=GOALS[selectedMonth];
 
-  const monthSteps=monthEntries.reduce((s,e)=>s+(Number(e.steps)||0),0);
-  const monthBike=monthEntries.reduce((s,e)=>s+(Number(e.bike)||0),0);
-  const monthSquats=monthEntries.reduce((s,e)=>s+(Number(e.squats)||0),0);
-  const monthPushups=monthEntries.reduce((s,e)=>s+(Number(e.pushups)||0),0);
-  const monthExercises=monthEntries.filter(e=>e.exercise).length;
-  const monthBonus=monthEntries.filter(e=>autoBonus(e)).length*4;
+  const monthSteps=list.reduce((s,e)=>s+(Number(e.steps)||0),0);
+  const monthBike=list.reduce((s,e)=>s+(Number(e.bike)||0),0);
+  const monthSquats=list.reduce((s,e)=>s+(Number(e.squats)||0),0);
+  const monthPushups=list.reduce((s,e)=>s+(Number(e.pushups)||0),0);
+  const monthExercises=list.filter(e=>e.exercise).length;
+  const monthBonus=list.filter(e=>autoBonus(e)).length*4;
   const stepPoints=monthSteps/1000;
   const powerPoints=monthSquats/5+monthPushups/3+(monthExercises*5);
-  const score=monthEntries.reduce((s,e)=>s+points(e),0);
+  const score=list.reduce((s,e)=>s+points(e),0);
   const pct=goal.target?Math.min(score/goal.target*100,100):0;
 
-  const now=new Date();
   const [y,m]=selectedMonth.split("-").map(Number);
   const lastDay=new Date(y,m,0).getDate();
-  const dayNow=(now.getFullYear()===y && now.getMonth()+1===m) ? now.getDate() : 1;
+  const today=new Date();
+  const dayNow=(today.getFullYear()===y && today.getMonth()+1===m) ? today.getDate() : 1;
+  const daysPassed=(today.getFullYear()===y && today.getMonth()+1===m) ? today.getDate() : lastDay;
   const restDays=Math.max(lastDay-dayNow+1,1);
   const needed=Math.max(goal.target-score,0)/restDays;
+  const forecast=(score/Math.max(daysPassed,1))*lastDay;
 
   $("entryCount").textContent=entries.length;
   $("monthTitle").textContent=goal.title;
@@ -464,7 +471,7 @@ function render(){
   $("barText").textContent=fmt(score,2)+" / "+fmt(goal.target,0);
   $("barFill").style.width=pct+"%";
   $("neededPerDay").textContent=fmt(needed,2);
-  $("daysLeft").textContent=fmt(restDays,0);
+  $("forecast").textContent=fmt(forecast,0);
 
   $("stepPts").textContent=fmt(stepPoints,2);
   $("bikePts").textContent=fmt(monthBike,2);
@@ -475,14 +482,14 @@ function render(){
   $("totalBike").textContent=fmt(monthBike,2);
   $("totalBonus").textContent=fmt(monthBonus,0);
   $("totalPower").textContent=fmt(monthSquats,0)+" / "+fmt(monthPushups,0)+" / "+fmt(monthExercises,0);
-  $("over10k").textContent=monthEntries.filter(e=>e.steps>=10000).length;
-  $("avgSteps").textContent=fmt(monthEntries.length?monthSteps/monthEntries.length:0,0);
-  const activeBike=monthEntries.filter(e=>e.bike>0);
+  $("over10k").textContent=list.filter(e=>e.steps>=10000).length;
+  $("avgSteps").textContent=fmt(list.length?monthSteps/list.length:0,0);
+  const activeBike=list.filter(e=>e.bike>0);
   $("avgBike").textContent=fmt(activeBike.length?monthBike/activeBike.length:0,2);
-  $("bonusCount").textContent=monthEntries.filter(e=>autoBonus(e)).length;
+  $("bonusCount").textContent=list.filter(e=>autoBonus(e)).length;
 
-  const maxS=monthEntries.reduce((a,b)=>b.steps>(a?.steps||0)?b:a,null);
-  const maxB=monthEntries.reduce((a,b)=>b.bike>(a?.bike||0)?b:a,null);
+  const maxS=list.reduce((a,b)=>b.steps>(a?.steps||0)?b:a,null);
+  const maxB=list.reduce((a,b)=>b.bike>(a?.bike||0)?b:a,null);
   $("maxSteps").textContent=maxS?fmt(maxS.steps,0)+" · "+maxS.date:"-";
   $("maxBike").textContent=maxB?fmt(maxB.bike,2)+" · "+maxB.date:"-";
   $("monthScore").textContent=fmt(score,2);
@@ -492,7 +499,11 @@ function render(){
   $("mixBonus").textContent=fmt(monthBonus,0);
 
   updateRecords();
-  renderList(monthEntries);
+  renderList(list);
+  renderHeatmap(list, y, m, lastDay);
+  renderFunFacts(list);
+  renderAchievements(list, score, monthSteps, monthBike, monthExercises);
+  renderTeamAlarm(list, score, pct);
 }
 
 function getRecords(){
@@ -548,6 +559,100 @@ function renderList(list){
         <div class="chip"><small>Punkte</small><br><b>${fmt(points(e),2)}</b></div>
       </div>
     </div>`).join("");
+}
+
+function groupedByDate(list){
+  const byDate={};
+  list.forEach(e=>{
+    if(!byDate[e.date])byDate[e.date]={entries:[],steps:0,bike:0,points:0,people:new Set(),bonus:0};
+    byDate[e.date].entries.push(e);
+    byDate[e.date].steps+=Number(e.steps)||0;
+    byDate[e.date].bike+=Number(e.bike)||0;
+    byDate[e.date].points+=points(e);
+    byDate[e.date].people.add(e.person);
+    if(autoBonus(e))byDate[e.date].bonus+=4;
+  });
+  return byDate;
+}
+
+function renderHeatmap(list,y,m,lastDay){
+  const byDate=groupedByDate(list);
+  let html="";
+  for(let d=1;d<=lastDay;d++){
+    const date=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const v=byDate[date];
+    const pts=v?v.points:0;
+    let cls="";
+    let icon="";
+    if(pts>=80){cls="day-fire";icon="🔥";}
+    else if(pts>=50){cls="day-high";icon="🟩";}
+    else if(pts>=20){cls="day-mid";icon="🟨";}
+    else cls="day-low";
+    html+=`<div class="daybox ${cls}"><strong>${d}. ${icon}</strong>${fmt(pts,1)} Punkte<br>${v?fmt(v.steps,0):0} Schritte<br>${v?fmt(v.bike,1):0} km</div>`;
+  }
+  $("heatmap").innerHTML=html;
+}
+
+function renderFunFacts(list){
+  const byWeekday={};
+  list.forEach(e=>{
+    const w=dayKeyToGerman(e.date);
+    if(!byWeekday[w])byWeekday[w]={points:0,count:0,bonus:0};
+    byWeekday[w].points+=points(e);
+    byWeekday[w].count++;
+    if(autoBonus(e))byWeekday[w].bonus++;
+  });
+
+  const days=Object.entries(byWeekday);
+  const strongest=days.sort((a,b)=>b[1].points-a[1].points)[0];
+  const weakest=days.sort((a,b)=>a[1].points-b[1].points)[0];
+  const bonusDay=days.sort((a,b)=>b[1].bonus-a[1].bonus)[0];
+
+  const all4=Object.values(groupedByDate(list)).filter(d=>d.people.size===4).length;
+
+  $("funFacts").innerHTML=`
+    <div class="row"><span class="muted">Stärkster Wochentag</span><strong>${strongest?strongest[0]:"-"}</strong></div>
+    <div class="row"><span class="muted">Gefährlichster Sofa-Tag</span><strong>${weakest?weakest[0]:"-"}</strong></div>
+    <div class="row"><span class="muted">Bonus-freudigster Tag</span><strong>${bonusDay?bonusDay[0]:"-"}</strong></div>
+    <div class="row"><span class="muted">Tage mit allen 4 aktiv</span><strong>${all4}</strong></div>
+  `;
+}
+
+function renderAchievements(list,score,steps,bike,exercises){
+  const bonusCount=list.filter(e=>autoBonus(e)).length;
+  const byDate=groupedByDate(list);
+  const team50=Object.values(byDate).filter(d=>d.points>=50).length;
+
+  const items=[
+    {icon:"👣",title:"100k Schritte",desc:"100.000 Schritte im Monat",done:steps>=100000},
+    {icon:"🚴",title:"500 km Rad",desc:"500 Fahrrad-km im Monat",done:bike>=500},
+    {icon:"🎁",title:"20 Boni",desc:"20 automatische Boni gesammelt",done:bonusCount>=20},
+    {icon:"🔥",title:"5 Teamtage",desc:"5 Tage mit mindestens 50 Punkten",done:team50>=5},
+    {icon:"🧘",title:"50 Übungen",desc:"50 individuelle Übungen",done:exercises>=50},
+    {icon:"👑",title:"Monat fällt",desc:"Monatsziel erreicht",done:score>=GOALS[selectedMonth].target}
+  ];
+
+  $("achievements").innerHTML=items.map(a=>`
+    <div class="achievement ${a.done?"done":""}">
+      <div class="icon">${a.icon}</div>
+      <div><b>${a.done?"✅ ":""}${a.title}</b><span>${a.desc}</span></div>
+    </div>
+  `).join("");
+}
+
+function renderTeamAlarm(list,score,pct){
+  const byDate=groupedByDate(list);
+  const today=new Date().toISOString().slice(0,10);
+  const todayData=byDate[today];
+  const alarms=[];
+
+  if(todayData?.people.size===4) alarms.push("🚨 Heute waren alle 4 aktiv. Teamtag!");
+  if(todayData?.points>=50) alarms.push("🔥 Heute schon 50+ Punkte. Der Tag lebt.");
+  if(pct>=90 && pct<100) alarms.push("👀 Monatsziel fast geknackt. Jetzt nicht auf der Couch verkleben.");
+  if(pct>=100) alarms.push("👑 Monatsziel gefallen. Wurstrand liefert.");
+  if(!alarms.length) alarms.push("🙂 Noch kein Teamalarm heute. Da geht noch was.");
+
+  $("teamAlarm").innerHTML=alarms.map(a=>`<div class="row"><span>${a}</span></div>`).join("");
 }
 
 function showTab(id,btn){
