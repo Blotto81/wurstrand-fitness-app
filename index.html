@@ -11,7 +11,9 @@ body{margin:0;font-family:Arial;background:linear-gradient(180deg,#020617,#0f172
 .wrap{max-width:1200px;margin:auto;padding:20px}
 .hero,.card,.tabs{background:rgba(17,24,39,.95);border:1px solid #334155;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .hero{padding:25px;margin-bottom:18px}
-.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+.logo-header{display:flex;align-items:center;gap:18px}
+.logo-header img{width:130px;max-width:35vw;height:auto;border-radius:18px}
 h1,h2,h3,p{margin:0}
 h1{font-size:34px}
 .sub{color:#94a3b8;margin-top:6px}
@@ -75,22 +77,12 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .toast.show{opacity:1;transform:translateY(0)}
 .confetti{position:fixed;top:-10px;width:10px;height:10px;background:#22c55e;z-index:9999;animation:fall 2.8s linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-.logo-header{
-  display:flex;
-  align-items:center;
-  gap:18px;
-}
-
-.logo-header img{
-  width:130px;
-  max-width:35vw;
-  height:auto;
-  border-radius:18px;
-}
-  @media(max-width:800px){
+@media(max-width:800px){
   .wrap{padding:12px}
   .hero,.card{padding:18px;border-radius:20px}
   h1{font-size:28px}
+  .logo-header{flex-direction:column;align-items:flex-start}
+  .logo-header img{width:105px;max-width:45vw}
   .grid4,.grid3,.grid2,.formgrid,.chips{grid-template-columns:1fr}
   .mini .v,.stat .v{font-size:22px}
   .tabs{overflow-x:auto}
@@ -103,12 +95,14 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
 <body>
 <div class="wrap">
-
-<div class="hero">
+  <div class="hero">
   <div class="top">
-    <div>
-      <h1>🔥 Wurstrand Challenge</h1>
-      <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+    <div class="logo-header">
+      <img src="wurstrand-logo.png" alt="Wurstrand Challenge Logo">
+      <div>
+        <h1>Wurstrand Challenge</h1>
+        <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+      </div>
     </div>
     <div class="badgebox"><span id="entryCount">0</span> Einträge gespeichert</div>
   </div>
@@ -116,13 +110,10 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   <div class="overlay">
     <div class="badge">Monats-Challenge</div>
 
-   <div class="logo-header">
-  <img src="wurstrand-logo.png" alt="Wurstrand Challenge Logo">
-  <div>
-    <h1>Wurstrand Challenge</h1>
-    <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
-  </div>
-</div>
+    <div class="challenge-row">
+      <div>
+        <h2 id="monthTitle">Mission Mai</h2>
+        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
       </div>
 
       <div style="width:100%;max-width:300px">
@@ -170,9 +161,21 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
   <div class="card">
     <h3>🔥 Wurstrand Bestmarken</h3>
     <div class="grid grid3">
-      <div class="mini"><div class="l">Team-Schritte Rekordtag</div><div class="v" id="recordSteps">47.526</div><div class="muted" id="recordStepsDate">11.02.2026</div></div>
-      <div class="mini"><div class="l">Team-Rad Rekordtag</div><div class="v" id="recordBike">118,4 km</div><div class="muted" id="recordBikeDate">24.04.2026</div></div>
-      <div class="mini"><div class="l">Team-Punkte Rekordtag</div><div class="v" id="recordPoints">118,76</div><div class="muted" id="recordPointsDate">24.04.2026</div></div>
+      <div class="mini">
+        <div class="l">Team-Schritte Rekordtag</div>
+        <div class="v" id="recordSteps">47.526</div>
+        <div class="muted" id="recordStepsDate">11.02.2026</div>
+      </div>
+      <div class="mini">
+        <div class="l">Team-Rad Rekordtag</div>
+        <div class="v" id="recordBike">118,4 km</div>
+        <div class="muted" id="recordBikeDate">24.04.2026</div>
+      </div>
+      <div class="mini">
+        <div class="l">Team-Punkte Rekordtag</div>
+        <div class="v" id="recordPoints">118,76</div>
+        <div class="muted" id="recordPointsDate">24.04.2026</div>
+      </div>
     </div>
   </div>
 
@@ -212,6 +215,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 <div id="eintrag" class="panel">
   <div class="card">
     <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
+
     <div class="formgrid">
       <div><label>Datum</label><input type="date" id="date"></div>
       <div><label>Person</label><select id="person"></select></div>
@@ -273,592 +277,297 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
     <div id="teamAlarm"></div>
   </div>
 </div>
-<script>
-const supabaseUrl = "https://ythcpltiujpnxedtgjmr.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aGNwbHRpdWpwbnhlZHRnam1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDk3NTAsImV4cCI6MjA5MjY4NTc1MH0.UfT5EwyMU_-CciwdfRP7AN7-5jMO_UCbwrz_vT8DNpo";
-const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-const PEOPLE = ["Thorsten","Basti","Marian","Fabi"];
-const GOALS = {
-  "2026-05": { title: "Mission Mai", target: 1700 },
-  "2026-06": { title: "Juni zieht durch", target: 1750 },
-  "2026-07": { title: "Juli wird wild", target: 1800 }
+</div>
+
+<div id="toast" class="toast"></div>
+<script>
+const SUPABASE_URL = "https://ythcpltiujpnxedtgjmr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aGNwbHRpdWpwbnhlZHRnam1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDk3NTAsImV4cCI6MjA5MjY4NTc1MH0.UfT5EwyMU_-CciwdfRP7AN7-5jMO_UCbwrz_vT8DNpo";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const people = ["Thorsten","Basti","Marian","Fabi"];
+
+const monthGoals = {
+  "2026-04": 1600,
+  "2026-05": 1700,
+  "2026-06": 1750,
+  "2026-07": 1800,
+  "2026-08": 1850
 };
 
-let selectedMonth = getCurrentMonthKey();
-let entries = [];
+let allEntries = [];
 let editingId = null;
 
-function $(id){ return document.getElementById(id); }
-
-function fmt(n,d=0){
-  return new Intl.NumberFormat("de-DE",{
-    minimumFractionDigits:d,
-    maximumFractionDigits:d
-  }).format(Number(n)||0);
+function currentMonthKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
 }
 
-function monthKey(date){
-  return String(date||"").slice(0,7);
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("de-DE");
 }
 
-function getCurrentMonthKey(){
-  const now = new Date();
-  const key = now.toISOString().slice(0,7);
-  return GOALS[key] ? key : "2026-05";
+function getMonthTitle(key) {
+  const months = {
+    "01":"Januar","02":"Februar","03":"März","04":"April",
+    "05":"Mai","06":"Juni","07":"Juli","08":"August",
+    "09":"September","10":"Oktober","11":"November","12":"Dezember"
+  };
+  const parts = key.split("-");
+  return "Mission " + months[parts[1]];
 }
 
-function autoBonus(e){
-  const categories = [
-    (Number(e.steps)||0) > 0,
-    (Number(e.bike)||0) > 0,
-    ((Number(e.squats)||0) + (Number(e.pushups)||0)) > 0,
-    !!e.exercise
-  ];
-  return categories.filter(Boolean).length >= 3;
+function calcPoints(e) {
+  const stepPts = Math.floor((+e.steps || 0) / 1000);
+  const bikePts = (+e.bike || 0);
+  const squatPts = Math.floor((+e.squats || 0) / 5);
+  const pushPts = Math.floor((+e.pushups || 0) / 3);
+  const powerPts = squatPts + pushPts;
+  const exercisePts = e.exercise ? 5 : 0;
+
+  let categories = 0;
+  if (stepPts > 0) categories++;
+  if (bikePts > 0) categories++;
+  if (powerPts > 0) categories++;
+  if (e.exercise) categories++;
+
+  const bonus = categories >= 3 ? 4 : 0;
+
+  return {
+    total: stepPts + bikePts + powerPts + exercisePts + bonus,
+    stepPts,
+    bikePts,
+    powerPts,
+    exercisePts,
+    bonus
+  };
 }
 
-function points(e){
-  return (Number(e.steps)||0) / 1000
-    + (Number(e.bike)||0)
-    + (Number(e.squats)||0) / 5
-    + (Number(e.pushups)||0) / 3
-    + (e.exercise ? 5 : 0)
-    + (autoBonus(e) ? 4 : 0);
+function showTab(id, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
 }
 
-function motivate(p){
-  if(p>=100) return "👑 Monatsziel geknackt. Starkes Ding.";
-  if(p>=85) return "🚀 Endspurt. Das Ziel ist greifbar nah.";
-  if(p>=60) return "🔥 Ihr seid richtig unterwegs.";
-  if(p>=35) return "🙂 Solide Basis. Weiter einsammeln.";
-  return "⚡ Monat läuft – aber da geht noch einiges.";
-}
-
-function toast(msg){
-  const t = $("toast");
-  t.innerHTML = msg;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
   t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3600);
+  setTimeout(() => t.classList.remove("show"), 3200);
 }
 
-function confetti(){
-  for(let i=0;i<70;i++){
+function confetti() {
+  for (let i = 0; i < 30; i++) {
     const c = document.createElement("div");
     c.className = "confetti";
-    c.style.left = Math.random()*100 + "vw";
-    c.style.background = ["#22c55e","#84cc16","#38bdf8","#facc15","#f472b6"][Math.floor(Math.random()*5)];
-    c.style.animationDelay = (Math.random()*0.8)+"s";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.animationDelay = (Math.random() * 0.5) + "s";
     document.body.appendChild(c);
-    setTimeout(()=>c.remove(),3500);
+    setTimeout(() => c.remove(), 3000);
   }
 }
 
-function monthEntries(){
-  return entries.filter(e => monthKey(e.date) === selectedMonth);
+function updateExerciseToggle() {
+  const checked = document.getElementById("exercise").checked;
+  const box = document.getElementById("exerciseBox");
+  const text = document.getElementById("exerciseText");
+
+  if (checked) {
+    box.classList.add("active");
+    text.innerText = "✅ Individuelle Übung: Ja (+5)";
+  } else {
+    box.classList.remove("active");
+    text.innerText = "❌ Individuelle Übung: Nein";
+  }
 }
 
-function monthScore(month){
-  return entries
-    .filter(e => monthKey(e.date) === month)
-    .reduce((sum,e)=>sum+points(e),0);
+function resetForm() {
+  editingId = null;
+  document.getElementById("formTitle").innerText = "Neuen Tageseintrag erfassen";
+  document.getElementById("saveButton").innerText = "Eintrag speichern";
+  document.getElementById("date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("person").value = people[0];
+  document.getElementById("steps").value = "";
+  document.getElementById("bike").value = "";
+  document.getElementById("squats").value = "";
+  document.getElementById("pushups").value = "";
+  document.getElementById("exercise").checked = false;
+  updateExerciseToggle();
 }
 
-function dayKeyToGerman(date){
-  return new Date(date+"T12:00:00").toLocaleDateString("de-DE",{weekday:"long"});
+function fillPeople() {
+  const select = document.getElementById("person");
+  select.innerHTML = "";
+
+  people.forEach(p => {
+    const o = document.createElement("option");
+    o.value = p;
+    o.innerText = p;
+    select.appendChild(o);
+  });
 }
 
-async function loadEntries(){
-  const { data, error } = await db
+function initMonths() {
+  const select = document.getElementById("monthSelect");
+  select.innerHTML = "";
+
+  Object.keys(monthGoals).forEach(key => {
+    const o = document.createElement("option");
+    o.value = key;
+    o.innerText = getMonthTitle(key);
+    if (key === currentMonthKey()) o.selected = true;
+    select.appendChild(o);
+  });
+
+  select.addEventListener("change", renderAll);
+}
+
+async function loadEntries() {
+  const { data, error } = await supabaseClient
     .from("entries")
     .select("*")
-    .order("date",{ ascending:false });
+    .order("date", { ascending: false });
 
-  if(error){
-    alert("Fehler beim Laden: " + error.message);
+  if (error) {
+    console.log(error);
+    toast("Fehler beim Laden");
     return;
   }
 
-  entries = data || [];
-  render();
+  allEntries = data || [];
+  renderAll();
 }
 
-function init(){
-  $("date").value = new Date().toISOString().slice(0,10);
-
-  $("person").innerHTML = PEOPLE
-    .map(p=>`<option>${p}</option>`)
-    .join("");
-
-  $("monthSelect").innerHTML = Object.keys(GOALS)
-    .map(m=>`<option value="${m}">${GOALS[m].title}${m===getCurrentMonthKey() ? " · aktuell" : " · Archiv"}</option>`)
-    .join("");
-
-  $("monthSelect").value = selectedMonth;
-
-  $("monthSelect").onchange = e => {
-    selectedMonth = e.target.value;
-    render();
-  };
-
-  $("exercise").onchange = updateExerciseToggle;
-
-  loadEntries();
-
-  db.channel("entries-changes")
-    .on("postgres_changes",{event:"*",schema:"public",table:"entries"},loadEntries)
-    .subscribe();
-}
-
-function updateExerciseToggle(){
-  const checked = $("exercise").checked;
-  $("exerciseText").textContent = checked
-    ? "✅ Individuelle Übung: Ja (+5)"
-    : "❌ Individuelle Übung: Nein";
-
-  $("exerciseBox").classList.toggle("active", checked);
-}
-
-async function saveEntry(){
-  const beforeScore = monthScore(selectedMonth);
-  const beforePct = GOALS[selectedMonth] ? beforeScore / GOALS[selectedMonth].target * 100 : 0;
-  const beforeRecords = getRecords();
-
+async function saveEntry() {
   const entry = {
-    date: $("date").value,
-    person: $("person").value,
-    steps: +$("steps").value || 0,
-    bike: +$("bike").value || 0,
-    squats: +$("squats").value || 0,
-    pushups: +$("pushups").value || 0,
-    exercise: $("exercise").checked
+    date: document.getElementById("date").value,
+    person: document.getElementById("person").value,
+    steps: +document.getElementById("steps").value || 0,
+    bike: +document.getElementById("bike").value || 0,
+    squats: +document.getElementById("squats").value || 0,
+    pushups: +document.getElementById("pushups").value || 0,
+    exercise: document.getElementById("exercise").checked
   };
 
-  entry.bonus = autoBonus(entry);
-
-  const result = editingId
-    ? await db.from("entries").update(entry).eq("id",editingId)
-    : await db.from("entries").insert([entry]);
-
-  if(result.error){
-    alert("Fehler beim Speichern: " + result.error.message);
+  if (!entry.date) {
+    toast("Bitte Datum wählen");
     return;
+  }
+
+  let result;
+
+  if (editingId) {
+    result = await supabaseClient
+      .from("entries")
+      .update(entry)
+      .eq("id", editingId);
+  } else {
+    result = await supabaseClient
+      .from("entries")
+      .insert([entry]);
+  }
+
+  if (result.error) {
+    console.log(result.error);
+    toast("Speichern fehlgeschlagen");
+    return;
+  }
+
+  const p = calcPoints(entry);
+
+  if (entry.steps >= 10000) {
+    toast("🔥 10.000 Schritte geknackt!");
+    confetti();
+  }
+
+  if (p.total >= 20) {
+    toast("🚀 Stark! Über 20 Punkte an einem Tag!");
+  }
+
+  if (p.bonus > 0) {
+    toast("🎁 Bonus automatisch aktiviert!");
   }
 
   resetForm();
   await loadEntries();
+}
 
-  const afterScore = monthScore(selectedMonth);
-  const afterPct = GOALS[selectedMonth] ? afterScore / GOALS[selectedMonth].target * 100 : 0;
-  const afterRecords = getRecords();
+function renderDashboard() {
+  const key = document.getElementById("monthSelect").value || currentMonthKey();
+  const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+  const goal = monthGoals[key] || 1700;
 
-  if(entry.steps >= 10000) toast("🔥 10.000 Schritte geknackt! Wurstrand läuft.");
-  if(entry.bike >= 20) toast("🚴 Radtag eskaliert – die Wade lebt.");
-  if(entry.bonus) toast("🎁 Bonus automatisch eingesammelt! 3 von 4 Kategorien geschafft.");
+  let total = 0;
+  let steps = 0;
+  let bike = 0;
+  let power = 0;
+  let exerciseCount = 0;
+  let bonus = 0;
 
-  if(beforePct < 50 && afterPct >= 50) toast("🔥 50% geschafft – der Monat nimmt Fahrt auf.");
-  if(beforePct < 75 && afterPct >= 75) toast("🚀 75% geschafft – jetzt nicht nachlassen!");
-  if(beforePct < 90 && afterPct >= 90) toast("👀 90% – das Ziel riecht schon nach Schweiß und Ruhm.");
+  entries.forEach(e => {
+    const p = calcPoints(e);
+    total += p.total;
+    steps += p.stepPts;
+    bike += p.bikePts;
+    power += p.powerPts;
+    bonus += p.bonus;
+    if (e.exercise) exerciseCount++;
+  });
 
-  if(beforePct < 100 && afterPct >= 100){
-    toast("👑 Monatsziel geknackt! Wurstrand liefert.");
-    confetti();
+  const percent = Math.round((total / goal) * 100);
+  const rest = Math.max(goal - total, 0);
+
+  document.getElementById("monthTitle").innerText = getMonthTitle(key);
+  document.getElementById("goalTarget").innerText = goal.toLocaleString("de-DE");
+  document.getElementById("goalCurrent").innerText = total.toLocaleString("de-DE");
+  document.getElementById("goalPercent").innerText = percent + "%";
+  document.getElementById("goalRest").innerText = rest.toLocaleString("de-DE");
+  document.getElementById("barText").innerText = total + " / " + goal;
+  document.getElementById("barFill").style.width = Math.min(percent, 100) + "%";
+
+  document.getElementById("stepPts").innerText = steps.toLocaleString("de-DE");
+  document.getElementById("bikePts").innerText = bike.toLocaleString("de-DE");
+  document.getElementById("powerPts").innerText = power.toLocaleString("de-DE");
+  document.getElementById("exerciseCount").innerText = exerciseCount;
+
+  if (total >= goal) {
+    document.getElementById("motivation").innerText = "🔥 Monatsziel erreicht. Wurstrand eskaliert.";
+  } else {
+    document.getElementById("motivation").innerText = "⚡ Monat läuft – aber da geht noch einiges.";
   }
-
-  if(afterRecords.steps.value > beforeRecords.steps.value) toast("👣 Neuer Team-Schritte-Rekord!");
-  if(afterRecords.bike.value > beforeRecords.bike.value) toast("🚴 Neuer Team-Rad-Rekord!");
-  if(afterRecords.points.value > beforeRecords.points.value) toast("⚡ Neuer Team-Punkte-Rekord!");
-
-  showTab("liste", document.querySelectorAll(".tab")[2]);
 }
 
-function editEntry(id){
-  const e = entries.find(x=>x.id===id);
-  if(!e) return;
+function renderEntries(){}
+function renderHeatmap(){}
+function renderAchievements(){}
+function renderFunFacts(){}
+function renderCheckOverview(){}
 
-  editingId = id;
-
-  $("date").value = e.date;
-  $("person").value = e.person;
-  $("steps").value = e.steps || 0;
-  $("bike").value = e.bike || 0;
-  $("squats").value = e.squats || 0;
-  $("pushups").value = e.pushups || 0;
-  $("exercise").checked = !!e.exercise;
-
-  updateExerciseToggle();
-
-  $("formTitle").textContent = "Eintrag bearbeiten";
-  $("saveButton").textContent = "Änderung speichern";
-
-  showTab("eintrag", document.querySelectorAll(".tab")[1]);
+function renderAll() {
+  document.getElementById("entryCount").innerText = allEntries.length;
+  renderDashboard();
+  renderEntries();
+  renderHeatmap();
+  renderAchievements();
+  renderFunFacts();
+  renderCheckOverview();
 }
 
-function resetForm(){
-  editingId = null;
-
-  $("date").value = new Date().toISOString().slice(0,10);
-  $("steps").value = "";
-  $("bike").value = "";
-  $("squats").value = "";
-  $("pushups").value = "";
-  $("exercise").checked = false;
-
-  updateExerciseToggle();
-
-  $("formTitle").textContent = "Neuen Tageseintrag erfassen";
-  $("saveButton").textContent = "Eintrag speichern";
-}
-
-async function del(id){
-  if(!confirm("Diesen Eintrag wirklich löschen?")) return;
-
-  const { error } = await db
-    .from("entries")
-    .delete()
-    .eq("id",id);
-
-  if(error){
-    alert("Fehler beim Löschen: " + error.message);
-    return;
+document.addEventListener("change", (e) => {
+  if (e.target.id === "exercise") {
+    updateExerciseToggle();
   }
-
-  await loadEntries();
-}
-
-function render(){
-  const list = monthEntries();
-  const goal = GOALS[selectedMonth];
-
-  const monthSteps = list.reduce((s,e)=>s+(Number(e.steps)||0),0);
-  const monthBike = list.reduce((s,e)=>s+(Number(e.bike)||0),0);
-  const monthSquats = list.reduce((s,e)=>s+(Number(e.squats)||0),0);
-  const monthPushups = list.reduce((s,e)=>s+(Number(e.pushups)||0),0);
-  const monthExercises = list.filter(e=>e.exercise).length;
-  const monthBonus = list.filter(e=>autoBonus(e)).length * 4;
-
-  const stepPoints = monthSteps / 1000;
-  const powerOnly = monthSquats / 5 + monthPushups / 3;
-  const score = list.reduce((s,e)=>s+points(e),0);
-  const pct = goal.target ? Math.min(score / goal.target * 100,100) : 0;
-
-  const today = new Date();
-  const [y,m] = selectedMonth.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-
-  const dayNow = (today.getFullYear()===y && today.getMonth()+1===m)
-    ? today.getDate()
-    : 1;
-
-  const daysPassed = (today.getFullYear()===y && today.getMonth()+1===m)
-    ? today.getDate()
-    : lastDay;
-
-  const restDays = Math.max(lastDay-dayNow+1,1);
-  const needed = Math.max(goal.target-score,0) / restDays;
-  const forecast = (score / Math.max(daysPassed,1)) * lastDay;
-
-  $("entryCount").textContent = entries.length;
-  $("monthTitle").textContent = goal.title;
-  $("motivation").textContent = motivate(pct);
-  $("goalTarget").textContent = fmt(goal.target,0);
-  $("goalCurrent").textContent = fmt(score,2);
-  $("goalPercent").textContent = Math.round(pct)+"%";
-  $("goalRest").textContent = fmt(Math.max(goal.target-score,0),2);
-  $("barText").textContent = fmt(score,2)+" / "+fmt(goal.target,0);
-  $("barFill").style.width = pct+"%";
-
-  $("neededPerDay").textContent = fmt(needed,2);
-  $("forecast").textContent = fmt(forecast,0);
-
-  $("stepPts").textContent = fmt(stepPoints,2);
-  $("bikePts").textContent = fmt(monthBike,2);
-  $("powerPts").textContent = fmt(powerOnly,2);
-  $("exerciseCount").textContent = fmt(monthExercises,0);
-
-  $("totalSteps").textContent = fmt(monthSteps,0);
-  $("totalBike").textContent = fmt(monthBike,2);
-  $("totalBonus").textContent = fmt(monthBonus,0);
-  $("totalPower").textContent = fmt(monthSquats,0)+" / "+fmt(monthPushups,0)+" / "+fmt(monthExercises,0);
-
-  $("over10k").textContent = list.filter(e=>e.steps>=10000).length;
-  $("avgSteps").textContent = fmt(list.length ? monthSteps/list.length : 0,0);
-
-  const activeBike = list.filter(e=>e.bike>0);
-  $("avgBike").textContent = fmt(activeBike.length ? monthBike/activeBike.length : 0,2);
-  $("bonusCount").textContent = list.filter(e=>autoBonus(e)).length;
-
-  const maxS = list.reduce((a,b)=>b.steps>(a?.steps||0)?b:a,null);
-  const maxB = list.reduce((a,b)=>b.bike>(a?.bike||0)?b:a,null);
-
-  $("maxSteps").textContent = maxS ? fmt(maxS.steps,0)+" · "+maxS.date : "-";
-  $("maxBike").textContent = maxB ? fmt(maxB.bike,2)+" · "+maxB.date : "-";
-  $("monthScore").textContent = fmt(score,2);
-
-  $("mixSteps").textContent = fmt(stepPoints,2);
-  $("mixBike").textContent = fmt(monthBike,2);
-  $("mixPower").textContent = fmt(powerOnly,2);
-  $("mixBonus").textContent = fmt(monthBonus,0);
-
-  updateRecords();
-  renderCheckOverview(list);
-  renderList(list);
-  renderHeatmap(list,y,m,lastDay);
-  renderFunFacts(list);
-  renderAchievements(list,score,monthSteps,monthBike,monthExercises);
-  renderTeamAlarm(list,score,pct);
-}
-
-function getRecords(){
-  const byDate = {};
-
-  entries.forEach(e=>{
-    const d = e.date;
-    if(!byDate[d]) byDate[d] = { steps:0, bike:0, points:0 };
-    byDate[d].steps += Number(e.steps)||0;
-    byDate[d].bike += Number(e.bike)||0;
-    byDate[d].points += points(e);
-  });
-
-  let stepRec = { value:47526, date:"11.02.2026" };
-  let bikeRec = { value:118.4, date:"24.04.2026" };
-  let pointRec = { value:118.76, date:"24.04.2026" };
-
-  Object.entries(byDate).forEach(([date,v])=>{
-    if(v.steps > stepRec.value) stepRec = { value:v.steps, date };
-    if(v.bike > bikeRec.value) bikeRec = { value:v.bike, date };
-    if(v.points > pointRec.value) pointRec = { value:v.points, date };
-  });
-
-  return { steps:stepRec, bike:bikeRec, points:pointRec };
-}
-
-function updateRecords(){
-  const r = getRecords();
-
-  $("recordSteps").textContent = fmt(r.steps.value,0);
-  $("recordStepsDate").textContent = r.steps.date;
-
-  $("recordBike").textContent = fmt(r.bike.value,1)+" km";
-  $("recordBikeDate").textContent = r.bike.date;
-
-  $("recordPoints").textContent = fmt(r.points.value,2);
-  $("recordPointsDate").textContent = r.points.date;
-}
-
-function renderCheckOverview(list){
-  const grouped = {};
-
-  list.forEach(e=>{
-    if(!grouped[e.date]) grouped[e.date] = {};
-    grouped[e.date][e.person] = true;
-  });
-
-  const [y,m] = selectedMonth.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-  const dates = [];
-
-  for(let d=1; d<=lastDay; d++){
-    dates.push(`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-  }
-
-  let html = `
-    <div style="overflow-x:auto;">
-      <table class="checktable">
-        <thead>
-          <tr>
-            <th>Datum</th>
-            ${PEOPLE.map(p=>`<th>${p}</th>`).join("")}
-          </tr>
-        </thead>
-        <tbody>
-  `;
-
-  dates.forEach(date=>{
-    html += `<tr><td>${date.slice(8,10)}.${date.slice(5,7)}.</td>`;
-    PEOPLE.forEach(person=>{
-      html += `<td>${grouped[date]?.[person] ? "✅" : "❌"}</td>`;
-    });
-    html += `</tr>`;
-  });
-
-  html += `</tbody></table></div>`;
-
-  $("checkOverview").innerHTML = html;
-}
-
-function renderList(list){
-  if(!list.length){
-    $("entriesList").innerHTML = '<div class="empty">Noch keine Einträge für diesen Monat.</div>';
-    return;
-  }
-
-  $("entriesList").innerHTML = [...list]
-    .sort((a,b)=>new Date(b.date)-new Date(a.date))
-    .map(e=>`
-      <div class="entry">
-        <div class="entrytop">
-          <strong>${e.person}</strong>
-          <span>${e.date}</span>
-          <div class="actions">
-            <button class="secondary" onclick="editEntry('${e.id}')">Bearbeiten</button>
-            <button class="danger" onclick="del('${e.id}')">Löschen</button>
-          </div>
-        </div>
-
-        <div class="chips">
-          <div class="chip"><small>Schritte</small><br><b>${fmt(e.steps,0)}</b></div>
-          <div class="chip"><small>Rad</small><br><b>${fmt(e.bike,2)}</b></div>
-          <div class="chip"><small>Knie</small><br><b>${fmt(e.squats,0)}</b></div>
-          <div class="chip"><small>Liege</small><br><b>${fmt(e.pushups,0)}</b></div>
-          <div class="chip"><small>Übung</small><br><b>${e.exercise ? "Ja" : "Nein"}</b></div>
-          <div class="chip"><small>Punkte</small><br><b>${fmt(points(e),2)}</b></div>
-        </div>
-      </div>
-    `).join("");
-}
-
-function groupedByDate(list){
-  const byDate = {};
-
-  list.forEach(e=>{
-    if(!byDate[e.date]){
-      byDate[e.date] = {
-        entries:[],
-        steps:0,
-        bike:0,
-        points:0,
-        people:new Set(),
-        bonus:0
-      };
-    }
-
-    byDate[e.date].entries.push(e);
-    byDate[e.date].steps += Number(e.steps)||0;
-    byDate[e.date].bike += Number(e.bike)||0;
-    byDate[e.date].points += points(e);
-    byDate[e.date].people.add(e.person);
-
-    if(autoBonus(e)) byDate[e.date].bonus += 4;
-  });
-
-  return byDate;
-}
-
-function renderHeatmap(list,y,m,lastDay){
-  const byDate = groupedByDate(list);
-  let html = "";
-
-  for(let d=1; d<=lastDay; d++){
-    const date = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    const v = byDate[date];
-    const pts = v ? v.points : 0;
-
-    let cls = "";
-    let icon = "";
-
-    if(pts>=80){ cls="day-fire"; icon="🔥"; }
-    else if(pts>=50){ cls="day-high"; icon="🟩"; }
-    else if(pts>=20){ cls="day-mid"; icon="🟨"; }
-    else cls="day-low";
-
-    html += `
-      <div class="daybox ${cls}">
-        <strong>${d}. ${icon}</strong>
-        ${fmt(pts,1)} Punkte<br>
-        ${v ? fmt(v.steps,0) : 0} Schritte<br>
-        ${v ? fmt(v.bike,1) : 0} km
-      </div>
-    `;
-  }
-
-  $("heatmap").innerHTML = html;
-}
-
-function renderFunFacts(list){
-  const byWeekday = {};
-
-  list.forEach(e=>{
-    const w = dayKeyToGerman(e.date);
-
-    if(!byWeekday[w]) byWeekday[w] = { points:0, count:0, bonus:0 };
-
-    byWeekday[w].points += points(e);
-    byWeekday[w].count++;
-
-    if(autoBonus(e)) byWeekday[w].bonus++;
-  });
-
-  const days = Object.entries(byWeekday);
-
-  const strongest = [...days].sort((a,b)=>b[1].points-a[1].points)[0];
-  const weakest = [...days].sort((a,b)=>a[1].points-b[1].points)[0];
-  const bonusDay = [...days].sort((a,b)=>b[1].bonus-a[1].bonus)[0];
-
-  const all4 = Object.values(groupedByDate(list)).filter(d=>d.people.size===4).length;
-
-  $("funFacts").innerHTML = `
-    <div class="row"><span class="muted">Stärkster Wochentag</span><strong>${strongest ? strongest[0] : "-"}</strong></div>
-    <div class="row"><span class="muted">Gefährlichster Sofa-Tag</span><strong>${weakest ? weakest[0] : "-"}</strong></div>
-    <div class="row"><span class="muted">Bonus-freudigster Tag</span><strong>${bonusDay ? bonusDay[0] : "-"}</strong></div>
-    <div class="row"><span class="muted">Tage mit allen 4 aktiv</span><strong>${all4}</strong></div>
-  `;
-}
-
-function renderAchievements(list,score,steps,bike,exercises){
-  const bonusCount = list.filter(e=>autoBonus(e)).length;
-  const byDate = groupedByDate(list);
-  const team50 = Object.values(byDate).filter(d=>d.points>=50).length;
-
-  const items = [
-    {icon:"👣",title:"100k Schritte",desc:"100.000 Schritte im Monat",done:steps>=100000},
-    {icon:"🚴",title:"500 km Rad",desc:"500 Fahrrad-km im Monat",done:bike>=500},
-    {icon:"🎁",title:"20 Boni",desc:"20 automatische Boni gesammelt",done:bonusCount>=20},
-    {icon:"🔥",title:"5 Teamtage",desc:"5 Tage mit mindestens 50 Punkten",done:team50>=5},
-    {icon:"🧘",title:"50 Übungen",desc:"50 individuelle Übungen",done:exercises>=50},
-    {icon:"👑",title:"Monat fällt",desc:"Monatsziel erreicht",done:score>=GOALS[selectedMonth].target}
-  ];
-
-  $("achievements").innerHTML = items.map(a=>`
-    <div class="achievement ${a.done ? "done" : ""}">
-      <div class="icon">${a.icon}</div>
-      <div>
-        <b>${a.done ? "✅ " : ""}${a.title}</b>
-        <span>${a.desc}</span>
-      </div>
-    </div>
-  `).join("");
-}
-
-function renderTeamAlarm(list,score,pct){
-  const byDate = groupedByDate(list);
-  const today = new Date().toISOString().slice(0,10);
-  const todayData = byDate[today];
-
-  const alarms = [];
-
-  if(todayData?.people.size===4) alarms.push("🚨 Heute waren alle 4 aktiv. Teamtag!");
-  if(todayData?.points>=50) alarms.push("🔥 Heute schon 50+ Punkte. Der Tag lebt.");
-  if(pct>=90 && pct<100) alarms.push("👀 Monatsziel fast geknackt. Jetzt nicht auf der Couch verkleben.");
-  if(pct>=100) alarms.push("👑 Monatsziel gefallen. Wurstrand liefert.");
-  if(!alarms.length) alarms.push("🙂 Noch kein Teamalarm heute. Da geht noch was.");
-
-  $("teamAlarm").innerHTML = alarms.map(a=>`<div class="row"><span>${a}</span></div>`).join("");
-}
-
-function showTab(id,btn){
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-  $(id).classList.add("active");
-
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  btn.classList.add("active");
-}
-
-init();
+});
+
+fillPeople();
+initMonths();
+resetForm();
+loadEntries();
 </script>
 
 </body>
 </html>
-</div>
-
-<div id="toast" class="toast"></div>
