@@ -73,6 +73,8 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .checktable{width:100%;border-collapse:collapse;margin-top:15px}
 .checktable th,.checktable td{padding:10px;border-bottom:1px solid #334155;text-align:center}
 .checktable th:first-child,.checktable td:first-child{text-align:left}
+.funfact{background:#0f172a;border:1px solid #334155;border-radius:16px;padding:14px;margin-bottom:10px}
+.funfact b{font-size:18px}
 .toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #475569;color:white;padding:14px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9999;opacity:0;transform:translateY(20px);transition:.3s;max-width:330px}
 .toast.show{opacity:1;transform:translateY(0)}
 .confetti{position:fixed;top:-10px;width:10px;height:10px;background:#22c55e;z-index:9999;animation:fall 2.8s linear forwards}
@@ -262,7 +264,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
   <div class="grid grid2">
     <div class="card">
-      <h3>😂 Fun Facts</h3>
+      <h3>😂 Fun Facts seit Februar</h3>
       <div id="funFacts"></div>
     </div>
 
@@ -288,6 +290,18 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const people = ["Thorsten","Basti","Marian","Fabi"];
 
+const HISTORIC_TOTALS = {
+  steps: 2545864,
+  over10k: 94,
+  bike: 1236.64,
+  bonusPoints: 108,
+  bonusDays: 27,
+  exercises: 50,
+  kraftReps: 1260,
+  maxSteps: 26996,
+  maxBike: 64.7
+};
+
 const monthGoals = {
   "2026-05": 1700,
   "2026-06": 1750,
@@ -300,27 +314,6 @@ const monthGoals = {
 };
 
 let allEntries = [];
-let editingId = null;
-
-function currentMonthKey(){
-  const d = new Date();
-  const key = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
-  return monthGoals[key] ? key : "2026-05";
-}
-
-function getMonthTitle(key){
-  const titles = {
-    "2026-05": "Mutiger Mai",
-    "2026-06": "Jubelnder Juni",
-    "2026-07": "Jäger Juli",
-    "2026-08": "Ausdauer-August",
-    "2026-09": "Starker September",
-    "2026-10": "Offensiver Oktober",
-    "2026-11": "Niemals-müde November",
-    "2026-12": "Dezember der Disziplin"
-  };
-  return titles[key] || "Wurstrand Challenge";
-}
 
 function fmt(n,d=0){
   return new Intl.NumberFormat("de-DE",{
@@ -329,89 +322,56 @@ function fmt(n,d=0){
   }).format(Number(n)||0);
 }
 
-function formatDate(dateStr){
-  if(!dateStr) return "-";
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("de-DE");
+function currentMonthKey(){
+  const d = new Date();
+  const key = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  return monthGoals[key] ? key : "2026-05";
+}
+
+function getMonthTitle(key){
+  const titles = {
+    "2026-05":"Mutiger Mai",
+    "2026-06":"Jubelnder Juni",
+    "2026-07":"Jäger Juli",
+    "2026-08":"Ausdauer-August",
+    "2026-09":"Starker September",
+    "2026-10":"Offensiver Oktober",
+    "2026-11":"Niemals-müde November",
+    "2026-12":"Dezember der Disziplin"
+  };
+  return titles[key] || "Wurstrand";
 }
 
 function calcPoints(e){
-  const stepPts = Math.floor((+e.steps || 0) / 1000);
-  const bikePts = (+e.bike || 0);
-  const squatPts = Math.floor((+e.squats || 0) / 5);
-  const pushPts = Math.floor((+e.pushups || 0) / 3);
+  const stepPts = Math.floor((+e.steps||0)/1000);
+  const bikePts = (+e.bike||0);
+  const squatPts = Math.floor((+e.squats||0)/5);
+  const pushPts = Math.floor((+e.pushups||0)/3);
   const powerPts = squatPts + pushPts;
   const exercisePts = e.exercise ? 5 : 0;
 
-  let categories = 0;
-  if(stepPts > 0) categories++;
-  if(bikePts > 0) categories++;
-  if(powerPts > 0) categories++;
-  if(e.exercise) categories++;
+  let cats = 0;
+  if(stepPts>0) cats++;
+  if(bikePts>0) cats++;
+  if(powerPts>0) cats++;
+  if(e.exercise) cats++;
 
-  const bonus = categories >= 3 ? 4 : 0;
+  const bonus = cats >= 3 ? 4 : 0;
 
   return {
     total: stepPts + bikePts + powerPts + exercisePts + bonus,
     stepPts,
     bikePts,
     powerPts,
-    exercisePts,
     bonus
   };
 }
 
 function showTab(id, btn){
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   btn.classList.add("active");
-}
-
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3200);
-}
-
-function confetti(){
-  for(let i=0;i<40;i++){
-    const c = document.createElement("div");
-    c.className = "confetti";
-    c.style.left = Math.random()*100+"vw";
-    c.style.animationDelay = (Math.random()*0.6)+"s";
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),3000);
-  }
-}
-
-function updateExerciseToggle(){
-  const checked = document.getElementById("exercise").checked;
-  const box = document.getElementById("exerciseBox");
-  const text = document.getElementById("exerciseText");
-
-  if(checked){
-    box.classList.add("active");
-    text.innerText = "✅ Individuelle Übung: Ja (+5)";
-  }else{
-    box.classList.remove("active");
-    text.innerText = "❌ Individuelle Übung: Nein";
-  }
-}
-
-function resetForm(){
-  editingId = null;
-  document.getElementById("formTitle").innerText = "Neuen Tageseintrag erfassen";
-  document.getElementById("saveButton").innerText = "Eintrag speichern";
-  document.getElementById("date").value = new Date().toISOString().split("T")[0];
-  document.getElementById("person").value = people[0];
-  document.getElementById("steps").value = "";
-  document.getElementById("bike").value = "";
-  document.getElementById("squats").value = "";
-  document.getElementById("pushups").value = "";
-  document.getElementById("exercise").checked = false;
-  updateExerciseToggle();
 }
 
 function fillPeople(){
@@ -432,8 +392,8 @@ function initMonths(){
   Object.keys(monthGoals).forEach(key=>{
     const o = document.createElement("option");
     o.value = key;
-    o.innerText = `${getMonthTitle(key)} · Ziel ${fmt(monthGoals[key],0)}`;
-    if(key === currentMonthKey()) o.selected = true;
+    o.innerText = `${getMonthTitle(key)} · Ziel ${fmt(monthGoals[key])}`;
+    if(key===currentMonthKey()) o.selected = true;
     select.appendChild(o);
   });
 
@@ -441,386 +401,62 @@ function initMonths(){
 }
 
 async function loadEntries(){
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("entries")
     .select("*")
-    .order("date", { ascending:false });
-
-  if(error){
-    console.log(error);
-    toast("Fehler beim Laden");
-    return;
-  }
+    .order("date",{ascending:false});
 
   allEntries = data || [];
   renderAll();
 }
 
-async function saveEntry(){
-  const entry = {
-    date: document.getElementById("date").value,
-    person: document.getElementById("person").value,
-    steps: +document.getElementById("steps").value || 0,
-    bike: +document.getElementById("bike").value || 0,
-    squats: +document.getElementById("squats").value || 0,
-    pushups: +document.getElementById("pushups").value || 0,
-    exercise: document.getElementById("exercise").checked
-  };
-
-  if(!entry.date){
-    toast("Bitte Datum wählen");
-    return;
-  }
-
-  let result;
-
-  if(editingId){
-    result = await supabaseClient.from("entries").update(entry).eq("id", editingId);
-  }else{
-    result = await supabaseClient.from("entries").insert([entry]);
-  }
-
-  if(result.error){
-    console.log(result.error);
-    toast("Speichern fehlgeschlagen");
-    return;
-  }
-
-  const p = calcPoints(entry);
-
-  if(entry.steps >= 10000){
-    toast("🔥 10.000 Schritte geknackt!");
-    confetti();
-  }
-
-  if(p.total >= 20){
-    toast("🚀 Stark! Über 20 Punkte an einem Tag!");
-  }
-
-  if(p.bonus > 0){
-    toast("🎁 Bonus automatisch aktiviert!");
-  }
-
-  resetForm();
-  await loadEntries();
-}
-
-function editEntry(id){
-  const e = allEntries.find(x=>x.id === id);
-  if(!e) return;
-
-  editingId = id;
-  document.getElementById("formTitle").innerText = "Eintrag bearbeiten";
-  document.getElementById("saveButton").innerText = "Änderung speichern";
-
-  document.getElementById("date").value = e.date || "";
-  document.getElementById("person").value = e.person || people[0];
-  document.getElementById("steps").value = e.steps || "";
-  document.getElementById("bike").value = e.bike || "";
-  document.getElementById("squats").value = e.squats || "";
-  document.getElementById("pushups").value = e.pushups || "";
-  document.getElementById("exercise").checked = !!e.exercise;
-  updateExerciseToggle();
-
-  showTab("eintrag", document.querySelectorAll(".tab")[1]);
-}
-
-async function deleteEntry(id){
-  if(!confirm("Eintrag wirklich löschen?")) return;
-
-  const { error } = await supabaseClient
-    .from("entries")
-    .delete()
-    .eq("id", id);
-
-  if(error){
-    console.log(error);
-    toast("Löschen fehlgeschlagen");
-    return;
-  }
-
-  await loadEntries();
-}
-
-function selectedMonth(){
-  return document.getElementById("monthSelect").value || currentMonthKey();
-}
-
-function monthEntries(){
-  const key = selectedMonth();
-  return allEntries.filter(e => (e.date || "").startsWith(key));
-}
-
 function renderAll(){
-  document.getElementById("entryCount").innerText = allEntries.length;
-  renderDashboard();
-  renderEntries();
-  renderCheckOverview();
-  renderHeatmap();
-  renderAchievements();
   renderFunFacts();
-  renderTeamAlarm();
-}
-
-function renderDashboard(){
-  const key = selectedMonth();
-  const entries = monthEntries();
-  const goal = monthGoals[key] || 1700;
-
-  let total = 0, steps = 0, bike = 0, bonus = 0, power = 0, exerciseCount = 0;
-  let totalStepsRaw = 0, totalSquats = 0, totalPushups = 0;
-
-  entries.forEach(e=>{
-    const p = calcPoints(e);
-    total += p.total;
-    steps += p.stepPts;
-    bike += p.bikePts;
-    power += p.powerPts;
-    bonus += p.bonus;
-    totalStepsRaw += +e.steps || 0;
-    totalSquats += +e.squats || 0;
-    totalPushups += +e.pushups || 0;
-    if(e.exercise) exerciseCount++;
-  });
-
-  const percent = Math.round((total / goal) * 100);
-  const rest = Math.max(goal - total, 0);
-
-  const now = new Date();
-  const [year,month] = key.split("-").map(Number);
-  const lastDay = new Date(year, month, 0).getDate();
-  const todayInMonth = now.getFullYear() === year && now.getMonth()+1 === month;
-  const currentDay = todayInMonth ? now.getDate() : 1;
-  const restDays = Math.max(lastDay - currentDay + 1, 1);
-  const passedDays = todayInMonth ? currentDay : lastDay;
-  const neededPerDay = rest / restDays;
-  const forecast = Math.round((total / Math.max(passedDays,1)) * lastDay);
-
-  document.getElementById("monthTitle").innerText = `${getMonthTitle(key)} · Ziel ${fmt(goal,0)} Punkte`;
-  document.getElementById("goalTarget").innerText = fmt(goal,0);
-  document.getElementById("goalCurrent").innerText = fmt(total,0);
-  document.getElementById("goalPercent").innerText = percent + "%";
-  document.getElementById("goalRest").innerText = fmt(rest,0);
-  document.getElementById("barText").innerText = `${fmt(total,0)} / ${fmt(goal,0)} Punkte`;
-  document.getElementById("barFill").style.width = Math.min(percent,100) + "%";
-
-  document.getElementById("stepPts").innerText = fmt(steps,0);
-  document.getElementById("bikePts").innerText = fmt(bike,1);
-  document.getElementById("powerPts").innerText = fmt(power,0);
-  document.getElementById("exerciseCount").innerText = exerciseCount;
-  document.getElementById("neededPerDay").innerText = fmt(neededPerDay,1);
-  document.getElementById("forecast").innerText = fmt(forecast,0);
-
-  document.getElementById("totalSteps").innerText = fmt(totalStepsRaw,0);
-  document.getElementById("totalBike").innerText = fmt(bike,1);
-  document.getElementById("totalBonus").innerText = fmt(bonus,0);
-  document.getElementById("totalPower").innerText = `${fmt(totalSquats,0)} / ${fmt(totalPushups,0)} / ${exerciseCount}`;
-
-  document.getElementById("over10k").innerText = entries.filter(e => (+e.steps || 0) >= 10000).length;
-  document.getElementById("avgSteps").innerText = entries.length ? fmt(totalStepsRaw / entries.length,0) : 0;
-  const activeBike = entries.filter(e => (+e.bike || 0) > 0);
-  document.getElementById("avgBike").innerText = activeBike.length ? fmt(bike / activeBike.length,1) : 0;
-  document.getElementById("bonusCount").innerText = entries.filter(e => calcPoints(e).bonus > 0).length;
-
-  const maxSteps = entries.reduce((a,b)=>(+b.steps||0)>(+a.steps||0)?b:a,{steps:0});
-  const maxBike = entries.reduce((a,b)=>(+b.bike||0)>(+a.bike||0)?b:a,{bike:0});
-
-  document.getElementById("maxSteps").innerText = maxSteps.steps ? `${fmt(maxSteps.steps,0)} · ${formatDate(maxSteps.date)}` : "-";
-  document.getElementById("maxBike").innerText = maxBike.bike ? `${fmt(maxBike.bike,1)} · ${formatDate(maxBike.date)}` : "-";
-  document.getElementById("monthScore").innerText = fmt(total,0);
-
-  document.getElementById("mixSteps").innerText = fmt(steps,0);
-  document.getElementById("mixBike").innerText = fmt(bike,1);
-  document.getElementById("mixPower").innerText = fmt(power,0);
-  document.getElementById("mixBonus").innerText = fmt(bonus,0);
-
-  if(total >= goal){
-    document.getElementById("motivation").innerText = "🔥 Monatsziel erreicht. Wurstrand eskaliert.";
-  }else{
-    document.getElementById("motivation").innerText = "⚡ Monat läuft – aber da geht noch einiges.";
-  }
-
-  renderRecords();
-}
-
-function renderRecords(){
-  const byDate = {};
-  allEntries.forEach(e=>{
-    const date = e.date;
-    if(!byDate[date]) byDate[date] = {steps:0,bike:0,points:0};
-    byDate[date].steps += +e.steps || 0;
-    byDate[date].bike += +e.bike || 0;
-    byDate[date].points += calcPoints(e).total;
-  });
-
-  let stepRecord = {value:47526,date:"2026-02-11"};
-  let bikeRecord = {value:118.4,date:"2026-04-24"};
-  let pointsRecord = {value:118.76,date:"2026-04-24"};
-
-  Object.entries(byDate).forEach(([date,v])=>{
-    if(v.steps > stepRecord.value) stepRecord = {value:v.steps,date};
-    if(v.bike > bikeRecord.value) bikeRecord = {value:v.bike,date};
-    if(v.points > pointsRecord.value) pointsRecord = {value:v.points,date};
-  });
-
-  document.getElementById("recordSteps").innerText = fmt(stepRecord.value,0);
-  document.getElementById("recordStepsDate").innerText = formatDate(stepRecord.date);
-  document.getElementById("recordBike").innerText = fmt(bikeRecord.value,1) + " km";
-  document.getElementById("recordBikeDate").innerText = formatDate(bikeRecord.date);
-  document.getElementById("recordPoints").innerText = fmt(pointsRecord.value,2);
-  document.getElementById("recordPointsDate").innerText = formatDate(pointsRecord.date);
-}
-
-function renderEntries(){
-  const list = monthEntries();
-  const box = document.getElementById("entriesList");
-
-  if(!list.length){
-    box.innerHTML = `<div class="empty">Noch keine Einträge für diesen Monat.</div>`;
-    return;
-  }
-
-  box.innerHTML = list.map(e=>{
-    const p = calcPoints(e);
-    return `
-      <div class="entry">
-        <div class="entrytop">
-          <strong>${formatDate(e.date)} · ${e.person}</strong>
-          <div class="actions">
-            <button class="secondary" onclick="editEntry('${e.id}')">Bearbeiten</button>
-            <button class="danger" onclick="deleteEntry('${e.id}')">Löschen</button>
-          </div>
-        </div>
-        <div class="chips">
-          <div class="chip"><small>Schritte</small><br>${fmt(e.steps,0)}</div>
-          <div class="chip"><small>Rad</small><br>${fmt(e.bike,1)} km</div>
-          <div class="chip"><small>Knie</small><br>${fmt(e.squats,0)}</div>
-          <div class="chip"><small>Liege</small><br>${fmt(e.pushups,0)}</div>
-          <div class="chip"><small>Übung</small><br>${e.exercise ? "✅" : "❌"}</div>
-          <div class="chip"><small>Punkte</small><br>${fmt(p.total,1)}</div>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderCheckOverview(){
-  const key = selectedMonth();
-  const [year,month] = key.split("-").map(Number);
-  const lastDay = new Date(year,month,0).getDate();
-  const list = monthEntries();
-  const box = document.getElementById("checkOverview");
-
-  let html = `<div style="overflow-x:auto"><table class="checktable"><tr><th>Tag</th>`;
-  people.forEach(p=>html += `<th>${p}</th>`);
-  html += `</tr>`;
-
-  for(let day=1; day<=lastDay; day++){
-    const date = `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    html += `<tr><td>${day}.${month}.</td>`;
-    people.forEach(person=>{
-      const done = list.some(e => e.date === date && e.person === person);
-      html += `<td>${done ? "✅" : "❌"}</td>`;
-    });
-    html += `</tr>`;
-  }
-
-  html += `</table></div>`;
-  box.innerHTML = html;
-}
-
-function renderHeatmap(){
-  const key = selectedMonth();
-  const [year,month] = key.split("-").map(Number);
-  const lastDay = new Date(year,month,0).getDate();
-  const list = monthEntries();
-  const box = document.getElementById("heatmap");
-
-  let html = "";
-
-  for(let day=1; day<=lastDay; day++){
-    const date = `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    const dayEntries = list.filter(e=>e.date === date);
-    const pts = dayEntries.reduce((s,e)=>s+calcPoints(e).total,0);
-
-    let cls = "day-low";
-    if(pts >= 80) cls = "day-fire";
-    else if(pts >= 50) cls = "day-high";
-    else if(pts >= 20) cls = "day-mid";
-
-    html += `<div class="daybox ${cls}"><strong>${day}.</strong>${fmt(pts,1)} Punkte<br>${dayEntries.length} Einträge</div>`;
-  }
-
-  box.innerHTML = html;
-}
-
-function renderAchievements(){
-  const entries = monthEntries();
-  const score = entries.reduce((s,e)=>s+calcPoints(e).total,0);
-  const steps = entries.reduce((s,e)=>s+(+e.steps||0),0);
-  const bike = entries.reduce((s,e)=>s+(+e.bike||0),0);
-  const exercises = entries.filter(e=>e.exercise).length;
-  const bonusCount = entries.filter(e=>calcPoints(e).bonus>0).length;
-  const goal = monthGoals[selectedMonth()] || 1700;
-
-  const achievements = [
-    {name:"100k Schritte", done:steps>=100000},
-    {name:"250 km Rad", done:bike>=250},
-    {name:"20 Boni", done:bonusCount>=20},
-    {name:"30 individuelle Übungen", done:exercises>=30},
-    {name:"Monatsziel geknackt", done:score>=goal}
-  ];
-
-  document.getElementById("achievements").innerHTML = achievements.map(a=>`
-    <div class="achievement ${a.done ? "done" : ""}">
-      <div class="icon">${a.done ? "🏆" : "🔒"}</div>
-      <div><b>${a.name}</b><span>${a.done ? "erreicht" : "noch offen"}</span></div>
-    </div>
-  `).join("");
+  document.getElementById("entryCount").innerText = allEntries.length;
 }
 
 function renderFunFacts(){
-  const entries = monthEntries();
+  const totalSteps = HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0);
+  const totalBike = HISTORIC_TOTALS.bike + allEntries.reduce((s,e)=>s+(+e.bike||0),0);
 
-  const all4Days = {};
-  entries.forEach(e=>{
-    if(!all4Days[e.date]) all4Days[e.date] = new Set();
-    all4Days[e.date].add(e.person);
-  });
+  const meters = totalSteps * 0.75;
+  const km = meters / 1000;
 
-  const fullTeamDays = Object.values(all4Days).filter(set=>set.size===4).length;
-  const over10k = entries.filter(e=>(+e.steps||0)>=10000).length;
-  const bonus = entries.filter(e=>calcPoints(e).bonus>0).length;
+  const stadionrunden = Math.floor(meters / 400);
+  const marathons = (km / 42.195).toFixed(1);
+  const fernsehturm = Math.floor(meters / 368);
+  const tourDeFrance = ((totalBike / 3500) * 100).toFixed(1);
 
   document.getElementById("funFacts").innerHTML = `
-    <div class="row"><span>Volle Teamtage</span><strong>${fullTeamDays}</strong></div>
-    <div class="row"><span>10k-Schritte-Tage</span><strong>${over10k}</strong></div>
-    <div class="row"><span>Bonustage</span><strong>${bonus}</strong></div>
+    <div class="funfact">
+      <b>🏟 ${fmt(stadionrunden)}</b><br>
+      Stadionrunden auf einer 400m-Bahn
+    </div>
+
+    <div class="funfact">
+      <b>🏃 ${marathons}</b><br>
+      gelaufene Marathons seit Februar
+    </div>
+
+    <div class="funfact">
+      <b>🗼 ${fmt(fernsehturm)}</b><br>
+      Berliner Fernsehtürme an Strecke
+    </div>
+
+    <div class="funfact">
+      <b>🚴 ${tourDeFrance}%</b><br>
+      der Tour de France bereits geschafft
+    </div>
+
+    <div class="funfact">
+      <b>🏙 ${fmt(km,0)} km</b><br>
+      fast von Berlin Richtung Paris unterwegs
+    </div>
   `;
 }
 
-function renderTeamAlarm(){
-  const entries = monthEntries();
-  const today = new Date().toISOString().split("T")[0];
-  const todayEntries = entries.filter(e=>e.date === today);
-  const todayPeople = new Set(todayEntries.map(e=>e.person));
-  const todayPts = todayEntries.reduce((s,e)=>s+calcPoints(e).total,0);
-
-  let msg = "🙂 Noch kein Teamalarm heute. Da geht noch was.";
-
-  if(todayPeople.size === 4) msg = "🚨 Heute haben alle eingetragen. Teamtag!";
-  if(todayPts >= 50) msg = "🔥 Heute schon über 50 Punkte. Wurstrand brennt!";
-
-  document.getElementById("teamAlarm").innerHTML = `<div class="row"><span>${msg}</span></div>`;
-}
-
-document.addEventListener("change", e=>{
-  if(e.target.id === "exercise") updateExerciseToggle();
-});
-
 fillPeople();
 initMonths();
-resetForm();
 loadEntries();
 </script>
 
