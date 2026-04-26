@@ -360,9 +360,6 @@ function calcPoints(e){
 
   return {
     total: stepPts + bikePts + powerPts + exercisePts + bonus,
-    stepPts,
-    bikePts,
-    powerPts,
     bonus
   };
 }
@@ -376,6 +373,7 @@ function showTab(id, btn){
 
 function fillPeople(){
   const select = document.getElementById("person");
+  if(!select) return;
   select.innerHTML = "";
   people.forEach(p=>{
     const o = document.createElement("option");
@@ -387,6 +385,8 @@ function fillPeople(){
 
 function initMonths(){
   const select = document.getElementById("monthSelect");
+  if(!select) return;
+
   select.innerHTML = "";
 
   Object.keys(monthGoals).forEach(key=>{
@@ -410,8 +410,15 @@ async function loadEntries(){
   renderAll();
 }
 
+function selectedMonth(){
+  const select = document.getElementById("monthSelect");
+  return select ? select.value : currentMonthKey();
+}
+
 function renderAll(){
   renderFunFacts();
+  renderHeatmap();
+  renderCheckOverview();
   document.getElementById("entryCount").innerText = allEntries.length;
 }
 
@@ -425,6 +432,9 @@ function renderFunFacts(){
   const stadionrunden = Math.floor(meters / 400);
   const marathons = (km / 42.195).toFixed(1);
   const fernsehturm = Math.floor(meters / 368);
+  const pizzaCalories = Math.floor((totalSteps * 0.04) / 900);
+  const pizzaStack = (pizzaCalories * 4 / 100).toFixed(2);
+  const dickeBohnen = Math.floor((totalSteps * 0.04) / 500);
   const tourDeFrance = ((totalBike / 3500) * 100).toFixed(1);
 
   document.getElementById("funFacts").innerHTML = `
@@ -440,7 +450,7 @@ function renderFunFacts(){
 
     <div class="funfact">
       <b>🗼 ${fmt(fernsehturm)}</b><br>
-      Berliner Fernsehtürme an Strecke
+      Eure Schritte ergeben ${fmt(fernsehturm)}× die Höhe des Berliner Fernsehturms
     </div>
 
     <div class="funfact">
@@ -449,10 +459,89 @@ function renderFunFacts(){
     </div>
 
     <div class="funfact">
-      <b>🏙 ${fmt(km,0)} km</b><br>
-      fast von Berlin Richtung Paris unterwegs
+      <b>🍕 ${fmt(pizzaCalories)}</b><br>
+      große Pizzen verbrannt (ca. 900 kcal pro Pizza)
+    </div>
+
+    <div class="funfact">
+      <b>📦 ${pizzaStack} m</b><br>
+      Pizzastapel aus euren verbrannten Pizza-Kalorien
+    </div>
+
+    <div class="funfact">
+      <b>🫘 ${fmt(dickeBohnen)}</b><br>
+      Portionen Dicke Bohnen (ca. 500 kcal pro Portion)
     </div>
   `;
+}
+
+function renderHeatmap(){
+  const key = selectedMonth();
+  const box = document.getElementById("heatmap");
+  if(!box) return;
+
+  const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+  const grouped = {};
+
+  entries.forEach(e=>{
+    if(!grouped[e.date]) grouped[e.date] = 0;
+    grouped[e.date] += calcPoints(e).total;
+  });
+
+  box.innerHTML = "";
+
+  Object.keys(grouped).sort().forEach(date=>{
+    const points = grouped[date];
+
+    let cls = "day-low";
+    if(points >= 80) cls = "day-fire";
+    else if(points >= 50) cls = "day-high";
+    else if(points >= 20) cls = "day-mid";
+
+    box.innerHTML += `
+      <div class="daybox ${cls}">
+        <strong>${date.split("-").reverse().join(".")}</strong>
+        ${fmt(points)} Punkte
+      </div>
+    `;
+  });
+}
+
+function renderCheckOverview(){
+  const box = document.getElementById("checkOverview");
+  if(!box) return;
+
+  const key = selectedMonth();
+  const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+
+  const grouped = {};
+
+  entries.forEach(e=>{
+    if(!grouped[e.date]) grouped[e.date] = {};
+    grouped[e.date][e.person] = true;
+  });
+
+  let html = `<table class="checktable">
+    <tr>
+      <th>Tag</th>
+      <th>Thorsten</th>
+      <th>Basti</th>
+      <th>Marian</th>
+      <th>Fabi</th>
+    </tr>`;
+
+  Object.keys(grouped).sort().reverse().forEach(date=>{
+    html += `<tr>
+      <td>${date.split("-").reverse().join(".")}</td>
+      <td>${grouped[date]["Thorsten"] ? "✅" : "❌"}</td>
+      <td>${grouped[date]["Basti"] ? "✅" : "❌"}</td>
+      <td>${grouped[date]["Marian"] ? "✅" : "❌"}</td>
+      <td>${grouped[date]["Fabi"] ? "✅" : "❌"}</td>
+    </tr>`;
+  });
+
+  html += `</table>`;
+  box.innerHTML = html;
 }
 
 fillPeople();
