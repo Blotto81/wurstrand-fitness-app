@@ -285,34 +285,10 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 <div id="toast" class="toast"></div>
 <script>
 const SUPABASE_URL = "https://ythcpltiujpnxedtgjmr.supabase.co";
-const SUPABASE_KEY = "DEIN_KEY_BLEIBT_HIER";
+const SUPABASE_KEY = "DEIN_ECHTER_ANON_KEY_HIER";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const people = ["Thorsten","Basti","Marian","Fabi"];
-
-const HISTORIC_TOTALS = {
-  steps: 2545864,
-  over10k: 94,
-  bike: 1236.64,
-  bonusPoints: 108,
-  bonusDays: 27,
-  exercises: 50,
-  squats: 1260,
-  pushups: 840,
-  maxSteps: 26996,
-  maxBike: 64.7
-};
-
-const monthGoals = {
-  "2026-05": 1700,
-  "2026-06": 1750,
-  "2026-07": 1800,
-  "2026-08": 1850,
-  "2026-09": 1900,
-  "2026-10": 1950,
-  "2026-11": 2000,
-  "2026-12": 2050
-};
 
 let allEntries = [];
 
@@ -323,78 +299,169 @@ function fmt(n,d=0){
   }).format(Number(n)||0);
 }
 
-function achievementCard(done,title,progress){
-  return `
-    <div class="achievement ${done ? "done" : ""}">
-      <div class="icon">${done ? "✅" : "🔒"}</div>
-      <div>
-        <b>${title}</b>
-        <span>${progress}</span>
+function showTab(id, btn){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(btn) btn.classList.add("active");
+}
+
+function fillPeople(){
+  const select = document.getElementById("person");
+  if(!select) return;
+
+  select.innerHTML = "";
+  people.forEach(p=>{
+    const o = document.createElement("option");
+    o.value = p;
+    o.innerText = p;
+    select.appendChild(o);
+  });
+}
+
+function resetForm(){
+  document.getElementById("date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("person").value = "Thorsten";
+  document.getElementById("steps").value = "";
+  document.getElementById("bike").value = "";
+  document.getElementById("squats").value = "";
+  document.getElementById("pushups").value = "";
+  document.getElementById("exercise").checked = false;
+}
+
+async function saveEntry(){
+  const payload = {
+    date: document.getElementById("date").value,
+    person: document.getElementById("person").value,
+    steps: Number(document.getElementById("steps").value || 0),
+    bike: Number(document.getElementById("bike").value || 0),
+    squats: Number(document.getElementById("squats").value || 0),
+    pushups: Number(document.getElementById("pushups").value || 0),
+    exercise: document.getElementById("exercise").checked
+  };
+
+  await supabaseClient.from("entries").insert([payload]);
+  resetForm();
+  loadEntries();
+}
+
+function renderEntries(){
+  const box = document.getElementById("entriesList");
+  if(!box) return;
+
+  if(!allEntries.length){
+    box.innerHTML = `<div class="empty">Noch keine Einträge vorhanden.</div>`;
+    return;
+  }
+
+  box.innerHTML = allEntries
+    .sort((a,b)=> new Date(b.date) - new Date(a.date))
+    .map(e=>`
+      <div class="entry">
+        <div class="entrytop">
+          <strong>${e.person}</strong>
+          <span>${e.date}</span>
+        </div>
+
+        <div class="chips">
+          <div class="chip"><small>Schritte</small><br>${fmt(e.steps)}</div>
+          <div class="chip"><small>Rad</small><br>${fmt(e.bike,1)} km</div>
+          <div class="chip"><small>Knie</small><br>${fmt(e.squats)}</div>
+          <div class="chip"><small>Liege</small><br>${fmt(e.pushups)}</div>
+          <div class="chip"><small>Übung</small><br>${e.exercise ? "✅" : "❌"}</div>
+        </div>
       </div>
-    </div>
-  `;
+    `).join("");
 }
 
-function renderAchievements(){
-  const totalSteps = HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0);
-  const totalBike = HISTORIC_TOTALS.bike + allEntries.reduce((s,e)=>s+(+e.bike||0),0);
-  const totalSquats = HISTORIC_TOTALS.squats + allEntries.reduce((s,e)=>s+(+e.squats||0),0);
-  const totalPushups = HISTORIC_TOTALS.pushups + allEntries.reduce((s,e)=>s+(+e.pushups||0),0);
-  const totalExercises = HISTORIC_TOTALS.exercises + allEntries.filter(e=>e.exercise).length;
+function renderHeatmap(){
+  const box = document.getElementById("heatmap");
+  if(!box) return;
 
-  const box = document.getElementById("achievements");
+  if(!allEntries.length){
+    box.innerHTML = `<div class="empty">Noch keine Daten für die Heatmap.</div>`;
+    return;
+  }
 
-  box.innerHTML = `
-    ${achievementCard(totalSteps >= 3000000,"👣 Millionen-Marsch","${fmt(totalSteps)} / 3.000.000 Schritte")}
-    ${achievementCard(totalSteps >= 5000000,"👣 Legendenlauf","${fmt(totalSteps)} / 5.000.000 Schritte")}
+  const grouped = {};
 
-    ${achievementCard(totalBike >= 1500,"🚴 Tour-Anwärter","${fmt(totalBike,1)} / 1.500 km")}
-    ${achievementCard(totalBike >= 3500,"🚴 Tour de France","${fmt(totalBike,1)} / 3.500 km")}
+  allEntries.forEach(e=>{
+    if(!grouped[e.date]) grouped[e.date] = 0;
 
-    ${achievementCard(totalSquats >= 2500,"🦵 Bein-Beben","${fmt(totalSquats)} / 2.500 Kniebeugen")}
-    ${achievementCard(totalSquats >= 5000,"🦵 Knie-Könige","${fmt(totalSquats)} / 5.000 Kniebeugen")}
+    const pts =
+      Math.floor((e.steps || 0)/1000) +
+      (e.bike || 0) +
+      Math.floor((e.squats || 0)/5) +
+      Math.floor((e.pushups || 0)/3) +
+      (e.exercise ? 5 : 0);
 
-    ${achievementCard(totalPushups >= 1000,"💪 Liegestütz-Legion","${fmt(totalPushups)} / 1.000 Liegestütze")}
-    ${achievementCard(totalPushups >= 2500,"💪 Gorilla-Modus","${fmt(totalPushups)} / 2.500 Liegestütze")}
+    grouped[e.date] += pts;
+  });
 
-    ${achievementCard(totalExercises >= 100,"🧘 Disziplin-Dämonen","${fmt(totalExercises)} / 100 individuelle Übungen")}
-    ${achievementCard(totalExercises >= 365,"🧘 Jahres-Mönche","${fmt(totalExercises)} / 365 individuelle Übungen")}
-  `;
+  box.innerHTML = Object.entries(grouped)
+    .sort((a,b)=> new Date(b[0]) - new Date(a[0]))
+    .map(([date,pts])=>{
+      let cls = "day-low";
+      if(pts >= 80) cls = "day-fire";
+      else if(pts >= 50) cls = "day-high";
+      else if(pts >= 20) cls = "day-mid";
+
+      return `
+        <div class="daybox ${cls}">
+          <strong>${date}</strong>
+          ${fmt(pts)} Punkte
+        </div>
+      `;
+    }).join("");
 }
 
-function renderFunFacts(){
-  const totalSteps = HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0);
-  const totalBike = HISTORIC_TOTALS.bike + allEntries.reduce((s,e)=>s+(+e.bike||0),0);
+function renderCheckOverview(){
+  const box = document.getElementById("checkOverview");
+  if(!box) return;
 
-  const meters = totalSteps * 0.75;
-  const km = meters / 1000;
+  if(!allEntries.length){
+    box.innerHTML = `<div class="empty">Noch keine Monatsübersicht vorhanden.</div>`;
+    return;
+  }
 
-  const stadionrunden = Math.floor(meters / 400);
-  const marathons = (km / 42.195).toFixed(1);
-  const fernsehturm = Math.floor(meters / 368);
-  const pizzaCalories = Math.floor((totalSteps * 0.04) / 900);
-  const pizzaStack = (pizzaCalories * 4 / 100).toFixed(2);
-  const dickeBohnen = Math.floor((totalSteps * 0.04) / 500);
-  const tourDeFrance = ((totalBike / 3500) * 100).toFixed(1);
+  const grouped = {};
 
-  document.getElementById("funFacts").innerHTML = `
-    <div class="funfact"><b>🏟 ${fmt(stadionrunden)}</b><br>Stadionrunden auf einer 400m-Bahn</div>
-    <div class="funfact"><b>🏃 ${marathons}</b><br>gelaufene Marathons seit Februar</div>
-    <div class="funfact"><b>🗼 ${fmt(fernsehturm)}</b><br>Eure Schritte ergeben ${fmt(fernsehturm)}× die Höhe des Berliner Fernsehturms</div>
-    <div class="funfact"><b>🚴 ${tourDeFrance}%</b><br>der Tour de France bereits geschafft</div>
-    <div class="funfact"><b>🍕 ${fmt(pizzaCalories)}</b><br>große Pizzen verbrannt (ca. 900 kcal pro Pizza)</div>
-    <div class="funfact">
-      <b>📦 ${pizzaStack} m</b><br>
-      Pizzastapel aus euren verbrannten Pizza-Kalorien<br>
-      <span class="muted">Annahme: 1 Pizza im Karton ist ca. 4 cm hoch</span>
-    </div>
-    <div class="funfact"><b>🫘 ${fmt(dickeBohnen)}</b><br>Portionen Dicke Bohnen (ca. 500 kcal pro Portion)</div>
-  `;
+  allEntries.forEach(e=>{
+    if(!grouped[e.date]) grouped[e.date] = {};
+    grouped[e.date][e.person] = true;
+  });
+
+  let html = `<table class="checktable">
+    <tr>
+      <th>Tag</th>
+      <th>Thorsten</th>
+      <th>Basti</th>
+      <th>Marian</th>
+      <th>Fabi</th>
+    </tr>`;
+
+  Object.keys(grouped)
+    .sort((a,b)=> new Date(b) - new Date(a))
+    .forEach(date=>{
+      html += `
+        <tr>
+          <td>${date}</td>
+          <td>${grouped[date]["Thorsten"] ? "✅" : "❌"}</td>
+          <td>${grouped[date]["Basti"] ? "✅" : "❌"}</td>
+          <td>${grouped[date]["Marian"] ? "✅" : "❌"}</td>
+          <td>${grouped[date]["Fabi"] ? "✅" : "❌"}</td>
+        </tr>
+      `;
+    });
+
+  html += `</table>`;
+  box.innerHTML = html;
 }
 
 function renderAll(){
-  renderFunFacts();
-  renderAchievements();
+  renderEntries();
+  renderHeatmap();
+  renderCheckOverview();
 }
 
 async function loadEntries(){
@@ -406,6 +473,8 @@ async function loadEntries(){
   renderAll();
 }
 
+fillPeople();
+resetForm();
 loadEntries();
 </script>
 
