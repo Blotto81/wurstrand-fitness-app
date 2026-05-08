@@ -273,139 +273,6 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
     </div>
   </div>
 </div>
-<div class="hero">
-  <div class="top">
-    <div class="logo-header">
-      <img src="wurstrand-logo.png" alt="Wurstrand Challenge Logo">
-      <div>
-        <h1>Wurstrand Challenge</h1>
-        <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
-      </div>
-    </div>
-
-    <div class="badgebox">
-      <span id="entryCount">0</span> Einträge gespeichert
-    </div>
-  </div>
-
-  <div class="overlay">
-    <div class="badge">Monats-Challenge</div>
-
-    <div class="challenge-row">
-      <div>
-        <h2 id="monthTitle">Mutiger Mai</h2>
-        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
-      </div>
-
-      <div style="width:100%;max-width:300px">
-        <label>Monat / Archiv</label>
-        <select id="monthSelect"></select>
-      </div>
-    </div>
-
-    <div id="goalBanner" class="goal-banner">
-      <strong>🔥 Monatsziel geschafft!</strong><br>
-      Dicke Bohnen offiziell freigeschaltet. Wurstrand eskaliert.
-    </div>
-
-    <div id="missBanner" class="miss-banner">
-      <strong>😢 Monatsziel verpasst.</strong><br>
-      Die Bohnen bleiben kurz im Schrank. Nächster Monat, neues Comeback.
-    </div>
-
-    <div class="barpercent" id="barPercentTop">0%</div>
-    <div class="barhead">
-      <span>Fortschrittsbalken</span>
-      <span id="barText">0 / 1.700 Punkte</span>
-    </div>
-    <div class="bar"><div class="fill" id="barFill"></div></div>
-
-    <div class="grid grid4">
-      <div class="mini"><div class="l">Ziel</div><div class="v" id="goalTarget">1.700</div></div>
-      <div class="mini"><div class="l">Aktuell</div><div class="v" id="goalCurrent">0</div></div>
-      <div class="mini"><div class="l">Fortschritt</div><div class="v" id="goalPercent">0%</div></div>
-      <div class="mini"><div class="l">Rest</div><div class="v" id="goalRest">1.700</div></div>
-    </div>
-
-    <div class="grid grid4">
-      <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts">0</div></div>
-      <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts">0</div></div>
-      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts">0</div></div>
-      <div class="mini"><div class="l">Individuelle Übungen</div><div class="v" id="exerciseCount">0</div></div>
-    </div>
-
-    <div class="grid grid2">
-      <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay">0</div></div>
-      <div class="mini"><div class="l">Prognose Monatsende</div><div class="v" id="forecast">0</div></div>
-    </div>
-  </div>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
-  <button class="tab" onclick="showTab('eintrag',this)">Eintragen</button>
-  <button class="tab" onclick="showTab('liste',this)">Einträge</button>
-  <button class="tab" onclick="showTab('analyse',this)">Analyse</button>
-</div>
-
-<div id="dashboard" class="panel active">
-
-  <div class="card">
-    <h3>🔥 Wurstrand Bestmarken</h3>
-
-    <div class="grid grid3">
-      <div class="mini">
-        <div class="l">Team-Schritte Rekordtag</div>
-        <div class="v" id="recordSteps">0</div>
-        <div class="muted" id="recordStepsDate">-</div>
-      </div>
-
-      <div class="mini">
-        <div class="l">Team-Rad Rekordtag</div>
-        <div class="v" id="recordBike">0 km</div>
-        <div class="muted" id="recordBikeDate">-</div>
-      </div>
-
-      <div class="mini">
-        <div class="l">Team-Punkte Rekordtag</div>
-        <div class="v" id="recordPoints">0</div>
-        <div class="muted" id="recordPointsDate">-</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid grid4">
-    <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps">0</div></div>
-    <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike">0</div></div>
-    <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus">0</div></div>
-    <div class="stat"><div class="l">Knie / Liege / Übung</div><div class="v" id="totalPower">0 / 0 / 0</div></div>
-  </div>
-
-  <div class="grid grid3">
-    <div class="card">
-      <h3>Team-Statistiken</h3>
-      <div class="row"><span class="muted">Über 10.000 Schritte</span><strong id="over10k">0</strong></div>
-      <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps">0</strong></div>
-      <div class="row"><span class="muted">Ø Rad-KM aktiv</span><strong id="avgBike">0</strong></div>
-      <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount">0</strong></div>
-    </div>
-
-    <div class="card">
-      <h3>Rekorde im Monat</h3>
-      <div class="row"><span class="muted">Meiste Schritte</span><strong id="maxSteps">-</strong></div>
-      <div class="row"><span class="muted">Meiste Rad-KM</span><strong id="maxBike">-</strong></div>
-      <div class="row"><span class="muted">Monatspunkte</span><strong id="monthScore">0</strong></div>
-    </div>
-
-    <div class="card">
-      <h3>Punkte-Mix</h3>
-      <div class="row"><span class="muted">Schritte</span><strong id="mixSteps">0</strong></div>
-      <div class="row"><span class="muted">Rad</span><strong id="mixBike">0</strong></div>
-      <div class="row"><span class="muted">Kraft</span><strong id="mixPower">0</strong></div>
-      <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
-    </div>
-  </div>
-</div>
 <div id="eintrag" class="panel">
   <div class="card">
     <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
@@ -494,95 +361,580 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
     <p id="popText">Wurstrand eskaliert.</p>
   </div>
 </div>
-<div id="eintrag" class="panel">
-  <div class="card">
-    <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
+<script>
+const SUPABASE_URL = "https://ythcpltiujpnxedtgjmr.supabase.co";
+const SUPABASE_KEY = "DEIN_KEY_HIER";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <div class="formgrid">
-      <div><label>Datum</label><input type="date" id="date"></div>
-      <div><label>Person</label><select id="person"></select></div>
-      <div><label>Schritte</label><input type="number" id="steps" placeholder="z. B. 10452"></div>
-      <div><label>Fahrrad-KM</label><input type="number" step="0.1" id="bike" placeholder="z. B. 7.5"></div>
-      <div><label>Kniebeugen</label><input type="number" id="squats" placeholder="z. B. 30"></div>
-      <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
-    </div>
+const people = ["Thorsten","Basti","Marian","Fabi"];
 
-    <label class="exercise-toggle" id="exerciseBox">
-      <input type="checkbox" id="exercise">
-      <span id="exerciseText">Individuelle Übung gemacht? Haken setzen, wenn ja.</span>
-    </label>
+const HISTORIC_TOTALS = {
+  steps: 2753969,
+  over10k: 105,
+  bike: 1332.1,
+  bonusPoints: 116,
+  bonusDays: 29,
+  exercises: 53,
+  squats: 1260,
+  pushups: 840,
+  maxSteps: 26996,
+  maxBike: 64.7
+};
 
-    <p class="sub">Bonus automatisch: 3 von 4 Kategorien geschafft = +4 Punkte.</p>
+const monthGoals = {
+  "2026-05":1700,
+  "2026-06":1750,
+  "2026-07":1800,
+  "2026-08":1850,
+  "2026-09":1900,
+  "2026-10":1950,
+  "2026-11":2000,
+  "2026-12":2050
+};
 
-    <div class="sticky-save">
-      <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
-    </div>
+let allEntries = [];
+let editingId = null;
+let stepsChart = null;
+let chartMode = "7days";
 
-    <button class="secondary" onclick="resetForm()" style="margin-top:10px">Abbrechen / zurücksetzen</button>
-  </div>
-</div>
+function fmt(n,d=0){
+  return new Intl.NumberFormat("de-DE",{
+    minimumFractionDigits:d,
+    maximumFractionDigits:d
+  }).format(Number(n)||0);
+}
 
-<div id="liste" class="panel">
-  <div class="card">
-    <h3>Einträge nach Tagen</h3>
-    <p class="sub">Wenn jemand am gleichen Tag mehrfach einträgt, wird automatisch zusammengeführt.</p>
-    <div id="entriesList"></div>
-  </div>
+function currentMonthKey(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
 
-  <div class="card">
-    <h3>Monatsübersicht</h3>
-    <p class="sub">✅ = eingetragen · ❌ = fehlt noch</p>
-    <div id="checkOverview"></div>
-  </div>
-</div>
+function selectedMonth(){
+  return document.getElementById("monthSelect")?.value || currentMonthKey();
+}
 
-<div id="analyse" class="panel">
-  <div class="card">
-    <h3>📈 Schritte-Analyse</h3>
-    <p class="sub">Wähle zwischen 7 Tagen, Monatsansicht oder Quartal.</p>
+function getMonthTitle(key){
+  const titles = {
+    "2026-05":"Mutiger Mai",
+    "2026-06":"Jubelnder Juni",
+    "2026-07":"Jäger Juli",
+    "2026-08":"Ausdauer-August",
+    "2026-09":"Starker September",
+    "2026-10":"Offensiver Oktober",
+    "2026-11":"Niemals-müde November",
+    "2026-12":"Dezember der Disziplin"
+  };
+  return titles[key] || "Wurstrand";
+}
 
-    <div class="chartbuttons">
-      <button class="chartbtn active" onclick="setChartMode('7days',this)">7 Tage</button>
-      <button class="chartbtn" onclick="setChartMode('month',this)">Monat</button>
-      <button class="chartbtn" onclick="setChartMode('quarter',this)">Quartal</button>
-    </div>
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
 
-    <div class="chartbox">
-      <canvas id="stepsChart"></canvas>
-    </div>
-  </div>
+function showBigPop(icon,title,text){
+  document.getElementById("popIcon").innerText = icon;
+  document.getElementById("popTitle").innerText = title;
+  document.getElementById("popText").innerText = text;
+  document.getElementById("bigPop").classList.add("show");
+}
 
-  <div class="card">
-    <h3>🗓️ Team-Heatmap</h3>
-    <p class="sub">Rot = mau, gelb = solide, grün = stark, 🔥 = Wurstrand-Tag.</p>
-    <div id="heatmap" class="heatmap"></div>
-  </div>
+function hideBigPop(){
+  document.getElementById("bigPop").classList.remove("show");
+}
 
-  <div class="grid grid2">
-    <div class="card">
-      <h3>😂 Fun Facts seit Februar</h3>
-      <div id="funFacts"></div>
-    </div>
+function createConfetti(){
+  for(let i=0;i<120;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100+"vw";
+    c.style.background = `hsl(${Math.random()*360}deg 100% 60%)`;
+    c.style.animationDelay = Math.random()*1.2+"s";
+    document.body.appendChild(c);
 
-    <div class="card">
-      <h3>🏆 Team-Achievements</h3>
-      <div id="achievements"></div>
-    </div>
-  </div>
-</div>
+    setTimeout(()=>c.remove(),3500);
+  }
+}
 
-</div>
+function calcPoints(e){
+  const stepPts = Math.round(((+e.steps||0)/1000)*10)/10;
+  const bikePts = (+e.bike||0);
+  const squatPts = Math.floor((+e.squats||0)/5);
+  const pushPts = Math.floor((+e.pushups||0)/3);
+  const powerPts = squatPts + pushPts;
+  const exercisePts = e.exercise ? 5 : 0;
 
-<div id="toast" class="toast"></div>
+  let cats = 0;
+  if(stepPts>0) cats++;
+  if(bikePts>0) cats++;
+  if(powerPts>0) cats++;
+  if(e.exercise) cats++;
 
-<div id="bigPop" class="bigpop" onclick="hideBigPop()">
-  <div class="popcard">
-    <div id="popIcon" class="popicon">🏆</div>
-    <h2 id="popTitle">Achievement freigeschaltet!</h2>
-    <p id="popText">Wurstrand eskaliert.</p>
-  </div>
-</div>
+  const bonus = cats>=3 ? 4 : 0;
+
+  return {
+    total: stepPts+bikePts+powerPts+exercisePts+bonus,
+    stepPts,bikePts,powerPts,bonus
+  };
+}
+
+function monthEntries(){
+  const key = selectedMonth();
+  return allEntries.filter(e=>(e.date||"").startsWith(key));
+}
+
+function checkGoalEffects(total,goal,key){
+
+  const successKey = "goalCelebrationShown_"+key;
+  const missKey = "goalMissShown_"+key;
+
+  document.getElementById("goalBanner").classList.remove("show");
+  document.getElementById("missBanner").classList.remove("show");
+
+  if(total >= goal){
+
+    document.getElementById("goalBanner").classList.add("show");
+
+    if(!localStorage.getItem(successKey)){
+      localStorage.setItem(successKey,"true");
+
+      createConfetti();
+
+      showBigPop(
+        "🎉",
+        "Monatsziel geschafft!",
+        "Dicke Bohnen offiziell freigeschaltet."
+      );
+    }
+
+  }else{
+
+    const now = new Date();
+    const [y,m] = key.split("-").map(Number);
+
+    const afterMonth =
+      now.getFullYear()>y ||
+      (now.getFullYear()===y && now.getMonth()+1>m);
+
+    if(afterMonth && now.getDate()>=2){
+
+      document.getElementById("missBanner").classList.add("show");
+
+      if(!localStorage.getItem(missKey)){
+        localStorage.setItem(missKey,"true");
+
+        showBigPop(
+          "😢",
+          "Monatsziel verpasst",
+          "Die Bohnen bleiben kurz im Schrank. Neues Monat, neues Comeback."
+        );
+      }
+    }
+  }
+}
+
+function achievementUnlock(id,icon,title,text){
+
+  const key = "achievement_"+id;
+
+  if(localStorage.getItem(key)) return;
+
+  localStorage.setItem(key,"true");
+
+  showBigPop(icon,title,text);
+}
+
+function renderDashboard(){
+
+  const key = selectedMonth();
+  const entries = monthEntries();
+  const goal = monthGoals[key] || 1700;
+
+  let total=0,stepPts=0,bikePts=0,powerPts=0,bonus=0,totalSteps=0,totalBike=0,totalSquats=0,totalPushups=0,exerciseCount=0;
+
+  entries.forEach(e=>{
+    const p = calcPoints(e);
+
+    total += p.total;
+    stepPts += p.stepPts;
+    bikePts += p.bikePts;
+    powerPts += p.powerPts;
+    bonus += p.bonus;
+
+    totalSteps += +e.steps||0;
+    totalBike += +e.bike||0;
+    totalSquats += +e.squats||0;
+    totalPushups += +e.pushups||0;
+
+    if(e.exercise) exerciseCount++;
+  });
+
+  const percent = Math.round(total/goal*100);
+  const rest = Math.max(goal-total,0);
+
+  const now = new Date();
+  const currentDay = now.getDate();
+  const lastDay = new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+
+  const forecast = Math.round((total/currentDay)*lastDay);
+
+  document.getElementById("monthTitle").innerText = `${getMonthTitle(key)} · Ziel ${fmt(goal)} Punkte`;
+
+  document.getElementById("goalTarget").innerText = fmt(goal);
+  document.getElementById("goalCurrent").innerText = fmt(total,1);
+  document.getElementById("goalPercent").innerText = percent+"%";
+  document.getElementById("goalRest").innerText = fmt(rest,1);
+
+  document.getElementById("barPercentTop").innerText = percent+"%";
+  document.getElementById("barText").innerText = `${fmt(total,1)} / ${fmt(goal)} Punkte`;
+  document.getElementById("barFill").style.width = Math.min(percent,100)+"%";
+
+  document.getElementById("stepPts").innerText = fmt(stepPts,1);
+  document.getElementById("bikePts").innerText = fmt(bikePts,1);
+  document.getElementById("powerPts").innerText = fmt(powerPts);
+  document.getElementById("exerciseCount").innerText = fmt(exerciseCount);
+
+  document.getElementById("neededPerDay").innerText = fmt(rest/Math.max(lastDay-currentDay,1),1);
+  document.getElementById("forecast").innerText = fmt(forecast);
+
+  document.getElementById("totalSteps").innerText = fmt(totalSteps);
+  document.getElementById("totalBike").innerText = fmt(totalBike,1);
+  document.getElementById("totalBonus").innerText = fmt(bonus);
+  document.getElementById("totalPower").innerText = `${fmt(totalSquats)} / ${fmt(totalPushups)} / ${fmt(exerciseCount)}`;
+
+  checkGoalEffects(total,goal,key);
+}
+
+function setChartMode(mode,btn){
+  chartMode = mode;
+
+  document.querySelectorAll(".chartbtn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+
+  renderStepsChart();
+}
+
+function renderStepsChart(){
+
+  const canvas = document.getElementById("stepsChart");
+
+  if(!canvas || typeof Chart==="undefined") return;
+
+  let labels = [];
+  let datasets = [];
+
+  if(chartMode==="7days"){
+
+    for(let i=6;i>=0;i--){
+      const d = new Date();
+      d.setDate(d.getDate()-i);
+
+      labels.push(
+        d.toLocaleDateString("de-DE",{weekday:"short"})
+      );
+    }
+
+    datasets = people.map(person=>{
+
+      const data = [];
+
+      for(let i=6;i>=0;i--){
+
+        const d = new Date();
+        d.setDate(d.getDate()-i);
+
+        const iso = d.toISOString().slice(0,10);
+
+        const total = allEntries
+          .filter(e=>e.date===iso && e.person===person)
+          .reduce((s,e)=>s+(+e.steps||0),0);
+
+        data.push(total);
+      }
+
+      return {
+        label: person,
+        data,
+        tension:.35,
+        borderWidth:3,
+        pointRadius:4
+      };
+    });
+  }
+
+  if(stepsChart) stepsChart.destroy();
+
+  stepsChart = new Chart(canvas,{
+    type:"line",
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:"#f8fafc"}}
+      },
+      scales:{
+        x:{
+          ticks:{color:"#cbd5e1"},
+          grid:{color:"rgba(255,255,255,.08)"}
+        },
+        y:{
+          ticks:{color:"#cbd5e1"},
+          grid:{color:"rgba(255,255,255,.08)"}
+        }
+      }
+    }
+  });
+}
+
+function renderAchievements(){
+
+  const totalSteps = HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0);
+
+  const achievements = [
+    {
+      id:"3m_steps",
+      done:totalSteps>=3000000,
+      icon:"👣",
+      title:"Millionen-Marsch",
+      text:`${fmt(totalSteps)} / 3.000.000 Schritte`
+    }
+  ];
+
+  achievements.forEach(a=>{
+    if(a.done){
+      achievementUnlock(a.id,a.icon,a.title,"Achievement freigeschaltet!");
+    }
+  });
+
+  document.getElementById("achievements").innerHTML =
+    achievements.map(a=>`
+      <div class="achievement ${a.done?"done":""}">
+        <div class="icon">${a.done?"✅":"🔒"}</div>
+        <div>
+          <b>${a.title}</b>
+          <span>${a.text}</span>
+        </div>
+      </div>
+    `).join("");
+}
+
+function renderHeatmap(){}
+function renderFunFacts(){}
+function renderEntries(){}
+function renderCheckOverview(){}
+
+async function loadEntries(){
+
+  const {data,error} = await supabaseClient
+    .from("entries")
+    .select("*")
+    .order("date",{ascending:false});
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+  allEntries = data || [];
+
+  renderDashboard();
+  renderHeatmap();
+  renderFunFacts();
+  renderEntries();
+  renderCheckOverview();
+  renderAchievements();
+  renderStepsChart();
+
+  document.getElementById("entryCount").innerText = allEntries.length;
+}
+
 function showTab(id,btn){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+
+  if(id==="analyse"){
+    setTimeout(renderStepsChart,150);
+  }
+}
+
+function fillPeople(){
+  const select = document.getElementById("person");
+
+  people.forEach(p=>{
+    const o = document.createElement("option");
+    o.value = p;
+    o.innerText = p;
+    select.appendChild(o);
+  });
+}
+
+function initMonths(){
+
+  const select = document.getElementById("monthSelect");
+
+  Object.keys(monthGoals).forEach(key=>{
+
+    const o = document.createElement("option");
+
+    o.value = key;
+    o.innerText = `${getMonthTitle(key)} · Ziel ${fmt(monthGoals[key])}`;
+
+    if(key===currentMonthKey()) o.selected = true;
+
+    select.appendChild(o);
+  });
+
+  select.addEventListener("change",()=>{
+    renderDashboard();
+    renderHeatmap();
+    renderEntries();
+    renderCheckOverview();
+  });
+}
+
+fillPeople();
+initMonths();
+loadEntries();
+</script>
+
+</body>
+</html>
+<script>
+const SUPABASE_URL = "https://ythcpltiujpnxedtgjmr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aGNwbHRpdWpwbnhlZHRnam1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDk3NTAsImV4cCI6MjA5MjY4NTc1MH0.UfT5EwyMU_-CciwdfRP7AN7-5jMO_UCbwrz_vT8DNpo";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const people = ["Thorsten","Basti","Marian","Fabi"];
+
+const HISTORIC_TOTALS = {
+  steps: 2753969,
+  over10k: 105,
+  bike: 1332.1,
+  bonusPoints: 116,
+  bonusDays: 29,
+  exercises: 53,
+  squats: 1260,
+  pushups: 840,
+  maxSteps: 26996,
+  maxBike: 64.7
+};
+
+const monthGoals = {
+  "2026-05":1700,
+  "2026-06":1750,
+  "2026-07":1800,
+  "2026-08":1850,
+  "2026-09":1900,
+  "2026-10":1950,
+  "2026-11":2000,
+  "2026-12":2050
+};
+
+let allEntries = [];
+let editingId = null;
+let stepsChart = null;
+let chartMode = "7days";
+
+function fmt(n,d=0){
+  return new Intl.NumberFormat("de-DE",{
+    minimumFractionDigits:d,
+    maximumFractionDigits:d
+  }).format(Number(n)||0);
+}
+
+function currentMonthKey(){
+  const d = new Date();
+  const key = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  return monthGoals[key] ? key : "2026-05";
+}
+
+function selectedMonth(){
+  return document.getElementById("monthSelect")?.value || currentMonthKey();
+}
+
+function getMonthTitle(key){
+  const titles = {
+    "2026-05":"Mutiger Mai",
+    "2026-06":"Jubelnder Juni",
+    "2026-07":"Jäger Juli",
+    "2026-08":"Ausdauer-August",
+    "2026-09":"Starker September",
+    "2026-10":"Offensiver Oktober",
+    "2026-11":"Niemals-müde November",
+    "2026-12":"Dezember der Disziplin"
+  };
+  return titles[key] || "Wurstrand";
+}
+
+function formatDate(date){
+  if(!date) return "-";
+  return new Date(date+"T12:00:00").toLocaleDateString("de-DE");
+}
+
+function calcPoints(e){
+  const stepPts = Math.round(((+e.steps||0)/1000)*10)/10;
+  const bikePts = (+e.bike||0);
+  const squatPts = Math.floor((+e.squats||0)/5);
+  const pushPts = Math.floor((+e.pushups||0)/3);
+  const powerPts = squatPts + pushPts;
+  const exercisePts = e.exercise ? 5 : 0;
+
+  let cats = 0;
+  if(stepPts>0) cats++;
+  if(bikePts>0) cats++;
+  if(powerPts>0) cats++;
+  if(e.exercise) cats++;
+
+  const bonus = cats>=3 ? 4 : 0;
+
+  return {
+    total: stepPts+bikePts+powerPts+exercisePts+bonus,
+    stepPts,
+    bikePts,
+    powerPts,
+    bonus
+  };
+}
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
+
+function showBigPop(icon,title,text, sad=false){
+  const iconEl = document.getElementById("popIcon");
+  iconEl.innerText = icon;
+  iconEl.className = sad ? "sadface" : "popicon";
+
+  document.getElementById("popTitle").innerText = title;
+  document.getElementById("popText").innerText = text;
+  document.getElementById("bigPop").classList.add("show");
+}
+
+function hideBigPop(){
+  document.getElementById("bigPop").classList.remove("show");
+}
+
+function createConfetti(){
+  for(let i=0;i<120;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100+"vw";
+    c.style.background = `hsl(${Math.random()*360}deg 100% 60%)`;
+    c.style.animationDelay = Math.random()*1.2+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3500);
+  }
+}
+  function showTab(id,btn){
   document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
 
