@@ -981,6 +981,29 @@ function mergeEntries(existing,incoming){
   };
 }
 
+function cleanLoadedEntries(rawEntries){
+  const mergedMap = {};
+
+  rawEntries.forEach(e=>{
+    const key = `${e.date}_${e.person}`;
+
+    if(!mergedMap[key]){
+      mergedMap[key] = {...e};
+      return;
+    }
+
+    const existing = mergedMap[key];
+
+    existing.steps = Math.max(+existing.steps || 0, +e.steps || 0);
+    existing.bike = Math.max(+existing.bike || 0, +e.bike || 0);
+    existing.squats = Math.max(+existing.squats || 0, +e.squats || 0);
+    existing.pushups = Math.max(+existing.pushups || 0, +e.pushups || 0);
+    existing.exercise = existing.exercise || e.exercise;
+  });
+
+  return Object.values(mergedMap);
+}
+
 async function loadEntries(){
   const {data,error} = await supabaseClient
     .from("entries")
@@ -993,7 +1016,7 @@ async function loadEntries(){
     return;
   }
 
-  allEntries = data || [];
+  allEntries = cleanLoadedEntries(data || []);
   renderAll();
 }
 
