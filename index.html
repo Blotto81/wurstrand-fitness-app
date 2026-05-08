@@ -15,45 +15,63 @@ body{margin:0;font-family:Arial;background:linear-gradient(180deg,#020617,#0f172
 .top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
 .logo-header{display:flex;align-items:center;gap:18px}
 .logo-header img{width:130px;max-width:35vw;height:auto;border-radius:18px}
+
 h1,h2,h3,p{margin:0}
 h1{font-size:34px}
 .sub{color:#94a3b8;margin-top:6px}
 .badgebox{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:12px 16px;color:#e2e8f0}
+
 .overlay{margin-top:22px;padding:24px;border-radius:24px;background:linear-gradient(135deg,#111827,#374151);border:1px solid #475569}
 .badge{display:inline-block;background:rgba(255,255,255,.1);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:bold;margin-bottom:14px}
 .challenge-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+
 select,input{width:100%;padding:14px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:white;margin-top:6px;font-size:16px;box-sizing:border-box}
 label{font-size:14px;color:#cbd5e1}
+
 .grid{display:grid;gap:14px;margin-top:16px}
 .grid4{grid-template-columns:repeat(4,1fr)}
 .grid3{grid-template-columns:repeat(3,1fr)}
 .grid2{grid-template-columns:repeat(2,1fr)}
+
 .mini,.stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:15px}
 .mini .l,.stat .l{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#cbd5e1}
 .mini .v,.stat .v{font-size:26px;font-weight:bold;margin-top:8px}
+
 .barhead{display:flex;justify-content:space-between;color:#e5e7eb;font-size:13px;margin-top:16px;margin-bottom:8px}
+.barpercent{font-size:22px;font-weight:bold;margin-top:18px}
 .bar{height:18px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
 .fill{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);width:0%;transition:.3s}
+
 .tabs{display:flex;gap:8px;padding:8px;margin-bottom:18px;position:sticky;top:0;z-index:50}
 .tab{background:#111827;color:white;border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:pointer;width:auto}
 .tab.active{background:#475569}
 .panel{display:none}
 .panel.active{display:block}
+
 .card{padding:22px;margin-bottom:18px}
 .formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
 button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:pointer;font-size:16px}
 .primary{background:#22c55e;color:#052e16;width:100%;margin-top:14px}
 .secondary{background:#334155;color:white;width:auto}
 .danger{background:#ef4444;color:white;width:auto}
+
 .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #1e293b;padding:10px 0}
 .row:last-child{border-bottom:0}
 .muted{color:#94a3b8;font-size:13px}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
+
 .exercise-toggle{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:14px;padding:18px;border-radius:18px;border:1px solid #334155;background:#0f172a;cursor:pointer;font-size:18px;font-weight:bold}
 .exercise-toggle input{width:auto;margin:0;transform:scale(1.5)}
 .exercise-toggle.active{background:rgba(34,197,94,.18);border-color:#22c55e}
+
 .sticky-save{position:sticky;bottom:10px;z-index:40;background:rgba(15,23,42,.92);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:20px;padding:10px;margin-top:18px}
+
 .chartbox{height:320px;position:relative;background:#0f172a;border:1px solid #334155;border-radius:18px;padding:14px;margin-top:14px}
+.chartbuttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chartbtn{background:#334155;color:white;width:auto}
+.chartbtn.active{background:#22c55e;color:#052e16}
+
 .heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px}
 .daybox{min-height:72px;border-radius:14px;border:1px solid #334155;background:#111827;padding:8px;font-size:12px}
 .daybox strong{display:block;font-size:14px;margin-bottom:5px}
@@ -61,7 +79,8 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .day-mid{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.4)}
 .day-high{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45)}
 .day-fire{background:rgba(249,115,22,.25);border-color:rgba(249,115,22,.7)}
-  .achievement{display:flex;gap:12px;align-items:center;background:#0f172a;border:1px solid #334155;border-radius:16px;padding:12px;margin-bottom:10px}
+
+.achievement{display:flex;gap:12px;align-items:center;background:#0f172a;border:1px solid #334155;border-radius:16px;padding:12px;margin-bottom:10px}
 .achievement.done{background:rgba(34,197,94,.14);border-color:#22c55e}
 .achievement .icon{font-size:24px}
 .achievement b{display:block}
@@ -79,8 +98,28 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 .funfact{background:#0f172a;border:1px solid #334155;border-radius:16px;padding:14px;margin-bottom:10px}
 .funfact b{font-size:18px}
 
+.goal-banner{display:none;margin-top:16px;padding:16px;border-radius:18px;border:1px solid #22c55e;background:rgba(34,197,94,.16)}
+.goal-banner.show{display:block}
+.miss-banner{display:none;margin-top:16px;padding:16px;border-radius:18px;border:1px solid #f59e0b;background:rgba(245,158,11,.14)}
+.miss-banner.show{display:block}
+
 .toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid #475569;color:white;padding:14px 18px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:9999;opacity:0;transform:translateY(20px);transition:.3s;max-width:330px}
 .toast.show{opacity:1;transform:translateY(0)}
+
+.confetti{position:fixed;top:-10px;width:10px;height:10px;z-index:9999;animation:fall 2.8s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+.bigpop{position:fixed;inset:0;background:rgba(2,6,23,.72);display:none;align-items:center;justify-content:center;z-index:9998;padding:20px}
+.bigpop.show{display:flex}
+.popcard{background:#111827;border:1px solid #475569;border-radius:28px;padding:28px;text-align:center;max-width:420px;box-shadow:0 20px 70px rgba(0,0,0,.55);animation:pop .55s ease-out}
+.popicon{font-size:76px;animation:shine 1.4s ease-in-out infinite alternate}
+.popcard h2{margin-top:12px;font-size:28px}
+.popcard p{margin-top:8px;color:#cbd5e1}
+@keyframes pop{0%{transform:scale(.65);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes shine{from{filter:drop-shadow(0 0 0px #fff);transform:scale(1)}to{filter:drop-shadow(0 0 18px #facc15);transform:scale(1.14)}}
+
+.sadface{font-size:82px;animation:sadwiggle 1.2s ease-in-out infinite}
+@keyframes sadwiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) translateY(6px)}}
 
 @media(max-width:800px){
   .wrap{padding:12px}
@@ -101,7 +140,139 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
 <body>
 <div class="wrap">
+  <div class="hero">
+  <div class="top">
+    <div class="logo-header">
+      <img src="wurstrand-logo.png" alt="Wurstrand Challenge Logo">
+      <div>
+        <h1>Wurstrand Challenge</h1>
+        <p class="sub">Teamfokus statt Wettbewerb: Eintragen, auswerten, Fortschritt sehen.</p>
+      </div>
+    </div>
 
+    <div class="badgebox">
+      <span id="entryCount">0</span> Einträge gespeichert
+    </div>
+  </div>
+
+  <div class="overlay">
+    <div class="badge">Monats-Challenge</div>
+
+    <div class="challenge-row">
+      <div>
+        <h2 id="monthTitle">Mutiger Mai</h2>
+        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
+      </div>
+
+      <div style="width:100%;max-width:300px">
+        <label>Monat / Archiv</label>
+        <select id="monthSelect"></select>
+      </div>
+    </div>
+
+    <div id="goalBanner" class="goal-banner">
+      <strong>🔥 Monatsziel geschafft!</strong><br>
+      Dicke Bohnen offiziell freigeschaltet. Wurstrand eskaliert.
+    </div>
+
+    <div id="missBanner" class="miss-banner">
+      <strong>😢 Monatsziel verpasst.</strong><br>
+      Die Bohnen bleiben kurz im Schrank. Nächster Monat, neues Comeback.
+    </div>
+
+    <div class="barpercent" id="barPercentTop">0%</div>
+    <div class="barhead">
+      <span>Fortschrittsbalken</span>
+      <span id="barText">0 / 1.700 Punkte</span>
+    </div>
+    <div class="bar"><div class="fill" id="barFill"></div></div>
+
+    <div class="grid grid4">
+      <div class="mini"><div class="l">Ziel</div><div class="v" id="goalTarget">1.700</div></div>
+      <div class="mini"><div class="l">Aktuell</div><div class="v" id="goalCurrent">0</div></div>
+      <div class="mini"><div class="l">Fortschritt</div><div class="v" id="goalPercent">0%</div></div>
+      <div class="mini"><div class="l">Rest</div><div class="v" id="goalRest">1.700</div></div>
+    </div>
+
+    <div class="grid grid4">
+      <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts">0</div></div>
+      <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts">0</div></div>
+      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts">0</div></div>
+      <div class="mini"><div class="l">Individuelle Übungen</div><div class="v" id="exerciseCount">0</div></div>
+    </div>
+
+    <div class="grid grid2">
+      <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay">0</div></div>
+      <div class="mini"><div class="l">Prognose Monatsende</div><div class="v" id="forecast">0</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard',this)">Dashboard</button>
+  <button class="tab" onclick="showTab('eintrag',this)">Eintragen</button>
+  <button class="tab" onclick="showTab('liste',this)">Einträge</button>
+  <button class="tab" onclick="showTab('analyse',this)">Analyse</button>
+</div>
+
+<div id="dashboard" class="panel active">
+
+  <div class="card">
+    <h3>🔥 Wurstrand Bestmarken</h3>
+
+    <div class="grid grid3">
+      <div class="mini">
+        <div class="l">Team-Schritte Rekordtag</div>
+        <div class="v" id="recordSteps">0</div>
+        <div class="muted" id="recordStepsDate">-</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">Team-Rad Rekordtag</div>
+        <div class="v" id="recordBike">0 km</div>
+        <div class="muted" id="recordBikeDate">-</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">Team-Punkte Rekordtag</div>
+        <div class="v" id="recordPoints">0</div>
+        <div class="muted" id="recordPointsDate">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid4">
+    <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps">0</div></div>
+    <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike">0</div></div>
+    <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus">0</div></div>
+    <div class="stat"><div class="l">Knie / Liege / Übung</div><div class="v" id="totalPower">0 / 0 / 0</div></div>
+  </div>
+
+  <div class="grid grid3">
+    <div class="card">
+      <h3>Team-Statistiken</h3>
+      <div class="row"><span class="muted">Über 10.000 Schritte</span><strong id="over10k">0</strong></div>
+      <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps">0</strong></div>
+      <div class="row"><span class="muted">Ø Rad-KM aktiv</span><strong id="avgBike">0</strong></div>
+      <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h3>Rekorde im Monat</h3>
+      <div class="row"><span class="muted">Meiste Schritte</span><strong id="maxSteps">-</strong></div>
+      <div class="row"><span class="muted">Meiste Rad-KM</span><strong id="maxBike">-</strong></div>
+      <div class="row"><span class="muted">Monatspunkte</span><strong id="monthScore">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h3>Punkte-Mix</h3>
+      <div class="row"><span class="muted">Schritte</span><strong id="mixSteps">0</strong></div>
+      <div class="row"><span class="muted">Rad</span><strong id="mixBike">0</strong></div>
+      <div class="row"><span class="muted">Kraft</span><strong id="mixPower">0</strong></div>
+      <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
+    </div>
+  </div>
+</div>
 <div class="hero">
   <div class="top">
     <div class="logo-header">
@@ -123,7 +294,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
     <div class="challenge-row">
       <div>
         <h2 id="monthTitle">Mutiger Mai</h2>
-        <p id="motivation" class="sub"></p>
+        <p id="motivation" class="sub">⚡ Monat läuft – aber da geht noch einiges.</p>
       </div>
 
       <div style="width:100%;max-width:300px">
@@ -132,32 +303,40 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
       </div>
     </div>
 
-    <div class="grid grid4">
-      <div class="mini"><div class="l">Ziel</div><div class="v" id="goalTarget"></div></div>
-      <div class="mini"><div class="l">Aktuell</div><div class="v" id="goalCurrent"></div></div>
-      <div class="mini"><div class="l">Fortschritt</div><div class="v" id="goalPercent"></div></div>
-      <div class="mini"><div class="l">Rest</div><div class="v" id="goalRest"></div></div>
+    <div id="goalBanner" class="goal-banner">
+      <strong>🔥 Monatsziel geschafft!</strong><br>
+      Dicke Bohnen offiziell freigeschaltet. Wurstrand eskaliert.
     </div>
 
+    <div id="missBanner" class="miss-banner">
+      <strong>😢 Monatsziel verpasst.</strong><br>
+      Die Bohnen bleiben kurz im Schrank. Nächster Monat, neues Comeback.
+    </div>
+
+    <div class="barpercent" id="barPercentTop">0%</div>
     <div class="barhead">
       <span>Fortschrittsbalken</span>
-      <span id="barText"></span>
+      <span id="barText">0 / 1.700 Punkte</span>
     </div>
+    <div class="bar"><div class="fill" id="barFill"></div></div>
 
-    <div class="bar">
-      <div class="fill" id="barFill"></div>
+    <div class="grid grid4">
+      <div class="mini"><div class="l">Ziel</div><div class="v" id="goalTarget">1.700</div></div>
+      <div class="mini"><div class="l">Aktuell</div><div class="v" id="goalCurrent">0</div></div>
+      <div class="mini"><div class="l">Fortschritt</div><div class="v" id="goalPercent">0%</div></div>
+      <div class="mini"><div class="l">Rest</div><div class="v" id="goalRest">1.700</div></div>
     </div>
 
     <div class="grid grid4">
-      <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts"></div></div>
-      <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts"></div></div>
-      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts"></div></div>
-      <div class="mini"><div class="l">Individuelle Übungen</div><div class="v" id="exerciseCount"></div></div>
+      <div class="mini"><div class="l">Schritte-Punkte</div><div class="v" id="stepPts">0</div></div>
+      <div class="mini"><div class="l">Rad-Punkte</div><div class="v" id="bikePts">0</div></div>
+      <div class="mini"><div class="l">Kraft-Punkte</div><div class="v" id="powerPts">0</div></div>
+      <div class="mini"><div class="l">Individuelle Übungen</div><div class="v" id="exerciseCount">0</div></div>
     </div>
 
     <div class="grid grid2">
-      <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay"></div></div>
-      <div class="mini"><div class="l">Prognose Monatsende</div><div class="v" id="forecast"></div></div>
+      <div class="mini"><div class="l">Noch nötig pro Resttag</div><div class="v" id="neededPerDay">0</div></div>
+      <div class="mini"><div class="l">Prognose Monatsende</div><div class="v" id="forecast">0</div></div>
     </div>
   </div>
 </div>
@@ -171,63 +350,62 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
 <div id="dashboard" class="panel active">
 
-<div class="card">
-  <h3>🔥 Wurstrand Bestmarken</h3>
+  <div class="card">
+    <h3>🔥 Wurstrand Bestmarken</h3>
+
+    <div class="grid grid3">
+      <div class="mini">
+        <div class="l">Team-Schritte Rekordtag</div>
+        <div class="v" id="recordSteps">0</div>
+        <div class="muted" id="recordStepsDate">-</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">Team-Rad Rekordtag</div>
+        <div class="v" id="recordBike">0 km</div>
+        <div class="muted" id="recordBikeDate">-</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">Team-Punkte Rekordtag</div>
+        <div class="v" id="recordPoints">0</div>
+        <div class="muted" id="recordPointsDate">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid4">
+    <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps">0</div></div>
+    <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike">0</div></div>
+    <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus">0</div></div>
+    <div class="stat"><div class="l">Knie / Liege / Übung</div><div class="v" id="totalPower">0 / 0 / 0</div></div>
+  </div>
 
   <div class="grid grid3">
-    <div class="mini">
-      <div class="l">Team-Schritte Rekordtag</div>
-      <div class="v" id="recordSteps"></div>
-      <div class="muted" id="recordStepsDate"></div>
+    <div class="card">
+      <h3>Team-Statistiken</h3>
+      <div class="row"><span class="muted">Über 10.000 Schritte</span><strong id="over10k">0</strong></div>
+      <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps">0</strong></div>
+      <div class="row"><span class="muted">Ø Rad-KM aktiv</span><strong id="avgBike">0</strong></div>
+      <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount">0</strong></div>
     </div>
 
-    <div class="mini">
-      <div class="l">Team-Rad Rekordtag</div>
-      <div class="v" id="recordBike"></div>
-      <div class="muted" id="recordBikeDate"></div>
+    <div class="card">
+      <h3>Rekorde im Monat</h3>
+      <div class="row"><span class="muted">Meiste Schritte</span><strong id="maxSteps">-</strong></div>
+      <div class="row"><span class="muted">Meiste Rad-KM</span><strong id="maxBike">-</strong></div>
+      <div class="row"><span class="muted">Monatspunkte</span><strong id="monthScore">0</strong></div>
     </div>
 
-    <div class="mini">
-      <div class="l">Team-Punkte Rekordtag</div>
-      <div class="v" id="recordPoints"></div>
-      <div class="muted" id="recordPointsDate"></div>
+    <div class="card">
+      <h3>Punkte-Mix</h3>
+      <div class="row"><span class="muted">Schritte</span><strong id="mixSteps">0</strong></div>
+      <div class="row"><span class="muted">Rad</span><strong id="mixBike">0</strong></div>
+      <div class="row"><span class="muted">Kraft</span><strong id="mixPower">0</strong></div>
+      <div class="row"><span class="muted">Bonus</span><strong id="mixBonus">0</strong></div>
     </div>
   </div>
 </div>
-
-<div class="grid grid4">
-  <div class="stat"><div class="l">Gesamt Schritte</div><div class="v" id="totalSteps"></div></div>
-  <div class="stat"><div class="l">Gesamt Fahrrad-KM</div><div class="v" id="totalBike"></div></div>
-  <div class="stat"><div class="l">Bonuspunkte</div><div class="v" id="totalBonus"></div></div>
-  <div class="stat"><div class="l">Knie / Liege / Übung</div><div class="v" id="totalPower"></div></div>
-</div>
-<div class="grid grid3">
-  <div class="card">
-    <h3>Team-Statistiken</h3>
-    <div class="row"><span class="muted">Über 10.000 Schritte</span><strong id="over10k"></strong></div>
-    <div class="row"><span class="muted">Ø Schritte pro Eintrag</span><strong id="avgSteps"></strong></div>
-    <div class="row"><span class="muted">Ø Rad-KM aktiv</span><strong id="avgBike"></strong></div>
-    <div class="row"><span class="muted">Bonustreffer</span><strong id="bonusCount"></strong></div>
-  </div>
-
-  <div class="card">
-    <h3>Rekorde im Monat</h3>
-    <div class="row"><span class="muted">Meiste Schritte</span><strong id="maxSteps"></strong></div>
-    <div class="row"><span class="muted">Meiste Rad-KM</span><strong id="maxBike"></strong></div>
-    <div class="row"><span class="muted">Monatspunkte</span><strong id="monthScore"></strong></div>
-  </div>
-
-  <div class="card">
-    <h3>Punkte-Mix</h3>
-    <div class="row"><span class="muted">Schritte</span><strong id="mixSteps"></strong></div>
-    <div class="row"><span class="muted">Rad</span><strong id="mixBike"></strong></div>
-    <div class="row"><span class="muted">Kraft</span><strong id="mixPower"></strong></div>
-    <div class="row"><span class="muted">Bonus</span><strong id="mixBonus"></strong></div>
-  </div>
-</div>
-
-</div>
-
 <div id="eintrag" class="panel">
   <div class="card">
     <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
@@ -235,10 +413,10 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
     <div class="formgrid">
       <div><label>Datum</label><input type="date" id="date"></div>
       <div><label>Person</label><select id="person"></select></div>
-      <div><label>Schritte</label><input type="number" id="steps"></div>
-      <div><label>Fahrrad-KM</label><input type="number" step="0.1" id="bike"></div>
-      <div><label>Kniebeugen</label><input type="number" id="squats"></div>
-      <div><label>Liegestütze</label><input type="number" id="pushups"></div>
+      <div><label>Schritte</label><input type="number" id="steps" placeholder="z. B. 10452"></div>
+      <div><label>Fahrrad-KM</label><input type="number" step="0.1" id="bike" placeholder="z. B. 7.5"></div>
+      <div><label>Kniebeugen</label><input type="number" id="squats" placeholder="z. B. 30"></div>
+      <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
     </div>
 
     <label class="exercise-toggle" id="exerciseBox">
@@ -246,31 +424,40 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
       <span id="exerciseText">Individuelle Übung gemacht? Haken setzen, wenn ja.</span>
     </label>
 
+    <p class="sub">Bonus automatisch: 3 von 4 Kategorien geschafft = +4 Punkte.</p>
+
     <div class="sticky-save">
       <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
     </div>
+
+    <button class="secondary" onclick="resetForm()" style="margin-top:10px">Abbrechen / zurücksetzen</button>
   </div>
 </div>
 
 <div id="liste" class="panel">
   <div class="card">
     <h3>Einträge nach Tagen</h3>
+    <p class="sub">Wenn jemand am gleichen Tag mehrfach einträgt, wird automatisch zusammengeführt.</p>
     <div id="entriesList"></div>
   </div>
 
   <div class="card">
     <h3>Monatsübersicht</h3>
+    <p class="sub">✅ = eingetragen · ❌ = fehlt noch</p>
     <div id="checkOverview"></div>
   </div>
 </div>
 
 <div id="analyse" class="panel">
-
   <div class="card">
-    <h3>📈 Schritte-Woche nach Personen</h3>
-    <p class="sub">
-      Montag bis Sonntag · tägliche Schritte pro Person
-    </p>
+    <h3>📈 Schritte-Analyse</h3>
+    <p class="sub">Wähle zwischen 7 Tagen, Monatsansicht oder Quartal.</p>
+
+    <div class="chartbuttons">
+      <button class="chartbtn active" onclick="setChartMode('7days',this)">7 Tage</button>
+      <button class="chartbtn" onclick="setChartMode('month',this)">Monat</button>
+      <button class="chartbtn" onclick="setChartMode('quarter',this)">Quartal</button>
+    </div>
 
     <div class="chartbox">
       <canvas id="stepsChart"></canvas>
@@ -279,10 +466,7 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
 
   <div class="card">
     <h3>🗓️ Team-Heatmap</h3>
-    <p class="sub">
-      Rot = schwach · Gelb = okay · Grün = stark · 🔥 = Eskalation
-    </p>
-
+    <p class="sub">Rot = mau, gelb = solide, grün = stark, 🔥 = Wurstrand-Tag.</p>
     <div id="heatmap" class="heatmap"></div>
   </div>
 
@@ -297,123 +481,107 @@ button{border:0;border-radius:14px;padding:14px 18px;font-weight:bold;cursor:poi
       <div id="achievements"></div>
     </div>
   </div>
-
 </div>
 
 </div>
 
 <div id="toast" class="toast"></div>
-<script>
-const SUPABASE_URL = "https://ythcpltiujpnxedtgjmr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0aGNwbHRpdWpwbnhlZHRnam1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDk3NTAsImV4cCI6MjA5MjY4NTc1MH0.UfT5EwyMU_-CciwdfRP7AN7-5jMO_UCbwrz_vT8DNpo";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+<div id="bigPop" class="bigpop" onclick="hideBigPop()">
+  <div class="popcard">
+    <div id="popIcon" class="popicon">🏆</div>
+    <h2 id="popTitle">Achievement freigeschaltet!</h2>
+    <p id="popText">Wurstrand eskaliert.</p>
+  </div>
+</div>
+<div id="eintrag" class="panel">
+  <div class="card">
+    <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
 
-const people = ["Thorsten","Basti","Marian","Fabi"];
+    <div class="formgrid">
+      <div><label>Datum</label><input type="date" id="date"></div>
+      <div><label>Person</label><select id="person"></select></div>
+      <div><label>Schritte</label><input type="number" id="steps" placeholder="z. B. 10452"></div>
+      <div><label>Fahrrad-KM</label><input type="number" step="0.1" id="bike" placeholder="z. B. 7.5"></div>
+      <div><label>Kniebeugen</label><input type="number" id="squats" placeholder="z. B. 30"></div>
+      <div><label>Liegestütze</label><input type="number" id="pushups" placeholder="z. B. 15"></div>
+    </div>
 
-const HISTORIC_TOTALS = {
-  steps: 2753969,
-  over10k: 105,
-  bike: 1332.1,
-  bonusPoints: 116,
-  bonusDays: 29,
-  exercises: 53,
-  squats: 1260,
-  pushups: 840,
-  maxSteps: 26996,
-  maxBike: 64.7
-};
+    <label class="exercise-toggle" id="exerciseBox">
+      <input type="checkbox" id="exercise">
+      <span id="exerciseText">Individuelle Übung gemacht? Haken setzen, wenn ja.</span>
+    </label>
 
-const monthGoals = {
-  "2026-05":1700,
-  "2026-06":1750,
-  "2026-07":1800,
-  "2026-08":1850,
-  "2026-09":1900,
-  "2026-10":1950,
-  "2026-11":2000,
-  "2026-12":2050
-};
+    <p class="sub">Bonus automatisch: 3 von 4 Kategorien geschafft = +4 Punkte.</p>
 
-let allEntries = [];
-let editingId = null;
-let stepsChart = null;
+    <div class="sticky-save">
+      <button class="primary" onclick="saveEntry()" id="saveButton">Eintrag speichern</button>
+    </div>
 
-function fmt(n,d=0){
-  return new Intl.NumberFormat("de-DE",{
-    minimumFractionDigits:d,
-    maximumFractionDigits:d
-  }).format(Number(n)||0);
-}
+    <button class="secondary" onclick="resetForm()" style="margin-top:10px">Abbrechen / zurücksetzen</button>
+  </div>
+</div>
 
-function currentMonthKey(){
-  const d = new Date();
-  const key = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-  return monthGoals[key] ? key : "2026-05";
-}
+<div id="liste" class="panel">
+  <div class="card">
+    <h3>Einträge nach Tagen</h3>
+    <p class="sub">Wenn jemand am gleichen Tag mehrfach einträgt, wird automatisch zusammengeführt.</p>
+    <div id="entriesList"></div>
+  </div>
 
-function selectedMonth(){
-  return document.getElementById("monthSelect")?.value || currentMonthKey();
-}
+  <div class="card">
+    <h3>Monatsübersicht</h3>
+    <p class="sub">✅ = eingetragen · ❌ = fehlt noch</p>
+    <div id="checkOverview"></div>
+  </div>
+</div>
 
-function getMonthTitle(key){
-  const titles = {
-    "2026-05":"Mutiger Mai",
-    "2026-06":"Jubelnder Juni",
-    "2026-07":"Jäger Juli",
-    "2026-08":"Ausdauer-August",
-    "2026-09":"Starker September",
-    "2026-10":"Offensiver Oktober",
-    "2026-11":"Niemals-müde November",
-    "2026-12":"Dezember der Disziplin"
-  };
-  return titles[key] || "Wurstrand";
-}
+<div id="analyse" class="panel">
+  <div class="card">
+    <h3>📈 Schritte-Analyse</h3>
+    <p class="sub">Wähle zwischen 7 Tagen, Monatsansicht oder Quartal.</p>
 
-function formatDate(date){
-  if(!date) return "-";
-  return new Date(date+"T12:00:00").toLocaleDateString("de-DE");
-}
+    <div class="chartbuttons">
+      <button class="chartbtn active" onclick="setChartMode('7days',this)">7 Tage</button>
+      <button class="chartbtn" onclick="setChartMode('month',this)">Monat</button>
+      <button class="chartbtn" onclick="setChartMode('quarter',this)">Quartal</button>
+    </div>
 
-function calcPoints(e){
+    <div class="chartbox">
+      <canvas id="stepsChart"></canvas>
+    </div>
+  </div>
 
-  // NEU: Schritte mit einer Nachkommastelle
-  const stepPts = Math.round(((+e.steps||0)/1000)*10)/10;
+  <div class="card">
+    <h3>🗓️ Team-Heatmap</h3>
+    <p class="sub">Rot = mau, gelb = solide, grün = stark, 🔥 = Wurstrand-Tag.</p>
+    <div id="heatmap" class="heatmap"></div>
+  </div>
 
-  const bikePts = (+e.bike||0);
+  <div class="grid grid2">
+    <div class="card">
+      <h3>😂 Fun Facts seit Februar</h3>
+      <div id="funFacts"></div>
+    </div>
 
-  const squatPts = Math.floor((+e.squats||0)/5);
-  const pushPts = Math.floor((+e.pushups||0)/3);
+    <div class="card">
+      <h3>🏆 Team-Achievements</h3>
+      <div id="achievements"></div>
+    </div>
+  </div>
+</div>
 
-  const powerPts = squatPts + pushPts;
+</div>
 
-  const exercisePts = e.exercise ? 5 : 0;
+<div id="toast" class="toast"></div>
 
-  let cats = 0;
-
-  if(stepPts > 0) cats++;
-  if(bikePts > 0) cats++;
-  if(powerPts > 0) cats++;
-  if(e.exercise) cats++;
-
-  const bonus = cats >= 3 ? 4 : 0;
-
-  return {
-    total: stepPts+bikePts+powerPts+exercisePts+bonus,
-    stepPts,
-    bikePts,
-    powerPts,
-    bonus
-  };
-}
-
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3000);
-}
-
+<div id="bigPop" class="bigpop" onclick="hideBigPop()">
+  <div class="popcard">
+    <div id="popIcon" class="popicon">🏆</div>
+    <h2 id="popTitle">Achievement freigeschaltet!</h2>
+    <p id="popText">Wurstrand eskaliert.</p>
+  </div>
+</div>
 function showTab(id,btn){
   document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -469,43 +637,20 @@ function resetForm(){
   editingId = null;
 
   document.getElementById("formTitle").innerText = "Neuen Tageseintrag erfassen";
-
   document.getElementById("saveButton").innerText = "Eintrag speichern";
-
   document.getElementById("date").value = new Date().toISOString().slice(0,10);
-
   document.getElementById("person").value = people[0];
 
   document.getElementById("steps").value = "";
   document.getElementById("bike").value = "";
   document.getElementById("squats").value = "";
   document.getElementById("pushups").value = "";
-
   document.getElementById("exercise").checked = false;
 
   updateExerciseToggle();
 }
 
-async function loadEntries(){
-
-  const {data,error} = await supabaseClient
-    .from("entries")
-    .select("*")
-    .order("date",{ascending:false});
-
-  if(error){
-    console.log(error);
-    toast("Fehler beim Laden");
-    return;
-  }
-
-  allEntries = data || [];
-
-  renderAll();
-}
-
 function mergeField(existingValue,newValue,label){
-
   const oldVal = Number(existingValue)||0;
   const newVal = Number(newValue)||0;
 
@@ -526,7 +671,6 @@ Abbrechen = vorhandenen Wert behalten`
 }
 
 function mergeEntries(existing,incoming){
-
   return {
     date: existing.date,
     person: existing.person,
@@ -538,8 +682,23 @@ function mergeEntries(existing,incoming){
   };
 }
 
-async function saveEntry(){
+async function loadEntries(){
+  const {data,error} = await supabaseClient
+    .from("entries")
+    .select("*")
+    .order("date",{ascending:false});
 
+  if(error){
+    console.log(error);
+    toast("Fehler beim Laden");
+    return;
+  }
+
+  allEntries = data || [];
+  renderAll();
+}
+
+async function saveEntry(){
   const entry = {
     date: document.getElementById("date").value,
     person: document.getElementById("person").value,
@@ -555,16 +714,15 @@ async function saveEntry(){
     return;
   }
 
-  let result;
-
   const existing = allEntries.find(e =>
     e.date===entry.date &&
     e.person===entry.person &&
     e.id!==editingId
   );
 
-  if(existing){
+  let result;
 
+  if(existing){
     const merged = mergeEntries(existing,entry);
 
     result = await supabaseClient
@@ -573,16 +731,12 @@ async function saveEntry(){
       .eq("id",existing.id);
 
     toast("Eintrag wurde zusammengeführt.");
-
   }else if(editingId){
-
     result = await supabaseClient
       .from("entries")
       .update(entry)
       .eq("id",editingId);
-
   }else{
-
     result = await supabaseClient
       .from("entries")
       .insert([entry]);
@@ -595,9 +749,7 @@ async function saveEntry(){
   }
 
   resetForm();
-
   await loadEntries();
-
   showTab("liste",document.querySelectorAll(".tab")[2]);
 }
 
@@ -605,10 +757,9 @@ function monthEntries(){
   const key = selectedMonth();
   return allEntries.filter(e=>(e.date||"").startsWith(key));
 }
-
-function renderAll(){
-
+  function renderAll(){
   renderDashboard();
+  renderRecords();
   renderEntries();
   renderCheckOverview();
   renderHeatmap();
@@ -618,7 +769,8 @@ function renderAll(){
 
   document.getElementById("entryCount").innerText = allEntries.length;
 }
-  function renderDashboard(){
+
+function renderDashboard(){
   const key = selectedMonth();
   const entries = monthEntries();
   const goal = monthGoals[key] || 1700;
@@ -627,15 +779,18 @@ function renderAll(){
 
   entries.forEach(e=>{
     const p = calcPoints(e);
+
     total += p.total;
     stepPts += p.stepPts;
     bikePts += p.bikePts;
     powerPts += p.powerPts;
     bonus += p.bonus;
+
     totalSteps += +e.steps||0;
     totalBike += +e.bike||0;
     totalSquats += +e.squats||0;
     totalPushups += +e.pushups||0;
+
     if(e.exercise) exerciseCount++;
   });
 
@@ -643,19 +798,26 @@ function renderAll(){
   const rest = Math.max(goal-total,0);
 
   const now = new Date();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-  const inMonth = now.getFullYear()===y && now.getMonth()+1===m;
-  const currentDay = inMonth ? now.getDate() : 1;
+  const [year,month] = key.split("-").map(Number);
+  const lastDay = new Date(year,month,0).getDate();
+
+  const isSelectedCurrentMonth =
+    now.getFullYear()===year &&
+    now.getMonth()+1===month;
+
+  const currentDay = isSelectedCurrentMonth ? now.getDate() : lastDay;
   const restDays = Math.max(lastDay-currentDay+1,1);
   const neededPerDay = rest/restDays;
   const forecast = Math.round((total/Math.max(currentDay,1))*lastDay);
 
   document.getElementById("monthTitle").innerText = `${getMonthTitle(key)} · Ziel ${fmt(goal)} Punkte`;
+
   document.getElementById("goalTarget").innerText = fmt(goal);
   document.getElementById("goalCurrent").innerText = fmt(total,1);
   document.getElementById("goalPercent").innerText = percent+"%";
   document.getElementById("goalRest").innerText = fmt(rest,1);
+
+  document.getElementById("barPercentTop").innerText = percent+"%";
   document.getElementById("barText").innerText = `${fmt(total,1)} / ${fmt(goal)} Punkte`;
   document.getElementById("barFill").style.width = Math.min(percent,100)+"%";
 
@@ -663,6 +825,7 @@ function renderAll(){
   document.getElementById("bikePts").innerText = fmt(bikePts,1);
   document.getElementById("powerPts").innerText = fmt(powerPts);
   document.getElementById("exerciseCount").innerText = fmt(exerciseCount);
+
   document.getElementById("neededPerDay").innerText = fmt(neededPerDay,1);
   document.getElementById("forecast").innerText = fmt(forecast);
 
@@ -695,11 +858,47 @@ function renderAll(){
     ? "🔥 Monatsziel erreicht. Wurstrand eskaliert."
     : "⚡ Monat läuft – aber da geht noch einiges.";
 
-  renderRecords();
+  checkGoalEffects(total,goal,key);
+}
+
+function checkGoalEffects(total,goal,key){
+  const successKey = "goalCelebrationShown_"+key;
+  const missKey = "goalMissShown_"+key;
+
+  document.getElementById("goalBanner").classList.remove("show");
+  document.getElementById("missBanner").classList.remove("show");
+
+  if(total >= goal){
+    document.getElementById("goalBanner").classList.add("show");
+
+    if(!localStorage.getItem(successKey)){
+      localStorage.setItem(successKey,"true");
+      createConfetti();
+      showBigPop("🎉","Monatsziel geschafft!","Dicke Bohnen offiziell freigeschaltet.");
+    }
+    return;
+  }
+
+  const now = new Date();
+  const [year,month] = key.split("-").map(Number);
+
+  const afterMonth =
+    now.getFullYear()>year ||
+    (now.getFullYear()===year && now.getMonth()+1>month);
+
+  if(afterMonth && now.getDate()>=2){
+    document.getElementById("missBanner").classList.add("show");
+
+    if(!localStorage.getItem(missKey)){
+      localStorage.setItem(missKey,"true");
+      showBigPop("😢","Monatsziel verpasst","Die Bohnen bleiben kurz im Schrank. Neuer Monat, neues Comeback.",true);
+    }
+  }
 }
 
 function renderRecords(){
   const byDate = {};
+
   allEntries.forEach(e=>{
     if(!byDate[e.date]) byDate[e.date] = {steps:0,bike:0,points:0};
     byDate[e.date].steps += +e.steps||0;
@@ -719,8 +918,10 @@ function renderRecords(){
 
   document.getElementById("recordSteps").innerText = fmt(stepRecord.value);
   document.getElementById("recordStepsDate").innerText = formatDate(stepRecord.date);
+
   document.getElementById("recordBike").innerText = fmt(bikeRecord.value,1)+" km";
   document.getElementById("recordBikeDate").innerText = formatDate(bikeRecord.date);
+
   document.getElementById("recordPoints").innerText = fmt(pointsRecord.value,2);
   document.getElementById("recordPointsDate").innerText = formatDate(pointsRecord.date);
 }
@@ -804,12 +1005,11 @@ async function deleteEntry(id){
 
   await loadEntries();
 }
-
-function renderCheckOverview(){
+  function renderCheckOverview(){
   const box = document.getElementById("checkOverview");
   const key = selectedMonth();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
+  const [year,month] = key.split("-").map(Number);
+  const lastDay = new Date(year,month,0).getDate();
   const entries = monthEntries();
 
   let html = '<div style="overflow-x:auto"><table class="checktable"><tr><th>Tag</th>';
@@ -817,8 +1017,8 @@ function renderCheckOverview(){
   html += "</tr>";
 
   for(let d=1; d<=lastDay; d++){
-    const date = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    html += `<tr><td>${d}.${m}.</td>`;
+    const date = `${year}-${String(month).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    html += `<tr><td>${d}.${month}.</td>`;
 
     people.forEach(person=>{
       const done = entries.some(e=>e.date===date && e.person===person);
@@ -835,14 +1035,14 @@ function renderCheckOverview(){
 function renderHeatmap(){
   const box = document.getElementById("heatmap");
   const key = selectedMonth();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
+  const [year,month] = key.split("-").map(Number);
+  const lastDay = new Date(year,month,0).getDate();
   const entries = monthEntries();
 
   let html = "";
 
   for(let d=1; d<=lastDay; d++){
-    const date = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const date = `${year}-${String(month).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const dayEntries = entries.filter(e=>e.date===date);
     const pts = dayEntries.reduce((s,e)=>s+calcPoints(e).total,0);
 
@@ -856,304 +1056,71 @@ function renderHeatmap(){
 
   box.innerHTML = html;
 }
-  function renderDashboard(){
-  const key = selectedMonth();
-  const entries = monthEntries();
-  const goal = monthGoals[key] || 1700;
 
-  let total=0,stepPts=0,bikePts=0,powerPts=0,bonus=0,totalSteps=0,totalBike=0,totalSquats=0,totalPushups=0,exerciseCount=0;
-
-  entries.forEach(e=>{
-    const p = calcPoints(e);
-    total += p.total;
-    stepPts += p.stepPts;
-    bikePts += p.bikePts;
-    powerPts += p.powerPts;
-    bonus += p.bonus;
-    totalSteps += +e.steps||0;
-    totalBike += +e.bike||0;
-    totalSquats += +e.squats||0;
-    totalPushups += +e.pushups||0;
-    if(e.exercise) exerciseCount++;
-  });
-
-  const percent = Math.round(total/goal*100);
-  const rest = Math.max(goal-total,0);
-
-  const now = new Date();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-  const inMonth = now.getFullYear()===y && now.getMonth()+1===m;
-  const currentDay = inMonth ? now.getDate() : 1;
-  const restDays = Math.max(lastDay-currentDay+1,1);
-  const neededPerDay = rest/restDays;
-  const forecast = Math.round((total/Math.max(currentDay,1))*lastDay);
-
-  document.getElementById("monthTitle").innerText = `${getMonthTitle(key)} · Ziel ${fmt(goal)} Punkte`;
-  document.getElementById("goalTarget").innerText = fmt(goal);
-  document.getElementById("goalCurrent").innerText = fmt(total,1);
-  document.getElementById("goalPercent").innerText = percent+"%";
-  document.getElementById("goalRest").innerText = fmt(rest,1);
-  document.getElementById("barText").innerText = `${fmt(total,1)} / ${fmt(goal)} Punkte`;
-  document.getElementById("barFill").style.width = Math.min(percent,100)+"%";
-
-  document.getElementById("stepPts").innerText = fmt(stepPts,1);
-  document.getElementById("bikePts").innerText = fmt(bikePts,1);
-  document.getElementById("powerPts").innerText = fmt(powerPts);
-  document.getElementById("exerciseCount").innerText = fmt(exerciseCount);
-  document.getElementById("neededPerDay").innerText = fmt(neededPerDay,1);
-  document.getElementById("forecast").innerText = fmt(forecast);
-
-  document.getElementById("totalSteps").innerText = fmt(totalSteps);
-  document.getElementById("totalBike").innerText = fmt(totalBike,1);
-  document.getElementById("totalBonus").innerText = fmt(bonus);
-  document.getElementById("totalPower").innerText = `${fmt(totalSquats)} / ${fmt(totalPushups)} / ${fmt(exerciseCount)}`;
-
-  document.getElementById("over10k").innerText = entries.filter(e=>(+e.steps||0)>=10000).length;
-  document.getElementById("avgSteps").innerText = entries.length ? fmt(totalSteps/entries.length) : "0";
-
-  const activeBike = entries.filter(e=>(+e.bike||0)>0);
-  document.getElementById("avgBike").innerText = activeBike.length ? fmt(totalBike/activeBike.length,1) : "0";
-
-  document.getElementById("bonusCount").innerText = entries.filter(e=>calcPoints(e).bonus>0).length;
-
-  const maxSteps = entries.reduce((a,b)=>(+b.steps||0)>(+a.steps||0)?b:a,{steps:0});
-  const maxBike = entries.reduce((a,b)=>(+b.bike||0)>(+a.bike||0)?b:a,{bike:0});
-
-  document.getElementById("maxSteps").innerText = maxSteps.steps ? `${fmt(maxSteps.steps)} · ${formatDate(maxSteps.date)}` : "-";
-  document.getElementById("maxBike").innerText = maxBike.bike ? `${fmt(maxBike.bike,1)} · ${formatDate(maxBike.date)}` : "-";
-  document.getElementById("monthScore").innerText = fmt(total,1);
-
-  document.getElementById("mixSteps").innerText = fmt(stepPts,1);
-  document.getElementById("mixBike").innerText = fmt(bikePts,1);
-  document.getElementById("mixPower").innerText = fmt(powerPts);
-  document.getElementById("mixBonus").innerText = fmt(bonus);
-
-  document.getElementById("motivation").innerText = total>=goal
-    ? "🔥 Monatsziel erreicht. Wurstrand eskaliert."
-    : "⚡ Monat läuft – aber da geht noch einiges.";
-
-  renderRecords();
-}
-
-function renderRecords(){
-  const byDate = {};
-  allEntries.forEach(e=>{
-    if(!byDate[e.date]) byDate[e.date] = {steps:0,bike:0,points:0};
-    byDate[e.date].steps += +e.steps||0;
-    byDate[e.date].bike += +e.bike||0;
-    byDate[e.date].points += calcPoints(e).total;
-  });
-
-  let stepRecord = {value:HISTORIC_TOTALS.maxSteps,date:"2026-02-21"};
-  let bikeRecord = {value:HISTORIC_TOTALS.maxBike,date:"2026-04-24"};
-  let pointsRecord = {value:118.76,date:"2026-04-24"};
-
-  Object.entries(byDate).forEach(([date,v])=>{
-    if(v.steps>stepRecord.value) stepRecord={value:v.steps,date};
-    if(v.bike>bikeRecord.value) bikeRecord={value:v.bike,date};
-    if(v.points>pointsRecord.value) pointsRecord={value:v.points,date};
-  });
-
-  document.getElementById("recordSteps").innerText = fmt(stepRecord.value);
-  document.getElementById("recordStepsDate").innerText = formatDate(stepRecord.date);
-  document.getElementById("recordBike").innerText = fmt(bikeRecord.value,1)+" km";
-  document.getElementById("recordBikeDate").innerText = formatDate(bikeRecord.date);
-  document.getElementById("recordPoints").innerText = fmt(pointsRecord.value,2);
-  document.getElementById("recordPointsDate").innerText = formatDate(pointsRecord.date);
-}
-
-function renderEntries(){
-  const entries = monthEntries();
-  const box = document.getElementById("entriesList");
-
-  if(!entries.length){
-    box.innerHTML = '<div class="empty">Noch keine Einträge für diesen Monat.</div>';
-    return;
-  }
-
-  const byDate = {};
-  entries.forEach(e=>{
-    if(!byDate[e.date]) byDate[e.date] = [];
-    byDate[e.date].push(e);
-  });
-
-  box.innerHTML = Object.keys(byDate).sort().reverse().map(date=>{
-    const rows = people.map(person=>{
-      const e = byDate[date].find(x=>x.person===person);
-
-      if(!e){
-        return `<div class="person-row"><strong>${person}</strong><div class="person-data">kein Eintrag</div><div></div></div>`;
-      }
-
-      const p = calcPoints(e);
-
-      return `
-        <div class="person-row">
-          <strong>${person}</strong>
-          <div class="person-data">
-            👣 ${fmt(e.steps)} · 🚴 ${fmt(e.bike,1)} km · 🦵 ${fmt(e.squats)} · 💪 ${fmt(e.pushups)} · 🧘 ${e.exercise?"ja":"nein"} · ${fmt(p.total,1)} Punkte
-          </div>
-          <div class="actions">
-            <button class="secondary" onclick="editEntry('${e.id}')">Bearbeiten</button>
-            <button class="danger" onclick="deleteEntry('${e.id}')">Löschen</button>
-          </div>
-        </div>`;
-    }).join("");
-
-    return `<div class="day-entry"><h3>${formatDate(date)}</h3>${rows}</div>`;
-  }).join("");
-}
-
-function editEntry(id){
-  const e = allEntries.find(x=>x.id===id);
-  if(!e) return;
-
-  editingId = id;
-
-  document.getElementById("formTitle").innerText = "Eintrag bearbeiten";
-  document.getElementById("saveButton").innerText = "Änderung speichern";
-
-  document.getElementById("date").value = e.date||"";
-  document.getElementById("person").value = e.person||people[0];
-  document.getElementById("steps").value = e.steps||"";
-  document.getElementById("bike").value = e.bike||"";
-  document.getElementById("squats").value = e.squats||"";
-  document.getElementById("pushups").value = e.pushups||"";
-  document.getElementById("exercise").checked = !!e.exercise;
-
-  updateExerciseToggle();
-  showTab("eintrag",document.querySelectorAll(".tab")[1]);
-}
-
-async function deleteEntry(id){
-  if(!confirm("Eintrag wirklich löschen?")) return;
-
-  const {error} = await supabaseClient
-    .from("entries")
-    .delete()
-    .eq("id",id);
-
-  if(error){
-    console.log(error);
-    toast("Löschen fehlgeschlagen");
-    return;
-  }
-
-  await loadEntries();
-}
-
-function renderCheckOverview(){
-  const box = document.getElementById("checkOverview");
-  const key = selectedMonth();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-  const entries = monthEntries();
-
-  let html = '<div style="overflow-x:auto"><table class="checktable"><tr><th>Tag</th>';
-  people.forEach(p=>html+=`<th>${p}</th>`);
-  html += "</tr>";
-
-  for(let d=1; d<=lastDay; d++){
-    const date = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    html += `<tr><td>${d}.${m}.</td>`;
-
-    people.forEach(person=>{
-      const done = entries.some(e=>e.date===date && e.person===person);
-      html += `<td>${done?"✅":"❌"}</td>`;
-    });
-
-    html += "</tr>";
-  }
-
-  html += "</table></div>";
-  box.innerHTML = html;
-}
-
-function renderHeatmap(){
-  const box = document.getElementById("heatmap");
-  const key = selectedMonth();
-  const [y,m] = key.split("-").map(Number);
-  const lastDay = new Date(y,m,0).getDate();
-  const entries = monthEntries();
-
-  let html = "";
-
-  for(let d=1; d<=lastDay; d++){
-    const date = `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    const dayEntries = entries.filter(e=>e.date===date);
-    const pts = dayEntries.reduce((s,e)=>s+calcPoints(e).total,0);
-
-    let cls = "day-low";
-    if(pts>=80) cls="day-fire";
-    else if(pts>=50) cls="day-high";
-    else if(pts>=20) cls="day-mid";
-
-    html += `<div class="daybox ${cls}"><strong>${d}.</strong>${fmt(pts,1)} Punkte<br>${dayEntries.length} Einträge</div>`;
-  }
-
-  box.innerHTML = html;
-}
-  function getMonday(date){
-  const d = new Date(date+"T12:00:00");
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  return d;
-}
-
-function isoDate(d){
-  return d.toISOString().slice(0,10);
+function setChartMode(mode,btn){
+  chartMode = mode;
+  document.querySelectorAll(".chartbtn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderStepsChart();
 }
 
 function renderStepsChart(){
   const canvas = document.getElementById("stepsChart");
-  if(!canvas || typeof Chart === "undefined") return;
+  if(!canvas || typeof Chart==="undefined") return;
 
-  const key = selectedMonth();
-  const now = new Date();
-  const currentKey = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  let labels = [];
+  let dates = [];
 
-  let baseDate;
-
-  if(key === currentKey){
-    baseDate = now.toISOString().slice(0,10);
-  }else{
-    const entries = monthEntries().filter(e => +e.steps > 0);
-    if(entries.length){
-      baseDate = entries
-        .map(e=>e.date)
-        .sort()
-        .reverse()[0];
-    }else{
-      baseDate = key + "-01";
+  if(chartMode==="7days"){
+    for(let i=6;i>=0;i--){
+      const d = new Date();
+      d.setDate(d.getDate()-i);
+      const iso = d.toISOString().slice(0,10);
+      dates.push(iso);
+      labels.push(d.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit"}));
     }
   }
 
-  const monday = getMonday(baseDate);
-  const labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+  if(chartMode==="month"){
+    const key = selectedMonth();
+    const [year,month] = key.split("-").map(Number);
+    const lastDay = new Date(year,month,0).getDate();
+
+    for(let d=1; d<=lastDay; d++){
+      const iso = `${year}-${String(month).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      dates.push(iso);
+      labels.push(String(d));
+    }
+  }
+
+  if(chartMode==="quarter"){
+    const key = selectedMonth();
+    const [year,month] = key.split("-").map(Number);
+    const startMonth = Math.floor((month-1)/3)*3+1;
+
+    for(let m=startMonth; m<startMonth+3; m++){
+      const lastDay = new Date(year,m,0).getDate();
+      for(let d=1; d<=lastDay; d++){
+        const iso = `${year}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        dates.push(iso);
+        labels.push(`${d}.${m}.`);
+      }
+    }
+  }
 
   const datasets = people.map(person=>{
-    const data = [];
-
-    for(let i=0;i<7;i++){
-      const d = new Date(monday);
-      d.setDate(monday.getDate()+i);
-      const date = isoDate(d);
-
-      const total = allEntries
-        .filter(e => e.date === date && e.person === person)
+    const data = dates.map(date=>{
+      return allEntries
+        .filter(e=>e.date===date && e.person===person)
         .reduce((s,e)=>s+(+e.steps||0),0);
-
-      data.push(total);
-    }
+    });
 
     return {
       label: person,
       data,
       tension:.35,
       borderWidth:3,
-      pointRadius:4,
+      pointRadius: chartMode==="quarter" ? 1 : 4,
       fill:false
     };
   });
@@ -1162,15 +1129,13 @@ function renderStepsChart(){
 
   stepsChart = new Chart(canvas,{
     type:"line",
-    data:{ labels, datasets },
+    data:{labels,datasets},
     options:{
       responsive:true,
       maintainAspectRatio:false,
-      plugins:{
-        legend:{labels:{color:"#f8fafc"}}
-      },
+      plugins:{legend:{labels:{color:"#f8fafc"}}},
       scales:{
-        x:{ticks:{color:"#cbd5e1"},grid:{color:"rgba(255,255,255,.08)"}},
+        x:{ticks:{color:"#cbd5e1",maxTicksLimit: chartMode==="quarter" ? 12 : 14},grid:{color:"rgba(255,255,255,.08)"}},
         y:{ticks:{color:"#cbd5e1"},grid:{color:"rgba(255,255,255,.08)"}}
       }
     }
@@ -1183,7 +1148,6 @@ function renderFunFacts(){
 
   const meters = totalSteps*0.75;
   const km = meters/1000;
-
   const stadion = Math.floor(meters/400);
   const marathons = (km/42.195).toFixed(1);
   const fernsehturm = Math.floor(meters/368);
@@ -1215,6 +1179,14 @@ function achievementCard(done,title,progress){
   `;
 }
 
+function achievementUnlock(id,icon,title,text){
+  const key = "achievement_"+id;
+  if(localStorage.getItem(key)) return;
+
+  localStorage.setItem(key,"true");
+  showBigPop(icon,"Achievement freigeschaltet!",`${title} · ${text}`);
+}
+
 function renderAchievements(){
   const totalSteps = HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0);
   const totalBike = HISTORIC_TOTALS.bike + allEntries.reduce((s,e)=>s+(+e.bike||0),0);
@@ -1223,29 +1195,33 @@ function renderAchievements(){
   const totalExercises = HISTORIC_TOTALS.exercises + allEntries.filter(e=>e.exercise).length;
 
   const achievements = [
-    [totalSteps>=3000000,"👣 Millionen-Marsch",`${fmt(totalSteps)} / 3.000.000 Schritte`],
-    [totalSteps>=5000000,"👣 Legendenlauf",`${fmt(totalSteps)} / 5.000.000 Schritte`],
-    [totalSteps>=10000000,"👣 Unfassbare 10 Millionen",`${fmt(totalSteps)} / 10.000.000 Schritte`],
+    {id:"steps_3m",done:totalSteps>=3000000,icon:"👣",title:"Millionen-Marsch",progress:`${fmt(totalSteps)} / 3.000.000 Schritte`},
+    {id:"steps_5m",done:totalSteps>=5000000,icon:"👣",title:"Legendenlauf",progress:`${fmt(totalSteps)} / 5.000.000 Schritte`},
+    {id:"steps_10m",done:totalSteps>=10000000,icon:"👣",title:"Unfassbare 10 Millionen",progress:`${fmt(totalSteps)} / 10.000.000 Schritte`},
 
-    [totalBike>=1500,"🚴 Tour-Anwärter",`${fmt(totalBike,1)} / 1.500 km`],
-    [totalBike>=3500,"🚴 Tour de France",`${fmt(totalBike,1)} / 3.500 km`],
-    [totalBike>=5000,"🚴 Ketten-Könige",`${fmt(totalBike,1)} / 5.000 km`],
+    {id:"bike_1500",done:totalBike>=1500,icon:"🚴",title:"Tour-Anwärter",progress:`${fmt(totalBike,1)} / 1.500 km`},
+    {id:"bike_3500",done:totalBike>=3500,icon:"🚴",title:"Tour de France",progress:`${fmt(totalBike,1)} / 3.500 km`},
+    {id:"bike_5000",done:totalBike>=5000,icon:"🚴",title:"Ketten-Könige",progress:`${fmt(totalBike,1)} / 5.000 km`},
 
-    [totalSquats>=2500,"🦵 Bein-Beben",`${fmt(totalSquats)} / 2.500 Kniebeugen`],
-    [totalSquats>=5000,"🦵 Knie-Könige",`${fmt(totalSquats)} / 5.000 Kniebeugen`],
-    [totalSquats>=10000,"🦵 Stahlstelzen",`${fmt(totalSquats)} / 10.000 Kniebeugen`],
+    {id:"squat_2500",done:totalSquats>=2500,icon:"🦵",title:"Bein-Beben",progress:`${fmt(totalSquats)} / 2.500 Kniebeugen`},
+    {id:"squat_5000",done:totalSquats>=5000,icon:"🦵",title:"Knie-Könige",progress:`${fmt(totalSquats)} / 5.000 Kniebeugen`},
+    {id:"squat_10000",done:totalSquats>=10000,icon:"🦵",title:"Stahlstelzen",progress:`${fmt(totalSquats)} / 10.000 Kniebeugen`},
 
-    [totalPushups>=1000,"💪 Liegestütz-Legion",`${fmt(totalPushups)} / 1.000 Liegestütze`],
-    [totalPushups>=2500,"💪 Gorilla-Modus",`${fmt(totalPushups)} / 2.500 Liegestütze`],
-    [totalPushups>=5000,"💪 Brustpanzer-Brigade",`${fmt(totalPushups)} / 5.000 Liegestütze`],
+    {id:"push_1000",done:totalPushups>=1000,icon:"💪",title:"Liegestütz-Legion",progress:`${fmt(totalPushups)} / 1.000 Liegestütze`},
+    {id:"push_2500",done:totalPushups>=2500,icon:"💪",title:"Gorilla-Modus",progress:`${fmt(totalPushups)} / 2.500 Liegestütze`},
+    {id:"push_5000",done:totalPushups>=5000,icon:"💪",title:"Brustpanzer-Brigade",progress:`${fmt(totalPushups)} / 5.000 Liegestütze`},
 
-    [totalExercises>=100,"🧘 Disziplin-Dämonen",`${fmt(totalExercises)} / 100 individuelle Übungen`],
-    [totalExercises>=365,"🧘 Jahres-Mönche",`${fmt(totalExercises)} / 365 individuelle Übungen`],
-    [totalExercises>=500,"🧘 Routine-Riesen",`${fmt(totalExercises)} / 500 individuelle Übungen`]
+    {id:"ex_100",done:totalExercises>=100,icon:"🧘",title:"Disziplin-Dämonen",progress:`${fmt(totalExercises)} / 100 individuelle Übungen`},
+    {id:"ex_365",done:totalExercises>=365,icon:"🧘",title:"Jahres-Mönche",progress:`${fmt(totalExercises)} / 365 individuelle Übungen`},
+    {id:"ex_500",done:totalExercises>=500,icon:"🧘",title:"Routine-Riesen",progress:`${fmt(totalExercises)} / 500 individuelle Übungen`}
   ];
 
+  achievements.forEach(a=>{
+    if(a.done) achievementUnlock(a.id,a.icon,a.title,a.progress);
+  });
+
   document.getElementById("achievements").innerHTML =
-    achievements.map(a=>achievementCard(a[0],a[1],a[2])).join("");
+    achievements.map(a=>achievementCard(a.done,a.title,a.progress)).join("");
 }
 
 document.addEventListener("change",e=>{
