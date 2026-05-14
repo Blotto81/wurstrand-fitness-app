@@ -1437,7 +1437,21 @@ function goBackAfterJump(){
     }
   },150);
 }
+function goBackAfterJump(){
+  if(!lastViewBeforeJump) return;
 
+  const tabs = document.querySelectorAll(".tab");
+  const tab =
+    tabs[lastViewBeforeJump.tabIndex] || tabs[0];
+
+  showTab(lastViewBeforeJump.panelId,tab);
+
+  const note = document.getElementById("jumpNote");
+
+  if(note){
+    note.style.display = "none";
+  }
+}
 function renderAll(){
   renderDashboard();
   renderRecords();
