@@ -1344,7 +1344,18 @@ function setText(id,value){
 }
 
 function jumpToDate(date){
+ let lastViewBeforeJump = null;
+
+function jumpToDate(date){
   if(!date) return;
+
+  const activePanel = document.querySelector(".panel.active");
+  const activeTab = document.querySelector(".tab.active");
+
+  lastViewBeforeJump = {
+    panelId: activePanel ? activePanel.id : "dashboard",
+    tabIndex: activeTab ? [...document.querySelectorAll(".tab")].indexOf(activeTab) : 0
+  };
 
   const key = date.slice(0,7);
   const monthSelect = document.getElementById("monthSelect");
@@ -1352,6 +1363,53 @@ function jumpToDate(date){
   if(monthSelect && [...monthSelect.options].some(o=>o.value===key)){
     monthSelect.value = key;
     renderAll();
+  }
+
+  showTab("eintraege",document.querySelectorAll(".tab")[2]);
+
+  const note = document.getElementById("jumpNote");
+  if(note){
+    note.style.display = "block";
+    note.innerHTML = `
+      📍 Gesprungen zu <b>${formatDate(date)}</b>
+      <br>
+      <button class="secondary" style="margin-top:8px" onclick="goBackAfterJump()">
+        ← Zurück
+      </button>
+    `;
+  }
+
+  setTimeout(()=>{
+    const el = document.getElementById("day-"+date);
+
+    if(el){
+      el.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+      });
+
+      el.style.boxShadow = "0 0 25px rgba(34,197,94,.7)";
+
+      setTimeout(()=>{
+        el.style.boxShadow = "";
+      },2200);
+    }
+  },150);
+}
+
+function goBackAfterJump(){
+  if(!lastViewBeforeJump) return;
+
+  const tabs = document.querySelectorAll(".tab");
+  const tab = tabs[lastViewBeforeJump.tabIndex] || tabs[0];
+
+  showTab(lastViewBeforeJump.panelId,tab);
+
+  const note = document.getElementById("jumpNote");
+  if(note){
+    note.style.display = "none";
+  }
+}
   }
 
   showTab("eintraege",document.querySelectorAll(".tab")[2]);
