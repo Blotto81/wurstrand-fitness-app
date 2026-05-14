@@ -2131,11 +2131,70 @@ function renderRecords(){
     formatDate(recordData.points.date);
 
 }
-fillPeople();
-initMonths();
-resetForm();
-loadEntries();
+  }
+function checkGoalEffects(){
+  const key = selectedMonth();
+  const entries = monthEntries();
+  const goal = monthGoals[key] || 1700;
+  const total = entries.reduce((sum,e)=>sum+calcPoints(e).total,0);
 
-</script>
-</body>
-</html>
+  const goalBanner = document.getElementById("goalBanner");
+  const missBanner = document.getElementById("missBanner");
+
+  goalBanner.style.display = "none";
+  missBanner.style.display = "none";
+
+  if(total >= goal){
+
+    goalBanner.style.display = "block";
+
+    const storageKey = "goalCelebrationShown_" + key;
+
+    if(!localStorage.getItem(storageKey)){
+      localStorage.setItem(storageKey,"true");
+      createConfetti();
+
+      showBigPop(
+        "🎉",
+        "Monatsziel geschafft!",
+        "Dicke Bohnen offiziell freigeschaltet."
+      );
+    }
+
+    return;
+  }
+
+  const now = new Date();
+
+  const [year,month] =
+    key.split("-").map(Number);
+
+  const afterMonth =
+    now.getFullYear() > year ||
+    (
+      now.getFullYear() === year &&
+      now.getMonth()+1 > month
+    );
+
+  if(afterMonth && now.getDate() >= 2){
+
+    missBanner.style.display = "block";
+
+    const missKey =
+      "goalMissShown_" + key;
+
+    if(!localStorage.getItem(missKey)){
+
+      localStorage.setItem(missKey,"true");
+
+      showBigPop(
+        "😢",
+        "Monatsziel verpasst",
+        "Die Bohnen bleiben kurz im Schrank. Neuer Monat, neues Comeback."
+      );
+
+    }
+
+  }
+
+}
