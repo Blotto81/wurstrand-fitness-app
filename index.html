@@ -682,37 +682,152 @@ Analyse
 
 <div class="card">
 
-<h3>🔥 Wurstrand Bestmarken</h3>
+<h3>🏆 Team-Rekorde · Monat</h3>
 
 <div class="grid grid3">
 
 <div class="mini"
 style="cursor:pointer"
-onclick="jumpToDate(recordData.steps.date)">
+onclick="jumpToDate(teamMonthRecords.points.date)">
+<div class="l">🔥 stärkster Teamtag</div>
+<div class="v" id="teamMonthPoints">0</div>
+<div class="sub" id="teamMonthPointsDate">-</div>
+</div>
 
-<div class="l">Team-Schritte Rekordtag</div>
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(teamMonthRecords.steps.date)">
+<div class="l">👣 meiste Teamschritte</div>
+<div class="v" id="teamMonthSteps">0</div>
+<div class="sub" id="teamMonthStepsDate">-</div>
+</div>
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(teamMonthRecords.bike.date)">
+<div class="l">🚴 meiste Team-km</div>
+<div class="v" id="teamMonthBike">0 km</div>
+<div class="sub" id="teamMonthBikeDate">-</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>🌍 Team-Rekorde · All Time</h3>
+
+<div class="grid grid3">
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(recordData.points.date)">
+<div class="l">🔥 stärkster Teamtag</div>
+<div class="v" id="recordPoints">0</div>
+<div class="sub" id="recordPointsDate">-</div>
+</div>
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(recordData.steps.date)">
+<div class="l">👣 meiste Teamschritte</div>
 <div class="v" id="recordSteps">0</div>
 <div class="sub" id="recordStepsDate">-</div>
-
 </div>
 
 <div class="mini"
 style="cursor:pointer"
 onclick="jumpToDate(recordData.bike.date)">
-
-<div class="l">Team-Rad Rekordtag</div>
+<div class="l">🚴 meiste Team-km</div>
 <div class="v" id="recordBike">0 km</div>
 <div class="sub" id="recordBikeDate">-</div>
+</div>
 
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>👤 Einzel-Rekorde</h3>
+
+<div class="grid grid3">
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(singleRecords.steps.date)">
+<div class="l">👣 meiste Schritte</div>
+<div class="v" id="singleSteps">0</div>
+<div class="sub" id="singleStepsInfo">-</div>
 </div>
 
 <div class="mini"
 style="cursor:pointer"
-onclick="jumpToDate(recordData.points.date)">
+onclick="jumpToDate(singleRecords.bike.date)">
+<div class="l">🚴 weiteste Fahrt</div>
+<div class="v" id="singleBike">0 km</div>
+<div class="sub" id="singleBikeInfo">-</div>
+</div>
 
-<div class="l">Team-Punkte Rekordtag</div>
-<div class="v" id="recordPoints">0</div>
-<div class="sub" id="recordPointsDate">-</div>
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(singleRecords.points.date)">
+<div class="l">⚡ höchste Punktzahl</div>
+<div class="v" id="singlePoints">0</div>
+<div class="sub" id="singlePointsInfo">-</div>
+</div>
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(singleRecords.squats.date)">
+<div class="l">🦵 meiste Kniebeugen</div>
+<div class="v" id="singleSquats">0</div>
+<div class="sub" id="singleSquatsInfo">-</div>
+</div>
+
+<div class="mini"
+style="cursor:pointer"
+onclick="jumpToDate(singleRecords.pushups.date)">
+<div class="l">💪 meiste Liegestütze</div>
+<div class="v" id="singlePushups">0</div>
+<div class="sub" id="singlePushupsInfo">-</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<button class="secondary"
+style="width:100%"
+onclick="toggleCurses()">
+
+☠️ Verfluchte Rekorde anzeigen / verstecken
+
+</button>
+
+<div id="curseWrapper"
+style="display:none;margin-top:18px">
+
+<div class="grid grid2">
+
+<div>
+
+<h3>📅 Verfluchte Rekorde · Monat</h3>
+
+<div id="monthCurses"></div>
+
+</div>
+
+<div>
+
+<h3>🌍 Verfluchte Rekorde · All Time</h3>
+
+<div id="alltimeCurses"></div>
+
+</div>
 
 </div>
 
@@ -875,6 +990,7 @@ Dynamische Tagesbewertung basierend auf eurem echten Monatsziel.
 </p>
 
 <div class="legend">
+<span>⬛ noch offen</span>
 <span>🟥 Bohnenflaute</span>
 <span>🟨 Stabil</span>
 <span>🟩 Zielkurs</span>
@@ -900,20 +1016,6 @@ style="display:none">
 <div class="card">
 <h3>🏆 Team-Achievements</h3>
 <div id="achievements"></div>
-</div>
-
-</div>
-
-<div class="grid grid2">
-
-<div class="card">
-<h3>☠️ Verfluchte Rekorde – Monat</h3>
-<div id="monthCurses"></div>
-</div>
-
-<div class="card">
-<h3>☠️ Verfluchte Rekorde – All Time</h3>
-<div id="alltimeCurses"></div>
 </div>
 
 </div>
@@ -1001,6 +1103,20 @@ let recordData = {
   steps:{date:null,value:0},
   bike:{date:null,value:0},
   points:{date:null,value:0}
+};
+
+let teamMonthRecords = {
+  steps:{date:null,value:0},
+  bike:{date:null,value:0},
+  points:{date:null,value:0}
+};
+
+let singleRecords = {
+  steps:{date:null,value:0,person:""},
+  bike:{date:null,value:0,person:""},
+  points:{date:null,value:0,person:""},
+  squats:{date:null,value:0,person:""},
+  pushups:{date:null,value:0,person:""}
 };
   function fmt(n,d=0){
   return new Intl.NumberFormat("de-DE",{
@@ -1299,11 +1415,7 @@ async function loadEntries(){
 
   resetForm();
   await loadEntries();
-
-  showTab(
-    "eintraege",
-    document.querySelectorAll(".tab")[2]
-  );
+  showTab("eintraege",document.querySelectorAll(".tab")[2]);
 }
 
 function editEntry(id){
@@ -1312,11 +1424,8 @@ function editEntry(id){
 
   editingId = id;
 
-  document.getElementById("formTitle").innerText =
-    "Eintrag bearbeiten";
-
-  document.getElementById("saveButton").innerText =
-    "Änderung speichern";
+  document.getElementById("formTitle").innerText = "Eintrag bearbeiten";
+  document.getElementById("saveButton").innerText = "Änderung speichern";
 
   document.getElementById("date").value = e.date || "";
   document.getElementById("person").value = e.person || people[0];
@@ -1326,10 +1435,7 @@ function editEntry(id){
   document.getElementById("pushups").value = e.pushups || "";
   document.getElementById("exercise").checked = !!e.exercise;
 
-  showTab(
-    "eintragen",
-    document.querySelectorAll(".tab")[1]
-  );
+  showTab("eintragen",document.querySelectorAll(".tab")[1]);
 }
 
 async function deleteEntry(id){
@@ -1351,9 +1457,7 @@ async function deleteEntry(id){
 
 function setText(id,value){
   const el = document.getElementById(id);
-  if(el){
-    el.innerText = value;
-  }
+  if(el) el.innerText = value;
 }
 
 let lastViewBeforeJump = null;
@@ -1361,47 +1465,31 @@ let lastViewBeforeJump = null;
 function jumpToDate(date){
   if(!date) return;
 
-  const activePanel =
-    document.querySelector(".panel.active");
-
-  const activeTab =
-    document.querySelector(".tab.active");
+  const activePanel = document.querySelector(".panel.active");
+  const activeTab = document.querySelector(".tab.active");
 
   lastViewBeforeJump = {
     panelId: activePanel ? activePanel.id : "dashboard",
-    tabIndex: activeTab
-      ? [...document.querySelectorAll(".tab")].indexOf(activeTab)
-      : 0
+    tabIndex: activeTab ? [...document.querySelectorAll(".tab")].indexOf(activeTab) : 0
   };
 
   const key = date.slice(0,7);
   const monthSelect = document.getElementById("monthSelect");
 
-  if(
-    monthSelect &&
-    [...monthSelect.options].some(o=>o.value===key)
-  ){
+  if(monthSelect && [...monthSelect.options].some(o=>o.value===key)){
     monthSelect.value = key;
     renderAll();
   }
 
-  showTab(
-    "eintraege",
-    document.querySelectorAll(".tab")[2]
-  );
+  showTab("eintraege",document.querySelectorAll(".tab")[2]);
 
   const note = document.getElementById("jumpNote");
-
   if(note){
     note.style.display = "block";
     note.innerHTML = `
       📍 Gesprungen zu <b>${formatDate(date)}</b>
       <br>
-      <button
-        class="secondary"
-        style="margin-top:8px"
-        onclick="goBackAfterJump()"
-      >
+      <button class="secondary" style="margin-top:8px" onclick="goBackAfterJump()">
         ← Zurück
       </button>
     `;
@@ -1416,8 +1504,7 @@ function jumpToDate(date){
         block:"start"
       });
 
-      el.style.boxShadow =
-        "0 0 25px rgba(34,197,94,.7)";
+      el.style.boxShadow = "0 0 25px rgba(34,197,94,.7)";
 
       setTimeout(()=>{
         el.style.boxShadow = "";
@@ -1430,17 +1517,24 @@ function goBackAfterJump(){
   if(!lastViewBeforeJump) return;
 
   const tabs = document.querySelectorAll(".tab");
-
-  const tab =
-    tabs[lastViewBeforeJump.tabIndex] || tabs[0];
+  const tab = tabs[lastViewBeforeJump.tabIndex] || tabs[0];
 
   showTab(lastViewBeforeJump.panelId,tab);
 
   const note = document.getElementById("jumpNote");
-
   if(note){
     note.style.display = "none";
   }
+}
+
+function toggleCurses(){
+  const box = document.getElementById("curseWrapper");
+  if(!box) return;
+
+  box.style.display =
+    box.style.display === "none" || !box.style.display
+      ? "block"
+      : "none";
 }
 
 function renderAll(){
@@ -1465,11 +1559,6 @@ function renderDashboard(){
   const goal = monthGoals[key] || 1700;
 
   let total = 0;
-  let stepPts = 0;
-  let bikePts = 0;
-  let powerPts = 0;
-  let bonus = 0;
-
   let totalSteps = 0;
   let totalBike = 0;
   let totalSquats = 0;
@@ -1480,19 +1569,12 @@ function renderDashboard(){
     const p = calcPoints(e);
 
     total += p.total;
-    stepPts += p.stepPts;
-    bikePts += p.bikePts;
-    powerPts += p.powerPts;
-    bonus += p.bonus;
-
     totalSteps += +e.steps || 0;
     totalBike += +e.bike || 0;
     totalSquats += +e.squats || 0;
     totalPushups += +e.pushups || 0;
 
-    if(e.exercise){
-      exerciseCount++;
-    }
+    if(e.exercise) exerciseCount++;
   });
 
   const percent = goal ? Math.round((total / goal) * 100) : 0;
@@ -1524,54 +1606,10 @@ function renderDashboard(){
   setText("neededPerDay",fmt(rest/restDays,1));
   setText("forecast",fmt(forecast));
 
-  setText("stepPts",fmt(stepPts,1));
-  setText("bikePts",fmt(bikePts,1));
-  setText("powerPts",fmt(powerPts));
-  setText("exerciseCount",fmt(exerciseCount));
-
   const fill = document.getElementById("barFill");
   if(fill){
     fill.style.width = Math.min(percent,100)+"%";
   }
-
-  setText("totalSteps",fmt(totalSteps));
-  setText("totalBike",fmt(totalBike,1));
-  setText("totalBonus",fmt(bonus));
-  setText("totalPower",`${fmt(totalSquats)} / ${fmt(totalPushups)} / ${fmt(exerciseCount)}`);
-
-  setText("over10k",entries.filter(e=>(+e.steps||0)>=10000).length);
-  setText("avgSteps",entries.length ? fmt(totalSteps/entries.length) : "0");
-
-  const activeBike = entries.filter(e=>(+e.bike||0)>0);
-  setText("avgBike",activeBike.length ? fmt(totalBike/activeBike.length,1) : "0");
-
-  setText("bonusCount",entries.filter(e=>calcPoints(e).bonus>0).length);
-
-  const maxSteps = entries.reduce((a,b)=>
-    (+b.steps||0) > (+a.steps||0) ? b : a,
-    {steps:0}
-  );
-
-  const maxBike = entries.reduce((a,b)=>
-    (+b.bike||0) > (+a.bike||0) ? b : a,
-    {bike:0}
-  );
-
-  setText(
-    "maxSteps",
-    maxSteps.steps ? `${fmt(maxSteps.steps)} · ${formatDate(maxSteps.date)}` : "-"
-  );
-
-  setText(
-    "maxBike",
-    maxBike.bike ? `${fmt(maxBike.bike,1)} · ${formatDate(maxBike.date)}` : "-"
-  );
-
-  setText("monthScore",fmt(total,1));
-  setText("mixSteps",fmt(stepPts,1));
-  setText("mixBike",fmt(bikePts,1));
-  setText("mixPower",fmt(powerPts));
-  setText("mixBonus",fmt(bonus));
 
   setText(
     "motivation",
@@ -1635,13 +1673,17 @@ function getDayTotals(entries){
         steps:0,
         bike:0,
         points:0,
-        entries:[]
+        entries:[],
+        bonus:0
       };
     }
 
+    const p = calcPoints(e);
+
     byDate[e.date].steps += +e.steps || 0;
     byDate[e.date].bike += +e.bike || 0;
-    byDate[e.date].points += calcPoints(e).total;
+    byDate[e.date].points += p.total;
+    byDate[e.date].bonus += p.bonus;
     byDate[e.date].entries.push(e);
   });
 
@@ -1649,48 +1691,138 @@ function getDayTotals(entries){
 }
 
 function renderRecords(){
-  const lastDate = getLastEntryDate(allEntries);
-  const validEntries = lastDate
-    ? allEntries.filter(e=>e.date <= lastDate)
-    : [];
+  const month = monthEntries();
+  const all = allEntries;
 
-  const byDate = getDayTotals(validEntries);
+  const monthTotals = getDayTotals(month);
+  const allTotals = getDayTotals(all);
 
-  recordData.steps = {
-    value:HISTORIC_TOTALS.maxSteps,
-    date:"2026-02-21"
+  teamMonthRecords = getTeamRecords(monthTotals);
+  recordData = getTeamRecords(allTotals,true);
+  singleRecords = getSingleRecords(all);
+
+  renderTeamRecordBox("teamMonth",teamMonthRecords);
+  renderTeamRecordBox("record",recordData);
+  renderSingleRecordBox(singleRecords);
+}
+
+function getTeamRecords(dayTotals,includeHistoric=false){
+  const records = {
+    steps:{date:null,value:0},
+    bike:{date:null,value:0},
+    points:{date:null,value:0}
   };
 
-  recordData.bike = {
-    value:HISTORIC_TOTALS.maxBike,
-    date:"2026-04-24"
-  };
+  if(includeHistoric){
+    records.steps = {value:HISTORIC_TOTALS.maxSteps,date:"2026-02-21"};
+    records.bike = {value:HISTORIC_TOTALS.maxBike,date:"2026-04-24"};
+    records.points = {value:118.76,date:"2026-04-24"};
+  }
 
-  recordData.points = {
-    value:118.76,
-    date:"2026-04-24"
-  };
-
-  Object.entries(byDate).forEach(([date,v])=>{
-    if(v.steps > recordData.steps.value){
-      recordData.steps = {value:v.steps,date};
+  Object.entries(dayTotals).forEach(([date,v])=>{
+    if(v.steps > records.steps.value){
+      records.steps = {value:v.steps,date};
     }
 
-    if(v.bike > recordData.bike.value){
-      recordData.bike = {value:v.bike,date};
+    if(v.bike > records.bike.value){
+      records.bike = {value:v.bike,date};
     }
 
-    if(v.points > recordData.points.value){
-      recordData.points = {value:v.points,date};
+    if(v.points > records.points.value){
+      records.points = {value:v.points,date};
     }
   });
 
-  setText("recordSteps",fmt(recordData.steps.value));
-  setText("recordStepsDate",formatDate(recordData.steps.date));
-  setText("recordBike",fmt(recordData.bike.value,1)+" km");
-  setText("recordBikeDate",formatDate(recordData.bike.date));
-  setText("recordPoints",fmt(recordData.points.value,1));
-  setText("recordPointsDate",formatDate(recordData.points.date));
+  return records;
+}
+
+function getSingleRecords(entries){
+  const records = {
+    steps:{date:null,value:0,person:""},
+    bike:{date:null,value:0,person:""},
+    points:{date:null,value:0,person:""},
+    squats:{date:null,value:0,person:""},
+    pushups:{date:null,value:0,person:""}
+  };
+
+  entries.forEach(e=>{
+    const p = calcPoints(e);
+
+    if((+e.steps||0) > records.steps.value){
+      records.steps = {date:e.date,value:+e.steps||0,person:e.person};
+    }
+
+    if((+e.bike||0) > records.bike.value){
+      records.bike = {date:e.date,value:+e.bike||0,person:e.person};
+    }
+
+    if(p.total > records.points.value){
+      records.points = {date:e.date,value:p.total,person:e.person};
+    }
+
+    if((+e.squats||0) > records.squats.value){
+      records.squats = {date:e.date,value:+e.squats||0,person:e.person};
+    }
+
+    if((+e.pushups||0) > records.pushups.value){
+      records.pushups = {date:e.date,value:+e.pushups||0,person:e.person};
+    }
+  });
+
+  return records;
+}
+
+function renderTeamRecordBox(prefix,records){
+  setText(prefix+"Points",fmt(records.points.value,1));
+  setText(prefix+"PointsDate",formatDate(records.points.date));
+
+  setText(prefix+"Steps",fmt(records.steps.value));
+  setText(prefix+"StepsDate",formatDate(records.steps.date));
+
+  setText(prefix+"Bike",fmt(records.bike.value,1)+" km");
+  setText(prefix+"BikeDate",formatDate(records.bike.date));
+}
+
+function renderSingleRecordBox(records){
+  setText("singleSteps",fmt(records.steps.value));
+  setText(
+    "singleStepsInfo",
+    records.steps.date
+      ? `${records.steps.person} · ${formatDate(records.steps.date)}`
+      : "-"
+  );
+
+  setText("singleBike",fmt(records.bike.value,1)+" km");
+  setText(
+    "singleBikeInfo",
+    records.bike.date
+      ? `${records.bike.person} · ${formatDate(records.bike.date)}`
+      : "-"
+  );
+
+  setText("singlePoints",fmt(records.points.value,1));
+  setText(
+    "singlePointsInfo",
+    records.points.date
+      ? `${records.points.person} · ${formatDate(records.points.date)}`
+      : "-"
+  );
+
+  setText("singleSquats",fmt(records.squats.value));
+  setText(
+    "singleSquatsInfo",
+    records.squats.date
+      ? `${records.squats.person} · ${formatDate(records.squats.date)}`
+      : "-"
+  );
+
+  setText("singlePushups",fmt(records.pushups.value));
+  setText(
+    "singlePushupsInfo",
+    records.pushups.date
+      ? `${records.pushups.person} · ${formatDate(records.pushups.date)}`
+      : "-"
+  );
 }
 
 function renderEntries(){
@@ -1825,6 +1957,7 @@ function renderHeatmap(){
   const [year,month] = key.split("-").map(Number);
   const lastDay = new Date(year,month,0).getDate();
   const entries = monthEntries();
+  const lastDate = getLastEntryDate(entries);
 
   const goal = monthGoals[key] || 1700;
   const dailyTarget = goal / lastDay;
@@ -1839,19 +1972,32 @@ function renderHeatmap(){
     const dayEntries = entries.filter(e=>e.date===date);
     const pts = dayEntries.reduce((sum,e)=>sum+calcPoints(e).total,0);
 
-    const ratio = Math.min(pts / fireTarget,1);
-    const hue = Math.round(ratio * 120);
-    const bg = `hsla(${hue},70%,38%,.28)`;
-    const border = `hsla(${hue},80%,55%,.75)`;
+    let bg = "rgba(148,163,184,.10)";
+    let border = "rgba(148,163,184,.25)";
+    let opacity = ".55";
+    let fireIcon = "";
+    let extraClass = "";
 
-    const isFire = pts >= fireTarget;
-    const fireIcon = isFire ? "🔥 " : "";
+    if(lastDate && date <= lastDate){
+      opacity = "1";
+
+      const ratio = Math.min(pts / fireTarget,1);
+      const hue = Math.round(ratio * 120);
+
+      bg = `hsla(${hue},70%,38%,.28)`;
+      border = `hsla(${hue},80%,55%,.75)`;
+
+      if(pts >= fireTarget){
+        fireIcon = "🔥 ";
+        extraClass = "fireday";
+      }
+    }
 
     html += `
       <div
-        class="daybox ${isFire ? "fireday" : ""}"
-        style="background:${bg};border-color:${border}"
-        onclick="showDayInfo('${date}')"
+        class="daybox ${extraClass}"
+        style="background:${bg};border-color:${border};opacity:${opacity}"
+        onclick="${lastDate && date <= lastDate ? `jumpToDate('${date}')` : ""}"
       >
         <strong>${d}.</strong>
         ${fireIcon}${fmt(pts,1)} Punkte<br>
@@ -1865,22 +2011,8 @@ function renderHeatmap(){
   if(info){
     info.style.display = "block";
     info.innerHTML =
-      `Legende: Tagesziel ca. <b>${fmt(dailyTarget,1)}</b> Punkte · 🔥 ab ca. <b>${fmt(fireTarget,1)}</b> Punkte`;
+      `Legende: Tagesziel ca. <b>${fmt(dailyTarget,1)}</b> Punkte · 🔥 ab ca. <b>${fmt(fireTarget,1)}</b> Punkte · graue Tage = noch offen`;
   }
-}
-
-function showDayInfo(date){
-  const dayEntries = allEntries.filter(e=>e.date===date);
-  const pts = dayEntries.reduce((sum,e)=>sum+calcPoints(e).total,0);
-  const mvp = getDayMvp(dayEntries);
-
-  const info = document.getElementById("heatmapInfo");
-  if(!info) return;
-
-  info.style.display = "block";
-  info.innerHTML =
-    `📅 <b>${formatDate(date)}</b> · ${fmt(pts,1)} Punkte · MVP: ${mvp}
-     <br><button class="secondary" style="margin-top:8px" onclick="jumpToDate('${date}')">Zu den Einträgen springen</button>`;
 }
 
 function setChartMode(mode,btn){
