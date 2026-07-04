@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wurstrand Challenge</title>
+<title>Wurstrand Challenge 2.0.1</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -386,21 +386,143 @@ button{
   color:#cbd5e1;
 }
 
-.funfact,
-.achievement,
-.curse{
+.quote-card{
   background:#0f172a;
   border:1px solid #334155;
-  border-radius:16px;
-  padding:14px;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.quote-category{
+  display:inline-block;
+  background:rgba(255,255,255,.08);
+  border:1px solid #334155;
+  border-radius:999px;
+  padding:5px 10px;
+  font-size:13px;
+  color:#dbeafe;
   margin-bottom:10px;
 }
 
-.achievement.done{
-  border-color:#22c55e;
-  background:rgba(34,197,94,.14);
+.quote-text{
+  font-size:20px;
+  font-weight:800;
+  line-height:1.35;
+  margin-bottom:10px;
 }
 
+.quote-meta{
+  color:#94a3b8;
+  font-size:13px;
+}
+#achievements{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+    gap:18px;
+}
+.funfact,
+.achievement,
+.curse{
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:12px;
+    transition:.25s;
+}
+
+.achievement:hover{
+    transform:translateY(-2px);
+    border-color:#64748b;
+}
+
+.achievement.done{
+    border-color:#22c55e;
+    background:rgba(34,197,94,.10);
+}
+
+.achievement-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+}
+
+.achievement-icon{
+    font-size:26px;
+}
+
+.achievement-title{
+    flex:1;
+    font-weight:700;
+    font-size:17px;
+}
+
+.achievement-state{
+    font-size:22px;
+}
+
+.achievement-progress{
+    color:#94a3b8;
+    font-size:14px;
+    line-height:1.5;
+}
+.achievement-group-card{
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:18px;
+    padding:22px;
+}
+
+.achievement-group-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.achievement-group-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:30px;
+    font-weight:700;
+}
+
+.achievement-group-icon{
+    font-size:34px;
+}
+
+.achievement-group-count{
+    font-size:22px;
+    font-weight:700;
+}
+
+.achievement-section-label{
+    font-weight:700;
+    margin:14px 0 8px;
+    color:#dbeafe;
+}
+
+.achievement-mini-line{
+    display:flex;
+    justify-content:space-between;
+    margin:6px 0;
+}
+
+.achievement-next{
+    margin-top:18px;
+    padding:12px;
+    background:#162235;
+    border-radius:10px;
+}
+
+.achievement-hidden-note{
+    margin-top:18px;
+    color:#94a3b8;
+    font-size:14px;
+}
 .curse{
   border-color:#7f1d1d;
   background:rgba(127,29,29,.16);
@@ -421,6 +543,251 @@ button{
 .chartbtn.active{
   background:#22c55e;
   color:#052e16;
+}
+
+
+.chart-month-picker{
+  min-width:230px;
+  margin-left:auto;
+}
+
+.chart-month-picker label{
+  display:block;
+  margin-bottom:4px;
+}
+
+.chart-month-picker select{
+  margin-top:0;
+  padding:12px 14px;
+}
+
+
+.record-ladder{
+  display:grid;
+  gap:8px;
+  margin-top:16px;
+}
+
+.record-ladder-row{
+  display:grid;
+  grid-template-columns:70px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid #334155;
+  background:rgba(15,23,42,.72);
+  color:#cbd5e1;
+}
+
+.record-ladder-row.reached{
+  border-color:rgba(34,197,94,.65);
+  background:rgba(34,197,94,.11);
+  color:#f8fafc;
+}
+
+.record-ladder-row.active{
+  border-color:rgba(245,158,11,.85);
+  background:rgba(245,158,11,.13);
+  color:#fff;
+}
+
+.record-ladder-stars{
+  font-size:18px;
+  white-space:nowrap;
+}
+
+.record-ladder-title{
+  font-weight:900;
+}
+
+.record-ladder-sub{
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:2px;
+}
+
+.record-ladder-value{
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.month-card-stage{
+  display:inline-block;
+  margin:4px 0 6px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(245,158,11,.14);
+  border:1px solid rgba(245,158,11,.35);
+  color:#fde68a;
+  font-size:13px;
+  font-weight:800;
+}
+
+@media(max-width:800px){
+  .record-ladder-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .record-ladder-value{
+    white-space:normal;
+  }
+}
+
+.funfact-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.funfact-card{
+  background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(30,41,59,.92));
+  border:1px solid #334155;
+  border-radius:20px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  min-height:120px;
+}
+
+.funfact-card::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:999px;
+  background:rgba(34,197,94,.08);
+  right:-40px;
+  top:-40px;
+}
+
+.funfact-emoji{
+  font-size:34px;
+  margin-bottom:8px;
+}
+
+.funfact-value{
+  font-size:32px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+.funfact-label{
+  margin-top:6px;
+  color:#dbeafe;
+  font-weight:800;
+}
+
+.funfact-note{
+  margin-top:6px;
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.randomfact{
+  animation:factPop .45s ease both;
+  font-size:18px;
+  font-weight:800;
+}
+
+@keyframes factPop{
+  from{opacity:0;transform:translateY(-10px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.bonus-preview{
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
+  background:rgba(15,23,42,.95);
+  border:1px solid #334155;
+  color:#cbd5e1;
+}
+
+.bonus-preview.good{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.12);
+}
+
+.bonus-preview b{
+  color:#fff;
+}
+
+.bonus-checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.bonus-pill{
+  border:1px solid #334155;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  background:#111827;
+}
+
+.bonus-pill.ok{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.14);
+}
+
+.analysis-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.analysis-card{
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:16px;
+}
+.analysis-card .label{
+  color:#cbd5e1;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.analysis-card .big{
+  font-size:28px;
+  font-weight:900;
+  margin-top:8px;
+}
+.analysis-card .note{
+  color:#94a3b8;
+  margin-top:6px;
+  line-height:1.35;
+}
+.average-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:14px;
+}
+.average-table th,
+.average-table td{
+  padding:10px;
+  border-bottom:1px solid #334155;
+  text-align:right;
+}
+.average-table th:first-child,
+.average-table td:first-child{
+  text-align:left;
+}
+.average-table th{
+  color:#cbd5e1;
+  font-size:13px;
+}
+
+@media(max-width:800px){
+  .chart-month-picker{
+    width:100%;
+    margin-left:0;
+  }
 }
 
 .chartbox{
@@ -492,6 +859,750 @@ button{
   color:#cbd5e1;
 }
 
+
+.main-menu-button{
+  margin-top:14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px 18px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#334155,#475569);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(0,0,0,.25);
+}
+
+.main-menu-button:hover{
+  transform:translateY(-1px);
+}
+
+.menu-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.62);
+  backdrop-filter:blur(4px);
+  z-index:199;
+  display:none;
+}
+
+.menu-backdrop.open{
+  display:block;
+}
+
+.main-drawer{
+  position:fixed;
+  top:0;
+  right:0;
+  width:min(360px,88vw);
+  height:100dvh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:44px;
+  background:linear-gradient(180deg,#0f172a,#111827);
+  border-left:1px solid #334155;
+  box-shadow:-22px 0 70px rgba(0,0,0,.55);
+  z-index:200;
+  padding:20px;
+  box-sizing:border-box;
+  transform:translateX(105%);
+  transition:transform .25s ease;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.main-drawer.open{
+  transform:translateX(0);
+}
+
+.drawer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:8px;
+  padding-bottom:14px;
+  border-bottom:1px solid #334155;
+}
+
+.drawer-head strong{
+  display:block;
+  font-size:24px;
+}
+
+.drawer-head span{
+  display:block;
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:4px;
+}
+
+.drawer-close{
+  width:42px;
+  height:42px;
+  padding:0;
+  border-radius:14px;
+  background:#1e293b;
+  color:#fff;
+  font-size:28px;
+  line-height:1;
+}
+
+.drawer-link{
+  width:100%;
+  text-align:left;
+  justify-content:flex-start;
+  border-radius:16px;
+  padding:14px 16px;
+  background:transparent;
+  color:#e5e7eb;
+  font-size:17px;
+}
+
+.drawer-link:hover{
+  background:#1e293b;
+}
+
+.drawer-link.active{
+  background:rgba(34,197,94,.16);
+  color:#ffffff;
+  border:1px solid rgba(34,197,94,.45);
+  box-shadow:none;
+}
+
+.drawer-divider{
+  height:1px;
+  background:#334155;
+  margin:8px 0;
+}
+
+body.menu-open{
+  overflow:hidden;
+}
+
+/* WRC 2.6 Layout-Fix: alle Unterseiten bleiben im gleichen App-Rahmen */
+.panel{
+  width:100%;
+}
+
+#analyse .card{
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+#analyse .chartbox{
+  min-height:320px;
+}
+
+@media(max-width:800px){
+  #analyse .chartbox{
+    height:260px;
+    padding:10px;
+  }
+
+  .chartbuttons{
+    gap:8px;
+  }
+
+  .chartbuttons button{
+    flex:1 1 auto;
+    padding:12px 10px;
+  }
+
+  .average-table{
+    min-width:760px;
+  }
+
+  #averageStats{
+    overflow-x:auto;
+  }
+}
+
+/* WRC 2.1 Header & Monatsübersicht */
+.app-header{
+  position:sticky;
+  top:0;
+  z-index:120;
+  padding:14px 20px;
+  margin-bottom:18px;
+  backdrop-filter:blur(14px);
+}
+
+.app-header .top{
+  align-items:center;
+}
+
+.app-header .logo-header img{
+  width:78px;
+  max-width:24vw;
+}
+
+.app-header h1{
+  font-size:28px;
+  line-height:1.05;
+}
+
+.app-header .sub{
+  font-size:15px;
+}
+
+.app-header .main-menu-button{
+  margin-top:10px;
+}
+
+#dashboard > .overlay{
+  margin-bottom:18px;
+}
+
+.month-overview-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.month-card{
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:16px;
+}
+
+.month-card.done{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.10);
+}
+
+.month-card.current{
+  box-shadow:0 0 0 1px rgba(59,130,246,.45),0 14px 35px rgba(0,0,0,.22);
+}
+
+.month-card-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.month-card-title{
+  font-weight:900;
+  font-size:18px;
+}
+
+.month-card-status{
+  font-size:22px;
+}
+
+.month-card-points{
+  font-size:26px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.month-card-label{
+  color:#94a3b8;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:4px;
+}
+
+.month-card-sub{
+  color:#94a3b8;
+  font-size:14px;
+}
+
+.month-mini-bar{
+  height:9px;
+  background:#334155;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.month-mini-fill{
+  height:100%;
+  background:#22c55e;
+}
+
+
+.record-ladder{
+  display:grid;
+  gap:8px;
+  margin-top:16px;
+}
+
+.record-ladder-row{
+  display:grid;
+  grid-template-columns:70px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid #334155;
+  background:rgba(15,23,42,.72);
+  color:#cbd5e1;
+}
+
+.record-ladder-row.reached{
+  border-color:rgba(34,197,94,.65);
+  background:rgba(34,197,94,.11);
+  color:#f8fafc;
+}
+
+.record-ladder-row.active{
+  border-color:rgba(245,158,11,.85);
+  background:rgba(245,158,11,.13);
+  color:#fff;
+}
+
+.record-ladder-stars{
+  font-size:18px;
+  white-space:nowrap;
+}
+
+.record-ladder-title{
+  font-weight:900;
+}
+
+.record-ladder-sub{
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:2px;
+}
+
+.record-ladder-value{
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.month-card-stage{
+  display:inline-block;
+  margin:4px 0 6px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(245,158,11,.14);
+  border:1px solid rgba(245,158,11,.35);
+  color:#fde68a;
+  font-size:13px;
+  font-weight:800;
+}
+
+@media(max-width:800px){
+  .record-ladder-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .record-ladder-value{
+    white-space:normal;
+  }
+}
+
+.funfact-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.funfact-card{
+  background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(30,41,59,.92));
+  border:1px solid #334155;
+  border-radius:20px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  min-height:120px;
+}
+
+.funfact-card::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:999px;
+  background:rgba(34,197,94,.08);
+  right:-40px;
+  top:-40px;
+}
+
+.funfact-emoji{
+  font-size:34px;
+  margin-bottom:8px;
+}
+
+.funfact-value{
+  font-size:32px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+.funfact-label{
+  margin-top:6px;
+  color:#dbeafe;
+  font-weight:800;
+}
+
+.funfact-note{
+  margin-top:6px;
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.randomfact{
+  animation:factPop .45s ease both;
+  font-size:18px;
+  font-weight:800;
+}
+
+@keyframes factPop{
+  from{opacity:0;transform:translateY(-10px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.bonus-preview{
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
+  background:rgba(15,23,42,.95);
+  border:1px solid #334155;
+  color:#cbd5e1;
+}
+
+.bonus-preview.good{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.12);
+}
+
+.bonus-preview b{
+  color:#fff;
+}
+
+.bonus-checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.bonus-pill{
+  border:1px solid #334155;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  background:#111827;
+}
+
+.bonus-pill.ok{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.14);
+}
+
+.analysis-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.analysis-card{
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:16px;
+}
+.analysis-card .label{
+  color:#cbd5e1;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.analysis-card .big{
+  font-size:28px;
+  font-weight:900;
+  margin-top:8px;
+}
+.analysis-card .note{
+  color:#94a3b8;
+  margin-top:6px;
+  line-height:1.35;
+}
+.average-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:14px;
+}
+.average-table th,
+.average-table td{
+  padding:10px;
+  border-bottom:1px solid #334155;
+  text-align:right;
+}
+.average-table th:first-child,
+.average-table td:first-child{
+  text-align:left;
+}
+.average-table th{
+  color:#cbd5e1;
+  font-size:13px;
+}
+
+@media(max-width:800px){
+  .app-header{
+    padding:12px 14px;
+    border-radius:18px;
+  }
+
+  .app-header .top{
+    align-items:flex-start;
+  }
+
+  .app-header .logo-header{
+    gap:12px;
+  }
+
+  .app-header .logo-header img{
+    width:60px;
+  }
+
+  .app-header h1{
+    font-size:22px;
+  }
+
+  .app-header .sub{
+    font-size:13px;
+  }
+
+  .badgebox{
+    font-size:14px;
+    padding:10px 12px;
+  }
+}
+
+
+.record-ladder{
+  display:grid;
+  gap:8px;
+  margin-top:16px;
+}
+
+.record-ladder-row{
+  display:grid;
+  grid-template-columns:70px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid #334155;
+  background:rgba(15,23,42,.72);
+  color:#cbd5e1;
+}
+
+.record-ladder-row.reached{
+  border-color:rgba(34,197,94,.65);
+  background:rgba(34,197,94,.11);
+  color:#f8fafc;
+}
+
+.record-ladder-row.active{
+  border-color:rgba(245,158,11,.85);
+  background:rgba(245,158,11,.13);
+  color:#fff;
+}
+
+.record-ladder-stars{
+  font-size:18px;
+  white-space:nowrap;
+}
+
+.record-ladder-title{
+  font-weight:900;
+}
+
+.record-ladder-sub{
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:2px;
+}
+
+.record-ladder-value{
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.month-card-stage{
+  display:inline-block;
+  margin:4px 0 6px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(245,158,11,.14);
+  border:1px solid rgba(245,158,11,.35);
+  color:#fde68a;
+  font-size:13px;
+  font-weight:800;
+}
+
+@media(max-width:800px){
+  .record-ladder-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .record-ladder-value{
+    white-space:normal;
+  }
+}
+
+.funfact-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.funfact-card{
+  background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(30,41,59,.92));
+  border:1px solid #334155;
+  border-radius:20px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  min-height:120px;
+}
+
+.funfact-card::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:999px;
+  background:rgba(34,197,94,.08);
+  right:-40px;
+  top:-40px;
+}
+
+.funfact-emoji{
+  font-size:34px;
+  margin-bottom:8px;
+}
+
+.funfact-value{
+  font-size:32px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+.funfact-label{
+  margin-top:6px;
+  color:#dbeafe;
+  font-weight:800;
+}
+
+.funfact-note{
+  margin-top:6px;
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.randomfact{
+  animation:factPop .45s ease both;
+  font-size:18px;
+  font-weight:800;
+}
+
+@keyframes factPop{
+  from{opacity:0;transform:translateY(-10px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.bonus-preview{
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
+  background:rgba(15,23,42,.95);
+  border:1px solid #334155;
+  color:#cbd5e1;
+}
+
+.bonus-preview.good{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.12);
+}
+
+.bonus-preview b{
+  color:#fff;
+}
+
+.bonus-checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.bonus-pill{
+  border:1px solid #334155;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:13px;
+  background:#111827;
+}
+
+.bonus-pill.ok{
+  border-color:#22c55e;
+  background:rgba(34,197,94,.14);
+}
+
+.analysis-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.analysis-card{
+  background:#0f172a;
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:16px;
+}
+.analysis-card .label{
+  color:#cbd5e1;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.analysis-card .big{
+  font-size:28px;
+  font-weight:900;
+  margin-top:8px;
+}
+.analysis-card .note{
+  color:#94a3b8;
+  margin-top:6px;
+  line-height:1.35;
+}
+.average-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:14px;
+}
+.average-table th,
+.average-table td{
+  padding:10px;
+  border-bottom:1px solid #334155;
+  text-align:right;
+}
+.average-table th:first-child,
+.average-table td:first-child{
+  text-align:left;
+}
+.average-table th{
+  color:#cbd5e1;
+  font-size:13px;
+}
+
 @media(max-width:800px){
 
   .wrap{
@@ -541,6 +1652,452 @@ button{
 
 }
 
+
+/* WRC 2.0.1 Clean Uplift: Spieler, Rekorde, Verfluchte Rekorde */
+#spieler .card > h3,
+#recordsPanel .card > h3,
+#cursesPanel .card > h3{
+  font-size:24px;
+  letter-spacing:.01em;
+}
+
+#spieler #playerStats{
+  margin-top:20px !important;
+}
+
+#spieler #playerStats .grid{
+  gap:16px;
+}
+
+#spieler #playerStats .mini{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.92));
+  border:1px solid rgba(100,116,139,.55);
+  box-shadow:0 14px 34px rgba(0,0,0,.20);
+  transition:.22s ease;
+}
+
+#spieler #playerStats .mini:hover{
+  transform:translateY(-2px);
+  border-color:rgba(34,197,94,.55);
+}
+
+#spieler #playerStats .mini::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:999px;
+  right:-48px;
+  top:-52px;
+  background:rgba(34,197,94,.055);
+  pointer-events:none;
+}
+
+#spieler #playerStats .mini .l{
+  color:#bfdbfe;
+  font-weight:800;
+}
+
+#spieler #playerStats .mini .v{
+  font-size:30px;
+  line-height:1.08;
+}
+
+#spieler .grid.grid2:first-of-type{
+  background:rgba(15,23,42,.65);
+  border:1px solid rgba(51,65,85,.8);
+  border-radius:20px;
+  padding:14px;
+}
+
+#recordsPanel .card,
+#cursesPanel .card{
+  background:linear-gradient(135deg,rgba(17,24,39,.97),rgba(15,23,42,.95));
+}
+
+#recordsPanel .grid,
+#cursesPanel .grid{
+  gap:16px;
+}
+
+#recordsPanel .mini{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.90));
+  border:1px solid rgba(100,116,139,.5);
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+  transition:.22s ease;
+}
+
+#recordsPanel .mini:hover{
+  transform:translateY(-2px);
+  border-color:rgba(59,130,246,.6);
+}
+
+#recordsPanel .mini::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:3px;
+  background:linear-gradient(90deg,#22c55e,#38bdf8,#f59e0b);
+  opacity:.8;
+}
+
+#recordsPanel .mini .l{
+  color:#dbeafe;
+  font-weight:850;
+}
+
+#recordsPanel .mini .v{
+  font-size:30px;
+  line-height:1.08;
+}
+
+#recordsPanel .sub{
+  color:#93c5fd;
+}
+
+#cursesPanel .curse{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(239,68,68,.55);
+  background:linear-gradient(135deg,rgba(69,10,10,.32),rgba(15,23,42,.92));
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+}
+
+#cursesPanel .curse:hover{
+  transform:translateY(-2px);
+  border-color:rgba(248,113,113,.9);
+}
+
+#cursesPanel .curse::after{
+  content:"☠️";
+  position:absolute;
+  right:14px;
+  bottom:8px;
+  font-size:42px;
+  opacity:.08;
+}
+
+#cursesPanel h3 + div,
+#cursesPanel .grid > div{
+  min-width:0;
+}
+
+@media(max-width:800px){
+  #spieler .grid.grid2:first-of-type{
+    padding:12px;
+  }
+
+  #spieler #playerStats .mini .v,
+  #recordsPanel .mini .v{
+    font-size:26px;
+  }
+
+  #recordsPanel .grid.grid3,
+  #cursesPanel .grid.grid2{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* WRC Launch-Wow: Belohnung nach dem Speichern */
+.save-reward{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  width:min(420px,calc(100vw - 28px));
+  transform:translate(-50%,24px) scale(.96);
+  opacity:0;
+  pointer-events:none;
+  z-index:10000;
+  transition:.28s ease;
+}
+
+.save-reward.show{
+  opacity:1;
+  transform:translate(-50%,0) scale(1);
+}
+
+.save-reward-card{
+  background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.96));
+  border:1px solid rgba(34,197,94,.65);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 28px rgba(34,197,94,.16);
+}
+
+.save-reward-head{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.save-reward-icon{
+  font-size:38px;
+  line-height:1;
+}
+
+.save-reward-title{
+  font-size:20px;
+  font-weight:900;
+}
+
+.save-reward-sub{
+  color:#cbd5e1;
+  margin-top:3px;
+  line-height:1.35;
+}
+
+.save-reward-points{
+  font-size:40px;
+  font-weight:950;
+  color:#86efac;
+  line-height:1;
+  margin:12px 0 8px;
+}
+
+.save-reward-lines{
+  display:grid;
+  gap:7px;
+  margin-top:10px;
+}
+
+.save-reward-line{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:9px 11px;
+  color:#e5e7eb;
+}
+
+.save-reward-line.gold{
+  border-color:rgba(245,158,11,.55);
+  background:rgba(245,158,11,.12);
+}
+
+@media(max-width:800px){
+  .save-reward{
+    bottom:14px;
+  }
+
+  .save-reward-card{
+    border-radius:20px;
+    padding:15px;
+  }
+
+  .save-reward-points{
+    font-size:34px;
+  }
+}
+
+
+/* WRC Launch-Politur Mobil: nur Layout/Lesbarkeit, keine Funktionsänderung */
+@media(max-width:800px){
+  html{
+    -webkit-text-size-adjust:100%;
+  }
+
+  body{
+    overflow-x:hidden;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .app-header{
+    position:sticky;
+    top:0;
+    margin-bottom:14px;
+  }
+
+  .app-header .top{
+    gap:10px;
+  }
+
+  .app-header .logo-header{
+    width:100%;
+    flex-direction:row;
+    align-items:center;
+  }
+
+  .app-header .logo-header img{
+    flex:0 0 auto;
+  }
+
+  .app-header h1{
+    max-width:100%;
+    word-break:normal;
+  }
+
+  .app-header .main-menu-button{
+    width:100%;
+    margin-top:12px;
+  }
+
+  .main-drawer{
+    width:min(340px,92vw);
+    padding:16px;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  }
+
+  .drawer-link{
+    min-height:48px;
+    font-size:16px;
+  }
+
+  .overlay{
+    padding:18px;
+    border-radius:20px;
+  }
+
+  .challenge-row{
+    align-items:stretch;
+  }
+
+  .challenge-row > div{
+    max-width:100% !important;
+  }
+
+  select,input,button{
+    min-height:48px;
+  }
+
+  .mini,.stat,.month-card,.achievement-group-card,.funfact-card,.analysis-card,.day-card{
+    min-width:0;
+  }
+
+  .mini .v,.stat .v,.month-card-points,.funfact-value,.analysis-card .big{
+    font-size:clamp(24px,8vw,31px);
+    overflow-wrap:anywhere;
+  }
+
+  .barpercent{
+    font-size:26px;
+  }
+
+  .barhead{
+    gap:10px;
+    font-size:14px;
+  }
+
+  .month-overview-grid,.funfact-grid,.analysis-highlight-grid{
+    grid-template-columns:1fr;
+  }
+
+  #achievements{
+    grid-template-columns:1fr;
+  }
+
+  .achievement-group-card{
+    padding:17px;
+  }
+
+  .achievement-group-head{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .achievement-group-title{
+    font-size:23px;
+    line-height:1.15;
+  }
+
+  .achievement-group-count{
+    font-size:18px;
+    white-space:nowrap;
+  }
+
+  .achievement-mini-line{
+    gap:10px;
+    align-items:flex-start;
+  }
+
+  .achievement-mini-line span:last-child{
+    text-align:right;
+  }
+
+  .row{
+    align-items:flex-start;
+  }
+
+  .person-row{
+    gap:6px;
+  }
+
+  .checktable{
+    font-size:13px;
+  }
+
+  .checktable th,.checktable td{
+    padding:8px 5px;
+  }
+
+  .chartbox{
+    height:260px;
+    padding:10px;
+  }
+
+  .chartbuttons button{
+    min-width:0;
+  }
+
+  .toast{
+    left:12px;
+    right:12px;
+    bottom:12px;
+    max-width:none;
+    box-sizing:border-box;
+  }
+
+  .popcard{
+    width:100%;
+    max-width:360px;
+    padding:22px;
+  }
+
+  .save-reward{
+    bottom:calc(12px + env(safe-area-inset-bottom));
+    width:calc(100vw - 20px);
+  }
+}
+
+@media(max-width:420px){
+  .app-header h1{
+    font-size:20px;
+  }
+
+  .app-header .sub{
+    display:none;
+  }
+
+  .card,.hero{
+    padding:15px;
+  }
+
+  .overlay{
+    padding:15px;
+  }
+
+  .mini,.stat{
+    padding:13px;
+  }
+
+  .save-reward-title{
+    font-size:18px;
+  }
+
+  .save-reward-points{
+    font-size:31px;
+  }
+}
+
 </style>
 </head>
 
@@ -548,7 +2105,7 @@ button{
 
 <div class="wrap">
 
-<div class="hero">
+<div class="hero app-header">
 
 <div class="top">
 
@@ -561,15 +2118,44 @@ button{
 <p class="sub">
 Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 </p>
+<button class="main-menu-button" onclick="toggleMainMenu(true)">☰ Menü</button>
 </div>
 
 </div>
 
-<div class="badgebox">
-<span id="entryCount">0</span> Einträge gespeichert
-</div>
 
 </div>
+
+
+</div>
+
+<div id="menuBackdrop" class="menu-backdrop" onclick="toggleMainMenu(false)"></div>
+
+<nav id="mainMenu" class="main-drawer" aria-label="Hauptmenü">
+  <div class="drawer-head">
+    <div>
+      <strong>☰ Menü</strong>
+      <span>Wurstrand Navigation</span>
+    </div>
+    <button class="drawer-close" onclick="toggleMainMenu(false)" aria-label="Menü schließen">×</button>
+  </div>
+
+  <button class="drawer-link tab active" onclick="showTab('dashboard',this); toggleMainMenu(false)">🏠 Dashboard</button>
+  <button class="drawer-link tab" onclick="showTab('eintragen',this); toggleMainMenu(false)">➕ Eintragen</button>
+
+  <div class="drawer-divider"></div>
+
+  <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
+  <button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
+  <button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
+  <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
+  <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte Rekorde</button>
+  <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
+  <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆 Achievements</button>
+  <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
+</nav>
+
+<div id="dashboard" class="panel active">
 
 <div class="overlay">
 
@@ -611,16 +2197,18 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 <div class="bar">
 <div class="fill" id="barFill"></div>
 </div>
+
+<div id="recordLadder" class="record-ladder"></div>
 <div class="grid grid4">
 
 <div class="mini">
-<div class="l">Ziel</div>
-<div class="v" id="goalTarget">1700</div>
+<div class="l">Erreichte Punkte</div>
+<div class="v" id="goalCurrent">0</div>
 </div>
 
 <div class="mini">
-<div class="l">Aktuell</div>
-<div class="v" id="goalCurrent">0</div>
+<div class="l">Aktuelles Ziel</div>
+<div class="v" id="goalTarget">1700</div>
 </div>
 
 <div class="mini">
@@ -650,35 +2238,18 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 </div>
 
 </div>
+
+<div class="card">
+<h3>📊 Monatsübersicht</h3>
+<p class="sub">Erreichte Punkte je Monat, aktuelle Stufe und Rekordtreppe.</p>
+<div id="monthlyOverview"></div>
 </div>
-
-<div class="tabs">
-
-<button class="tab active"
-onclick="showTab('dashboard',this)">
-Dashboard
-</button>
-
-<button class="tab"
-onclick="showTab('eintragen',this)">
-Eintragen
-</button>
-
-<button class="tab"
-onclick="showTab('eintraege',this)">
-Einträge
-</button>
-
-<button class="tab"
-onclick="showTab('analyse',this)">
-Analyse
-</button>
-
-</div>
-
-<div id="dashboard" class="panel active">
 
 <div id="randomFactBox" class="randomfact"></div>
+
+</div>
+
+<div id="recordsPanel" class="panel">
 
 <div class="card">
 
@@ -798,37 +2369,24 @@ onclick="jumpToDate(singleRecords.pushups.date)">
 
 </div>
 
+</div>
+
+<div id="cursesPanel" class="panel">
+
 <div class="card">
-
-<button class="secondary"
-style="width:100%"
-onclick="toggleCurses()">
-
-☠️ Verfluchte Rekorde anzeigen / verstecken
-
-</button>
-
-<div id="curseWrapper"
-style="display:none;margin-top:18px">
+<h3>☠️ Verfluchte Rekorde</h3>
+<p class="sub">Die härtesten kleinen WRC-Fails – getrennt nach aktuellem Monat und All Time.</p>
 
 <div class="grid grid2">
 
 <div>
-
 <h3>📅 Verfluchte Rekorde · Monat</h3>
-
 <div id="monthCurses"></div>
-
 </div>
 
 <div>
-
 <h3>🌍 Verfluchte Rekorde · All Time</h3>
-
 <div id="alltimeCurses"></div>
-
-</div>
-
 </div>
 
 </div>
@@ -896,6 +2454,8 @@ Individuelle Übung gemacht?
 
 </label>
 
+<div id="bonusPreview" class="bonus-preview"></div>
+
 <button class="primary"
 onclick="saveEntry()"
 id="saveButton"
@@ -945,9 +2505,94 @@ Mehrere Einträge am gleichen Tag werden pro Person automatisch zusammengeführt
 </div>
 
 </div>
+<div id="spieler" class="panel">
 
+  <div class="card">
+    <h3>👤 Spieler-Übersicht</h3>
+    <p class="sub">Punkte pro Teilnehmer und Monat.</p>
+
+    <div class="grid grid2">
+      <div>
+        <label>Spieler</label>
+        <select id="playerSelect" onchange="renderPlayerOverview()"></select>
+      </div>
+
+      <div>
+        <label>Monat</label>
+        <select id="playerMonthSelect" onchange="renderPlayerOverview()"></select>
+      </div>
+    </div>
+
+    <div id="playerStats" style="margin-top:16px"></div>
+  </div>
+
+</div>
+<div id="funfactsPanel" class="panel">
+
+  <div class="card">
+    <h3>😂 Fun Facts seit Februar</h3>
+    <div id="funFacts"></div>
+  </div>
+
+</div>
+
+<div id="achievementsPanel" class="panel">
+
+  <div class="card">
+    <h3>🏆 Team-Achievements</h3>
+    <div id="achievements"></div>
+  </div>
+
+</div>
+<div id="quotesPanel" class="panel">
+
+  <div class="card">
+    <h3>💬 Wurstrand-Zitate</h3>
+    <p class="sub">Lustige Sprüche, legendäre Momente und später auch Fotos.</p>
+
+    <div class="grid grid3">
+      <div>
+        <label>Datum</label>
+        <input type="date" id="quoteDate">
+      </div>
+
+      <div>
+        <label>Von wem?</label>
+        <select id="quotePerson"></select>
+      </div>
+
+      <div>
+        <label>Kategorie</label>
+        <select id="quoteCategory">
+          <option>🤣 Lustig</option>
+          <option>🌭 Wurstrand</option>
+          <option>💪 Motivation</option>
+          <option>🤦 Fail</option>
+          <option>🏆 Legendär</option>
+        </select>
+      </div>
+    </div>
+
+    <label style="margin-top:16px;display:block">Zitat</label>
+    <input id="quoteText" placeholder="Zitat hier einfügen...">
+
+    <button class="primary" style="width:100%;margin-top:18px" onclick="saveQuote()">
+      Zitat speichern
+    </button>
+  </div>
+
+  <div class="card">
+    <h3>📜 Sammlung</h3>
+    <div id="quotesList"></div>
+  </div>
+
+</div>
 <div id="analyse" class="panel">
-
+<div class="card">
+ <div class="card" style="display:none">
+  <p class="sub">Interne Prüfwerte für historische Daten + neue Einträge.</p>
+  <div id="adminStats"></div>
+</div>
 <div class="card">
 
 <h3>📈 Schritte-Analyse</h3>
@@ -973,12 +2618,37 @@ onclick="setChartMode('quarter',this)">
 Quartal
 </button>
 
+<div id="chartMonthWrap" class="chart-month-picker" style="display:none">
+  <label>Monat anzeigen</label>
+  <select id="chartMonthSelect" onchange="renderStepsChart()"></select>
+</div>
+
 </div>
 
 <div class="chartbox">
 <canvas id="stepsChart"></canvas>
 </div>
 
+</div>
+
+<div class="card">
+<h3>📊 Analyse-Highlights</h3>
+<p class="sub">Teamform, stärkster Wochentag, Serien und bester Monat auf einen Blick.</p>
+<div id="analysisHighlights" class="analysis-highlight-grid"></div>
+</div>
+
+<div class="card">
+<h3>📈 Monatsvergleich</h3>
+<p class="sub">Gesamtpunkte je Monat im Saisonverlauf.</p>
+<div class="chartbox">
+<canvas id="monthCompareChart"></canvas>
+</div>
+</div>
+
+<div class="card">
+<h3>📐 Durchschnitt pro aktivem Tag</h3>
+<p class="sub">Durchschnittswerte je Spieler im ausgewählten Monat.</p>
+<div id="averageStats"></div>
 </div>
 
 <div class="card">
@@ -1006,17 +2676,6 @@ style="display:none">
 
 </div>
 
-<div class="grid grid2">
-
-<div class="card">
-<h3>😂 Fun Facts seit Februar</h3>
-<div id="funFacts"></div>
-</div>
-
-<div class="card">
-<h3>🏆 Team-Achievements</h3>
-<div id="achievements"></div>
-</div>
 
 </div>
 
@@ -1025,6 +2684,8 @@ style="display:none">
 </div>
 
 <div id="toast" class="toast"></div>
+
+<div id="saveReward" class="save-reward" aria-live="polite"></div>
 
 <div id="bigPop"
 class="bigpop"
@@ -1050,6 +2711,7 @@ Wurstrand eskaliert.
 </div>
 
 <script>
+// WRC Version 2.0.1
 
 const SUPABASE_URL =
   "https://ythcpltiujpnxedtgjmr.supabase.co";
@@ -1077,8 +2739,8 @@ const HISTORIC_TOTALS = {
   bonusPoints:116,
   bonusDays:29,
   exercises:53,
-  squats:1260,
-  pushups:840,
+  squats:555,
+  pushups:290,
   maxSteps:26996,
   maxBike:64.7
 };
@@ -1094,9 +2756,136 @@ const monthGoals = {
   "2026-12":1875
 };
 
+function monthTotalPoints(key){
+  return allEntries
+    .filter(e => (e.date || "").startsWith(key))
+    .reduce((sum,e)=>sum+calcPoints(e).total,0);
+}
+
+function getFinishedMonthKeys(currentKey){
+  return Object.keys(monthGoals)
+    .filter(key => key < currentKey)
+    .filter(key => monthTotalPoints(key) > 0);
+}
+
+function buildRecordLadder(monthKey,total){
+  const baseGoal = monthGoals[monthKey] || 1700;
+  const finishedMonths = getFinishedMonthKeys(monthKey).map(key=>({
+    key,
+    title:getMonthTitle(key),
+    points:monthTotalPoints(key)
+  }));
+
+  const ranking = [...finishedMonths].sort((a,b)=>b.points-a.points);
+
+  const historicTargets = ranking
+    .slice(0,3)
+    .filter(m => m.points > baseGoal)
+    .sort((a,b)=>a.points-b.points)
+    .map(m=>({
+      value:m.points,
+      title:m.title,
+      rank:ranking.findIndex(r=>r.key===m.key)+1
+    }));
+
+  const milestones = [
+    {
+      value:baseGoal,
+      title:"Monatsziel",
+      subtitle:"Basisziel für " + getMonthTitle(monthKey),
+      stars:"⭐",
+      kind:"base"
+    },
+    ...historicTargets.map((m,i)=>({
+      value:m.value,
+      title:(m.rank === 1 ? "Bester Monat" : "Platz " + m.rank + " der besten Monate"),
+      subtitle:m.title,
+      stars:i === 0 ? "⭐⭐" : i === 1 ? "⭐⭐⭐" : "👑",
+      kind:"record"
+    }))
+  ];
+
+  const next = milestones.find(m => total < m.value) || null;
+  const reached = milestones.filter(m => total >= m.value).slice(-1)[0] || null;
+  const allTime = !next && milestones.length > 1;
+  const goal = next ? next.value : (milestones[milestones.length-1]?.value || baseGoal);
+  const stage = next || {title:"All-Time-Rekord",subtitle:"Jeder weitere Punkt baut den Rekord aus",stars:"👑",value:goal,kind:"crown"};
+
+  return {baseGoal, milestones, next, reached, allTime, goal, stage};
+}
+
+function dynamicMonthGoal(baseGoal,total,monthKey=selectedMonth()){
+  return buildRecordLadder(monthKey,total).goal;
+}
+
+function highestReachedMonthGoal(baseGoal,total,monthKey=selectedMonth()){
+  const ladder = buildRecordLadder(monthKey,total);
+  return ladder.reached ? ladder.reached.value : 0;
+}
+
+function renderRecordLadder(monthKey,total){
+  const box = document.getElementById("recordLadder");
+  if(!box) return;
+
+  const ladder = buildRecordLadder(monthKey,total);
+  const baseGoal = ladder.baseGoal;
+
+  if(total < baseGoal){
+    box.innerHTML = `
+      <div class="record-ladder-row active">
+        <div class="record-ladder-stars">⭐</div>
+        <div>
+          <div class="record-ladder-title">Monatsziel</div>
+        </div>
+        <div class="record-ladder-value">${fmt(baseGoal,1)} Punkte</div>
+      </div>
+    `;
+    return;
+  }
+
+  const firstOpenIndex = ladder.milestones.findIndex(m => total < m.value);
+  const visibleMilestones = firstOpenIndex === -1
+    ? ladder.milestones
+    : ladder.milestones.slice(0, firstOpenIndex + 1);
+
+  const rows = visibleMilestones.map(m=>{
+    const reached = total >= m.value;
+    const active = ladder.next && ladder.next.value === m.value;
+    const cls = reached ? " reached" : active ? " active" : "";
+
+    return `
+      <div class="record-ladder-row${cls}">
+        <div class="record-ladder-stars">${m.stars}</div>
+        <div>
+          <div class="record-ladder-title">${m.title}</div>
+          <div class="record-ladder-sub">${m.subtitle}</div>
+        </div>
+        <div class="record-ladder-value">${fmt(m.value,1)} Punkte</div>
+      </div>
+    `;
+  }).join("");
+
+  const crown = ladder.allTime
+    ? `
+      <div class="record-ladder-row active">
+        <div class="record-ladder-stars">👑</div>
+        <div>
+          <div class="record-ladder-title">All-Time-Rekord</div>
+          <div class="record-ladder-sub">Ihr seid über allen bisherigen Monaten.</div>
+        </div>
+        <div class="record-ladder-value">${fmt(total,1)} Punkte</div>
+      </div>
+    `
+    : "";
+
+  box.innerHTML = rows + crown;
+}
+
+
 let allEntries = [];
 let editingId = null;
 let stepsChart = null;
+let monthCompareChart = null;
 let chartMode = "7days";
 
 let recordData = {
@@ -1165,30 +2954,62 @@ function getLastEntryDate(entries=allEntries){
 }
 
 function calcPoints(e){
-  const stepPts = Math.round(((+e.steps || 0)/1000)*10)/10;
-  const bikePts = +e.bike || 0;
-  const squatPts = Math.floor((+e.squats || 0)/5);
-  const pushPts = Math.floor((+e.pushups || 0)/3);
-  const powerPts = squatPts + pushPts;
+  const isJulyOrLater = (e.date || "") >= "2026-07-01";
+
+  const steps = +e.steps || 0;
+  const bike = +e.bike || 0;
+  const squats = +e.squats || 0;
+  const pushups = +e.pushups || 0;
+
+  const stepPts = Math.round((steps/1000)*10)/10;
+  const bikePts = Math.round(bike*10)/10;
+
+  const squatPts = isJulyOrLater
+    ? Math.round((squats/5)*10)/10
+    : Math.floor(squats/5);
+
+  const pushPts = isJulyOrLater
+    ? Math.round((pushups/3)*10)/10
+    : Math.floor(pushups/3);
+
+  const powerPts = Math.round((squatPts + pushPts)*10)/10;
   const exercisePts = e.exercise ? 5 : 0;
 
-  let cats = 0;
-  if(stepPts > 0) cats++;
-  if(bikePts > 0) cats++;
-  if(powerPts > 0) cats++;
-  if(e.exercise) cats++;
+  let bonusChecks;
 
+  if(isJulyOrLater){
+    bonusChecks = {
+      steps: steps >= 6000,
+      bike: bike >= 6,
+      power: (squats + pushups) >= 6,
+      exercise: !!e.exercise
+    };
+  }else{
+    bonusChecks = {
+      steps: stepPts > 0,
+      bike: bikePts > 0,
+      power: powerPts > 0,
+      exercise: !!e.exercise
+    };
+  }
+
+  const cats = Object.values(bonusChecks).filter(Boolean).length;
   const bonus = cats >= 3 ? 4 : 0;
 
   return {
-    total: stepPts + bikePts + powerPts + exercisePts + bonus,
+    total: Math.round((stepPts + bikePts + powerPts + exercisePts + bonus)*10)/10,
     stepPts,
     bikePts,
     powerPts,
-    bonus
+    squatPts,
+    pushPts,
+    exercisePts,
+    bonus,
+    bonusChecks,
+    bonusCats:cats,
+    bonusRule:isJulyOrLater ? "6er-Regel" : "alte Bonus-Regel"
   };
 }
-
 function toast(msg){
   const t = document.getElementById("toast");
   t.innerText = msg;
@@ -1237,18 +3058,133 @@ function createConfetti(){
   }
 }
 
-function showTab(id,btn){
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
 
-  document.getElementById(id).classList.add("active");
-  btn.classList.add("active");
+function showSaveReward(data){
+  const box = document.getElementById("saveReward");
+  if(!box) return;
+
+  const lines = (data.lines || []).map(line =>
+    `<div class="save-reward-line${line.gold ? " gold" : ""}">${line.text}</div>`
+  ).join("");
+
+  box.innerHTML = `
+    <div class="save-reward-card">
+      <div class="save-reward-head">
+        <div class="save-reward-icon">${data.icon || "🎉"}</div>
+        <div>
+          <div class="save-reward-title">${data.title || "Eintrag gespeichert"}</div>
+          <div class="save-reward-sub">${data.subtitle || "Wurstrand sammelt weiter."}</div>
+        </div>
+      </div>
+      <div class="save-reward-points">+${fmt(data.points || 0,1)} Punkte</div>
+      <div class="save-reward-lines">${lines}</div>
+    </div>
+  `;
+
+  box.classList.add("show");
+  clearTimeout(window.saveRewardTimer);
+  window.saveRewardTimer = setTimeout(()=>{
+    box.classList.remove("show");
+  },3600);
+}
+
+function buildSaveReward(entry,options={}){
+  const points = calcPoints(entry);
+  const dateKey = (entry.date || "").slice(0,7);
+  const dayEntries = allEntries.filter(e => e.date === entry.date);
+  const dayTotal = dayEntries.reduce((sum,e)=>sum+calcPoints(e).total,0);
+  const monthTotal = allEntries
+    .filter(e => (e.date || "").startsWith(dateKey))
+    .reduce((sum,e)=>sum+calcPoints(e).total,0);
+
+  const ladder = buildRecordLadder(dateKey,monthTotal);
+  const next = ladder.next;
+
+  const funTitles = [
+    "Stark gespeichert!",
+    "Bohnenkonto wächst!",
+    "Wurstrand sammelt weiter!",
+    "Sauber eingetragen!",
+    "Das gibt Rückenwind!"
+  ];
+
+  const title = options.merged
+    ? "Eintrag zusammengeführt!"
+    : options.editing
+      ? "Änderung gespeichert!"
+      : funTitles[Math.floor(Math.random()*funTitles.length)];
+
+  const lines = [];
+
+  if(points.bonus > 0){
+    lines.push({text:`🔥 Bonus aktiviert: +${fmt(points.bonus,0)} Bohnenpunkte`,gold:true});
+  }else if(points.bonusCats >= 2){
+    lines.push({text:`⚡ Fast Bonus: ${points.bonusCats}/4 Bereiche erfüllt`});
+  }
+
+  lines.push({text:`📅 Tagesgesamt jetzt: ${fmt(dayTotal,1)} Punkte`});
+
+  if(next){
+    const rest = Math.max(0,next.value - monthTotal);
+    lines.push({text:`🏆 Noch ${fmt(rest,1)} Punkte bis ${next.title}`,gold:rest <= 50});
+  }else if(monthTotal > 0){
+    lines.push({text:"👑 All-Time-Modus: Jeder Punkt schreibt weiter Geschichte",gold:true});
+  }
+
+  return {
+    icon: points.total >= 30 ? "🔥" : points.total >= 15 ? "🎉" : "✅",
+    title,
+    subtitle:`${entry.person} · ${formatDate(entry.date)}`,
+    points:points.total,
+    lines
+  };
+}
+
+function toggleMainMenu(force){
+  const menu = document.getElementById("mainMenu");
+  const backdrop = document.getElementById("menuBackdrop");
+  if(!menu || !backdrop) return;
+
+  const open = force === true ? true : force === false ? false : !menu.classList.contains("open");
+
+  menu.classList.toggle("open",open);
+  backdrop.classList.toggle("open",open);
+  document.body.classList.toggle("menu-open",open);
+}
+
+function showTab(id,btn){
+  document.querySelectorAll(".panel").forEach(p=>{
+    p.classList.remove("active");
+    p.style.display = "none";
+  });
+
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.classList.remove("active");
+  });
+
+  const panel = document.getElementById(id);
+
+  if(panel){
+    panel.classList.add("active");
+    panel.style.display = "block";
+  }
+
+  if(btn){
+    btn.classList.add("active");
+  }
 
   if(id === "analyse"){
     setTimeout(renderStepsChart,150);
   }
-}
 
+  if(id === "spieler"){
+    renderPlayerOverview();
+  }
+
+  if(id === "quotesPanel"){
+  renderQuotes();
+  }
+}
 function fillPeople(){
   const select = document.getElementById("person");
   select.innerHTML = "";
@@ -1279,7 +3215,52 @@ function initMonths(){
 
   select.addEventListener("change",renderAll);
 }
+function initPlayerFilters(){
+  const playerSelect = document.getElementById("playerSelect");
+  const playerMonthSelect = document.getElementById("playerMonthSelect");
 
+  if(playerSelect){
+    playerSelect.innerHTML = people.map(p =>
+      `<option value="${p}">${p}</option>`
+    ).join("");
+  }
+
+  if(playerMonthSelect){
+    playerMonthSelect.innerHTML = Object.keys(monthGoals).map(key =>
+      `<option value="${key}">${getMonthTitle(key)}</option>`
+    ).join("");
+
+    playerMonthSelect.value = selectedMonth();
+  }
+}
+
+function initChartMonthFilter(){
+  const select = document.getElementById("chartMonthSelect");
+  if(!select) return;
+
+  select.innerHTML = Object.keys(monthGoals).map(key =>
+    `<option value="${key}">${getMonthTitle(key)}</option>`
+  ).join("");
+
+  select.value = selectedMonth();
+}
+
+function initQuoteForm(){
+
+  const quotePerson = document.getElementById("quotePerson");
+  const quoteDate = document.getElementById("quoteDate");
+
+  if(quotePerson){
+    quotePerson.innerHTML = people.map(p =>
+      `<option value="${p}">${p}</option>`
+    ).join("");
+  }
+
+  if(quoteDate){
+    quoteDate.value = new Date().toISOString().slice(0,10);
+  }
+
+}
 function resetForm(){
   editingId = null;
   document.getElementById("formTitle").innerText = "Neuen Tageseintrag erfassen";
@@ -1291,6 +3272,7 @@ function resetForm(){
   document.getElementById("squats").value = "";
   document.getElementById("pushups").value = "";
   document.getElementById("exercise").checked = false;
+  updateBonusPreview();
 }
 
 function mergeField(existingValue,newValue,label){
@@ -1386,16 +3368,19 @@ async function loadEntries(){
   );
 
   let result;
+  let savedEntry = entry;
+  let wasMerged = false;
+  let wasEditing = !!editingId;
 
   if(existing){
     const merged = mergeEntries(existing,entry);
+    savedEntry = merged;
+    wasMerged = true;
 
     result = await supabaseClient
       .from("entries")
       .update(merged)
       .eq("id",existing.id);
-
-    toast("Eintrag wurde zusammengeführt.");
   }else if(editingId){
     result = await supabaseClient
       .from("entries")
@@ -1415,6 +3400,7 @@ async function loadEntries(){
 
   resetForm();
   await loadEntries();
+  showSaveReward(buildSaveReward(savedEntry,{merged:wasMerged,editing:wasEditing}));
   showTab("eintraege",document.querySelectorAll(".tab")[2]);
 }
 
@@ -1527,18 +3513,9 @@ function goBackAfterJump(){
   }
 }
 
-function toggleCurses(){
-  const box = document.getElementById("curseWrapper");
-  if(!box) return;
-
-  box.style.display =
-    box.style.display === "none" || !box.style.display
-      ? "block"
-      : "none";
-}
-
 function renderAll(){
   renderDashboard();
+  renderMonthlyOverview();
   renderRecords();
   renderEntries();
   renderCheckOverview();
@@ -1547,16 +3524,55 @@ function renderAll(){
   renderAchievements();
   renderCurses();
   renderStepsChart();
+  renderAnalysisExtras();
+  renderPlayerOverview();
   maybeRandomFact();
   checkGoalEffects();
-
+renderAdminStats();
   setText("entryCount",allEntries.length);
 }
 
+
+function renderMonthlyOverview(){
+  const box = document.getElementById("monthlyOverview");
+  if(!box) return;
+
+  const current = selectedMonth();
+
+  box.innerHTML = `
+    <div class="month-overview-grid">
+      ${Object.keys(monthGoals).map(key=>{
+        const baseGoal = monthGoals[key] || 1700;
+        const total = monthTotalPoints(key);
+        const percent = baseGoal ? Math.min((total / baseGoal) * 100,100) : 0;
+        const done = total >= baseGoal;
+        const currentClass = key === current ? " current" : "";
+        const doneClass = done ? " done" : "";
+        const status = done ? "✅" : total > 0 ? "⚡" : "⬛";
+
+        return `
+          <div class="month-card${doneClass}${currentClass}">
+            <div class="month-card-head">
+              <div class="month-card-title">${getMonthTitle(key)}</div>
+              <div class="month-card-status">${status}</div>
+            </div>
+            <div class="month-card-label">Erreichte Punkte</div>
+            <div class="month-card-points">${fmt(total,1)}</div>
+            <div class="month-card-sub">Basisziel: ${fmt(baseGoal,1)} Punkte</div>
+            <div class="month-mini-bar">
+              <div class="month-mini-fill" style="width:${percent}%"></div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
 function renderDashboard(){
   const key = selectedMonth();
   const entries = monthEntries();
-  const goal = monthGoals[key] || 1700;
+  const baseGoal = monthGoals[key] || 1700;
+  let goal = baseGoal;
 
   let total = 0;
   let totalSteps = 0;
@@ -1577,6 +3593,9 @@ function renderDashboard(){
     if(e.exercise) exerciseCount++;
   });
 
+  const ladder = buildRecordLadder(key,total);
+  goal = ladder.goal;
+
   const percent = goal ? Math.round((total / goal) * 100) : 0;
   const rest = Math.max(goal-total,0);
 
@@ -1596,13 +3615,13 @@ function renderDashboard(){
     ? Math.round((total / Math.max(currentDay,1)) * lastDay)
     : 0;
 
-  setText("monthTitle",`${getMonthTitle(key)} · Ziel ${fmt(goal)} Punkte`);
+  setText("monthTitle",`${getMonthTitle(key)} · ${ladder.stage.stars} ${ladder.stage.title}`);
   setText("goalTarget",fmt(goal));
   setText("goalCurrent",fmt(total,1));
   setText("goalPercent",percent+"%");
   setText("goalRest",fmt(rest,1));
   setText("barPercentTop",percent+"%");
-  setText("barText",`${fmt(total,1)} / ${fmt(goal)} Punkte`);
+  setText("barText",`${fmt(total,1)} / ${fmt(goal,1)} Punkte`);
   setText("neededPerDay",fmt(rest/restDays,1));
   setText("forecast",fmt(forecast));
 
@@ -1611,19 +3630,24 @@ function renderDashboard(){
     fill.style.width = Math.min(percent,100)+"%";
   }
 
+  renderRecordLadder(key,total);
+
   setText(
     "motivation",
-    total >= goal
-      ? "🔥 Monatsziel erreicht. Wurstrand eskaliert."
-      : "⚡ Monat läuft – aber da geht noch einiges."
+    ladder.allTime
+      ? "👑 All-Time-Rekord-Modus – jeder Punkt schreibt Geschichte."
+      : total >= baseGoal
+        ? `🔥 ${ladder.stage.stars} ${ladder.stage.title} ist jetzt aktiv.`
+        : "⚡ Monat läuft – aber da geht noch einiges."
   );
 }
 
 function checkGoalEffects(){
   const key = selectedMonth();
   const entries = monthEntries();
-  const goal = monthGoals[key] || 1700;
   const total = entries.reduce((sum,e)=>sum+calcPoints(e).total,0);
+  const ladder = buildRecordLadder(key,total);
+  const next = ladder.next;
 
   const goalBanner = document.getElementById("goalBanner");
   const missBanner = document.getElementById("missBanner");
@@ -1631,15 +3655,36 @@ function checkGoalEffects(){
   if(goalBanner) goalBanner.style.display = "none";
   if(missBanner) missBanner.style.display = "none";
 
-  if(total >= goal){
-    if(goalBanner) goalBanner.style.display = "block";
+  const reachedMilestones = ladder.milestones.filter(m => total >= m.value);
 
-    const storageKey = "goalCelebrationShown_" + key;
+  if(reachedMilestones.length){
+    if(goalBanner){
+      goalBanner.style.display = "block";
+      goalBanner.innerHTML = next
+        ? `🔥 Stufe geknackt – jetzt wurde <b>${next.stars} ${next.title}</b> freigeschaltet.`
+        : `👑 All-Time-Rekord! Jeder weitere Punkt verbessert eure ewige Bestmarke.`;
+    }
 
-    if(!localStorage.getItem(storageKey)){
-      localStorage.setItem(storageKey,"true");
-      createConfetti();
-      showBigPop("🎉","Monatsziel geschafft!","Dicke Bohnen offiziell freigeschaltet.");
+    const newlyReached = reachedMilestones.filter(m =>
+      !localStorage.getItem(`goalCelebrationShown_${key}_${m.value}`)
+    );
+
+    if(newlyReached.length){
+      newlyReached.forEach((m,index)=>{
+        localStorage.setItem(`goalCelebrationShown_${key}_${m.value}`,"true");
+        const nextAfter = ladder.milestones.find(x => x.value > m.value);
+
+        setTimeout(()=>{
+          createConfetti();
+          showBigPop(
+            nextAfter ? "🚀" : "👑",
+            m.kind === "base" ? "Monatsziel erreicht!" : `${m.stars} ${m.title} geknackt!`,
+            nextAfter
+              ? `Stark! Jetzt öffnet sich die nächste Stufe: ${nextAfter.stars} ${nextAfter.title}.`
+              : "All-Time-Rekord-Modus! Jeder weitere Punkt schreibt Geschichte."
+          );
+        }, index * 1800);
+      });
     }
 
     return;
@@ -1871,7 +3916,7 @@ function renderEntries(){
             · 🦵 ${fmt(e.squats)}
             · 💪 ${fmt(e.pushups)}
             · 🧘 ${e.exercise ? "ja" : "nein"}
-            · ${fmt(p.total,1)} Punkte
+            · ${fmt(p.total,1)} Punkte${p.bonus > 0 ? " · 🏅 Bonus" : ""}
           </div>
           <div>
             <button class="secondary" onclick="editEntry('${e.id}')">Bearbeiten</button>
@@ -2022,8 +4067,15 @@ function setChartMode(mode,btn){
     b.classList.remove("active");
   });
 
-  btn.classList.add("active");
+  if(btn) btn.classList.add("active");
+
+  const monthWrap = document.getElementById("chartMonthWrap");
+  if(monthWrap){
+    monthWrap.style.display = mode === "month" ? "block" : "none";
+  }
+
   renderStepsChart();
+  renderAnalysisExtras();
 }
 
 function buildDateRange(start,end){
@@ -2070,7 +4122,7 @@ function renderStepsChart(){
   }
 
   if(chartMode === "month"){
-    const key = selectedMonth();
+    const key = document.getElementById("chartMonthSelect")?.value || selectedMonth();
     const [year,month] = key.split("-").map(Number);
     const lastDay = new Date(year,month,0).getDate();
 
@@ -2160,14 +4212,436 @@ function renderStepsChart(){
   });
 }
 
+function monthKeyForAnalysis(){
+  return document.getElementById("chartMonthSelect")?.value || selectedMonth();
+}
+
+function monthLabelShort(key){
+  return getMonthTitle(key).replace("Jubelnder ","").replace("Mutiger ","").replace("Jäger ","").replace("Starker ","").replace("Offensiver ","").replace("Niemals-müde ","").replace("Dezember der ","Dez. ");
+}
+
+function renderAnalysisExtras(){
+  renderAnalysisHighlights();
+  renderMonthCompareChart();
+  renderAverageStats();
+}
+
+function renderAnalysisHighlights(){
+  const box = document.getElementById("analysisHighlights");
+  if(!box) return;
+
+  const key = monthKeyForAnalysis();
+  const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+  const dayTotals = getDayTotals(entries);
+  const dayKeys = Object.keys(dayTotals).sort();
+  const [year,month] = key.split("-").map(Number);
+  const lastDay = new Date(year,month,0).getDate();
+  const goal = monthGoals[key] || 1700;
+  const dailyTarget = goal / lastDay;
+
+  const last7 = dayKeys.slice(-7).reduce((s,d)=>s + dayTotals[d].points,0);
+  const prev7 = dayKeys.slice(-14,-7).reduce((s,d)=>s + dayTotals[d].points,0);
+  let formIcon = "➡️";
+  let formText = "stabil";
+  let formNote = "Noch nicht genug Vergleichsdaten.";
+
+  if(prev7 > 0){
+    const diff = ((last7 - prev7) / prev7) * 100;
+    formIcon = diff >= 8 ? "📈" : diff <= -8 ? "📉" : "➡️";
+    formText = diff >= 8 ? "steigend" : diff <= -8 ? "fallend" : "stabil";
+    formNote = `${diff >= 0 ? "+" : ""}${fmt(diff,1)}% gegenüber den 7 Tagen davor.`;
+  }
+
+  const weekdayNames = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+  const weekdayTotals = {};
+  dayKeys.forEach(date=>{
+    const wd = new Date(date+"T12:00:00").getDay();
+    if(!weekdayTotals[wd]) weekdayTotals[wd] = {points:0,days:0};
+    weekdayTotals[wd].points += dayTotals[date].points;
+    weekdayTotals[wd].days += 1;
+  });
+
+  let bestWeekday = "-";
+  let bestWeekdayAvg = 0;
+  Object.entries(weekdayTotals).forEach(([wd,v])=>{
+    const avg = v.points / Math.max(v.days,1);
+    if(avg > bestWeekdayAvg){
+      bestWeekdayAvg = avg;
+      bestWeekday = weekdayNames[Number(wd)];
+    }
+  });
+
+  let longest = 0;
+  let current = 0;
+  for(let d=1; d<=lastDay; d++){
+    const date = `${year}-${String(month).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const pts = dayTotals[date]?.points || 0;
+    if(pts >= dailyTarget){
+      current++;
+      longest = Math.max(longest,current);
+    }else{
+      current = 0;
+    }
+  }
+
+  let bestMonth = {key:null,total:0};
+  Object.keys(monthGoals).forEach(mKey=>{
+    const total = allEntries
+      .filter(e => (e.date || "").startsWith(mKey))
+      .reduce((s,e)=>s+calcPoints(e).total,0);
+    if(total > bestMonth.total){
+      bestMonth = {key:mKey,total};
+    }
+  });
+
+  box.innerHTML = `
+    <div class="analysis-card">
+      <div class="label">Teamform</div>
+      <div class="big">${formIcon} ${formText}</div>
+      <div class="note">${formNote}</div>
+    </div>
+    <div class="analysis-card">
+      <div class="label">Stärkster Wochentag</div>
+      <div class="big">⭐ ${bestWeekday}</div>
+      <div class="note">Ø ${fmt(bestWeekdayAvg,1)} Punkte an aktiven ${bestWeekday}-Tagen.</div>
+    </div>
+    <div class="analysis-card">
+      <div class="label">Längste Zielkurs-Serie</div>
+      <div class="big">🔥 ${longest} Tage</div>
+      <div class="note">Tage in Folge mit mindestens ca. ${fmt(dailyTarget,1)} Punkten.</div>
+    </div>
+    <div class="analysis-card">
+      <div class="label">Bester Monat</div>
+      <div class="big">🏆 ${bestMonth.key ? getMonthTitle(bestMonth.key) : "-"}</div>
+      <div class="note">${fmt(bestMonth.total,1)} Punkte bisher.</div>
+    </div>
+  `;
+}
+
+function renderMonthCompareChart(){
+  const canvas = document.getElementById("monthCompareChart");
+  if(!canvas || typeof Chart === "undefined") return;
+
+  const labels = Object.keys(monthGoals).map(key=>monthLabelShort(key));
+  const values = Object.keys(monthGoals).map(key=>{
+    return allEntries
+      .filter(e => (e.date || "").startsWith(key))
+      .reduce((s,e)=>s+calcPoints(e).total,0);
+  });
+
+  if(monthCompareChart){
+    monthCompareChart.destroy();
+  }
+
+  monthCompareChart = new Chart(canvas,{
+    type:"bar",
+    data:{
+      labels,
+      datasets:[{
+        label:"Monatspunkte",
+        data:values,
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:"#f8fafc"}}
+      },
+      scales:{
+        x:{
+          ticks:{color:"#cbd5e1"},
+          grid:{color:"rgba(255,255,255,.08)"}
+        },
+        y:{
+          ticks:{color:"#cbd5e1"},
+          grid:{color:"rgba(255,255,255,.08)"}
+        }
+      }
+    }
+  });
+}
+
+function renderAverageStats(){
+  const box = document.getElementById("averageStats");
+  if(!box) return;
+
+  const key = monthKeyForAnalysis();
+  const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+
+  if(!entries.length){
+    box.innerHTML = '<div class="sub">Noch keine Daten für diesen Monat.</div>';
+    return;
+  }
+
+  const rows = people.map(person=>{
+    const pe = entries.filter(e => e.person === person);
+    const activeDays = pe.filter(e => (+e.steps||0) || (+e.bike||0) || (+e.squats||0) || (+e.pushups||0) || e.exercise).length;
+    const div = Math.max(activeDays,1);
+    const points = pe.reduce((s,e)=>s+calcPoints(e).total,0);
+    const steps = pe.reduce((s,e)=>s+(+e.steps||0),0);
+    const bike = pe.reduce((s,e)=>s+(+e.bike||0),0);
+    const squats = pe.reduce((s,e)=>s+(+e.squats||0),0);
+    const pushups = pe.reduce((s,e)=>s+(+e.pushups||0),0);
+
+    return `
+      <tr>
+        <td><b>${person}</b><br><span class="sub">${activeDays} aktive Tage</span></td>
+        <td>${fmt(points/div,1)}</td>
+        <td>${fmt(steps/div)}</td>
+        <td>${fmt(bike/div,1)}</td>
+        <td>${fmt(squats/div,1)}</td>
+        <td>${fmt(pushups/div,1)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  box.innerHTML = `
+    <div style="overflow-x:auto">
+      <table class="average-table">
+        <tr>
+          <th>Spieler</th>
+          <th>Ø Punkte</th>
+          <th>Ø Schritte</th>
+          <th>Ø km</th>
+          <th>Ø Kniebeugen</th>
+          <th>Ø Liegestütze</th>
+        </tr>
+        ${rows}
+      </table>
+    </div>
+  `;
+}
+
+function renderPlayerOverview(){
+
+    const player = document.getElementById("playerSelect").value;
+    const month = document.getElementById("playerMonthSelect").value;
+    const box = document.getElementById("playerStats");
+
+    if(!box) return;
+
+    const entries = allEntries.filter(e =>
+        e.person === player &&
+        e.date.startsWith(month)
+    );
+
+    const total = entries.reduce((s,e)=>s+calcPoints(e).total,0);
+const steps = entries.reduce((s,e)=>s+(+e.steps||0),0);
+const bike = entries.reduce((s,e)=>s+(+e.bike||0),0);
+const pushups = entries.reduce((s,e)=>s+(+e.pushups||0),0);
+const squats = entries.reduce((s,e)=>s+(+e.squats||0),0);
+const bonus = entries.reduce((s,e)=>s+calcPoints(e).bonus,0);
+const bonusCount = entries.filter(e => calcPoints(e).bonus > 0).length;
+
+const monthTeamEntries = allEntries.filter(e => e.date.startsWith(month));
+const monthTeamTotal = monthTeamEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+
+const allPlayerEntries = allEntries.filter(e => e.person === player);
+const allPlayerTotal = allPlayerEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+
+const allTeamTotal = allEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+
+const monthShare = monthTeamTotal ? (total / monthTeamTotal) * 100 : 0;
+const totalShare = allTeamTotal ? (allPlayerTotal / allTeamTotal) * 100 : 0;
+const monthTeamSteps = monthTeamEntries.reduce((s,e)=>s+(+e.steps||0),0);
+const stepShare = monthTeamSteps ? (steps / monthTeamSteps) * 100 : 0;
+const monthTeamBike = monthTeamEntries.reduce((s,e)=>s+(+e.bike||0),0);
+const bikeShare = monthTeamBike ? (bike / monthTeamBike) * 100 : 0;
+    box.innerHTML = `
+    <div class="grid grid3">
+<div class="mini">
+    <div class="l">🏆 Monatspunkte</div>
+    <div class="v">${fmt(total,1)}</div>
+</div>
+
+<div class="mini">
+    <div class="l">🌍 Gesamtpunkte</div>
+    <div class="v">${fmt(allPlayerTotal,1)}</div>
+</div>
+
+<div class="mini">
+    <div class="l">📅 Teamanteil Monat</div>
+    <div class="v">${fmt(monthShare,1)}%</div>
+</div>
+
+<div class="mini">
+    <div class="l">🥇 Teamanteil Gesamt</div>
+    <div class="v">${fmt(totalShare,1)}%</div>
+</div>
+
+<div class="mini">
+    <div class="l">👣 Schritte (Team)</div>
+    <div class="v">${fmt(steps)} / ${fmt(monthTeamSteps)}</div>
+    <div class="sub">${fmt(stepShare,1)}% der Teamschritte</div>
+</div>
+
+
+<div class="mini">
+    <div class="l">🚴 Fahrrad-km (Team)</div>
+    <div class="v">${fmt(bike,1)} / ${fmt(monthTeamBike,1)}</div>
+    <div class="sub">${fmt(bikeShare,1)}% der Team-km</div>
+</div>
+
+<div class="mini">
+    <div class="l">💪 Liegestütze</div>
+    <div class="v">${fmt(pushups)}</div>
+</div>
+
+<div class="mini">
+    <div class="l">🦵 Kniebeugen</div>
+    <div class="v">${fmt(squats)}</div>
+</div>
+
+<div class="mini">
+    <div class="l">⭐ Bonus</div>
+    <div class="v">🏅 ${bonusCount}× verdient</div>
+    <div class="sub">+${fmt(bonus,1)} Punkte</div>
+</div>
+
+
+
+    </div>`;
+}
+async function loadQuotes(){
+
+  const { data, error } = await supabaseClient
+    .from("quotes")
+    .select("*")
+    .order("quote_date",{ascending:false})
+    .order("created_at",{ascending:false});
+
+  if(error){
+    console.error(error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function saveQuote(){
+
+  const quote_date = document.getElementById("quoteDate").value;
+  const person = document.getElementById("quotePerson").value;
+  const category = document.getElementById("quoteCategory").value;
+  const quote = document.getElementById("quoteText").value.trim();
+
+  if(!quote){
+    toast("Bitte ein Zitat eingeben.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("quotes")
+    .insert([{
+      quote_date,
+      person,
+      category,
+      quote
+    }]);
+
+  if(error){
+    console.error(error);
+    toast("Fehler beim Speichern.");
+    return;
+  }
+
+  document.getElementById("quoteText").value="";
+
+  renderQuotes();
+
+  toast("💬 Zitat gespeichert!");
+}
+async function renderQuotes(){
+
+  const box = document.getElementById("quotesList");
+  if(!box) return;
+
+  box.innerHTML = '<div class="sub">Zitate werden geladen...</div>';
+
+  const quotes = await loadQuotes();
+
+  if(!quotes.length){
+    box.innerHTML = '<div class="sub">Noch keine Zitate gespeichert.</div>';
+    return;
+  }
+
+  box.innerHTML = quotes.map(q => `
+    <div class="quote-card">
+
+      <div class="quote-category">
+        ${q.category}
+      </div>
+
+      <div class="quote-text">
+        „${q.quote}“
+      </div>
+
+      <div class="quote-meta">
+        👤 ${q.person} &nbsp;&nbsp; 📅 ${formatDate(q.quote_date)}
+      </div>
+
+    </div>
+  `).join("");
+
+}
+function renderAdminStats(){
+  const box = document.getElementById("adminStats");
+  if(!box) return;
+
+  const newSquats = allEntries.reduce((s,e)=>s+(+e.squats||0),0);
+  const newPushups = allEntries.reduce((s,e)=>s+(+e.pushups||0),0);
+
+  const totalSquats = HISTORIC_TOTALS.squats + newSquats;
+  const totalPushups = HISTORIC_TOTALS.pushups + newPushups;
+
+  box.innerHTML = `
+    <div class="grid grid2">
+      <div class="mini">
+        <div class="l">🦵 Kniebeugen historisch</div>
+        <div class="v">${fmt(HISTORIC_TOTALS.squats)}</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">🦵 Kniebeugen seit App</div>
+        <div class="v">${fmt(newSquats)}</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">🦵 Kniebeugen gesamt</div>
+        <div class="v">${fmt(totalSquats)}</div>
+      </div>
+
+
+      <div class="mini">
+        <div class="l">💪 Liegestütze seit App</div>
+        <div class="v">${fmt(newPushups)}</div>
+      </div>
+
+      <div class="mini">
+        <div class="l">💪 Liegestütze gesamt</div>
+        <div class="v">${fmt(totalPushups)}</div>
+      </div>
+    </div>
+  `;
+}
 function renderFunFacts(){
   const totalSteps =
     HISTORIC_TOTALS.steps +
-    allEntries.reduce((s,e)=>s+(+e.steps||0),0);
+    allEntries.reduce((sum,e)=>sum+(+e.steps||0),0);
 
   const totalBike =
     HISTORIC_TOTALS.bike +
-    allEntries.reduce((s,e)=>s+(+e.bike||0),0);
+    allEntries.reduce((sum,e)=>sum+(+e.bike||0),0);
+
+  const totalSquats =
+    HISTORIC_TOTALS.squats +
+    allEntries.reduce((sum,e)=>sum+(+e.squats||0),0);
+
+  const totalPushups =
+    HISTORIC_TOTALS.pushups +
+    allEntries.reduce((sum,e)=>sum+(+e.pushups||0),0);
 
   const meters = totalSteps * 0.75;
   const km = meters / 1000;
@@ -2182,92 +4656,214 @@ function renderFunFacts(){
   const box = document.getElementById("funFacts");
   if(!box) return;
 
+  const cards = [
+    ["🏟",fmt(stadion),"Stadionrunden","auf einer 400m-Bahn"],
+    ["🏃",marathons,"Marathons","seit Februar gelaufen"],
+    ["🗼",fmt(fernsehturm)+"×","Fernsehturm","so hoch wären eure Schritte gestapelt"],
+    ["🚴",tour+"%","Tour de France","mit euren Fahrrad-km geschafft"],
+    ["🍕",fmt(pizzas),"Pizzen verbrannt","0,04 kcal pro Schritt · 900 kcal pro Pizza"],
+    ["📦",pizzaStack+" m","Pizzastapel","1 Pizza im Karton = ca. 4 cm"],
+    ["🫘",fmt(bohnen),"Portionen Dicke Bohnen","ca. 500 kcal pro Portion"],
+    ["💪",fmt(totalPushups),"Liegestütze","Wurstrand-Arme in Arbeit"],
+    ["🦵",fmt(totalSquats),"Kniebeugen","Beine sagen: Joa, läuft." ]
+  ];
+
   box.innerHTML = `
-    <div class="funfact"><b>🏟 ${fmt(stadion)}</b><br>Stadionrunden auf einer 400m-Bahn</div>
-    <div class="funfact"><b>🏃 ${marathons}</b><br>gelaufene Marathons seit Februar</div>
-    <div class="funfact"><b>🗼 ${fmt(fernsehturm)}</b><br>Eure Schritte ergeben ${fmt(fernsehturm)}× die Höhe des Berliner Fernsehturms</div>
-    <div class="funfact"><b>🚴 ${tour}%</b><br>der Tour de France bereits geschafft</div>
-    <div class="funfact"><b>🍕 ${fmt(pizzas)}</b><br>große Pizzen verbrannt<br><span class="sub">0,04 kcal pro Schritt · 900 kcal pro Pizza</span></div>
-    <div class="funfact"><b>📦 ${pizzaStack} m</b><br>Pizzastapel<br><span class="sub">1 Pizza im Karton = ca. 4 cm</span></div>
-    <div class="funfact"><b>🫘 ${fmt(bohnen)}</b><br>Portionen Dicke Bohnen<br><span class="sub">ca. 500 kcal pro Portion</span></div>
+    <div class="funfact-grid">
+      ${cards.map(c=>`
+        <div class="funfact-card">
+          <div class="funfact-emoji">${c[0]}</div>
+          <div class="funfact-value">${c[1]}</div>
+          <div class="funfact-label">${c[2]}</div>
+          <div class="funfact-note">${c[3]}</div>
+        </div>
+      `).join("")}
+    </div>
   `;
 }
-
 function renderAchievements(){
-  const totalSteps =
-    HISTORIC_TOTALS.steps +
-    allEntries.reduce((s,e)=>s+(+e.steps||0),0);
+  const totals = {
+    steps: HISTORIC_TOTALS.steps + allEntries.reduce((s,e)=>s+(+e.steps||0),0),
+    bike: HISTORIC_TOTALS.bike + allEntries.reduce((s,e)=>s+(+e.bike||0),0),
+    squats: HISTORIC_TOTALS.squats + allEntries.reduce((s,e)=>s+(+e.squats||0),0),
+    pushups: HISTORIC_TOTALS.pushups + allEntries.reduce((s,e)=>s+(+e.pushups||0),0),
+    exercises: HISTORIC_TOTALS.exercises + allEntries.filter(e=>e.exercise).length
+  };
 
-  const totalBike =
-    HISTORIC_TOTALS.bike +
-    allEntries.reduce((s,e)=>s+(+e.bike||0),0);
-
-  const totalSquats =
-    HISTORIC_TOTALS.squats +
-    allEntries.reduce((s,e)=>s+(+e.squats||0),0);
-
-  const totalPushups =
-    HISTORIC_TOTALS.pushups +
-    allEntries.reduce((s,e)=>s+(+e.pushups||0),0);
-
-  const totalExercises =
-    HISTORIC_TOTALS.exercises +
-    allEntries.filter(e=>e.exercise).length;
-
-  const achievements = [
-    ["steps3",totalSteps>=3000000,"👣","Millionen-Marsch",`${fmt(totalSteps)} / 3.000.000 Schritte`],
-    ["steps5",totalSteps>=5000000,"👣","Legendenlauf",`${fmt(totalSteps)} / 5.000.000 Schritte`],
-    ["steps75",totalSteps>=7500000,"👣","Siebenkommafünf-Marsch",`${fmt(totalSteps)} / 7.500.000 Schritte`],
-    ["steps10",totalSteps>=10000000,"👣","Unfassbare 10 Millionen",`${fmt(totalSteps)} / 10.000.000 Schritte`],
-
-    ["bike1500",totalBike>=1500,"🚴","Tour-Anwärter",`${fmt(totalBike,1)} / 1.500 km`],
-    ["bike2500",totalBike>=2500,"🚴","Ketten-Kilometer",`${fmt(totalBike,1)} / 2.500 km`],
-    ["bike3500",totalBike>=3500,"🚴","Tour de France",`${fmt(totalBike,1)} / 3.500 km`],
-    ["bike5000",totalBike>=5000,"🚴","Ketten-Könige",`${fmt(totalBike,1)} / 5.000 km`],
-
-    ["squat500",totalSquats>=500,"🦵","Bein-Warmup",`${fmt(totalSquats)} / 500 Kniebeugen`],
-    ["squat1000",totalSquats>=1000,"🦵","Knie-Kommando",`${fmt(totalSquats)} / 1.000 Kniebeugen`],
-    ["squat2500",totalSquats>=2500,"🦵","Bein-Beben",`${fmt(totalSquats)} / 2.500 Kniebeugen`],
-    ["squat5000",totalSquats>=5000,"🦵","Stahlstelzen",`${fmt(totalSquats)} / 5.000 Kniebeugen`],
-
-    ["push500",totalPushups>=500,"💪","Arm-Alarm",`${fmt(totalPushups)} / 500 Liegestütze`],
-    ["push1000",totalPushups>=1000,"💪","Liegestütz-Legion",`${fmt(totalPushups)} / 1.000 Liegestütze`],
-    ["push2500",totalPushups>=2500,"💪","Gorilla-Modus",`${fmt(totalPushups)} / 2.500 Liegestütze`],
-    ["push5000",totalPushups>=5000,"💪","Brustpanzer-Brigade",`${fmt(totalPushups)} / 5.000 Liegestütze`],
-
-    ["ex50",totalExercises>=50,"🧘","Routine-Funken",`${fmt(totalExercises)} / 50 individuelle Übungen`],
-    ["ex100",totalExercises>=100,"🧘","Disziplin-Dämonen",`${fmt(totalExercises)} / 100 individuelle Übungen`],
-    ["ex250",totalExercises>=250,"🧘","Ritual-Riesen",`${fmt(totalExercises)} / 250 individuelle Übungen`],
-    ["ex365",totalExercises>=365,"🧘","Jahres-Mönche",`${fmt(totalExercises)} / 365 individuelle Übungen`]
+  const groups = [
+    {
+      key:"steps",
+      icon:"👣",
+      title:"Schritte",
+      unit:"Schritte",
+      decimals:0,
+      value:totals.steps,
+      milestones:[
+        [3000000,"Millionen-Marsch"],
+        [5000000,"Legendenlauf"],
+        [7500000,"Siebeneinhalb-Marsch"],
+        [10000000,"Unfassbare 10 Millionen"],
+        [12500000,"Wurstrand-Wanderung Deluxe"],
+        [15000000,"15-Millionen-Meile"],
+        [17500000,"Siebzehneinhalb-Sprint"],
+        [20000000,"20-Millionen-Monster"],
+        [25000000,"Viertelhundert-Millionen"],
+        [30000000,"30-Millionen-Legende"]
+      ]
+    },
+    {
+      key:"bike",
+      icon:"🚴",
+      title:"Fahrrad",
+      unit:"km",
+      decimals:1,
+      value:totals.bike,
+      milestones:[
+        [1500,"Tour-Anwärter"],
+        [2500,"Ketten-Kilometer"],
+        [3500,"Tour de France"],
+        [5000,"Ketten-Könige"],
+        [7500,"Pedal-Patriarchen"],
+        [10000,"10.000-km-Titanen"],
+        [12500,"Zwölf-Fünf-Zünder"],
+        [15000,"Sattel-Superstars"],
+        [20000,"20.000-km-Radrebellen"],
+        [25000,"Wurstrand-Weltreise"]
+      ]
+    },
+    {
+      key:"squats",
+      icon:"🦵",
+      title:"Kniebeugen",
+      unit:"Kniebeugen",
+      decimals:0,
+      value:totals.squats,
+      milestones:[
+        [500,"Bein-Warmup"],
+        [1000,"Knie-Kommando"],
+        [2500,"Bein-Beben"],
+        [5000,"Stahlstelzen"],
+        [7500,"Schenkel-Sturm"],
+        [10000,"Oberschenkel-Orkan"],
+        [15000,"Kniebeuge-Kaiser"],
+        [20000,"20.000-Bein-Boss"],
+        [25000,"Quadrizeps-Queen-Kings"],
+        [30000,"30.000-Bein-Legenden"]
+      ]
+    },
+    {
+      key:"pushups",
+      icon:"💪",
+      title:"Liegestütze",
+      unit:"Liegestütze",
+      decimals:0,
+      value:totals.pushups,
+      milestones:[
+        [500,"Arm-Alarm"],
+        [1000,"Liegestütz-Legion"],
+        [2500,"Gorilla-Modus"],
+        [5000,"Brustpanzer-Brigade"],
+        [7500,"Arm-Arena"],
+        [10000,"Push-up-Panik"],
+        [15000,"Armageddon-Arme"],
+        [20000,"20.000-Drücker"],
+        [25000,"Oberkörper-Orkan"],
+        [30000,"30.000-Push-Legende"]
+      ]
+    },
+    {
+      key:"exercises",
+      icon:"🧘",
+      title:"Übungen",
+      unit:"Übungen",
+      decimals:0,
+      value:totals.exercises,
+      milestones:[
+        [50,"Routine-Funken"],
+        [100,"Disziplin-Dämonen"],
+        [250,"Ritual-Riesen"],
+        [365,"Jahres-Mönche"],
+        [500,"Routine-Rakete"],
+        [750,"Übungs-Ultras"],
+        [1000,"Tausend-Tage-Titanen"],
+        [1250,"Ritual-Rekordler"],
+        [1500,"Disziplin-Deluxe"],
+        [2000,"Übungs-Universum"]
+      ]
+    }
   ];
 
   const box = document.getElementById("achievements");
   if(!box) return;
 
-  box.innerHTML = achievements.map(a=>{
-    const [id,done,icon,title,progress] = a;
+  const fmtUnit = (value,unit,decimals)=>{
+    return `${fmt(value,decimals)} ${unit}`;
+  };
 
-    if(done && !localStorage.getItem("achievement_"+id)){
-      localStorage.setItem("achievement_"+id,"true");
-      showBigPop(icon,"Achievement freigeschaltet!",`${title} · ${progress}`);
-    }
+  box.innerHTML = groups.map(group=>{
+    const reached = group.milestones.filter(m => group.value >= m[0]);
+    const next = group.milestones.find(m => group.value < m[0]);
+
+    reached.forEach(m=>{
+      const storageKey = `achievement_${group.key}_${m[0]}`;
+
+      if(!localStorage.getItem(storageKey)){
+        localStorage.setItem(storageKey,"true");
+        showBigPop(group.icon,"Achievement freigeschaltet!",`${m[1]} · ${fmtUnit(m[0],group.unit,group.decimals)}`);
+      }
+    });
+
+    const reachedHtml = reached.length
+      ? reached.map(m=>`
+        <div class="achievement-mini-line">
+          <div>${group.icon} ${m[1]}</div>
+          <div>✓ ${fmtUnit(m[0], group.unit, group.decimals)}</div>
+        </div>
+      `).join("")
+      : `<div class="achievement-mini-line muted">Noch nichts freigeschaltet</div>`;
+
+    const nextHtml = next
+      ? `
+        <div class="achievement-next">
+          <b>🎯 Als Nächstes ${group.icon} ${next[1]}</b>
+          <div>${fmtUnit(group.value, group.unit, group.decimals)} / ${fmtUnit(next[0], group.unit, group.decimals)}</div>
+        </div>
+      `
+      : `
+        <div class="achievement-next">
+          <b>🏆 Alles erreicht!</b>
+          <div>${fmtUnit(group.value, group.unit, group.decimals)}</div>
+        </div>
+      `;
+
+    const hiddenCount = group.milestones.length - reached.length - (next ? 1 : 0);
 
     return `
-      <div class="achievement ${done ? "done" : ""}">
-        <b>${done ? "✅" : "🔒"} ${title}</b><br>
-        <span class="sub">${progress}</span>
+      <div class="achievement-group-card">
+        <div class="achievement-group-head">
+          <div class="achievement-group-title">
+            <span class="achievement-group-icon">${group.icon}</span>
+            <span>${group.title}</span>
+          </div>
+          <div class="achievement-group-count">${reached.length}/${group.milestones.length}</div>
+        </div>
+
+        <div class="achievement-section-label">✅ Erreicht</div>
+        <div class="achievement-reached-list">
+          ${reachedHtml}
+        </div>
+
+        ${nextHtml}
+
+        <div class="achievement-hidden-note">
+          ${hiddenCount > 0 ? `${hiddenCount} weitere Ziele schlummern noch im Hintergrund.` : `Keine weiteren Ziele im Hintergrund.`}
+        </div>
       </div>
     `;
   }).join("");
 }
-
 function curseItem(icon,title,value,date){
-  return `
-    <div class="curse" onclick="jumpToDate('${date}')">
-      <b>${icon} ${title}</b><br>
-      <small>${value} · ${formatDate(date)}</small>
-    </div>
-  `;
+    return '<div class="curse" onclick="jumpToDate(\''+date+'\')"><b>'+icon+' '+title+'</b><br><small>'+value+' • '+formatDate(date)+'</small></div>';
 }
 
 function getCurses(entries){
@@ -2313,52 +4909,52 @@ function getCurses(entries){
 
   let html = "";
 
-  if(weakestTeamDay){
+ if(weakestTeamDay){
     html += curseItem(
-      "🌧️",
-      "Schwächster Teamtag",
-      `${fmt(weakestTeamDay.points,1)} Punkte`,
-      weakestTeamDay.date
+        "🌀",
+        "Schwächster Teamtag",
+        fmt(weakestTeamDay.points,1) + " Punkte",
+        weakestTeamDay.date
     );
-  }
+}
 
-  if(weakestSteps){
+if(weakestSteps){
     html += curseItem(
-      "🐌",
-      `Wenigste Schritte: ${weakestSteps.person}`,
-      `${fmt(weakestSteps.steps)} Schritte`,
-      weakestSteps.date
+        "🪨",
+        "Wenigste Schritte: " + weakestSteps.person,
+        fmt(weakestSteps.steps) + " Schritte",
+        weakestSteps.date
     );
-  }
+}
 
-  if(weakestBike){
+if(weakestBike){
     html += curseItem(
-      "🚲",
-      `Kürzeste Fahrradfahrt: ${weakestBike.person}`,
-      `${fmt(weakestBike.bike,1)} km`,
-      weakestBike.date
+        "🚴",
+        "Kürzeste Fahrradfahrt: " + weakestBike.person,
+        fmt(weakestBike.bike,1) + " km",
+        weakestBike.date
     );
-  }
+}
 
-  if(weakestSquat){
+if(weakestSquat){
     html += curseItem(
-      "🦵",
-      `Kleinste Kniebeugen-Runde: ${weakestSquat.person}`,
-      `${fmt(weakestSquat.squats)} Kniebeugen`,
-      weakestSquat.date
+        "🏋️",
+        "Kleinste Kniebeugen-Runde: " + weakestSquat.person,
+        fmt(weakestSquat.squats) + " Kniebeugen",
+        weakestSquat.date
     );
-  }
+}
 
-  if(weakestPush){
+if(weakestPush){
     html += curseItem(
-      "💪",
-      `Kleinste Liegestütz-Runde: ${weakestPush.person}`,
-      `${fmt(weakestPush.pushups)} Liegestütze`,
-      weakestPush.date
+        "💪",
+        "Kleinste Liegestütz-Runde: " + weakestPush.person,
+        fmt(weakestPush.pushups) + " Liegestütze",
+        weakestPush.date
     );
-  }
+}
 
-  return html || '<div class="sub">Noch keine verfluchten Rekorde.</div>';
+return html || '<div class="sub">Noch keine verfluchten Rekorde.</div>';
 }
 
 function renderCurses(){
@@ -2404,21 +5000,69 @@ function maybeRandomFact(){
   const pizzas = Math.floor((totalSteps*0.04)/900);
 
   const facts = [
-    `🫘 Zufalls-Bohne: Ihr habt rechnerisch schon ${fmt(bohnen)} Portionen Dicke Bohnen verbrannt.`,
-    `🍕 Pizza-Warnung: ${fmt(pizzas)} große Pizzen sind rechnerisch schon Geschichte.`,
-    `🚴 Kettenmeldung: Zusammen stehen ${fmt(totalBike,1)} Fahrrad-km auf dem Wurstrand-Tacho.`,
-    `👣 Schritt-Orakel: ${fmt(totalSteps)} Schritte. Das ist nicht mehr Sport, das ist Verwaltung.`
+    ["🫘","Zufalls-Bohne","Ihr habt rechnerisch schon " + fmt(bohnen) + " Portionen Dicke Bohnen verdrückt."],
+    ["🍕","Pizza-Warnung",fmt(pizzas) + " große Pizzen sind rechnerisch schon Geschichte."],
+    ["🚴","Kettenmeldung","Zusammen stehen " + fmt(totalBike,1) + " Fahrrad-km auf dem Wurstrand-Tacho."],
+    ["👣","Schritt-Orakel",fmt(totalSteps) + " Schritte. Das ist nicht mehr Sport, das ist Verwaltung."]
   ];
 
-  box.innerHTML = facts[Math.floor(Math.random()*facts.length)];
+  const f = facts[Math.floor(Math.random()*facts.length)];
+  box.innerHTML = `<b>${f[0]} ${f[1]}</b><br><span>${f[2]}</span>`;
   box.style.display = "block";
   localStorage.setItem("randomFactLastShown",String(now));
+}
+function updateBonusPreview(){
+  const box = document.getElementById("bonusPreview");
+  if(!box) return;
+
+  const entry = {
+    date: document.getElementById("date")?.value || new Date().toISOString().slice(0,10),
+    steps:+document.getElementById("steps")?.value || 0,
+    bike:+document.getElementById("bike")?.value || 0,
+    squats:+document.getElementById("squats")?.value || 0,
+    pushups:+document.getElementById("pushups")?.value || 0,
+    exercise:!!document.getElementById("exercise")?.checked
+  };
+
+  const p = calcPoints(entry);
+  const c = p.bonusChecks || {};
+  const pill = (ok,text)=>`<span class="bonus-pill ${ok ? "ok" : ""}">${ok ? "✅" : "⬜"} ${text}</span>`;
+
+  box.classList.toggle("good",p.bonus > 0);
+  box.innerHTML = `
+    <b>${p.bonus > 0 ? "🏅 Bonus verdient: +4 Punkte" : "⭐ Bonus-Check"}</b>
+    <div class="sub">Ab Juli gilt die 6er-Regel: mindestens 3 von 4 Bereichen erfüllen.</div>
+    <div class="bonus-checks">
+      ${pill(c.steps,"6.000 Schritte")}
+      ${pill(c.bike,"6 km Rad")}
+      ${pill(c.power,"6 Kraftübungen")}
+      ${pill(c.exercise,"Übung gemacht")}
+    </div>
+    <div class="sub" style="margin-top:8px">Aktuell: ${p.bonusCats || 0}/4 Bereiche · Tagespunkte: ${fmt(p.total,1)}</div>
+  `;
+}
+
+function initBonusPreview(){
+  ["date","steps","bike","squats","pushups","exercise"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener("input",updateBonusPreview);
+      el.addEventListener("change",updateBonusPreview);
+    }
+  });
+  updateBonusPreview();
 }
 
 fillPeople();
 initMonths();
+initPlayerFilters();
+initChartMonthFilter();
+initQuoteForm();
+initBonusPreview();
 resetForm();
 loadEntries();
+renderCurses();
+renderQuotes();
 
 </script>
 </body>
