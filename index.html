@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wurstrand Challenge 2.0.1</title>
+<title>Wurstrand Challenge 2.2</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1806,6 +1806,136 @@ body.menu-open{
 }
 
 
+/* WRC 2.2: Spieler-Beitrag als Teamanteil */
+.player-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+
+.player-chip{
+  background:rgba(34,197,94,.11);
+  border:1px solid rgba(34,197,94,.36);
+  border-radius:18px;
+  padding:14px;
+}
+
+.player-chip .chip-label{
+  color:#bfdbfe;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-weight:850;
+}
+
+.player-chip .chip-value{
+  font-size:28px;
+  font-weight:950;
+  margin-top:6px;
+}
+
+.player-contribution-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+  margin-top:18px;
+}
+
+.player-share-card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.92));
+  border:1px solid rgba(100,116,139,.55);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:0 14px 34px rgba(0,0,0,.18);
+}
+
+.player-share-card::after{
+  content:"";
+  position:absolute;
+  width:110px;
+  height:110px;
+  border-radius:999px;
+  right:-44px;
+  top:-48px;
+  background:rgba(34,197,94,.055);
+  pointer-events:none;
+}
+
+.player-share-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:18px;
+  font-weight:950;
+  margin-bottom:14px;
+}
+
+.player-share-block{
+  padding:12px;
+  border-radius:16px;
+  background:rgba(15,23,42,.72);
+  border:1px solid rgba(51,65,85,.95);
+}
+
+.player-share-block + .player-share-block{
+  margin-top:10px;
+}
+
+.player-share-label{
+  color:#bfdbfe;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-weight:850;
+}
+
+.player-share-main{
+  font-size:22px;
+  font-weight:950;
+  margin-top:6px;
+  overflow-wrap:anywhere;
+}
+
+.player-share-sub{
+  color:#94a3b8;
+  font-size:13px;
+  margin-top:4px;
+}
+
+.player-share-bar{
+  height:8px;
+  border-radius:999px;
+  background:#334155;
+  overflow:hidden;
+  margin-top:9px;
+}
+
+.player-share-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#22c55e,#84cc16);
+}
+
+@media(max-width:800px){
+  .player-summary,
+  .player-contribution-grid{
+    grid-template-columns:1fr;
+  }
+
+  .player-share-card{
+    padding:16px;
+  }
+
+  .player-share-main{
+    font-size:20px;
+  }
+}
+
+
 /* WRC Launch-Wow: Belohnung nach dem Speichern */
 .save-reward{
   position:fixed;
@@ -2804,7 +2934,7 @@ Mehrere Einträge am gleichen Tag werden pro Person automatisch zusammengeführt
   </div>
 
   <div class="rule-footer">
-    <b>Version 2.0.1</b><br>
+    <b>Version 2.2</b><br>
     Mit ❤️ entwickelt von Thorsten – gemeinsam mit vielen Ideen aus der WRC.
   </div>
 
@@ -2934,7 +3064,7 @@ Wurstrand eskaliert.
 </div>
 
 <script>
-// WRC Version 2.0.1
+// WRC Version 2.2
 
 const SUPABASE_URL =
   "https://ythcpltiujpnxedtgjmr.supabase.co";
@@ -4645,88 +4775,88 @@ function renderPlayerOverview(){
 
     if(!box) return;
 
-    const entries = allEntries.filter(e =>
+    const monthPlayerEntries = allEntries.filter(e =>
         e.person === player &&
         e.date.startsWith(month)
     );
 
-    const total = entries.reduce((s,e)=>s+calcPoints(e).total,0);
-const steps = entries.reduce((s,e)=>s+(+e.steps||0),0);
-const bike = entries.reduce((s,e)=>s+(+e.bike||0),0);
-const pushups = entries.reduce((s,e)=>s+(+e.pushups||0),0);
-const squats = entries.reduce((s,e)=>s+(+e.squats||0),0);
-const bonus = entries.reduce((s,e)=>s+calcPoints(e).bonus,0);
-const bonusCount = entries.filter(e => calcPoints(e).bonus > 0).length;
+    const monthTeamEntries = allEntries.filter(e => e.date.startsWith(month));
+    const allPlayerEntries = allEntries.filter(e => e.person === player);
+    const allTeamEntries = allEntries;
 
-const monthTeamEntries = allEntries.filter(e => e.date.startsWith(month));
-const monthTeamTotal = monthTeamEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+    const sumData = (entries)=>({
+      points: entries.reduce((s,e)=>s+calcPoints(e).total,0),
+      steps: entries.reduce((s,e)=>s+(+e.steps||0),0),
+      bike: entries.reduce((s,e)=>s+(+e.bike||0),0),
+      squats: entries.reduce((s,e)=>s+(+e.squats||0),0),
+      pushups: entries.reduce((s,e)=>s+(+e.pushups||0),0),
+      exercises: entries.filter(e=>!!e.exercise).length,
+      bonusCount: entries.filter(e=>calcPoints(e).bonus > 0).length,
+      bonusPoints: entries.reduce((s,e)=>s+calcPoints(e).bonus,0)
+    });
 
-const allPlayerEntries = allEntries.filter(e => e.person === player);
-const allPlayerTotal = allPlayerEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+    const monthPlayer = sumData(monthPlayerEntries);
+    const monthTeam = sumData(monthTeamEntries);
+    const allPlayer = sumData(allPlayerEntries);
+    const allTeam = sumData(allTeamEntries);
 
-const allTeamTotal = allEntries.reduce((s,e)=>s+calcPoints(e).total,0);
+    const pct = (part,total)=> total ? (part / total) * 100 : 0;
+    const bar = (value)=>`<div class="player-share-bar"><div class="player-share-fill" style="width:${Math.min(Math.max(value,0),100)}%"></div></div>`;
+    const valueLine = (value,total,dec=0,suffix="")=>`${fmt(value,dec)}${suffix} <span class="sub">von ${fmt(total,dec)}${suffix}</span>`;
 
-const monthShare = monthTeamTotal ? (total / monthTeamTotal) * 100 : 0;
-const totalShare = allTeamTotal ? (allPlayerTotal / allTeamTotal) * 100 : 0;
-const monthTeamSteps = monthTeamEntries.reduce((s,e)=>s+(+e.steps||0),0);
-const stepShare = monthTeamSteps ? (steps / monthTeamSteps) * 100 : 0;
-const monthTeamBike = monthTeamEntries.reduce((s,e)=>s+(+e.bike||0),0);
-const bikeShare = monthTeamBike ? (bike / monthTeamBike) * 100 : 0;
+    const card = (icon,title,monthValue,monthTotal,allValue,allTotal,dec=0,suffix="")=>{
+      const monthPct = pct(monthValue,monthTotal);
+      const allPct = pct(allValue,allTotal);
+
+      return `
+        <div class="player-share-card">
+          <div class="player-share-title"><span>${icon} ${title}</span></div>
+
+          <div class="player-share-block">
+            <div class="player-share-label">Diesen Monat</div>
+            <div class="player-share-main">${valueLine(monthValue,monthTotal,dec,suffix)}</div>
+            <div class="player-share-sub">${fmt(monthPct,1)}% Teamanteil</div>
+            ${bar(monthPct)}
+          </div>
+
+          <div class="player-share-block">
+            <div class="player-share-label">Gesamt</div>
+            <div class="player-share-main">${valueLine(allValue,allTotal,dec,suffix)}</div>
+            <div class="player-share-sub">${fmt(allPct,1)}% Teamanteil</div>
+            ${bar(allPct)}
+          </div>
+        </div>
+      `;
+    };
+
     box.innerHTML = `
-    <div class="grid grid3">
-<div class="mini">
-    <div class="l">🏆 Monatspunkte</div>
-    <div class="v">${fmt(total,1)}</div>
-</div>
+      <div class="player-summary">
+        <div class="player-chip">
+          <div class="chip-label">Spieler</div>
+          <div class="chip-value">${player}</div>
+        </div>
+        <div class="player-chip">
+          <div class="chip-label">Punkte-Anteil Monat</div>
+          <div class="chip-value">${fmt(pct(monthPlayer.points,monthTeam.points),1)}%</div>
+        </div>
+        <div class="player-chip">
+          <div class="chip-label">Punkte-Anteil Gesamt</div>
+          <div class="chip-value">${fmt(pct(allPlayer.points,allTeam.points),1)}%</div>
+        </div>
+      </div>
 
-<div class="mini">
-    <div class="l">🌍 Gesamtpunkte</div>
-    <div class="v">${fmt(allPlayerTotal,1)}</div>
-</div>
-
-<div class="mini">
-    <div class="l">📅 Teamanteil Monat</div>
-    <div class="v">${fmt(monthShare,1)}%</div>
-</div>
-
-<div class="mini">
-    <div class="l">🥇 Teamanteil Gesamt</div>
-    <div class="v">${fmt(totalShare,1)}%</div>
-</div>
-
-<div class="mini">
-    <div class="l">👣 Schritte (Team)</div>
-    <div class="v">${fmt(steps)} / ${fmt(monthTeamSteps)}</div>
-    <div class="sub">${fmt(stepShare,1)}% der Teamschritte</div>
-</div>
-
-
-<div class="mini">
-    <div class="l">🚴 Fahrrad-km (Team)</div>
-    <div class="v">${fmt(bike,1)} / ${fmt(monthTeamBike,1)}</div>
-    <div class="sub">${fmt(bikeShare,1)}% der Team-km</div>
-</div>
-
-<div class="mini">
-    <div class="l">💪 Liegestütze</div>
-    <div class="v">${fmt(pushups)}</div>
-</div>
-
-<div class="mini">
-    <div class="l">🦵 Kniebeugen</div>
-    <div class="v">${fmt(squats)}</div>
-</div>
-
-<div class="mini">
-    <div class="l">⭐ Bonus</div>
-    <div class="v">🏅 ${bonusCount}× verdient</div>
-    <div class="sub">+${fmt(bonus,1)} Punkte</div>
-</div>
-
-
-
-    </div>`;
+      <div class="player-contribution-grid">
+        ${card("⭐","Punkte",monthPlayer.points,monthTeam.points,allPlayer.points,allTeam.points,1)}
+        ${card("👣","Schritte",monthPlayer.steps,monthTeam.steps,allPlayer.steps,allTeam.steps,0)}
+        ${card("🚴","Fahrrad-km",monthPlayer.bike,monthTeam.bike,allPlayer.bike,allTeam.bike,1," km")}
+        ${card("🦵","Kniebeugen",monthPlayer.squats,monthTeam.squats,allPlayer.squats,allTeam.squats,0)}
+        ${card("💪","Liegestütze",monthPlayer.pushups,monthTeam.pushups,allPlayer.pushups,allTeam.pushups,0)}
+        ${card("🏋️","Übungen",monthPlayer.exercises,monthTeam.exercises,allPlayer.exercises,allTeam.exercises,0)}
+        ${card("🔥","Bonus",monthPlayer.bonusCount,monthTeam.bonusCount,allPlayer.bonusCount,allTeam.bonusCount,0,"×")}
+      </div>
+    `;
 }
+
 async function loadQuotes(){
 
   const { data, error } = await supabaseClient
