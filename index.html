@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wurstrand Challenge 2.2</title>
+<title>Wurstrand Challenge 2.2.1</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2905,9 +2905,9 @@ Mehrere Einträge am gleichen Tag werden pro Person automatisch zusammengeführt
         <div class="rule-title">Ab Juli 2026</div>
         <div class="rule-text">Mindestens 3 dieser 4 Bedingungen müssen erfüllt sein:</div>
         <div class="rule-list">
-          <div class="rule-pill">👣 mindestens 6.000 Schritte</div>
-          <div class="rule-pill">🚴 mindestens 6 km Fahrrad</div>
-          <div class="rule-pill">💪 mindestens 6 Wiederholungen gesamt</div>
+          <div class="rule-pill">👣 mindestens 3.000 Schritte</div>
+          <div class="rule-pill">🚴 mindestens 3 km Fahrrad</div>
+          <div class="rule-pill">💪 Kraft: 3 Punkte Liegestütze <b>oder</b> 3 Punkte Kniebeugen</div>
           <div class="rule-pill">🏋️ individuelle Übung gemacht</div>
         </div>
       </div>
@@ -2934,7 +2934,7 @@ Mehrere Einträge am gleichen Tag werden pro Person automatisch zusammengeführt
   </div>
 
   <div class="rule-footer">
-    <b>Version 2.2</b><br>
+    <b>Version 2.2.1</b><br>
     Mit ❤️ entwickelt von Thorsten – gemeinsam mit vielen Ideen aus der WRC.
   </div>
 
@@ -3064,7 +3064,7 @@ Wurstrand eskaliert.
 </div>
 
 <script>
-// WRC Version 2.2
+// WRC Version 2.2.1
 
 const SUPABASE_URL =
   "https://ythcpltiujpnxedtgjmr.supabase.co";
@@ -3332,9 +3332,9 @@ function calcPoints(e){
 
   if(isJulyOrLater){
     bonusChecks = {
-      steps: steps >= 6000,
-      bike: bike >= 6,
-      power: (squats + pushups) >= 6,
+      steps: steps >= 3000,
+      bike: bike >= 3,
+      power: pushPts >= 3 || squatPts >= 3,
       exercise: !!e.exercise
     };
   }else{
@@ -3360,7 +3360,7 @@ function calcPoints(e){
     bonus,
     bonusChecks,
     bonusCats:cats,
-    bonusRule:isJulyOrLater ? "6er-Regel" : "alte Bonus-Regel"
+    bonusRule:isJulyOrLater ? "3er-Regel" : "alte Bonus-Regel"
   };
 }
 function toast(msg){
@@ -5384,11 +5384,11 @@ function updateBonusPreview(){
   box.classList.toggle("good",p.bonus > 0);
   box.innerHTML = `
     <b>${p.bonus > 0 ? "🏅 Bonus verdient: +4 Punkte" : "⭐ Bonus-Check"}</b>
-    <div class="sub">Ab Juli gilt die 6er-Regel: mindestens 3 von 4 Bereichen erfüllen.</div>
+    <div class="sub">Ab Juli gilt: mindestens 3 von 4 Bereichen erfüllen.</div>
     <div class="bonus-checks">
-      ${pill(c.steps,"6.000 Schritte")}
-      ${pill(c.bike,"6 km Rad")}
-      ${pill(c.power,"6 Kraftübungen")}
+      ${pill(c.steps,"3.000 Schritte")}
+      ${pill(c.bike,"3 km Rad")}
+      ${pill(c.power,"3 Kraftpunkte")}
       ${pill(c.exercise,"Übung gemacht")}
     </div>
     <div class="sub" style="margin-top:8px">Aktuell: ${p.bonusCats || 0}/4 Bereiche · Tagespunkte: ${fmt(p.total,1)}</div>
