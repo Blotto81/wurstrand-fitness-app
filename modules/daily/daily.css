@@ -1,0 +1,150 @@
+/* ======================================
+   WRC DAILY
+   Version 1.1
+====================================== */
+
+#wrcDailyMount {
+  margin-bottom: 18px;
+}
+
+.wrc-daily-card {
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid #475569;
+  background: linear-gradient(135deg, #111827, #1e293b);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+}
+
+.wrc-daily-label {
+  margin-bottom: 12px;
+  color: #86efac;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.wrc-daily-card h2 {
+  margin: 0 0 12px;
+}
+
+.wrc-daily-card p {
+  margin: 0 0 16px;
+  color: #e2e8f0;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.wrc-daily-category {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 10px;
+  border: 1px solid #475569;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wrc-daily-task {
+  color: #f8fafc !important;
+  font-size: 18px !important;
+  font-weight: 700;
+}
+
+.wrc-daily-why {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  background: #0f172a;
+}
+
+.wrc-daily-why strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #86efac;
+}
+
+.wrc-daily-why p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 16px;
+}
+
+.wrc-daily-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.wrc-daily-muted {
+  color: #94a3b8 !important;
+}
+
+@media (max-width: 800px) {
+  .wrc-daily-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .wrc-daily-actions button {
+    width: 100%;
+  }
+}
+/* WRC Daily Startbanner */
+
+.wrc-daily-start {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(34,197,94,.18), transparent 35%),
+    linear-gradient(135deg, #111827, #1e293b);
+  border-color: rgba(34,197,94,.45);
+}
+
+.wrc-daily-start::after {
+  content: "🎁";
+  position: absolute;
+  right: 22px;
+  top: 16px;
+  font-size: 72px;
+  opacity: .08;
+  pointer-events: none;
+}
+
+.wrc-daily-start h2 {
+  max-width: 520px;
+}
+
+.wrc-daily-start label {
+  display: block;
+  margin-top: 18px;
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.wrc-daily-start select {
+  max-width: 340px;
+  margin-bottom: 14px;
+}
+
+.wrc-daily-start .primary {
+  min-width: 190px;
+}
+
+@media (max-width: 800px) {
+  .wrc-daily-start::after {
+    right: 10px;
+    top: 10px;
+    font-size: 56px;
+  }
+
+  .wrc-daily-start select,
+  .wrc-daily-start .primary {
+    width: 100%;
+    max-width: none;
+  }
+}

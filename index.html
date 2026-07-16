@@ -7,6 +7,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="modules/daily/daily.css">
 
 <style>
 body{
@@ -2412,6 +2413,7 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 </nav>
 
 <div id="dashboard" class="panel active">
+<div id="wrcDailyMount"></div>
 
 <div class="overlay">
 
@@ -2780,6 +2782,7 @@ Mehrere Einträge am gleichen Tag werden pro Person automatisch zusammengeführt
     </div>
 
     <div id="playerStats" style="margin-top:16px"></div>
+
   </div>
 
 </div>
@@ -4846,6 +4849,13 @@ function renderPlayerOverview(){
       </div>
 
       <div class="player-contribution-grid">
+        <div class="card" style="margin-bottom:18px;">
+    <h3>🎁 WRC Daily</h3>
+
+    <div id="playerDailyHistory">
+        Noch keine erledigten Dailys.
+    </div>
+</div>
         ${card("⭐","Punkte",monthPlayer.points,monthTeam.points,allPlayer.points,allTeam.points,1)}
         ${card("👣","Schritte",monthPlayer.steps,monthTeam.steps,allPlayer.steps,allTeam.steps,0)}
         ${card("🚴","Fahrrad-km",monthPlayer.bike,monthTeam.bike,allPlayer.bike,allTeam.bike,1," km")}
@@ -4855,6 +4865,9 @@ function renderPlayerOverview(){
         ${card("🔥","Bonus",monthPlayer.bonusCount,monthTeam.bonusCount,allPlayer.bonusCount,allTeam.bonusCount,0,"×")}
       </div>
     `;
+   if (typeof WRCDaily !== "undefined") {
+    WRCDaily.renderPlayerHistory();
+}
 }
 
 async function loadQuotes(){
@@ -5416,7 +5429,16 @@ resetForm();
 loadEntries();
 renderCurses();
 renderQuotes();
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
 
+window.addEventListener("pageshow", () => {
+  window.scrollTo(0, 0);
+});
 </script>
+<script src="modules/daily/daily-pool.js"></script>
+<script src="modules/daily/daily-manager.js"></script>
+<script src="modules/daily/daily.js"></script>
 </body>
 </html>
