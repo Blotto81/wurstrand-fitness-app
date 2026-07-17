@@ -68,9 +68,6 @@ async getPlayerState(player) {
   const localState =
     states[this.getStateKey(player)] || null;
 
-  if (localState) {
-    return localState;
-  }
 
   const { data, error } = await supabaseClient
     .from("daily_states")
@@ -79,17 +76,17 @@ async getPlayerState(player) {
     .eq("daily_date", this.getToday())
     .limit(1);
 
-  if (error) {
-    console.error(
-      "Daily-Zustand konnte nicht aus Supabase geladen werden:",
-      error
-    );
-    return null;
-  }
+ if (error) {
+  console.error(
+    "Daily-Zustand konnte nicht aus Supabase geladen werden:",
+    error
+  );
+  return localState;
+}
 
-  if (!data || data.length === 0) {
-    return null;
-  }
+if (!data || data.length === 0) {
+  return localState;
+}
 
   const row = data[0];
   const daily = DailyManager.getDailyById(row.daily_id);
