@@ -2,7 +2,29 @@
 // WRC DAILY
 // Version 2.1
 // ======================================
+const COMPLETED_MESSAGES = [
 
+  "🌟 Mission erfüllt. Morgen wartet schon die nächste Überraschung.",
+
+  "🚀 Stark! Komm morgen wieder vorbei.",
+
+  "🎉 Challenge gemeistert. Bis morgen!",
+
+  "💪 Wieder eine Daily geschafft.",
+
+  "🏁 Tagesmission abgeschlossen.",
+
+  "⭐ Klasse gemacht. Morgen geht's weiter.",
+
+  "🔥 Wieder ein kleiner Erfolg.",
+
+  "🎲 Ich bin gespannt, was morgen auf dich wartet.",
+
+  "🍀 Wieder eine Mission weniger.",
+
+  "👏 Genau so sammelt man kleine Erfolge."
+
+];
 const WRCDaily = {
   statesKey: "wrc_daily_player_states",
   historyKey: "wrc_daily_history",
@@ -504,14 +526,13 @@ drawRandomDaily(player) {
 
         this.renderOpen(state);
   });
-  }
-},
-  // --------------------------------------
+    // --------------------------------------
   // Daily geschafft
   // --------------------------------------
 
   async renderCompleted(state) {
     console.log(state);
+
     const loaded = await this.loadTemplate(
       "daily-finished.html"
     );
@@ -523,6 +544,24 @@ drawRandomDaily(player) {
     const card = document.querySelector(
       "#wrcDailyMount .wrc-daily-card"
     );
+
+    const completedMessage = document.getElementById(
+      "wrcCompletedMessage"
+    );
+
+    if (completedMessage) {
+
+      const message =
+        COMPLETED_MESSAGES[
+          Math.floor(
+            Math.random() * COMPLETED_MESSAGES.length
+          )
+        ];
+
+      completedMessage.textContent =
+        `${state.player}, ${message}`;
+    }
+
 
     if (!card) {
       return;
@@ -567,7 +606,6 @@ drawRandomDaily(player) {
 
     await this.renderPlayerHistory();
   },
-
   // --------------------------------------
   // Joker
   // --------------------------------------
@@ -781,8 +819,8 @@ useJoker(player) {
 
   async init() {
     // ---------- TEST-RESET ----------
-localStorage.removeItem(this.statesKey);
-localStorage.removeItem(this.jokerKey);
+// localStorage.removeItem(this.statesKey);
+// localStorage.removeItem(this.jokerKey);
 // -------------------------------
     console.log("WRC Daily 2.1 geladen");
 
