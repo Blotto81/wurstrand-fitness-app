@@ -376,13 +376,13 @@ drawRandomDaily(player) {
       select.value = selectedPlayer;
     }
 
-    const updateButton = () => {
-      const state = this.getPlayerState(select.value);
+   const updateButton = async () => {
+  const state = await this.getPlayerState(select.value);
 
-      button.textContent = state
-        ? "🎁 Daily ansehen"
-        : "🎁 Daily öffnen";
-    };
+  button.textContent = state
+    ? "🎁 Daily ansehen"
+    : "🎁 Daily öffnen";
+};
 
     updateButton();
 
@@ -398,15 +398,15 @@ drawRandomDaily(player) {
       button.textContent =
         "🎲 Die WRC sucht etwas für dich aus ...";
 
-      setTimeout(() => {
-        let state = this.getPlayerState(player);
+    setTimeout(async () => {
+  let state = await this.getPlayerState(player);
 
-        if (!state) {
-          state = this.createPlayerState(player);
-        }
+  if (!state) {
+    state = await this.createPlayerState(player);
+  }
 
-        this.renderState(state);
-      }, 650);
+  this.renderState(state);
+}, 650);
     });
   },
 
@@ -696,7 +696,38 @@ drawRandomDaily(player) {
         this.renderStart(state.player);
       }
     );
+const countdownText = document.createElement("div");
+countdownText.textContent = "🎉 Super gemacht! Morgen wartet die nächste Daily.";
+countdownText.style.marginTop = "14px";
+countdownText.style.textAlign = "center";
+countdownText.style.fontWeight = "600";
+countdownText.style.fontSize = "0.95rem";
+const countdown = document.createElement("div");
+countdown.style.marginTop = "8px";
+countdown.style.textAlign = "center";
+countdown.style.fontSize = "1.1rem";
+countdown.style.fontWeight = "700";
 
+card.appendChild(countdownText);
+card.appendChild(countdown);
+
+const updateCountdown = () => {
+  const now = new Date();
+
+  const tomorrow = new Date();
+  tomorrow.setHours(24, 0, 0, 0);
+
+  const diff = tomorrow - now;
+
+  const hours = String(Math.floor(diff / 3600000)).padStart(2, "0");
+  const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+  const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+
+  countdown.textContent = `⏳ ${hours}:${minutes}:${seconds}`;
+};
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
     await this.renderPlayerHistory();
   },
   // --------------------------------------
