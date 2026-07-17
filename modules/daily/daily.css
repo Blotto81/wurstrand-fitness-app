@@ -148,3 +148,59 @@
     max-width: none;
   }
 }
+/* ================================
+   Erfolgreich abgeschlossen
+================================ */
+
+.wrc-daily-success{
+    animation: successPop .45s ease;
+}
+
+@keyframes successPop{
+
+0%{
+    transform:scale(.92);
+    opacity:0;
+}
+
+70%{
+    transform:scale(1.04);
+}
+
+100%{
+    transform:scale(1);
+    opacity:1;
+}
+
+}
+
+.wrc-success-icon{
+    font-size:58px;
+    text-align:center;
+    margin:18px 0;
+    animation:bounce 1s ease;
+}
+
+@keyframes bounce{
+
+0%,100%{
+    transform:translateY(0);
+}
+
+40%{
+    transform:translateY(-12px);
+}
+
+60%{
+    transform:translateY(-6px);
+}
+
+}
+
+.wrc-success-stars{
+    text-align:center;
+    font-size:22px;
+    margin-top:18px;
+    letter-spacing:8px;
+    opacity:.85;
+}

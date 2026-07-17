@@ -16,7 +16,11 @@ const DailyManager = {
   // -----------------------------
   // Neue Daily
   // -----------------------------
-
+getDailyById(id) {
+  return DAILY_POOL.find(
+    daily => daily.id === id
+  ) || null;
+},
   getDaily(player) {
 
     const history = WRCDaily

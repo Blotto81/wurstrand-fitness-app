@@ -63,21 +63,113 @@ maxJokersPerMonth: 3,
     }
   },
 
-  getPlayerState(player) {
-    const states = this.getStates();
-    return states[this.getStateKey(player)] || null;
-  },
+async getPlayerState(player) {
+  const states = this.getStates();
+  const localState =
+    states[this.getStateKey(player)] || null;
 
-  savePlayerState(player, state) {
-    const states = this.getStates();
+  if (localState) {
+    return localState;
+  }
 
-    states[this.getStateKey(player)] = state;
+  const { data, error } = await supabaseClient
+    .from("daily_states")
+    .select("player,daily_date,daily_id,status,joker_used")
+    .eq("player", player)
+    .eq("daily_date", this.getToday())
+    .limit(1);
 
-    localStorage.setItem(
-      this.statesKey,
-      JSON.stringify(states)
+  if (error) {
+    console.error(
+      "Daily-Zustand konnte nicht aus Supabase geladen werden:",
+      error
     );
-  },
+    return null;
+  }
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  const row = data[0];
+  const daily = DailyManager.getDailyById(row.daily_id);
+
+  if (!daily) {
+    console.error(
+      "Daily-ID wurde im Daily-Pool nicht gefunden:",
+      row.daily_id
+    );
+    return null;
+  }
+
+  const state = {
+    date: row.daily_date,
+    player: row.player,
+    status: row.status,
+    jokerUsed: Boolean(row.joker_used),
+    daily
+  };
+
+  states[this.getStateKey(player)] = state;
+
+  localStorage.setItem(
+    this.statesKey,
+    JSON.stringify(states)
+  );
+
+  return state;
+},
+async savePlayerState(player, state) {
+  const states = this.getStates();
+
+  states[this.getStateKey(player)] = state;
+
+  // Weiterhin lokal speichern
+  localStorage.setItem(
+    this.statesKey,
+    JSON.stringify(states)
+  );
+
+  // Prüfen, ob für diesen Spieler und Tag schon ein Datensatz existiert
+  const { data: existing, error: checkError } = await supabaseClient
+    .from("daily_states")
+    .select("id")
+    .eq("player", player)
+    .eq("daily_date", state.date)
+    .limit(1);
+
+  if (checkError) {
+    console.error("Daily-Zustand konnte nicht geprüft werden:", checkError);
+    return;
+  }
+
+  const dailyState = {
+    player,
+    daily_date: state.date,
+    daily_id: state.daily.id,
+    status: state.status,
+    joker_used: Boolean(state.jokerUsed)
+  };
+
+  if (existing && existing.length > 0) {
+    const { error } = await supabaseClient
+      .from("daily_states")
+      .update(dailyState)
+      .eq("id", existing[0].id);
+
+    if (error) {
+      console.error("Daily-Zustand konnte nicht aktualisiert werden:", error);
+    }
+  } else {
+    const { error } = await supabaseClient
+      .from("daily_states")
+      .insert([dailyState]);
+
+    if (error) {
+      console.error("Daily-Zustand konnte nicht gespeichert werden:", error);
+    }
+  }
+},
 
   // --------------------------------------
   // Lokale Historie als Sicherung
@@ -523,12 +615,16 @@ drawRandomDaily(player) {
       state.player,
       state
     );
-
-        this.renderOpen(state);
+    this.renderOpen(state);
   });
-    // --------------------------------------
-  // Daily geschafft
-  // --------------------------------------
+}
+
+},
+
+// --------------------------------------
+// Daily geschafft
+// --------------------------------------
+
 
   async renderCompleted(state) {
     console.log(state);
@@ -824,7 +920,14 @@ useJoker(player) {
 // -------------------------------
     console.log("WRC Daily 2.1 geladen");
 
-    await this.renderStart();
+  const player = people[0];
+const state = await this.getPlayerState(player);
+
+if (state) {
+  this.renderState(state);
+} else {
+  await this.renderStart();
+}
   }
 };
 
