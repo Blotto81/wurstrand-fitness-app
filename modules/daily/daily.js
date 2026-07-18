@@ -424,7 +424,10 @@ drawRandomDaily(player) {
       this.renderCompleted(state);
       return;
     }
-
+if (state.status === "failed") {
+  this.renderFailed(state);
+  return;
+}
     if (state.status === "joker") {
       this.renderJoker(state);
       return;
@@ -562,7 +565,28 @@ drawRandomDaily(player) {
         }
       );
     }
+const failedButton = document.getElementById(
+  "wrcDailyFailedButton"
+);
 
+if (failedButton) {
+  failedButton.addEventListener(
+    "click",
+    () => {
+      state.status = "failed";
+
+      this.savePlayerState(
+        state.player,
+        state
+      );
+
+      failedButton.disabled = true;
+      failedButton.textContent = "❌ Nicht geschafft";
+
+      doneButton.disabled = true;
+    }
+  );
+}
     const jokerButton = document.getElementById(
       "wrcDailyJokerButton"
     );
@@ -570,8 +594,8 @@ drawRandomDaily(player) {
    if (jokerButton) {
   const jokersLeft = this.getJokersLeft(state.player);
 
-  jokerButton.textContent =
-    `🃏 Neu würfeln (${jokersLeft}/3)`;
+   jokerButton.textContent =
+  `🃏 Joker nutzen (${jokersLeft}/3)`;
 
   jokerButton.disabled = jokersLeft === 0;
 
@@ -586,7 +610,7 @@ drawRandomDaily(player) {
     }
 
     const confirmed = window.confirm(
-      `Möchtest du neu würfeln? Danach bleiben dir diesen Monat noch ${remaining - 1} Joker.`
+  `Möchtest du einen Joker nutzen? Danach bleiben dir diesen Monat noch ${remaining - 1} Joker.`
     );
 
     if (!confirmed) {
@@ -730,7 +754,85 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
     await this.renderPlayerHistory();
   },
-  // --------------------------------------
+async renderFailed(state) {
+  const loaded = await this.loadTemplate(
+  "daily-failed.html"
+);
+
+if (!loaded) {
+  return;
+}
+  const player = document.getElementById(
+    "wrcDailyFailedPlayer"
+  );
+
+  if (player) {
+    player.textContent = `Für ${state.player}`;
+  }
+
+  const button = document.getElementById(
+    "wrcDailyFailedChangeButton"
+  );
+
+  if (button) {
+    button.addEventListener(
+      "click",
+      () => {
+        this.renderStart(state.player);
+      }
+    );
+  }
+  const card = document.querySelector(
+  "#wrcDailyMount .wrc-daily-card"
+);
+
+if (card) {
+  const countdownText = document.createElement("div");
+  countdownText.textContent =
+    "Morgen wartet die nächste Daily.";
+  countdownText.style.marginTop = "14px";
+  countdownText.style.textAlign = "center";
+  countdownText.style.fontWeight = "600";
+  countdownText.style.fontSize = "0.95rem";
+
+  const countdown = document.createElement("div");
+  countdown.style.marginTop = "8px";
+  countdown.style.textAlign = "center";
+  countdown.style.fontSize = "1.1rem";
+  countdown.style.fontWeight = "700";
+
+  card.appendChild(countdownText);
+  card.appendChild(countdown);
+
+  const updateCountdown = () => {
+    const now = new Date();
+
+    const tomorrow = new Date();
+    tomorrow.setHours(24, 0, 0, 0);
+
+    const diff = tomorrow - now;
+
+    const hours = String(
+      Math.floor(diff / 3600000)
+    ).padStart(2, "0");
+
+    const minutes = String(
+      Math.floor((diff % 3600000) / 60000)
+    ).padStart(2, "0");
+
+    const seconds = String(
+      Math.floor((diff % 60000) / 1000)
+    ).padStart(2, "0");
+
+    countdown.textContent =
+      `⏳ ${hours}:${minutes}:${seconds}`;
+  };
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+},
+// -----------------------------------
   // Joker
   // --------------------------------------
 getMonthKey() {
