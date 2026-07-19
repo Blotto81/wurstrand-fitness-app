@@ -720,8 +720,8 @@ if (failedButton) {
         this.renderStart(state.player);
       }
     );
-const countdownText = document.createElement("div");
-countdownText.textContent = "🎉 Super gemacht! Morgen wartet die nächste Daily.";
+countdownText.textContent =
+"⏳ Morgen wartet die nächste Daily.";
 countdownText.style.marginTop = "14px";
 countdownText.style.textAlign = "center";
 countdownText.style.fontWeight = "600";
