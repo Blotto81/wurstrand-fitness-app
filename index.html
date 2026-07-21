@@ -2409,8 +2409,80 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
   <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
   <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆 Achievements</button>
   <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
+ <div class="drawer-divider"></div>
+
+<button class="drawer-group-title drawer-toggle"
+        type="button"
+        onclick="toggleGameLounge()">
+    <span>🎮 Game Lounge</span>
+    <span id="gameLoungeArrow">▸</span>
+</button>
+
+<div id="gameLoungeSubmenu" class="drawer-submenu">
+
+<button class="drawer-link tab drawer-sublink"
+        onclick="showTab('dartPanel',this); toggleMainMenu(false)">
+  🎯 Dart
+</button>
+
+<button class="drawer-link tab drawer-sublink"
+        onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
+  🥏 Frisbee-Golf
+</button>
+
+<button class="drawer-link tab drawer-sublink"
+        onclick="showTab('unoPanel',this); toggleMainMenu(false)">
+  🃏 UNO
+</button>
+</div>
+<div class="drawer-divider"></div>
   <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖 WRC-Regeln</button>
 </nav>
+
+<div id="dartPanel" class="panel">
+  <div class="overlay">
+    <div class="badge">Game Lounge</div>
+
+    <div class="challenge-row">
+      <div>
+        <h2>🎯 Dart</h2>
+        <p class="sub">Dart-Runden, Ergebnisse und Statistiken.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div id="frisbeePanel" class="panel">
+  <div class="overlay">
+    <div class="badge">Game Lounge</div>
+
+    <div class="challenge-row">
+      <div>
+       <h2>🥏 Frisbee-Golf</h2>
+        <p class="sub">Frisbee-Runden, Ergebnisse und Bestleistungen.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div id="unoPanel" class="panel">
+  <div class="overlay">
+    <div class="badge">Game Lounge</div>
+
+    <div class="challenge-row">
+      <div>
+        <h2>🃏 UNO</h2>
+        <p class="sub">UNO-Spiele, Gewinner und Statistiken.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
 
 <div id="dashboard" class="panel active">
 <div id="wrcDailyMount"></div>
@@ -3089,6 +3161,7 @@ const people = [
 ];
 
 const HISTORIC_TOTALS = {
+  points: 4531.428333,
   steps:2753969,
   over10k:105,
   bike:1332.1,
@@ -3100,22 +3173,77 @@ const HISTORIC_TOTALS = {
   maxSteps:26996,
   maxBike:64.7
 };
+const HISTORIC_PLAYER_TOTALS = {
+  Thorsten: {
+    points: 1137.942,
+    steps: 716673,
+    bike: 270.74,
+    squats: 555,
+    pushups: 0,
+    exercises: 8,
+    bonusCount: 9,
+    bonusPoints: 36
+  },
 
-const monthGoals = {
-  "2026-05":1700,
-  "2026-06":1725,
-  "2026-07":1750,
-  "2026-08":1775,
-  "2026-09":1800,
-  "2026-10":1825,
-  "2026-11":1850,
-  "2026-12":1875
+  Basti: {
+    points: 935.884,
+    steps: 850311,
+    bike: 0,
+    squats: 100,
+    pushups: 30,
+    exercises: 16,
+    bonusCount: 0,
+    bonusPoints: 0
+  },
+
+  Marian: {
+    points: 1387.455,
+    steps: 443236,
+    bike: 919.5,
+    squats: 0,
+    pushups: 38,
+    exercises: 8,
+    bonusCount: 8,
+    bonusPoints: 32
+  },
+
+  Fabi: {
+    points: 1070.148,
+    steps: 743749,
+    bike: 141.9,
+    squats: 0,
+    pushups: 122,
+    exercises: 21,
+    bonusCount: 12,
+    bonusPoints: 48
+  }
 };
-
+const monthGoals = {
+  "2026-02": 650,
+  "2026-03": 1600,
+  "2026-04": 1600,
+  "2026-05": 1700,
+  "2026-06": 1725,
+  "2026-07": 1750,
+  "2026-08": 1775,
+  "2026-09": 1800,
+  "2026-10": 1825,
+  "2026-11": 1850,
+  "2026-12": 1875
+};
+const HISTORIC_MONTH_POINTS = {
+  "2026-02": 883.345,
+  "2026-03": 1711.12,
+  "2026-04": 1936.963333
+};
 function monthTotalPoints(key){
-  return allEntries
+
+  const historic = HISTORIC_MONTH_POINTS[key] || 0;
+
+  return historic + allEntries
     .filter(e => (e.date || "").startsWith(key))
     .reduce((sum,e)=>sum+calcPoints(e).total,0);
+
 }
 
 function getFinishedMonthKeys(currentKey){
@@ -3287,6 +3415,9 @@ function monthEntries(){
 
 function getMonthTitle(key){
   const titles = {
+    "2026-02":"Fitter Februar",
+"2026-03":"Mächtiger März",
+"2026-04":"Aktiver April",
     "2026-05":"Mutiger Mai",
     "2026-06":"Jubelnder Juni",
     "2026-07":"Jäger Juli",
@@ -4679,11 +4810,7 @@ function renderMonthCompareChart(){
   if(!canvas || typeof Chart === "undefined") return;
 
   const labels = Object.keys(monthGoals).map(key=>monthLabelShort(key));
-  const values = Object.keys(monthGoals).map(key=>{
-    return allEntries
-      .filter(e => (e.date || "").startsWith(key))
-      .reduce((s,e)=>s+calcPoints(e).total,0);
-  });
+ const values = Object.keys(monthGoals).map(key => monthTotalPoints(key));
 
   if(monthCompareChart){
     monthCompareChart.destroy();
@@ -4798,11 +4925,42 @@ function renderPlayerOverview(){
       bonusPoints: entries.reduce((s,e)=>s+calcPoints(e).bonus,0)
     });
 
-    const monthPlayer = sumData(monthPlayerEntries);
-    const monthTeam = sumData(monthTeamEntries);
-    const allPlayer = sumData(allPlayerEntries);
-    const allTeam = sumData(allTeamEntries);
+const monthPlayer = sumData(monthPlayerEntries);
+const monthTeam = sumData(monthTeamEntries);
 
+const currentAllPlayer = sumData(allPlayerEntries);
+const currentAllTeam = sumData(allTeamEntries);
+const historicPlayer = HISTORIC_PLAYER_TOTALS[player] || {
+  points: 0,
+  steps: 0,
+  bike: 0,
+  squats: 0,
+  pushups: 0,
+  exercises: 0,
+  bonusCount: 0,
+  bonusPoints: 0
+};
+
+const allPlayer = {
+  points: currentAllPlayer.points + historicPlayer.points,
+  steps: currentAllPlayer.steps + historicPlayer.steps,
+  bike: currentAllPlayer.bike + historicPlayer.bike,
+  squats: currentAllPlayer.squats + historicPlayer.squats,
+  pushups: currentAllPlayer.pushups + historicPlayer.pushups,
+  exercises: currentAllPlayer.exercises + historicPlayer.exercises,
+  bonusCount: currentAllPlayer.bonusCount + historicPlayer.bonusCount,
+  bonusPoints: currentAllPlayer.bonusPoints + historicPlayer.bonusPoints
+};
+const allTeam = {
+  points: currentAllTeam.points + HISTORIC_TOTALS.points,
+  steps: currentAllTeam.steps + HISTORIC_TOTALS.steps,
+  bike: currentAllTeam.bike + HISTORIC_TOTALS.bike,
+  squats: currentAllTeam.squats + HISTORIC_TOTALS.squats,
+  pushups: currentAllTeam.pushups + HISTORIC_TOTALS.pushups,
+  exercises: currentAllTeam.exercises + HISTORIC_TOTALS.exercises,
+  bonusCount: currentAllTeam.bonusCount + HISTORIC_TOTALS.bonusDays,
+  bonusPoints: currentAllTeam.bonusPoints + HISTORIC_TOTALS.bonusPoints
+};
     const pct = (part,total)=> total ? (part / total) * 100 : 0;
     const bar = (value)=>`<div class="player-share-bar"><div class="player-share-fill" style="width:${Math.min(Math.max(value,0),100)}%"></div></div>`;
     const valueLine = (value,total,dec=0,suffix="")=>`${fmt(value,dec)}${suffix} <span class="sub">von ${fmt(total,dec)}${suffix}</span>`;
@@ -4823,7 +4981,7 @@ function renderPlayerOverview(){
           </div>
 
           <div class="player-share-block">
-            <div class="player-share-label">Gesamt</div>
+<div class="player-share-label">Gesamt</div>
             <div class="player-share-main">${valueLine(allValue,allTotal,dec,suffix)}</div>
             <div class="player-share-sub">${fmt(allPct,1)}% Teamanteil</div>
             ${bar(allPct)}
@@ -5434,11 +5592,27 @@ if ("scrollRestoration" in history) {
 }
 
 window.addEventListener("pageshow", () => {
-  window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
 });
+
+function toggleGameLounge() {
+    const submenu = document.getElementById("gameLoungeSubmenu");
+    const arrow = document.getElementById("gameLoungeArrow");
+
+    submenu.classList.toggle("open");
+
+    if (submenu.classList.contains("open")) {
+        arrow.textContent = "▾";
+    } else {
+        arrow.textContent = "▸";
+    }
+}
+
 </script>
+
 <script src="modules/daily/daily-pool.js"></script>
 <script src="modules/daily/daily-manager.js"></script>
 <script src="modules/daily/daily.js"></script>
+</script>
 </body>
 </html>
