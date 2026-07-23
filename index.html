@@ -2450,25 +2450,99 @@
           white-space: normal;
         }
       }
-      /* Menü sicher außerhalb der Seite verstecken */
+/* Hauptmenü: sauber über der gesamten Seite */
 html,
 body {
   overflow-x: hidden;
 }
 
+.menu-backdrop {
+  z-index: 100000 !important;
+}
+
 .main-drawer {
+  z-index: 100001 !important;
   visibility: hidden;
   pointer-events: none;
+  background: linear-gradient(180deg, #0f172a, #111827) !important;
+  background-color: #0f172a !important;
+  opacity: 1 !important;
 }
 
 .main-drawer.open {
   visibility: visible;
   pointer-events: auto;
+  transform: translateX(0) !important;
 }
+
+
+
+
   </style>
 </head>
 
 <body>
+
+  <div id="menuBackdrop" class="menu-backdrop" onclick="toggleMainMenu(false)"></div>
+  
+  <nav id="mainMenu" class="main-drawer" aria-label="Hauptmenü">
+    <div class="drawer-head">
+      <div>
+        <strong>☰ Menü</strong>
+        <span>Wurstrand Navigation</span>
+      </div>
+      <button class="drawer-close" onclick="toggleMainMenu(false)" aria-label="Menü schließen">×</button>
+    </div>
+  
+    <button class="drawer-link tab active" onclick="showTab('dashboard',this); toggleMainMenu(false)">🏠
+      Dashboard</button>
+    <button class="drawer-link tab" onclick="showTab('eintragen',this); toggleMainMenu(false)">➕ Eintragen</button>
+  
+    <div class="drawer-divider"></div>
+  
+    <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
+    <button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
+    <button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
+  
+    <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆
+      Rekorde</button>
+    <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
+      Rekorde</button>
+    <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun
+      Facts</button>
+    <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆
+      Achievements</button>
+  
+    <button class="drawer-link tab" onclick="showTab('dailyPanel',this); toggleMainMenu(false)">📅 WRC
+      Daily</button>
+  
+    <div class="drawer-divider"></div>
+    <button class="drawer-group-title drawer-toggle" type="button" onclick="toggleGameLounge()">
+      <span>🎮 Game Lounge</span>
+      <span id="gameLoungeArrow">▸</span>
+    </button>
+  
+    <div id="gameLoungeSubmenu" class="drawer-submenu">
+  
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('dartPanel',this); toggleMainMenu(false)">
+        🎯 Dart
+      </button>
+  
+  
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
+        🥏 Frisbee-Golf
+      </button>
+  
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('unoPanel',this); toggleMainMenu(false)">
+        🃏 UNO
+      </button>
+    </div>
+    <div class="drawer-divider"></div>
+    <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖
+      WRC-Regeln</button>
+    <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
+  </nav>
+
 
   <div class="wrap">
 
@@ -2485,7 +2559,7 @@ body {
             <p class="sub">
               Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
             </p>
-            <button class="main-menu-button" onclick="toggleMainMenu(true)">☰ Menü</button>
+            <button class="main-menu-button" onclick="toggleMainMenu()">☰ Menü</button>
 
           </div>
 
@@ -2495,65 +2569,7 @@ body {
 
       </div>
 
-      <div id="menuBackdrop" class="menu-backdrop" onclick="toggleMainMenu(false)"></div>
 
-      <nav id="mainMenu" class="main-drawer" aria-label="Hauptmenü">
-        <div class="drawer-head">
-          <div>
-            <strong>☰ Menü</strong>
-            <span>Wurstrand Navigation</span>
-          </div>
-          <button class="drawer-close" onclick="toggleMainMenu(false)" aria-label="Menü schließen">×</button>
-        </div>
-
-        <button class="drawer-link tab active" onclick="showTab('dashboard',this); toggleMainMenu(false)">🏠
-          Dashboard</button>
-        <button class="drawer-link tab" onclick="showTab('eintragen',this); toggleMainMenu(false)">➕ Eintragen</button>
-
-        <div class="drawer-divider"></div>
-
-        <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
-        <button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
-        <button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
-
-        <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆
-          Rekorde</button>
-        <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
-          Rekorde</button>
-        <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun
-          Facts</button>
-        <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆
-          Achievements</button>
-
-        <button class="drawer-link tab" onclick="showTab('dailyPanel',this); toggleMainMenu(false)">📅 WRC
-          Daily</button>
-
-        <div class="drawer-divider"></div>
-        <button class="drawer-group-title drawer-toggle" type="button" onclick="toggleGameLounge()">
-          <span>🎮 Game Lounge</span>
-          <span id="gameLoungeArrow">▸</span>
-        </button>
-
-        <div id="gameLoungeSubmenu" class="drawer-submenu">
-
-          <button class="drawer-link tab drawer-sublink" onclick="showTab('dartPanel',this); toggleMainMenu(false)">
-            🎯 Dart
-          </button>
-
-
-          <button class="drawer-link tab drawer-sublink" onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
-            🥏 Frisbee-Golf
-          </button>
-
-          <button class="drawer-link tab drawer-sublink" onclick="showTab('unoPanel',this); toggleMainMenu(false)">
-            🃏 UNO
-          </button>
-        </div>
-        <div class="drawer-divider"></div>
-        <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖
-          WRC-Regeln</button>
-        <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
-      </nav>
       <div id="unoPanel" class="panel"></div>
       <div id="dartPanel" class="panel">
         <div class="overlay">
@@ -6380,6 +6396,63 @@ Abbrechen = vorhandenen Wert behalten`
           Number(result.place) === place
         ).length
       );
+
+      const { data: discgolfRounds, error: discgolfPlayerError } =
+        await supabaseClient
+          .from("discgolf_rounds")
+          .select(`
+            id,
+            discgolf_scores (
+              player,
+              throws
+            )
+          `);
+
+      if (discgolfPlayerError) {
+        console.error("DISCGOLF PLAYER STATS ERROR:", discgolfPlayerError);
+      }
+
+      const frisbeeStats = [0, 0, 0, 0];
+
+      (discgolfRounds || []).forEach(round => {
+        const totals = new Map();
+
+        (round.discgolf_scores || []).forEach(score => {
+          const scorePlayer = String(score.player || "").trim();
+          if (!scorePlayer) return;
+
+          totals.set(
+            scorePlayer,
+            (totals.get(scorePlayer) || 0) + (Number(score.throws) || 0)
+          );
+        });
+
+        const sorted = Array.from(totals.entries())
+          .map(([roundPlayer, total]) => ({ roundPlayer, total }))
+          .sort((a, b) => {
+            if (a.total !== b.total) return a.total - b.total;
+            return a.roundPlayer.localeCompare(b.roundPlayer, "de");
+          });
+
+        let previousTotal = null;
+        let previousPlace = 0;
+
+        sorted.forEach((result, index) => {
+          let place = index + 1;
+
+          if (previousTotal !== null && result.total === previousTotal) {
+            place = previousPlace;
+          }
+
+          previousTotal = result.total;
+          previousPlace = place;
+
+          if (result.roundPlayer === player && place >= 1 && place <= 4) {
+            frisbeeStats[place - 1] += 1;
+          }
+        });
+      });
+
       const allTeam = {
         points: currentAllTeam.points + HISTORIC_TOTALS.points,
         steps: currentAllTeam.steps + HISTORIC_TOTALS.steps,
@@ -6418,6 +6491,20 @@ Abbrechen = vorhandenen Wert behalten`
         <div class="player-share-main">🥈 ${unoStats[1]}</div>
         <div class="player-share-main">🥉 ${unoStats[2]}</div>
         <div class="player-share-main">4️⃣ ${unoStats[3]}</div>
+    </div>
+</div>
+`;
+      const frisbeeCard = () => `
+<div class="player-share-card">
+    <div class="player-share-title">
+        <span>🥏 Discgolf</span>
+    </div>
+
+    <div class="player-share-block">
+        <div class="player-share-main">🥇 ${frisbeeStats[0]}</div>
+        <div class="player-share-main">🥈 ${frisbeeStats[1]}</div>
+        <div class="player-share-main">🥉 ${frisbeeStats[2]}</div>
+        <div class="player-share-main">4️⃣ ${frisbeeStats[3]}</div>
     </div>
 </div>
 `;
@@ -6471,16 +6558,18 @@ Abbrechen = vorhandenen Wert behalten`
         ${card("🏋️", "Übungen", monthPlayer.exercises, monthTeam.exercises, allPlayer.exercises, allTeam.exercises, 0)}
         ${card("🔥", "Bonus", monthPlayer.bonusCount, monthTeam.bonusCount, allPlayer.bonusCount, allTeam.bonusCount, 0, "×")}
   <div class="player-contribution-grid">
-        <div class="card" style="margin-bottom:18px;">
-    <h3>🎁 WRC Daily</h3>
-
-    <div id="playerDailyHistory">
-        Noch keine erledigten Dailys.
-    </div>
-</div>
         ${dartCard()}
-${unoCard()}
+        ${unoCard()}
+        ${frisbeeCard()}
+
+        <div class="card" style="margin-bottom:18px;">
+          <h3>🎁 WRC Daily</h3>
+
+          <div id="playerDailyHistory">
+            Noch keine erledigten Dailys.
+          </div>
         </div>
+      </div>
     `;
       if (typeof WRCDaily !== "undefined") {
         WRCDaily.renderPlayerHistory();
