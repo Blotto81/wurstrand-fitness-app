@@ -1,0 +1,531 @@
+.frisbee-submenu {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 24px;
+  flex-wrap: wrap;
+}
+
+.frisbee-submenu-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.frisbee-submenu-button.selected {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.frisbee-view {
+  display: none;
+}
+
+.frisbee-view.active {
+  display: block;
+}
+
+.frisbee-section {
+  margin-bottom: 22px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.frisbee-section h3,
+.frisbee-history-section h3,
+.frisbee-stats-head h3 {
+  margin-top: 0;
+}
+
+.frisbee-player-grid {
+  display: grid;
+ grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.frisbee-player-button {
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.frisbee-player-button.selected {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: rgba(74, 222, 128, 0.7);
+}
+
+.frisbee-guest-toggle,
+.frisbee-guest-add,
+.frisbee-create-button,
+.frisbee-save-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.frisbee-guest-toggle {
+  margin-top: 12px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+
+.frisbee-guest-form {
+  display: none;
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.frisbee-guest-form.open {
+  display: grid;
+}
+
+.frisbee-guest-form label,
+.frisbee-round-settings label {
+  font-weight: 700;
+}
+
+.frisbee-guest-form input,
+.frisbee-round-settings select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font: inherit;
+}
+
+.frisbee-guest-add,
+.frisbee-create-button,
+.frisbee-save-button {
+  width: 100%;
+  background: #2f8f4e;
+  color: white;
+}
+
+.frisbee-guest-add.success,
+.frisbee-save-button.success {
+  background: #1f7a3f;
+}
+
+.frisbee-round-settings {
+  display: grid;
+  gap: 12px;
+}
+
+.frisbee-scorecard-section {
+  margin-bottom: 22px;
+}
+
+.frisbee-scorecard {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 2px solid #284b33;
+  background:
+    linear-gradient(
+      rgba(255, 255, 255, 0.76),
+      rgba(255, 255, 255, 0.76)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #f3eddc,
+      #f3eddc 28px,
+      #e9e0ca 29px
+    );
+  color: #233126;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.frisbee-scorecard-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px;
+  border-bottom: 2px solid #284b33;
+  background: rgba(40, 75, 51, 0.08);
+}
+
+.frisbee-scorecard-head h3 {
+  margin: 3px 0 0;
+  color: #284b33;
+}
+
+.frisbee-scorecard-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #54715c;
+}
+
+.frisbee-scorecard-info {
+  display: grid;
+  gap: 6px;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.frisbee-scorecard-table-wrapper {
+  overflow-x: auto;
+}
+
+.frisbee-scorecard-empty {
+  padding: 28px 18px;
+  text-align: center;
+  color: #506156;
+  font-weight: 700;
+}
+
+.frisbee-scorecard-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.frisbee-scorecard-table th,
+.frisbee-scorecard-table td {
+  border-right: 1px solid #8e9b90;
+  border-bottom: 1px solid #8e9b90;
+  padding: 8px;
+  text-align: center;
+}
+
+.frisbee-scorecard-table th {
+  background: rgba(40, 75, 51, 0.13);
+  color: #284b33;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.frisbee-scorecard-table th:first-child,
+.frisbee-scorecard-table td:first-child {
+  width: 58px;
+  font-weight: 900;
+}
+
+.frisbee-score-input {
+  width: 54px;
+  height: 42px;
+  box-sizing: border-box;
+  border: 1px solid #75887a;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1f2c22;
+  text-align: center;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.frisbee-score-input:focus {
+  outline: 3px solid rgba(47, 143, 78, 0.25);
+  border-color: #2f8f4e;
+}
+
+.frisbee-total-row td {
+  background: rgba(40, 75, 51, 0.13);
+  font-weight: 900;
+  color: #284b33;
+}
+
+.frisbee-result-section {
+  overflow: hidden;
+}
+
+.frisbee-result-head {
+  margin-bottom: 14px;
+}
+
+.frisbee-podium {
+  display: grid;
+  gap: 10px;
+}
+
+.frisbee-podium-empty {
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  text-align: center;
+  opacity: 0.8;
+}
+
+.frisbee-podium-row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.frisbee-podium-place {
+  font-size: 1.45rem;
+  text-align: center;
+}
+
+.frisbee-podium-name {
+  font-weight: 900;
+}
+
+.frisbee-podium-score {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.frisbee-save-section {
+  margin-bottom: 24px;
+}
+
+.frisbee-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.frisbee-history-section {
+  margin-top: 26px;
+}
+
+.frisbee-history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.frisbee-history-empty,
+.frisbee-stats-empty {
+  opacity: 0.75;
+}
+
+.frisbee-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.frisbee-summary-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.frisbee-summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.frisbee-summary-card strong {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .frisbee-player-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .frisbee-scorecard-head {
+    display: grid;
+  }
+
+  .frisbee-scorecard-info {
+    text-align: left;
+  }
+
+  .frisbee-stats-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 460px) {
+  .frisbee-section {
+    padding: 14px;
+  }
+
+  .frisbee-scorecard-head {
+    padding: 14px;
+  }
+
+  .frisbee-score-input {
+    width: 48px;
+  }
+
+  .frisbee-podium-row {
+    grid-template-columns: 42px 1fr auto;
+    padding: 12px 10px;
+  }
+}
+.frisbee-history-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.frisbee-history-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.frisbee-history-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.frisbee-history-card-head strong {
+  font-size: 18px;
+}
+
+.frisbee-history-card-head span {
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.frisbee-history-results {
+  display: grid;
+  gap: 8px;
+}
+
+.frisbee-history-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.frisbee-history-result span {
+  font-weight: 700;
+}
+
+.frisbee-history-result strong {
+  white-space: nowrap;
+}
+
+.frisbee-history-empty {
+  padding: 16px;
+  text-align: center;
+  opacity: 0.75;
+}
+
+@media (max-width: 600px) {
+  .frisbee-history-card {
+    padding: 14px;
+  }
+
+  .frisbee-history-card-head strong {
+    font-size: 17px;
+  }
+
+  .frisbee-history-result {
+    padding: 10px;
+  }
+}
+.frisbee-history-delete {
+  background: transparent;
+  border: none;
+  color: #b8bfd0;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  margin-left: 12px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.frisbee-history-delete:hover {
+  color: #ff6b6b;
+  transform: scale(1.15);
+}
+.frisbee-stats-summary-card,
+.frisbee-stats-player-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.frisbee-stats-summary-card span{
+  display:block;
+  color:#9fb0d3;
+  margin-bottom:6px;
+}
+
+.frisbee-stats-summary-card strong{
+  font-size:1.5rem;
+}
+
+.frisbee-stats-ranking{
+  display:grid;
+  gap:14px;
+  margin-top:20px;
+}
+
+.frisbee-stats-player-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.frisbee-stats-placements{
+  display:flex;
+  gap:18px;
+  margin-bottom:14px;
+  font-weight:600;
+}
+
+.frisbee-stats-values{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.frisbee-stats-values span{
+  display:block;
+  color:#9fb0d3;
+  font-size:.9rem;
+  margin-bottom:4px;
+}
+
+.frisbee-stats-values strong{
+  font-size:1.1rem;
+}
+
+@media (max-width:720px){
+
+  .frisbee-stats-values{
+    grid-template-columns:1fr;
+  }
+
+}

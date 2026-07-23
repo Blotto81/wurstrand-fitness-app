@@ -1,0 +1,434 @@
+.dart-result-section{
+  margin-top:36px;
+}
+
+.dart-result-hint{
+  margin:0 0 24px;
+  color:#aeb9cc;
+  font-size:14px;
+}
+
+.dart-podium{
+  display:grid;
+  grid-template-columns:1fr 1.12fr 1fr;
+  align-items:end;
+  gap:10px;
+  max-width:760px;
+  margin:0 auto;
+}
+
+.dart-podium-place{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:14px 10px;
+  border:2px solid #3a4762;
+  background:#243149;
+  border-radius:18px 18px 8px 8px;
+  text-align:center;
+}
+
+.dart-podium-first{
+  min-height:300px;
+  border-color:#d4af37;
+  background:linear-gradient(
+    180deg,
+    rgba(212,175,55,.2),
+    #243149 45%
+  );
+}
+
+.dart-podium-second{
+  min-height:245px;
+  border-color:#aeb7c4;
+  background:linear-gradient(
+    180deg,
+    rgba(174,183,196,.17),
+    #243149 45%
+  );
+}
+
+.dart-podium-third{
+  min-height:210px;
+  border-color:#b87943;
+  background:linear-gradient(
+    180deg,
+    rgba(184,121,67,.18),
+    #243149 45%
+  );
+}
+
+.dart-podium-fourth{
+  grid-column:1 / -1;
+  min-height:auto;
+  margin-top:0;
+  border-radius:8px 8px 18px 18px;
+  background:#1e293d;
+}
+
+.dart-medal{
+  font-size:32px;
+  margin-bottom:4px;
+}
+
+.dart-place-title{
+  margin-bottom:14px;
+  font-size:16px;
+  font-weight:800;
+}
+
+.dart-placement-grid{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  gap:8px;
+}
+
+.dart-podium-fourth .dart-placement-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+.dart-placement-button{
+  width:100%;
+  min-height:46px;
+  padding:10px 8px;
+  border:2px solid #3a4762;
+  border-radius:13px;
+  background:#1c273a;
+  color:white;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:
+    background .2s,
+    border-color .2s,
+    transform .1s;
+}
+
+.dart-placement-button:active{
+  transform:scale(.97);
+}
+
+.dart-podium-first .dart-placement-button.selected{
+  border-color:#d4af37;
+  background:#d4af37;
+  color:#172033;
+}
+
+.dart-podium-second .dart-placement-button.selected{
+  border-color:#b9c1cc;
+  background:#b9c1cc;
+  color:#172033;
+}
+
+.dart-podium-third .dart-placement-button.selected{
+  border-color:#bd7d49;
+  background:#bd7d49;
+  color:white;
+}
+
+.dart-podium-fourth .dart-placement-button.selected{
+  border-color:#70809c;
+  background:#70809c;
+}
+
+.dart-placement-empty{
+  display:block;
+  padding:12px 5px;
+  color:#8f9bb0;
+  font-size:13px;
+  line-height:1.35;
+}
+
+@media (max-width:600px){
+  .dart-podium{
+    grid-template-columns:1fr 1.12fr 1fr;
+    gap:6px;
+  }
+
+  .dart-podium-place{
+    padding:11px 5px;
+  }
+
+  .dart-podium-first{
+    min-height:280px;
+  }
+
+  .dart-podium-second{
+    min-height:230px;
+  }
+
+  .dart-podium-third{
+    min-height:195px;
+  }
+
+  .dart-medal{
+    font-size:27px;
+  }
+
+  .dart-place-title{
+    font-size:13px;
+  }
+
+  .dart-placement-button{
+    min-height:42px;
+    padding:8px 4px;
+    font-size:12px;
+    overflow-wrap:anywhere;
+  }
+
+  .dart-placement-empty{
+    font-size:11px;
+  }
+}
+/* ===== Dart: Teilnehmer und Platzierungen korrigieren ===== */
+
+#dartPlayerGrid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  max-width:650px;
+  margin-top:14px;
+}
+
+#dartPlayerGrid .dart-player-button{
+  width:100%;
+  min-height:58px;
+  padding:12px;
+  border:2px solid #40506e;
+  border-radius:17px;
+  background:#26344d;
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+#dartPlayerGrid .dart-player-button.selected{
+  border-color:#45c77a;
+  background:#237447;
+  color:#fff;
+  box-shadow:0 0 0 3px rgba(69, 199, 122, 0.18);
+}
+
+.dart-guest-toggle{
+  margin-top:20px;
+  padding:14px 22px;
+  border:0;
+  border-radius:15px;
+  background:#35486d;
+  color:#fff;
+  font-size:17px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.dart-guest-form{
+  display:none;
+  max-width:650px;
+  margin-top:16px;
+}
+
+.dart-guest-form.open{
+  display:block;
+}
+
+.dart-guest-form label{
+  display:block;
+  margin-bottom:8px;
+  color:#fff;
+}
+
+.dart-guest-form input{
+  width:100%;
+  box-sizing:border-box;
+  padding:14px 16px;
+  border:1px solid #40506e;
+  border-radius:14px;
+  background:#111b30;
+  color:#fff;
+  font-size:17px;
+}
+
+.dart-guest-add{
+  margin-top:12px;
+  padding:13px 20px;
+  border:0;
+  border-radius:14px;
+  background:#35486d;
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* Namen unten sind zunächst nur Auswahlmöglichkeiten */
+.dart-placement-button{
+  opacity:.55;
+  background:#18243a;
+  border-color:#3d4d69;
+}
+
+/* Erst nach einem Klick ist der Platz wirklich vergeben */
+.dart-placement-button.selected{
+  opacity:1;
+  transform:scale(1.02);
+}
+
+@media (max-width:600px){
+  #dartPlayerGrid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+  }
+
+  #dartPlayerGrid .dart-player-button{
+    min-height:52px;
+    font-size:15px;
+  }
+}
+/* ===== Dart: Spielmodus ===== */
+
+.dart-mode-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  max-width:650px;
+  margin-top:14px;
+}
+
+.dart-mode-button{
+  min-height:54px;
+  padding:12px 14px;
+  border:2px solid #40506e;
+  border-radius:16px;
+  background:#26344d;
+  color:#fff;
+  font-size:17px;
+  font-weight:700;
+  cursor:pointer;
+  transition:
+    background .2s,
+    border-color .2s,
+    transform .1s;
+}
+
+.dart-mode-button:active{
+  transform:scale(.97);
+}
+
+.dart-mode-button.selected{
+  border-color:#45c77a;
+  background:#237447;
+  box-shadow:0 0 0 3px rgba(69, 199, 122, 0.18);
+}
+
+.dart-other-mode{
+  display:none;
+  max-width:650px;
+  margin-top:16px;
+}
+
+.dart-other-mode.open{
+  display:block;
+}
+
+.dart-other-mode label{
+  display:block;
+  margin-bottom:8px;
+  color:#fff;
+  font-weight:700;
+}
+
+.dart-other-mode input{
+  width:100%;
+  box-sizing:border-box;
+  padding:14px 16px;
+  border:1px solid #40506e;
+  border-radius:14px;
+  background:#111b30;
+  color:#fff;
+  font-size:17px;
+}
+
+@media (max-width:600px){
+  .dart-mode-grid{
+    gap:8px;
+  }
+
+  .dart-mode-button{
+    min-height:50px;
+    padding:10px 8px;
+    font-size:14px;
+  }
+}
+/* ===== Speichern ===== */
+
+.dart-save-section{
+    display:flex;
+    justify-content:center;
+    margin-top:28px;
+}
+.dart-history-section {
+    margin-top: 30px;
+}
+
+.dart-history-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.dart-history-card strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    .dart-delete-icon{
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:18px;
+    margin-left:8px;
+    opacity:.65;
+    transition:.2s;
+}
+
+.dart-delete-icon:hover{
+    opacity:1;
+    transform:scale(1.15);
+}
+}
+.dart-save-button{
+    min-width:260px;
+    min-height:58px;
+    padding:14px 28px;
+    border:none;
+    border-radius:18px;
+    background:#2b6ee8;
+    color:#fff;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .2s ease;
+}
+
+.dart-save-button:hover{
+    background:#3d7ef4;
+    transform:translateY(-2px);
+}
+
+.dart-save-button:active{
+    transform:scale(.98);
+}
+#dartGameView,
+#dartStatsView {
+  display: none;
+}
+
+#dartGameView.active,
+#dartStatsView.active {
+  display: block;
+}
