@@ -8,7 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="modules/daily/daily.css">
-
+<link rel="stylesheet" href="modules/dart/dart.css">
+<link rel="stylesheet" href="modules/frisbee/frisbee.css">
+<link rel="stylesheet" href="modules/uno/uno.css">
 <style>
 body{
   margin:0;
@@ -959,6 +961,24 @@ button{
   background:transparent;
   color:#e5e7eb;
   font-size:17px;
+}
+.drawer-link{
+    width:100%;
+    text-align:left;
+    justify-content:flex-start;
+    border-radius:16px;
+    padding:14px 16px;
+    background:transparent;
+    color:#e5e7eb;
+    font-size:17px;
+}
+
+/* HIER EINFÜGEN */
+
+.dart-submenu-item{
+    padding-left:44px;
+    font-size:0.95em;
+    opacity:0.9;
 }
 
 .drawer-link:hover{
@@ -2401,16 +2421,18 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 
   <div class="drawer-divider"></div>
 
-  <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
-  <button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
-  <button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
-  <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
-  <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte Rekorde</button>
-  <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
-  <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆 Achievements</button>
-  <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
- <div class="drawer-divider"></div>
+ <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
+<button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
+<button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
 
+<button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
+<button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte Rekorde</button>
+<button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
+<button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆 Achievements</button>
+
+<button class="drawer-link tab" onclick="showTab('dailyPanel',this); toggleMainMenu(false)">📅 WRC Daily</button>
+
+<div class="drawer-divider"></div>
 <button class="drawer-group-title drawer-toggle"
         type="button"
         onclick="toggleGameLounge()">
@@ -2421,24 +2443,25 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 <div id="gameLoungeSubmenu" class="drawer-submenu">
 
 <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('dartPanel',this); toggleMainMenu(false)">
-  🎯 Dart
+    onclick="showTab('dartPanel',this); toggleMainMenu(false)">
+    🎯 Dart
+</button>
+
+
+<button class="drawer-link tab drawer-sublink"
+    onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
+    🥏 Frisbee-Golf
 </button>
 
 <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
-  🥏 Frisbee-Golf
-</button>
-
-<button class="drawer-link tab drawer-sublink"
-        onclick="showTab('unoPanel',this); toggleMainMenu(false)">
-  🃏 UNO
+    onclick="showTab('unoPanel',this); toggleMainMenu(false)">
+    🃏 UNO
 </button>
 </div>
 <div class="drawer-divider"></div>
   <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖 WRC-Regeln</button>
-</nav>
-
+<button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button></nav>
+<div id="unoPanel" class="panel"></div>
 <div id="dartPanel" class="panel">
   <div class="overlay">
     <div class="badge">Game Lounge</div>
@@ -2453,7 +2476,670 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
   </div>
 </div>
 </div>
+<section id="dartStatsPanel" class="panel">
 
+    <div class="dart-stats-page">
+
+        <div class="dart-stats-header">
+            <div>
+                <h2>📊 Dart Statistiken</h2>
+                <p>Alle Ergebnisse und Platzierungen auf einen Blick.</p>
+            </div>
+
+            <button
+                type="button"
+                id="dartStatsReload"
+                class="dart-stats-reload"
+                title="Statistiken neu laden">
+                ↻
+            </button>
+        </div>
+
+
+        <div id="dartStatsSummary" class="dart-stats-summary">
+            <div class="dart-stats-summary-card">
+                <span>🎯 Partien</span>
+                <strong>–</strong>
+            </div>
+
+            <div class="dart-stats-summary-card">
+                <span>👥 Spieler</span>
+                <strong>–</strong>
+            </div>
+
+            <div class="dart-stats-summary-card">
+                <span>⭐ Häufigster Modus</span>
+                <strong>–</strong>
+            </div>
+        </div>
+
+
+        <div class="dart-stats-section">
+            <h3>🏆 Gesamtrangliste</h3>
+
+            <div id="dartStatsRanking" class="dart-stats-ranking">
+                <p class="dart-stats-loading">Statistiken werden geladen …</p>
+            </div>
+        </div>
+
+
+        <div class="dart-stats-section">
+            <h3>👤 Spielerübersicht</h3>
+
+            <div id="dartStatsPlayers" class="dart-stats-player-grid">
+                <p class="dart-stats-loading">Statistiken werden geladen …</p>
+            </div>
+        </div>
+
+
+        <div class="dart-stats-section">
+            <h3>🔥 Letzte fünf Spiele</h3>
+
+            <div id="dartStatsRecent" class="dart-stats-recent">
+                <p class="dart-stats-loading">Statistiken werden geladen …</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <style>
+
+        .dart-stats-page {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .dart-stats-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .dart-stats-header h2 {
+            margin: 0 0 5px;
+        }
+
+        .dart-stats-header p {
+            margin: 0;
+            opacity: 0.72;
+        }
+
+        .dart-stats-reload {
+            flex: 0 0 auto;
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            color: inherit;
+            font-size: 23px;
+            cursor: pointer;
+        }
+
+        .dart-stats-reload:hover {
+            background: rgba(255,255,255,0.11);
+        }
+
+
+        .dart-stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .dart-stats-summary-card {
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .dart-stats-summary-card span {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .dart-stats-summary-card strong {
+            display: block;
+            overflow: hidden;
+            font-size: 20px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        .dart-stats-section {
+            padding: 17px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 17px;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .dart-stats-section h3 {
+            margin: 0 0 15px;
+        }
+
+        .dart-stats-loading,
+        .dart-stats-empty,
+        .dart-stats-error {
+            margin: 0;
+            opacity: 0.72;
+        }
+
+
+        .dart-ranking-row {
+            display: grid;
+            grid-template-columns: 34px minmax(90px, 1fr) repeat(4, 52px);
+            align-items: center;
+            gap: 7px;
+            padding: 11px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .dart-ranking-row:last-child {
+            border-bottom: 0;
+        }
+
+        .dart-ranking-position {
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .dart-ranking-player {
+            overflow: hidden;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dart-ranking-place {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+
+        .dart-stats-player-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .dart-player-stat-card {
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .dart-player-stat-card h4 {
+            margin: 0 0 13px;
+            font-size: 17px;
+        }
+
+        .dart-player-medals {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .dart-player-medal {
+            padding: 8px 4px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .dart-player-details {
+            display: grid;
+            gap: 7px;
+            font-size: 14px;
+        }
+
+        .dart-player-detail {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .dart-player-detail span:first-child {
+            opacity: 0.7;
+        }
+
+
+        .dart-recent-row {
+            display: grid;
+            grid-template-columns: minmax(90px, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .dart-recent-row:last-child {
+            border-bottom: 0;
+        }
+
+        .dart-recent-player {
+            overflow: hidden;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dart-recent-places {
+            display: flex;
+            gap: 8px;
+            font-size: 20px;
+        }
+
+
+        @media (max-width: 650px) {
+
+            .dart-stats-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .dart-stats-player-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dart-ranking-row {
+                grid-template-columns: 29px minmax(70px, 1fr) repeat(4, 39px);
+                gap: 3px;
+                padding-left: 0;
+                padding-right: 0;
+                font-size: 13px;
+            }
+
+            .dart-recent-row {
+                grid-template-columns: 85px minmax(0, 1fr);
+            }
+
+            .dart-recent-places {
+                justify-content: flex-end;
+                gap: 5px;
+                font-size: 18px;
+            }
+        }
+
+    </style>
+
+
+    <script>
+
+        async function loadDartStatistics() {
+
+            const summaryElement =
+                document.getElementById("dartStatsSummary");
+
+            const rankingElement =
+                document.getElementById("dartStatsRanking");
+
+            const playersElement =
+                document.getElementById("dartStatsPlayers");
+
+            const recentElement =
+                document.getElementById("dartStatsRecent");
+
+
+            rankingElement.innerHTML =
+                '<p class="dart-stats-loading">Statistiken werden geladen …</p>';
+
+            playersElement.innerHTML =
+                '<p class="dart-stats-loading">Statistiken werden geladen …</p>';
+
+            recentElement.innerHTML =
+                '<p class="dart-stats-loading">Statistiken werden geladen …</p>';
+
+
+            const { data: games, error } = await supabaseClient
+                .from("dart_games")
+                .select(`
+                    id,
+                    mode,
+                    game_date,
+                    created_at,
+                    dart_results (
+                        player,
+                        place
+                    )
+                `)
+                .order("game_date", { ascending: false })
+                .order("created_at", { ascending: false });
+
+
+            if (error) {
+
+                console.error("DART STATS ERROR:", error);
+
+                rankingElement.innerHTML =
+                    '<p class="dart-stats-error">❌ Statistiken konnten nicht geladen werden.</p>';
+
+                playersElement.innerHTML = "";
+                recentElement.innerHTML = "";
+
+                return;
+            }
+
+
+            const gameList = games || [];
+
+            const fixedPlayers = [
+                "Thorsten",
+                "Basti",
+                "Marian",
+                "Fabi"
+            ];
+
+            const resultPlayers = gameList.flatMap(game =>
+                (game.dart_results || []).map(result => result.player)
+            );
+
+            const extraPlayers = [...new Set(resultPlayers)]
+                .filter(player => !fixedPlayers.includes(player))
+                .sort((a, b) => a.localeCompare(b, "de"));
+
+
+            const players = [
+                ...fixedPlayers,
+                ...extraPlayers
+            ];
+
+
+            const stats = {};
+
+            players.forEach(player => {
+
+                stats[player] = {
+                    player,
+                    places: {
+                        1: 0,
+                        2: 0,
+                        3: 0,
+                        4: 0
+                    },
+                    games: 0,
+                    placeSum: 0,
+                    recent: [],
+                    currentNoFourthStreak: 0
+                };
+
+            });
+
+
+            gameList.forEach(game => {
+
+                (game.dart_results || []).forEach(result => {
+
+                    const playerStats = stats[result.player];
+
+                    if (!playerStats) return;
+
+                    const place = Number(result.place);
+
+                    if (place >= 1 && place <= 4) {
+                        playerStats.places[place] += 1;
+                    }
+
+                    playerStats.games += 1;
+                    playerStats.placeSum += place;
+
+                    if (playerStats.recent.length < 5) {
+                        playerStats.recent.push(place);
+                    }
+
+                });
+
+            });
+
+
+            players.forEach(player => {
+
+                const playerStats = stats[player];
+
+                let streak = 0;
+
+                for (const place of playerStats.recent) {
+
+                    if (place === 4) break;
+
+                    streak += 1;
+                }
+
+                playerStats.currentNoFourthStreak = streak;
+
+            });
+
+
+            const rankedPlayers = Object.values(stats)
+                .filter(player => player.games > 0)
+                .sort((a, b) =>
+                    b.places[1] - a.places[1] ||
+                    b.places[2] - a.places[2] ||
+                    b.places[3] - a.places[3] ||
+                    a.places[4] - b.places[4] ||
+                    a.player.localeCompare(b.player, "de")
+                );
+
+
+            const modeCounts = {};
+
+            gameList.forEach(game => {
+
+                const mode = game.mode || "Sonstiges";
+
+                modeCounts[mode] =
+                    (modeCounts[mode] || 0) + 1;
+
+            });
+
+
+            const mostPlayedMode = Object.entries(modeCounts)
+                .sort((a, b) => b[1] - a[1])[0];
+
+
+            summaryElement.innerHTML = `
+
+                <div class="dart-stats-summary-card">
+                    <span>🎯 Partien</span>
+                    <strong>${gameList.length}</strong>
+                </div>
+
+                <div class="dart-stats-summary-card">
+                    <span>👥 Spieler</span>
+                    <strong>${rankedPlayers.length}</strong>
+                </div>
+
+                <div class="dart-stats-summary-card">
+                    <span>⭐ Häufigster Modus</span>
+                    <strong>
+                        ${mostPlayedMode
+                            ? `${mostPlayedMode[0]} · ${mostPlayedMode[1]}×`
+                            : "–"}
+                    </strong>
+                </div>
+
+            `;
+
+
+            if (!rankedPlayers.length) {
+
+                rankingElement.innerHTML =
+                    '<p class="dart-stats-empty">Noch keine Dart-Ergebnisse vorhanden.</p>';
+
+                playersElement.innerHTML =
+                    '<p class="dart-stats-empty">Noch keine Spielergebnisse vorhanden.</p>';
+
+                recentElement.innerHTML =
+                    '<p class="dart-stats-empty">Noch keine vergangenen Spiele vorhanden.</p>';
+
+                return;
+            }
+
+
+            rankingElement.innerHTML = rankedPlayers
+                .map((player, index) => `
+
+                    <div class="dart-ranking-row">
+
+                        <div class="dart-ranking-position">
+                            ${index + 1}.
+                        </div>
+
+                        <div class="dart-ranking-player">
+                            ${player.player}
+                        </div>
+
+                        <div class="dart-ranking-place">
+                            🥇 ${player.places[1]}
+                        </div>
+
+                        <div class="dart-ranking-place">
+                            🥈 ${player.places[2]}
+                        </div>
+
+                        <div class="dart-ranking-place">
+                            🥉 ${player.places[3]}
+                        </div>
+
+                        <div class="dart-ranking-place">
+                            4️⃣ ${player.places[4]}
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+
+            playersElement.innerHTML = rankedPlayers
+                .map(player => {
+
+                    const averagePlace =
+                        player.games > 0
+                            ? (player.placeSum / player.games)
+                                .toLocaleString("de-DE", {
+                                    minimumFractionDigits: 1,
+                                    maximumFractionDigits: 1
+                                })
+                            : "–";
+
+                    return `
+
+                        <div class="dart-player-stat-card">
+
+                            <h4>👤 ${player.player}</h4>
+
+                            <div class="dart-player-medals">
+
+                                <div class="dart-player-medal">
+                                    🥇 ${player.places[1]}
+                                </div>
+
+                                <div class="dart-player-medal">
+                                    🥈 ${player.places[2]}
+                                </div>
+
+                                <div class="dart-player-medal">
+                                    🥉 ${player.places[3]}
+                                </div>
+
+                                <div class="dart-player-medal">
+                                    4️⃣ ${player.places[4]}
+                                </div>
+
+                            </div>
+
+                            <div class="dart-player-details">
+
+                                <div class="dart-player-detail">
+                                    <span>🎯 Partien</span>
+                                    <strong>${player.games}</strong>
+                                </div>
+
+                                <div class="dart-player-detail">
+                                    <span>📈 Ø Platz</span>
+                                    <strong>${averagePlace}</strong>
+                                </div>
+
+                                <div class="dart-player-detail">
+                                    <span>🔥 Aktuelle Serie</span>
+                                    <strong>
+                                        ${player.currentNoFourthStreak}
+                                        ${player.currentNoFourthStreak === 1
+                                            ? "Spiel"
+                                            : "Spiele"}
+                                        ohne Platz 4
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("");
+
+
+            const placeIcon = place => {
+
+                if (place === 1) return "🥇";
+                if (place === 2) return "🥈";
+                if (place === 3) return "🥉";
+
+                return "4️⃣";
+            };
+
+
+            recentElement.innerHTML = rankedPlayers
+                .map(player => `
+
+                    <div class="dart-recent-row">
+
+                        <div class="dart-recent-player">
+                            ${player.player}
+                        </div>
+
+                        <div class="dart-recent-places">
+
+                            ${player.recent.length
+                                ? player.recent
+                                    .map(place => `<span>${placeIcon(place)}</span>`)
+                                    .join("")
+                                : "<span>–</span>"}
+
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+        }
+
+
+        document
+            .getElementById("dartStatsReload")
+            .addEventListener("click", loadDartStatistics);
+
+
+        window.addEventListener("DOMContentLoaded", () => {
+            loadDartStatistics();
+        });
+
+    </script>
+
+</section>
 <div id="frisbeePanel" class="panel">
   <div class="overlay">
     <div class="badge">Game Lounge</div>
@@ -2468,7 +3154,7 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
   </div>
 </div>
 </div>
-
+<div id="frisbeePanel" class="panel"></div>
 <div id="unoPanel" class="panel">
   <div class="overlay">
     <div class="badge">Game Lounge</div>
@@ -2484,90 +3170,722 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 </div>
 </div>
 
+<div id="dailyPanel" class="panel">
+    <div id="wrcDailyMount"></div>
+</div>
+
 <div id="dashboard" class="panel active">
-<div id="wrcDailyMount"></div>
-
 <div class="overlay">
+<div class="wrc-dashboard-hero">
 
-<div class="badge">Monats-Challenge</div>
+    <div class="wrc-dashboard-heading">
 
-<div class="challenge-row">
+        <div>
+            <div class="wrc-dashboard-brand">
+                🏆 Wurstrand Challenge
+            </div>
 
-<div>
-<h2 id="monthTitle">Mutiger Mai</h2>
-<p id="motivation" class="sub">
-⚡ Monat läuft – aber da geht noch einiges.
-</p>
+            <h2 id="monthTitle">Mutiger Mai</h2>
+
+            <p id="motivation" class="sub">
+                ⚡ Monat läuft – aber da geht noch einiges.
+            </p>
+        </div>
+
+        <div class="wrc-dashboard-month">
+            <label for="monthSelect">Monat / Archiv</label>
+            <select id="monthSelect"></select>
+        </div>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="wrc-dashboard-entry-button"
+        onclick="showTab('eintragen', this)">
+        <span class="wrc-dashboard-entry-icon">➕</span>
+
+        <span>
+            <strong>Aktivität eintragen</strong>
+            <small>Schritte, Rad und Übungen hinzufügen</small>
+        </span>
+
+        <span class="wrc-dashboard-entry-arrow">›</span>
+    </button>
+
+
+    <div id="goalBanner" class="goal-banner">
+        🔥 Monatsziel geschafft – Dicke Bohnen offiziell freigeschaltet.
+    </div>
+
+    <div id="missBanner" class="miss-banner">
+        😳 Monatsziel verpasst – neuer Monat, neues Comeback.
+    </div>
+
+
+    <div class="wrc-progress-card">
+
+        <div class="wrc-progress-top">
+
+            <div>
+                <span class="wrc-progress-label">Monatsfortschritt</span>
+
+                <strong id="barText">
+                    0 / 1700 Punkte
+                </strong>
+            </div>
+
+            <div class="barpercent wrc-progress-percent"
+                 id="barPercentTop">
+                0 %
+            </div>
+
+        </div>
+
+        <div class="bar">
+            <div class="fill" id="barFill"></div>
+        </div>
+
+    </div>
+
+
+    <div id="recordLadder" class="record-ladder"></div>
+
+
+    <div class="wrc-dashboard-values">
+
+        <div class="wrc-dashboard-value">
+            <span>⭐ Erreichte Punkte</span>
+            <strong id="goalCurrent">0</strong>
+        </div>
+
+        <div class="wrc-dashboard-value">
+            <span>🎯 Aktuelles Ziel</span>
+            <strong id="goalTarget">1700</strong>
+        </div>
+
+        <div class="wrc-dashboard-value">
+            <span>📈 Fortschritt</span>
+            <strong id="goalPercent">0 %</strong>
+        </div>
+
+        <div class="wrc-dashboard-value">
+            <span>🏁 Noch offen</span>
+            <strong id="goalRest">1700</strong>
+        </div>
+
+        <div class="wrc-dashboard-value">
+            <span>📅 Nötig pro Resttag</span>
+            <strong id="neededPerDay">0</strong>
+        </div>
+
+        <div class="wrc-dashboard-value">
+            <span>🔮 Prognose Monatsende</span>
+            <strong id="forecast">0</strong>
+        </div>
+
+    </div>
+
 </div>
 
-<div style="width:100%;max-width:300px">
-<label>Monat / Archiv</label>
-<select id="monthSelect"></select>
-</div>
 
-</div>
+<style>
 
-<div id="goalBanner" class="goal-banner">
-🔥 Monatsziel geschafft – Dicke Bohnen offiziell freigeschaltet.
-</div>
+ .wrc-dashboard-hero{
+    position:relative;
 
-<div id="missBanner" class="miss-banner">
-😢 Monatsziel verpasst – neuer Monat, neues Comeback.
-</div>
+    display:flex;
+    flex-direction:column;
+    gap:22px;
 
-<div class="barpercent" id="barPercentTop">
-0%
-</div>
+    padding:28px;
 
-<div class="barhead">
-<span>Fortschrittsbalken</span>
-<span id="barText">0 / 1700 Punkte</span>
-</div>
+    border-radius:24px;
 
-<div class="bar">
-<div class="fill" id="barFill"></div>
-</div>
+    background:
+        radial-gradient(circle at top right,
+            rgba(255,215,80,.12),
+            transparent 32%),
+        radial-gradient(circle at top left,
+            rgba(65,145,255,.08),
+            transparent 38%),
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.04),
+            rgba(255,255,255,.015)
+        );
 
-<div id="recordLadder" class="record-ladder"></div>
-<div class="grid grid4">
+    border:1px solid rgba(255,255,255,.08);
 
-<div class="mini">
-<div class="l">Erreichte Punkte</div>
-<div class="v" id="goalCurrent">0</div>
-</div>
+    box-shadow:
+        0 18px 45px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.04);
 
-<div class="mini">
-<div class="l">Aktuelles Ziel</div>
-<div class="v" id="goalTarget">1700</div>
-</div>
+    overflow:hidden;
+}
+.wrc-dashboard-hero::before{
+    content:"";
 
-<div class="mini">
-<div class="l">Fortschritt</div>
-<div class="v" id="goalPercent">0%</div>
-</div>
+    position:absolute;
 
-<div class="mini">
-<div class="l">Rest</div>
-<div class="v" id="goalRest">1700</div>
-</div>
+    top:-120px;
+    right:-120px;
 
-</div>
+    width:260px;
+    height:260px;
 
-<div class="grid grid2">
+    border-radius:50%;
 
-<div class="mini">
-<div class="l">Noch nötig pro Resttag</div>
-<div class="v" id="neededPerDay">0</div>
-</div>
+    background:
+        radial-gradient(
+            rgba(255,220,80,.16),
+            transparent 70%
+        );
 
-<div class="mini">
-<div class="l">Prognose Monatsende</div>
-<div class="v" id="forecast">0</div>
-</div>
+    pointer-events:none;
+}
 
-</div>
+.wrc-dashboard-hero::after{
+    content:"";
 
-</div>
+    position:absolute;
+
+    left:0;
+    top:0;
+    right:0;
+
+    height:1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.18),
+            transparent
+        );
+}
+
+    .wrc-dashboard-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .wrc-dashboard-brand {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 7px 11px;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .wrc-dashboard-heading h2 {
+        margin: 0 0 5px;
+        font-size: clamp(26px, 5vw, 38px);
+        line-height: 1.08;
+    }
+
+    .wrc-dashboard-heading .sub {
+        margin: 0;
+    }
+
+    .wrc-dashboard-month {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .wrc-dashboard-month label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        opacity: 0.7;
+    }
+
+    .wrc-dashboard-month select {
+        width: 100%;
+    }
+
+
+    .wrc-dashboard-entry-button {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 13px;
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid rgba(53, 211, 153, 0.38);
+        border-radius: 16px;
+        background:
+            linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.18),
+                rgba(16, 185, 129, 0.08)
+            );
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .wrc-dashboard-entry-button:hover {
+        border-color: rgba(53, 211, 153, 0.65);
+        background:
+            linear-gradient(
+                135deg,
+                rgba(34, 197, 94, 0.25),
+                rgba(16, 185, 129, 0.13)
+            );
+    }
+
+    .wrc-dashboard-entry-icon {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.09);
+        font-size: 21px;
+    }
+
+    .wrc-dashboard-entry-button strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 16px;
+    }
+
+    .wrc-dashboard-entry-button small {
+        display: block;
+        opacity: 0.7;
+    }
+
+    .wrc-dashboard-entry-arrow {
+        font-size: 30px;
+        line-height: 1;
+        opacity: 0.7;
+    }
+
+
+    .wrc-progress-card {
+        padding: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 17px;
+        background: rgba(255,255,255,0.045);
+    }
+
+    .wrc-progress-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 12px;
+    }
+
+    .wrc-progress-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+        opacity: 0.68;
+    }
+
+    .wrc-progress-top strong {
+        font-size: 18px;
+    }
+
+    .wrc-progress-percent {
+        flex: 0 0 auto;
+        min-width: 64px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.07);
+        font-size: 18px;
+        font-weight: 800;
+        text-align: center;
+    }
+
+
+    .wrc-dashboard-values {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .wrc-dashboard-value {
+        min-width: 0;
+        padding: 13px;
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+    }
+
+    .wrc-dashboard-value span {
+        display: block;
+        min-height: 32px;
+        margin-bottom: 6px;
+        font-size: 12px;
+        line-height: 1.3;
+        opacity: 0.68;
+    }
+
+    .wrc-dashboard-value strong {
+        display: block;
+        overflow: hidden;
+        font-size: 21px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    @media (max-width: 700px) {
+
+        .wrc-dashboard-heading {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .wrc-dashboard-month {
+            max-width: none;
+        }
+
+        .wrc-dashboard-values {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+    }
+
+    @media (max-width: 430px) {
+
+        .wrc-dashboard-entry-button {
+            padding: 12px;
+        }
+
+        .wrc-dashboard-entry-button small {
+            font-size: 11px;
+        }
+
+        .wrc-progress-top strong {
+            font-size: 16px;
+        }
+
+        .wrc-dashboard-value {
+            padding: 11px;
+        }
+
+        .wrc-dashboard-value strong {
+            font-size: 18px;
+        }
+
+    }
+/* ===== Dashboard-Kennzahlen veredeln ===== */
+
+.wrc-dashboard-values{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+}
+
+.wrc-dashboard-value{
+    position:relative;
+    min-height:118px;
+    padding:18px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.065),
+            rgba(255,255,255,.025)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 10px 24px rgba(0,0,0,.14);
+
+    overflow:hidden;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.wrc-dashboard-value::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,214,70,.8),
+            rgba(76,210,130,.55),
+            transparent
+        );
+
+    opacity:.65;
+}
+
+.wrc-dashboard-value:hover{
+    transform:translateY(-3px);
+    border-color:rgba(255,255,255,.17);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 16px 30px rgba(0,0,0,.2);
+}
+
+.wrc-dashboard-value span{
+    display:block;
+    min-height:auto;
+    margin-bottom:14px;
+
+    font-size:13px;
+    line-height:1.35;
+    opacity:.72;
+}
+
+.wrc-dashboard-value strong{
+    display:block;
+
+    font-size:clamp(24px,3vw,32px);
+    line-height:1;
+    letter-spacing:-.03em;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+@media (max-width:700px){
+
+    .wrc-dashboard-values{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .wrc-dashboard-value{
+        min-height:105px;
+        padding:16px;
+    }
+
+}
+
+@media (max-width:430px){
+
+    .wrc-dashboard-values{
+        gap:10px;
+    }
+
+    .wrc-dashboard-value{
+        min-height:98px;
+        padding:14px;
+        border-radius:15px;
+    }
+
+    .wrc-dashboard-value span{
+        margin-bottom:10px;
+        font-size:12px;
+    }
+
+    .wrc-dashboard-value strong{
+        font-size:21px;
+    }
+
+}
+.month-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.month-card {
+  position: relative;
+  min-width: 0;
+  padding: 15px 16px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.month-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.month-card.done {
+  border-color: rgba(28, 211, 112, 0.75);
+  background: rgba(28, 211, 112, 0.065);
+}
+
+.month-card.current {
+  border: 2px solid rgba(255, 184, 28, 0.95);
+  padding: 14px 15px 13px;
+  background: rgba(255, 184, 28, 0.075);
+  box-shadow: 0 0 0 3px rgba(255, 184, 28, 0.07);
+}
+
+.month-card.empty {
+  opacity: 0.72;
+}
+
+.month-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 24px;
+}
+
+.month-card-title {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.month-current-label {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 184, 28, 0.2);
+  color: #fff3cf;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+}
+
+.month-card-score {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.month-card-score strong {
+  font-size: 28px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.month-card-score span {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.65;
+}
+
+.month-card-goal {
+  margin-top: 5px;
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.month-card-goal strong {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 850;
+}
+
+.month-mini-bar {
+  height: 7px;
+  margin-top: 13px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.month-mini-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+  transition: width 0.4s ease;
+}
+
+.month-card.done .month-mini-fill {
+  color: #1cd370;
+}
+
+.month-card.current .month-mini-fill {
+  color: #ffb81c;
+}
+
+.month-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.month-card-badge {
+  overflow: hidden;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.085);
+  font-size: 10px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.month-card.current .month-card-badge {
+  background: rgba(255, 184, 28, 0.16);
+}
+
+.month-card.done .month-card-badge {
+  background: rgba(28, 211, 112, 0.13);
+}
+
+.month-card-place {
+  flex-shrink: 0;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+@media (max-width: 700px) {
+  .month-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .month-card {
+    padding: 13px;
+  }
+
+  .month-card.current {
+    padding: 12px;
+  }
+
+  .month-card-title {
+    font-size: 14px;
+  }
+
+  .month-card-score strong {
+    font-size: 23px;
+  }
+
+  .month-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+</style>
+
+
 
 <div class="card">
 <h3>📊 Monatsübersicht</h3>
@@ -2577,6 +3895,7 @@ Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
 
 <div id="randomFactBox" class="randomfact"></div>
 
+</div>
 </div>
 
 <div id="recordsPanel" class="panel">
@@ -4020,34 +5339,79 @@ renderAdminStats();
 }
 
 
-function renderMonthlyOverview(){
+function renderMonthlyOverview() {
   const box = document.getElementById("monthlyOverview");
-  if(!box) return;
+  if (!box) return;
 
   const current = selectedMonth();
 
+  const months = Object.keys(monthGoals).map((key) => {
+    const goal = monthGoals[key] || 1700;
+    const total = monthTotalPoints(key);
+
+    return {
+      key,
+      goal,
+      total,
+      percent: goal > 0 ? Math.min((total / goal) * 100, 100) : 0
+    };
+  });
+
+  const ranking = [...months]
+    .filter((month) => month.total > 0)
+    .sort((a, b) => b.total - a.total);
+
   box.innerHTML = `
     <div class="month-overview-grid">
-      ${Object.keys(monthGoals).map(key=>{
-        const baseGoal = monthGoals[key] || 1700;
-        const total = monthTotalPoints(key);
-        const percent = baseGoal ? Math.min((total / baseGoal) * 100,100) : 0;
-        const done = total >= baseGoal;
-        const currentClass = key === current ? " current" : "";
-        const doneClass = done ? " done" : "";
-        const status = done ? "✅" : total > 0 ? "⚡" : "⬛";
+      ${months.map((month) => {
+        const isCurrent = month.key === current;
+        const goalReached = month.total >= month.goal;
+        const hasPoints = month.total > 0;
+
+        const placeIndex = ranking.findIndex(
+          (rankedMonth) => rankedMonth.key === month.key
+        );
+
+        const place = placeIndex >= 0 ? placeIndex + 1 : null;
+
+        let badge = "Noch nicht gestartet";
+
+        if (hasPoints) badge = "Ziel noch offen";
+        if (hasPoints && !goalReached && !isCurrent) badge = "Ziel verpasst";
+        if (isCurrent && !goalReached) badge = "Auf Rekordjagd";
+        if (goalReached) badge = "Ziel erreicht";
+        if (place === 1 && hasPoints) badge = "Rekordmonat";
+
+        const placeText = place
+          ? `🏅 Platz ${place}`
+          : "Ohne Platzierung";
 
         return `
-          <div class="month-card${doneClass}${currentClass}">
+          <div class="month-card${goalReached ? " done" : ""}${isCurrent ? " current" : ""}${!hasPoints ? " empty" : ""}">
             <div class="month-card-head">
-              <div class="month-card-title">${getMonthTitle(key)}</div>
-              <div class="month-card-status">${status}</div>
+              <div class="month-card-title">${getMonthTitle(month.key)}</div>
+              ${isCurrent ? '<span class="month-current-label">AKTUELL</span>' : ""}
             </div>
-            <div class="month-card-label">Erreichte Punkte</div>
-            <div class="month-card-points">${fmt(total,1)}</div>
-            <div class="month-card-sub">Basisziel: ${fmt(baseGoal,1)} Punkte</div>
+
+            <div class="month-card-score">
+              <strong>${fmt(month.total, 1)}</strong>
+              <span>Punkte</span>
+            </div>
+
+            <div class="month-card-goal">
+              Ziel: <strong>${fmt(month.goal, 1)}</strong> Punkte
+            </div>
+
             <div class="month-mini-bar">
-              <div class="month-mini-fill" style="width:${percent}%"></div>
+              <div
+                class="month-mini-fill"
+                style="width:${month.percent}%"
+              ></div>
+            </div>
+
+            <div class="month-card-footer">
+              <span class="month-card-badge">${badge}</span>
+              <span class="month-card-place">${placeText}</span>
             </div>
           </div>
         `;
@@ -4897,7 +6261,7 @@ function renderAverageStats(){
   `;
 }
 
-function renderPlayerOverview(){
+async function renderPlayerOverview(){
 
     const player = document.getElementById("playerSelect").value;
     const month = document.getElementById("playerMonthSelect").value;
@@ -4951,6 +6315,30 @@ const allPlayer = {
   bonusCount: currentAllPlayer.bonusCount + historicPlayer.bonusCount,
   bonusPoints: currentAllPlayer.bonusPoints + historicPlayer.bonusPoints
 };
+const { data: dartResults } = await supabaseClient
+  .from("dart_results")
+  .select("player, place");
+  const dartStats = [1, 2, 3, 4].map(place =>
+  (dartResults || []).filter(result =>
+    result.player === player && result.place === place
+  ).length
+);
+const { data: unoResults, error: unoResultsError } =
+  await supabaseClient
+    .from("uno_results")
+    .select("player, place")
+    .eq("player", player);
+
+if (unoResultsError) {
+  console.error("UNO PLAYER STATS ERROR:", unoResultsError);
+}
+
+const unoStats = [1, 2, 3, 4].map(place =>
+  (unoResults || []).filter(result =>
+    result.player === player &&
+    Number(result.place) === place
+  ).length
+);
 const allTeam = {
   points: currentAllTeam.points + HISTORIC_TOTALS.points,
   steps: currentAllTeam.steps + HISTORIC_TOTALS.steps,
@@ -4964,7 +6352,34 @@ const allTeam = {
     const pct = (part,total)=> total ? (part / total) * 100 : 0;
     const bar = (value)=>`<div class="player-share-bar"><div class="player-share-fill" style="width:${Math.min(Math.max(value,0),100)}%"></div></div>`;
     const valueLine = (value,total,dec=0,suffix="")=>`${fmt(value,dec)}${suffix} <span class="sub">von ${fmt(total,dec)}${suffix}</span>`;
+const dartCard = () => `
+<div class="player-share-card">
+    <div class="player-share-title">
+        <span>🎯 Dart</span>
+    </div>
 
+    <div class="player-share-block">
+        <div class="player-share-main">🥇 ${dartStats[0]}</div>
+        <div class="player-share-main">🥈 ${dartStats[1]}</div>
+        <div class="player-share-main">🥉 ${dartStats[2]}</div>
+        <div class="player-share-main">4️⃣ ${dartStats[3]}</div>
+    </div>
+</div>
+`;
+const unoCard = () => `
+<div class="player-share-card">
+    <div class="player-share-title">
+        <span>🃏 UNO</span>
+    </div>
+
+    <div class="player-share-block">
+        <div class="player-share-main">🥇 ${unoStats[0]}</div>
+        <div class="player-share-main">🥈 ${unoStats[1]}</div>
+        <div class="player-share-main">🥉 ${unoStats[2]}</div>
+        <div class="player-share-main">4️⃣ ${unoStats[3]}</div>
+    </div>
+</div>
+`;
     const card = (icon,title,monthValue,monthTotal,allValue,allTotal,dec=0,suffix="")=>{
       const monthPct = pct(monthValue,monthTotal);
       const allPct = pct(allValue,allTotal);
@@ -5021,7 +6436,9 @@ const allTeam = {
         ${card("💪","Liegestütze",monthPlayer.pushups,monthTeam.pushups,allPlayer.pushups,allTeam.pushups,0)}
         ${card("🏋️","Übungen",monthPlayer.exercises,monthTeam.exercises,allPlayer.exercises,allTeam.exercises,0)}
         ${card("🔥","Bonus",monthPlayer.bonusCount,monthTeam.bonusCount,allPlayer.bonusCount,allTeam.bonusCount,0,"×")}
-      </div>
+${dartCard()}
+${unoCard()}
+        </div>
     `;
    if (typeof WRCDaily !== "undefined") {
     WRCDaily.renderPlayerHistory();
@@ -5613,6 +7030,9 @@ function toggleGameLounge() {
 <script src="modules/daily/daily-pool.js"></script>
 <script src="modules/daily/daily-manager.js"></script>
 <script src="modules/daily/daily.js"></script>
+<script src="modules/dart/dart.js"></script>
+<script src="modules/frisbee/frisbee.js"></script>
+<script src="modules/uno/uno.js"></script>
 </script>
 </body>
 </html>
