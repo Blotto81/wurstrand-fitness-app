@@ -4,14 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WRC">
   <title>Wurstrand Challenge</title>
 
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="modules/daily/daily.css">
   <link rel="stylesheet" href="modules/dart/dart.css">
   <link rel="stylesheet" href="modules/frisbee/frisbee.css">
   <link rel="stylesheet" href="modules/uno/uno.css">
+  <link rel="stylesheet" href="modules/mascots/mascots.css">
+  <link rel="stylesheet" href="modules/pwa/pwa.css">
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -75,6 +84,7 @@
     <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖
       WRC-Regeln</button>
     <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
+    <button class="drawer-link tab" onclick="showTab('mascotsPanel',this); toggleMainMenu(false)">🌭 Wursti &amp; Bertha</button>
   </nav>
 
   <button class="mobile-menu-button" onclick="toggleMainMenu()" aria-label="Menü öffnen">☰</button>
@@ -1034,6 +1044,8 @@ background:#0f172a
 
   </div>
 
+  <div id="mascotsPanel" class="panel"></div>
+
   <div id="rulesPanel" class="panel">
 
     <div class="card rules-hero">
@@ -1252,6 +1264,7 @@ background:#0f172a
   <script src="entries-utils.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
+  <script src="modules/mascots/mascots.js"></script>
   <script>
     // WRC Version 2.2.1
 
@@ -3623,6 +3636,7 @@ background:#0f172a
   <script src="modules/dart/dart.js"></script>
   <script src="modules/frisbee/frisbee.js"></script>
   <script src="modules/uno/uno.js"></script>
+  <script src="modules/pwa/pwa.js"></script>
 </body>
 
 </html>
