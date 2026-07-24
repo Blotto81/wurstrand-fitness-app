@@ -626,7 +626,10 @@
 
 
         <div id="goalBanner" class="goal-banner">
-          🔥 Monatsziel geschafft – Dicke Bohnen offiziell freigeschaltet.
+          <div class="goal-banner-content">
+            <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
+            <strong>🔥 Monatsziel geschafft – Dicke Bohnen offiziell freigeschaltet.</strong>
+          </div>
         </div>
 
         <div id="missBanner" class="miss-banner">
@@ -667,11 +670,17 @@
           <div class="wrc-dashboard-value">
             <span>⭐ Erreichte Punkte</span>
             <strong id="goalCurrent">0</strong>
+            <div id="dashboardWeekTrend"></div>
           </div>
 
-          <div class="wrc-dashboard-value">
+          <div class="wrc-dashboard-value goal-ring-card">
             <span>🎯 Aktuelles Ziel</span>
-            <strong id="goalTarget">1700</strong>
+            <div id="goalProgressRing" class="goal-progress-ring" aria-label="Monatsfortschritt 0 Prozent">
+              <div class="goal-progress-ring-inner">
+                <strong id="goalTarget">1700</strong>
+                <small id="goalRingPercent">0%</small>
+              </div>
+            </div>
           </div>
 
           <div class="wrc-dashboard-value">
@@ -1533,6 +1542,64 @@ background:#0f172a
       return entries.map(e => e.date).sort().reverse()[0];
     }
 
+    function getWeeklyTrend(entries, anchorDate, metric = "points") {
+      if (!anchorDate) {
+        return { current: 0, previous: 0, percent: null, direction: "neutral" };
+      }
+
+      const anchor = new Date(anchorDate + "T12:00:00");
+      const daysSinceMonday = (anchor.getDay() + 6) % 7;
+      const currentStart = new Date(anchor);
+      currentStart.setDate(anchor.getDate() - daysSinceMonday);
+
+      const previousStart = new Date(currentStart);
+      previousStart.setDate(currentStart.getDate() - 7);
+
+      const previousEnd = new Date(anchor);
+      previousEnd.setDate(anchor.getDate() - 7);
+
+      const dateKey = date => [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+
+      const value = entry => {
+        if (metric === "points") return calcPoints(entry).total;
+        if (metric === "exercises") return entry.exercise ? 1 : 0;
+        return Number(entry[metric]) || 0;
+      };
+
+      const sumRange = (start, end) => entries
+        .filter(entry => entry.date >= dateKey(start) && entry.date <= dateKey(end))
+        .reduce((sum, entry) => sum + value(entry), 0);
+
+      const current = sumRange(currentStart, anchor);
+      const previous = sumRange(previousStart, previousEnd);
+      const percent = previous > 0 ? ((current - previous) / previous) * 100 : null;
+      const direction = percent === null
+        ? current > 0 ? "up" : "neutral"
+        : percent >= 5 ? "up" : percent <= -5 ? "down" : "neutral";
+
+      return { current, previous, percent, direction };
+    }
+
+    function trendMarkup(trend, options = {}) {
+      const decimals = options.decimals || 0;
+      const suffix = options.suffix || "";
+      const icon = trend.direction === "up" ? "↑" : trend.direction === "down" ? "↓" : "→";
+      const className = `trend-${trend.direction}`;
+
+      let comparison = "Noch keine Vorwoche";
+      if (trend.percent !== null) {
+        comparison = `${trend.percent >= 0 ? "+" : ""}${fmt(trend.percent, 1)}%`;
+      } else if (trend.current > 0) {
+        comparison = "Neu";
+      }
+
+      return `<span class="trend-indicator ${className}">${icon} ${comparison} <small>zur Vorwoche · ${fmt(trend.current, decimals)}${suffix}</small></span>`;
+    }
+
     function toast(msg) {
       const t = document.getElementById("toast");
       t.innerText = msg;
@@ -1582,10 +1649,36 @@ background:#0f172a
     }
 
 
+    function animateRewardPoints(element, points) {
+      const target = Number(points) || 0;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (reduceMotion || target === 0) {
+        element.textContent = `+${fmt(target, 1)} Punkte`;
+        return;
+      }
+
+      const duration = 700;
+      const start = performance.now();
+
+      const update = now => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.textContent = `+${fmt(target * eased, 1)} Punkte`;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      };
+
+      requestAnimationFrame(update);
+    }
+
     function showSaveReward(data) {
       const box = document.getElementById("saveReward");
       if (!box) return;
 
+      const rewardPoints = Number(data.points) || 0;
       const lines = (data.lines || []).map(line =>
         `<div class="save-reward-line${line.gold ? " gold" : ""}">${line.text}</div>`
       ).join("");
@@ -1593,26 +1686,38 @@ background:#0f172a
       box.innerHTML = `
     <div class="save-reward-card">
       <div class="save-reward-head">
-        <div class="save-reward-icon">${data.icon || "🎉"}</div>
+        <img
+          class="save-reward-mascot"
+          src="wursti-speichern.png"
+          alt=""
+          aria-hidden="true"
+        >
         <div>
           <div class="save-reward-title">${data.title || "Eintrag gespeichert"}</div>
           <div class="save-reward-sub">${data.subtitle || "Wurstrand sammelt weiter."}</div>
         </div>
       </div>
-      <div class="save-reward-points">+${fmt(data.points || 0, 1)} Punkte</div>
+      <div class="save-reward-points" aria-label="+${fmt(rewardPoints, 1)} Punkte">
+        <span class="save-reward-points-value" aria-hidden="true">+0,0 Punkte</span>
+      </div>
       <div class="save-reward-lines">${lines}</div>
     </div>
   `;
 
       box.classList.add("show");
+      const pointsElement = box.querySelector(".save-reward-points-value");
+      if (pointsElement) {
+        animateRewardPoints(pointsElement, rewardPoints);
+      }
       clearTimeout(window.saveRewardTimer);
       window.saveRewardTimer = setTimeout(() => {
         box.classList.remove("show");
-      }, 3600);
+      }, data.duration || 3600);
     }
 
     function buildSaveReward(entry, options = {}) {
       const points = calcPoints(entry);
+      const personalRecords = options.personalRecords || [];
       const dateKey = (entry.date || "").slice(0, 7);
       const dayEntries = allEntries.filter(e => e.date === entry.date);
       const dayTotal = dayEntries.reduce((sum, e) => sum + calcPoints(e).total, 0);
@@ -1631,13 +1736,32 @@ background:#0f172a
         "Das gibt Rückenwind!"
       ];
 
-      const title = options.merged
-        ? "Eintrag zusammengeführt!"
-        : options.editing
-          ? "Änderung gespeichert!"
-          : funTitles[Math.floor(Math.random() * funTitles.length)];
+      const title = personalRecords.length
+        ? personalRecords.length === 1
+          ? "Persönlicher Rekord!"
+          : `${personalRecords.length} persönliche Rekorde!`
+        : options.merged
+          ? "Eintrag zusammengeführt!"
+          : options.editing
+            ? "Änderung gespeichert!"
+            : funTitles[Math.floor(Math.random() * funTitles.length)];
 
       const lines = [];
+
+      personalRecords.forEach(record => {
+        const previousText = record.previous > 0
+          ? ` · bisher ${fmt(record.previous, record.decimals)}${record.suffix}`
+          : " · erster Wert";
+        const improvementText = record.improvement !== null
+          ? ` · +${fmt(record.improvement, 1)}%`
+          : "";
+        const prefix = record.significant ? "🚀 Deutlich verbessert" : "🏆 Neuer Rekord";
+
+        lines.push({
+          text: `${prefix}: ${record.label} ${fmt(record.current, record.decimals)}${record.suffix}${previousText}${improvementText}`,
+          gold: true
+        });
+      });
 
       if (points.bonus > 0) {
         lines.push({ text: `🔥 Bonus aktiviert: +${fmt(points.bonus, 0)} Bohnenpunkte`, gold: true });
@@ -1655,11 +1779,12 @@ background:#0f172a
       }
 
       return {
-        icon: points.total >= 30 ? "🔥" : points.total >= 15 ? "🎉" : "✅",
+        icon: personalRecords.length ? "🏆" : points.total >= 30 ? "🔥" : points.total >= 15 ? "🎉" : "✅",
         title,
         subtitle: `${entry.person} · ${formatDate(entry.date)}`,
         points: points.total,
-        lines
+        lines,
+        duration: personalRecords.length ? 5200 : 3600
       };
     }
 
@@ -2076,10 +2201,30 @@ background:#0f172a
       setText("neededPerDay", fmt(rest / restDays, 1));
       setText("forecast", fmt(forecast));
 
+      const dashboardWeekTrend = document.getElementById("dashboardWeekTrend");
+      if (dashboardWeekTrend) {
+        const anchorDate = getLastEntryDate(entries);
+        dashboardWeekTrend.innerHTML = trendMarkup(
+          getWeeklyTrend(allEntries, anchorDate, "points"),
+          { decimals: 1 }
+        );
+      }
+
       const fill = document.getElementById("barFill");
       if (fill) {
-        fill.style.width = Math.min(percent, 100) + "%";
+        requestAnimationFrame(() => {
+          fill.style.width = Math.min(percent, 100) + "%";
+        });
       }
+
+      const goalProgressRing = document.getElementById("goalProgressRing");
+      if (goalProgressRing) {
+        goalProgressRing.setAttribute("aria-label", `Monatsfortschritt ${percent} Prozent`);
+        requestAnimationFrame(() => {
+          goalProgressRing.style.setProperty("--goal-progress", Math.min(percent, 100));
+        });
+      }
+      setText("goalRingPercent", percent + "%");
 
       renderRecordLadder(key, total);
 
@@ -2690,18 +2835,11 @@ background:#0f172a
       const goal = monthGoals[key] || 1700;
       const dailyTarget = goal / lastDay;
 
-      const last7 = dayKeys.slice(-7).reduce((s, d) => s + dayTotals[d].points, 0);
-      const prev7 = dayKeys.slice(-14, -7).reduce((s, d) => s + dayTotals[d].points, 0);
-      let formIcon = "➡️";
-      let formText = "stabil";
-      let formNote = "Noch nicht genug Vergleichsdaten.";
-
-      if (prev7 > 0) {
-        const diff = ((last7 - prev7) / prev7) * 100;
-        formIcon = diff >= 8 ? "📈" : diff <= -8 ? "📉" : "➡️";
-        formText = diff >= 8 ? "steigend" : diff <= -8 ? "fallend" : "stabil";
-        formNote = `${diff >= 0 ? "+" : ""}${fmt(diff, 1)}% gegenüber den 7 Tagen davor.`;
-      }
+      const anchorDate = getLastEntryDate(entries);
+      const pointsTrend = getWeeklyTrend(allEntries, anchorDate, "points");
+      const stepsTrend = getWeeklyTrend(allEntries, anchorDate, "steps");
+      const bikeTrend = getWeeklyTrend(allEntries, anchorDate, "bike");
+      const exerciseTrend = getWeeklyTrend(allEntries, anchorDate, "exercises");
 
       const weekdayNames = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
       const weekdayTotals = {};
@@ -2747,9 +2885,13 @@ background:#0f172a
 
       box.innerHTML = `
     <div class="analysis-card">
-      <div class="label">Teamform</div>
-      <div class="big">${formIcon} ${formText}</div>
-      <div class="note">${formNote}</div>
+      <div class="label">Wochenentwicklung</div>
+      <div class="analysis-trend-list">
+        <div><b>⭐ Punkte</b>${trendMarkup(pointsTrend, { decimals: 1 })}</div>
+        <div><b>👣 Schritte</b>${trendMarkup(stepsTrend)}</div>
+        <div><b>🚴 Fahrrad</b>${trendMarkup(bikeTrend, { decimals: 1, suffix: " km" })}</div>
+        <div><b>🏋️ Übungen</b>${trendMarkup(exerciseTrend)}</div>
+      </div>
     </div>
     <div class="analysis-card">
       <div class="label">Stärkster Wochentag</div>
@@ -2891,6 +3033,11 @@ background:#0f172a
 
       const monthPlayer = sumData(monthPlayerEntries);
       const monthTeam = sumData(monthTeamEntries);
+      const playerWeekTrend = getWeeklyTrend(
+        allPlayerEntries,
+        getLastEntryDate(monthTeamEntries),
+        "points"
+      );
 
       const currentAllPlayer = sumData(allPlayerEntries);
       const currentAllTeam = sumData(allTeamEntries);
@@ -3089,6 +3236,10 @@ background:#0f172a
         <div class="player-chip">
           <div class="chip-label">Punkte-Anteil Gesamt</div>
           <div class="chip-value">${fmt(pct(allPlayer.points, allTeam.points), 1)}%</div>
+        </div>
+        <div class="player-chip">
+          <div class="chip-label">Wochentrend Punkte</div>
+          <div class="chip-value">${trendMarkup(playerWeekTrend, { decimals: 1 })}</div>
         </div>
       </div>
 

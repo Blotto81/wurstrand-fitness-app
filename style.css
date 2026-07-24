@@ -179,7 +179,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #22c55e, #84cc16);
-      transition: .4s;
+      transition: width .85s cubic-bezier(.22, 1, .36, 1);
     }
 
     .tabs {
@@ -2036,6 +2036,36 @@
       line-height: 1;
     }
 
+    .save-reward-mascot {
+      flex: 0 0 auto;
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .28));
+      animation: saveMascotPop .9s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    @keyframes saveMascotPop {
+      0% {
+        opacity: 0;
+        transform: translateY(8px) scale(.82) rotate(-2deg);
+      }
+
+      48% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.06) rotate(1.5deg);
+      }
+
+      72% {
+        transform: translateY(0) scale(.98) rotate(-1deg);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0);
+      }
+    }
+
     .save-reward-title {
       font-size: 20px;
       font-weight: 900;
@@ -2321,6 +2351,11 @@
           font-size: 18px;
         }
 
+        .save-reward-mascot {
+          width: 58px;
+          height: 58px;
+        }
+
         .save-reward-points {
           font-size: 31px;
         }
@@ -2470,6 +2505,303 @@ body {
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0) !important;
+}
+
+.trend-indicator {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.trend-indicator small {
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trend-up {
+  color: #4ade80;
+}
+
+.trend-neutral {
+  color: #facc15;
+}
+
+.trend-down {
+  color: #fb7185;
+}
+
+.analysis-trend-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.analysis-trend-list > div {
+  display: flex;
+  flex-direction: column;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.analysis-trend-list > div:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.achievement-mini-line.achievement-new {
+  border-radius: 10px;
+  animation: achievementUnlock .9s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.achievement-group-card.achievement-group-new {
+  animation: achievementGroupGlow 1.2s ease-out both;
+}
+
+.game-mascot-heading {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.game-mascot-heading > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.game-mascot {
+  flex: 0 0 auto;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .24));
+}
+
+.panel.active .game-mascot {
+  animation: mascotHello .65s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.goal-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.goal-banner-mascot {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .24));
+  animation: goalMascotCelebrate 1s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes mascotHello {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes goalMascotCelebrate {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(.82) rotate(-2deg);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.06) rotate(1.5deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+
+@media (max-width: 430px) {
+  .game-mascot {
+    width: 66px;
+    height: 66px;
+  }
+
+  .goal-banner-mascot {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+button:not(:disabled) {
+  transition-duration: .14s;
+  transition-timing-function: ease-out;
+}
+
+button:not(:disabled):active {
+  transform: scale(.97);
+  filter: brightness(1.1);
+}
+
+@keyframes achievementUnlock {
+  0% {
+    opacity: .45;
+    transform: scale(.96);
+    background: rgba(74, 222, 128, .3);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scale(1.025);
+    background: rgba(74, 222, 128, .2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    background: transparent;
+  }
+}
+
+@keyframes achievementGroupGlow {
+  0% {
+    border-color: #4ade80;
+    box-shadow: 0 0 0 rgba(74, 222, 128, 0);
+  }
+
+  45% {
+    border-color: #4ade80;
+    box-shadow: 0 0 24px rgba(74, 222, 128, .24);
+  }
+
+  100% {
+    border-color: #334155;
+    box-shadow: none;
+  }
+}
+
+.player-chip .trend-indicator {
+  justify-content: center;
+}
+
+@property --goal-progress {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.goal-ring-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.goal-progress-ring {
+  --goal-progress: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 96px;
+  height: 96px;
+  margin: auto;
+  padding: 7px;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      #4ade80 0 calc(var(--goal-progress) * 1%),
+      rgba(255, 255, 255, .1) calc(var(--goal-progress) * 1%) 100%
+    );
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+  transition: --goal-progress .9s cubic-bezier(.22, 1, .36, 1);
+}
+
+.goal-progress-ring-inner {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #18243a;
+  text-align: center;
+}
+
+.goal-progress-ring .goal-progress-ring-inner strong {
+  font-size: 19px;
+}
+
+.goal-progress-ring small {
+  margin-top: -14px;
+  color: #bbf7d0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+@media (max-width: 430px) {
+  .goal-progress-ring {
+    width: 82px;
+    height: 82px;
+  }
+
+  .goal-progress-ring .goal-progress-ring-inner strong {
+    font-size: 17px;
+  }
+}
+
+.panel.active .card,
+.panel.active > .overlay {
+  animation: wrcCardEnter .32s ease-out both;
+}
+
+@keyframes wrcCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .goal-progress-ring {
+    transition: none;
+  }
+
+  button:not(:disabled) {
+    transition: none;
+  }
+
+  button:not(:disabled):active {
+    transform: none;
+  }
+
+  .achievement-mini-line.achievement-new,
+  .achievement-group-card.achievement-group-new {
+    animation: none;
+  }
+
+  .save-reward-mascot {
+    animation: none;
+  }
+
+  .panel.active .game-mascot,
+  .goal-banner-mascot {
+    animation: none;
+  }
+
+  .panel.active .card,
+  .panel.active > .overlay {
+    animation: none;
+  }
 }
 
 

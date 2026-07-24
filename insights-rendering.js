@@ -172,6 +172,8 @@
         return `${fmt(value, decimals)} ${unit}`;
       };
 
+      const newAchievementKeys = new Set();
+
       box.innerHTML = groups.map(group => {
         const reached = group.milestones.filter(m => group.value >= m[0]);
         const next = group.milestones.find(m => group.value < m[0]);
@@ -181,17 +183,23 @@
 
           if (!localStorage.getItem(storageKey)) {
             localStorage.setItem(storageKey, "true");
+            newAchievementKeys.add(storageKey);
             showBigPop(group.icon, "Achievement freigeschaltet!", `${m[1]} · ${fmtUnit(m[0], group.unit, group.decimals)}`);
           }
         });
 
         const reachedHtml = reached.length
-          ? reached.map(m => `
-        <div class="achievement-mini-line">
+          ? reached.map(m => {
+            const storageKey = `achievement_${group.key}_${m[0]}`;
+            const newClass = newAchievementKeys.has(storageKey) ? " achievement-new" : "";
+
+            return `
+        <div class="achievement-mini-line${newClass}">
           <div>${group.icon} ${m[1]}</div>
           <div>✓ ${fmtUnit(m[0], group.unit, group.decimals)}</div>
         </div>
-      `).join("")
+      `;
+          }).join("")
           : `<div class="achievement-mini-line muted">Noch nichts freigeschaltet</div>`;
 
         const nextHtml = next
@@ -209,9 +217,12 @@
       `;
 
         const hiddenCount = group.milestones.length - reached.length - (next ? 1 : 0);
+        const hasNewAchievement = reached.some(m =>
+          newAchievementKeys.has(`achievement_${group.key}_${m[0]}`)
+        );
 
         return `
-      <div class="achievement-group-card">
+      <div class="achievement-group-card${hasNewAchievement ? " achievement-group-new" : ""}">
         <div class="achievement-group-head">
           <div class="achievement-group-title">
             <span class="achievement-group-icon">${group.icon}</span>

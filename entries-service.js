@@ -13,6 +13,50 @@
       allEntries = cleanLoadedEntries(data || []);
       renderAll();
     }
+
+    function getNewPersonalRecords(entry) {
+      const metrics = [
+        { key: "steps", label: "Schritte", decimals: 0, suffix: "", value: e => +e.steps || 0 },
+        { key: "bike", label: "Fahrrad", decimals: 1, suffix: " km", value: e => +e.bike || 0 },
+        { key: "squats", label: "Kniebeugen", decimals: 0, suffix: "", value: e => +e.squats || 0 },
+        { key: "pushups", label: "Liegestütze", decimals: 0, suffix: "", value: e => +e.pushups || 0 },
+        { key: "points", label: "Tagespunkte", decimals: 1, suffix: " Punkte", value: e => calcPoints(e).total }
+      ];
+
+      const playerEntries = allEntries.filter(e => e.person === entry.person);
+
+      return metrics.flatMap(metric => {
+        const current = metric.value(entry);
+        if (current <= 0) return [];
+
+        const oldDayBest = playerEntries
+          .filter(e => e.date === entry.date)
+          .reduce((best, e) => Math.max(best, metric.value(e)), 0);
+
+        const otherDayBest = playerEntries
+          .filter(e => e.date !== entry.date)
+          .reduce((best, e) => Math.max(best, metric.value(e)), 0);
+
+        const previous = Math.max(oldDayBest, otherDayBest);
+        if (current <= previous) return [];
+
+        const improvement = previous > 0
+          ? ((current - previous) / previous) * 100
+          : null;
+
+        return [{
+          key: metric.key,
+          label: metric.label,
+          decimals: metric.decimals,
+          suffix: metric.suffix,
+          current,
+          previous,
+          improvement,
+          significant: improvement !== null && improvement >= 10
+        }];
+      });
+    }
+
     async function saveEntry() {
       const entry = {
         date: document.getElementById("date").value,
@@ -66,9 +110,14 @@
         return;
       }
 
+      const personalRecords = getNewPersonalRecords(savedEntry);
       resetForm();
       await loadEntries();
-      showSaveReward(buildSaveReward(savedEntry, { merged: wasMerged, editing: wasEditing }));
+      showSaveReward(buildSaveReward(savedEntry, {
+        merged: wasMerged,
+        editing: wasEditing,
+        personalRecords
+      }));
       showTab("eintraege", document.querySelectorAll(".tab")[2]);
     }
 
@@ -88,4 +137,3 @@
 
       await loadEntries();
     }
-
