@@ -1,0 +1,281 @@
+:root {
+  --season-accent: #22c55e;
+  --season-accent-soft: rgba(34, 197, 94, .14);
+  --season-glow: rgba(34, 197, 94, .2);
+  --season-header: transparent;
+}
+
+.wrc-season-active .app-header {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--season-accent) 34%, #334155);
+  background:
+    radial-gradient(circle at 12% 40%, var(--season-accent-soft), transparent 36%),
+    linear-gradient(135deg, var(--season-header), rgba(17, 24, 39, .95) 58%);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, .3),
+    0 0 28px var(--season-glow);
+}
+
+.wrc-season-active .app-header .logo-header {
+  position: relative;
+  z-index: 2;
+}
+
+.wrc-season-active .app-header .main-menu-button,
+.wrc-season-active .mobile-menu-button {
+  border-color: color-mix(in srgb, var(--season-accent) 55%, #334155);
+  box-shadow: 0 0 18px var(--season-glow);
+}
+
+.wrc-season-badge {
+  width: max-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--season-accent) 42%, transparent);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--season-accent) 78%, white);
+  background: color-mix(in srgb, var(--season-accent-soft) 78%, rgba(15, 23, 42, .7));
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .035em;
+  line-height: 1.25;
+}
+
+.wrc-season-accessories {
+  position: absolute;
+  z-index: 3;
+  top: -9px;
+  left: 70px;
+  display: flex;
+  align-items: flex-end;
+  gap: 26px;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .38));
+}
+
+.wrc-season-accessories span {
+  display: block;
+  font-size: 23px;
+  transform: rotate(8deg);
+}
+
+.wrc-season-accessories span + span {
+  font-size: 17px;
+  transform: translateY(27px) rotate(-9deg);
+}
+
+.wrc-season-garland {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 18px;
+  display: flex;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.wrc-season-garland::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: -7px;
+  right: -7px;
+  height: 1px;
+  background: rgba(203, 213, 225, .24);
+  transform: rotate(-2deg);
+}
+
+.wrc-season-garland i {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bulb);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--bulb) 72%, transparent);
+  animation: wrc-season-glow 3.2s ease-in-out var(--bulb-delay) infinite;
+}
+
+.wrc-season-particles {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.wrc-season-active .wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.wrc-season-particle {
+  position: absolute;
+  left: var(--x);
+  top: -8vh;
+  color: var(--season-accent);
+  font-size: var(--size);
+  line-height: 1;
+  opacity: .32;
+  will-change: transform;
+  filter: drop-shadow(0 0 5px var(--season-glow));
+}
+
+.wrc-season-particles[data-motion="fall"] .wrc-season-particle,
+.wrc-season-particles[data-motion="drift"] .wrc-season-particle {
+  animation: wrc-season-fall var(--duration) linear var(--delay) infinite;
+}
+
+.wrc-season-particles[data-motion="float"] .wrc-season-particle {
+  top: auto;
+  bottom: -8vh;
+  animation: wrc-season-rise var(--duration) ease-in-out var(--delay) infinite;
+}
+
+.wrc-season-particles[data-motion="rise"] .wrc-season-particle {
+  top: auto;
+  bottom: -8vh;
+  animation: wrc-season-rise var(--duration) linear var(--delay) infinite;
+}
+
+.wrc-season-particles[data-motion="glide"] .wrc-season-particle {
+  top: var(--y);
+  left: -10vw;
+  animation: wrc-season-glide var(--duration) linear var(--delay) infinite;
+}
+
+.wrc-season-particles[data-motion="spark"] .wrc-season-particle {
+  top: var(--y);
+  animation: wrc-season-spark var(--duration) ease-in-out var(--delay) infinite;
+}
+
+.wrc-season-halloween .app-header::after {
+  content: "🕸";
+  position: absolute;
+  right: -8px;
+  bottom: -18px;
+  color: rgba(226, 232, 240, .17);
+  font-size: 68px;
+  transform: rotate(-12deg);
+}
+
+.wrc-season-christmas .wrc-season-garland i {
+  animation-duration: 2.4s;
+}
+
+.wrc-season-summer .app-header::after {
+  content: "☀";
+  position: absolute;
+  right: 8%;
+  bottom: -42px;
+  color: rgba(242, 206, 98, .1);
+  font-size: 116px;
+  line-height: 1;
+}
+
+.wrc-season-easter .wrc-season-badge,
+.wrc-season-spring .wrc-season-badge {
+  color: #dffbed;
+}
+
+@keyframes wrc-season-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0);
+    opacity: 0;
+  }
+  12% { opacity: .34; }
+  88% { opacity: .28; }
+  100% {
+    transform: translate3d(var(--drift), 118vh, 0) rotate(280deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wrc-season-rise {
+  0% {
+    transform: translate3d(0, 8vh, 0) rotate(-8deg);
+    opacity: 0;
+  }
+  16% { opacity: .3; }
+  84% { opacity: .24; }
+  100% {
+    transform: translate3d(var(--drift), -114vh, 0) rotate(18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wrc-season-glide {
+  0% {
+    transform: translate3d(-12vw, 0, 0) scale(.78);
+    opacity: 0;
+  }
+  18% { opacity: .3; }
+  82% { opacity: .24; }
+  100% {
+    transform: translate3d(124vw, var(--drift), 0) scale(1.05);
+    opacity: 0;
+  }
+}
+
+@keyframes wrc-season-spark {
+  0%, 100% {
+    transform: scale(.35) rotate(0);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1) rotate(80deg);
+    opacity: .42;
+  }
+}
+
+@keyframes wrc-season-glow {
+  0%, 100% { opacity: .5; transform: scale(.86); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (max-width: 700px) {
+  .wrc-season-badge {
+    margin-top: 7px;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .wrc-season-accessories {
+    top: -7px;
+    left: 43px;
+    gap: 14px;
+  }
+
+  .wrc-season-accessories span {
+    font-size: 17px;
+  }
+
+  .wrc-season-accessories span + span {
+    font-size: 13px;
+    transform: translateY(20px) rotate(-9deg);
+  }
+
+  .wrc-season-garland {
+    right: 58px;
+    gap: 9px;
+  }
+
+  .wrc-season-particle {
+    opacity: .25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrc-season-particle {
+    display: none;
+  }
+
+  .wrc-season-garland i {
+    animation: none;
+  }
+}
