@@ -15,40 +15,116 @@
         HISTORIC_TOTALS.pushups +
         allEntries.reduce((sum, e) => sum + (+e.pushups || 0), 0);
 
-      const meters = totalSteps * 0.75;
-      const km = meters / 1000;
-      const stadion = Math.floor(meters / 400);
-      const marathons = (km / 42.195).toFixed(1);
-      const fernsehturm = Math.floor(meters / 368);
-      const pizzas = Math.floor((totalSteps * 0.04) / 900);
-      const pizzaStack = (pizzas * 4 / 100).toFixed(2);
-      const bohnen = Math.floor((totalSteps * 0.04) / 500);
-      const tour = ((totalBike / 3500) * 100).toFixed(1);
+      const walkingMeters = totalSteps * 0.75;
+      const walkingKm = walkingMeters / 1000;
+      const totalMovementKm = walkingKm + totalBike;
+      const earthCircumferenceKm = 40075;
+      const marathonKm = 42.195;
+      const stadiumLapMeters = 400;
+      const sausageMeters = 0.15;
+      const dartDistanceMeters = 2.37;
+      const powerRepetitions = totalSquats + totalPushups;
+
+      const travelDestinations = {
+        "2026-02": { name: "Hamburg", roundTripKm: 580 },
+        "2026-03": { name: "München", roundTripKm: 1170 },
+        "2026-04": { name: "Rom", roundTripKm: 2360 },
+        "2026-05": { name: "Mallorca", roundTripKm: 2700 },
+        "2026-06": { name: "Istanbul", roundTripKm: 3480 },
+        "2026-07": { name: "Nordkap", roundTripKm: 5000 },
+        "2026-08": { name: "Paris", roundTripKm: 2100 },
+        "2026-09": { name: "Wien", roundTripKm: 1360 },
+        "2026-10": { name: "Kopenhagen", roundTripKm: 880 },
+        "2026-11": { name: "Amsterdam", roundTripKm: 1300 },
+        "2026-12": { name: "New York", roundTripKm: 12770 }
+      };
+
+      const travel = travelDestinations[currentMonthKey()] || {
+        name: "Nordkap",
+        roundTripKm: 5000
+      };
 
       const box = document.getElementById("funFacts");
       if (!box) return;
 
       const cards = [
-        ["🏟", fmt(stadion), "Stadionrunden", "auf einer 400m-Bahn"],
-        ["🏃", marathons, "Marathons", "seit Februar gelaufen"],
-        ["🗼", fmt(fernsehturm) + "×", "Fernsehturm", "so hoch wären eure Schritte gestapelt"],
-        ["🚴", tour + "%", "Tour de France", "mit euren Fahrrad-km geschafft"],
-        ["🍕", fmt(pizzas), "Pizzen verbrannt", "0,04 kcal pro Schritt · 900 kcal pro Pizza"],
-        ["📦", pizzaStack + " m", "Pizzastapel", "1 Pizza im Karton = ca. 4 cm"],
-        ["🫘", fmt(bohnen), "Portionen Dicke Bohnen", "ca. 500 kcal pro Portion"],
-        ["💪", fmt(totalPushups), "Liegestütze", "Wurstrand-Arme in Arbeit"],
-        ["🦵", fmt(totalSquats), "Kniebeugen", "Beine sagen: Joa, läuft."]
+        {
+          icon: "👣",
+          value: `${fmt(walkingKm, 1)} km`,
+          label: "Zurückgelegte Laufstrecke",
+          note: "gerechnet mit durchschnittlich 0,75 m pro Schritt",
+          image: "funfact-wursti-laufen.png"
+        },
+        {
+          icon: "🌍",
+          value: `${fmt((walkingKm / earthCircumferenceKm) * 100, 1)}%`,
+          label: "Einmal um die Erde",
+          note: `vom Erdumfang mit rund ${fmt(earthCircumferenceKm)} km`,
+          image: "funfact-wursti-weltreise.png"
+        },
+        {
+          icon: "🏃",
+          value: fmt(walkingKm / marathonKm, 1),
+          label: "Marathon-Distanzen",
+          note: `je ${fmt(marathonKm, 3)} km – ohne Startnummernstress`,
+          image: "funfact-wursti-laufen.png"
+        },
+        {
+          icon: "🏟️",
+          value: fmt(Math.floor(walkingMeters / stadiumLapMeters)),
+          label: "Stadionrunden",
+          note: "auf einer klassischen 400-Meter-Bahn",
+          image: "funfact-wursti-laufen.png"
+        },
+        {
+          icon: "🚴",
+          value: `${fmt(totalMovementKm, 1)} km`,
+          label: "Gesamte Bewegung",
+          note: "Laufstrecke und Fahrradkilometer gemeinsam",
+          image: "funfact-wursti-fahrrad.png"
+        },
+        {
+          icon: "⚙️",
+          value: fmt(powerRepetitions),
+          label: "Wurstrand-Kraftwerk",
+          note: "Kniebeugen und Liegestütze zusammen – Wursti schwitzt",
+          image: "funfact-wurstrand-kraftwerk.png"
+        },
+        {
+          icon: "🌭",
+          value: fmt(Math.floor(walkingMeters / sausageMeters)),
+          label: "Wurstlängen",
+          note: "aneinandergereiht bei 15 cm pro Wurst",
+          image: "funfact-bohne-wurstlaenge.png"
+        },
+        {
+          icon: "🎯",
+          value: fmt(Math.floor(walkingMeters / dartDistanceMeters)),
+          label: "Dart-Abstände",
+          note: "gerechnet mit 2,37 m bis zur Dartscheibe",
+          image: "funfact-bohne-dartabstand.png"
+        },
+        {
+          icon: "🧳",
+          value: `${fmt(totalMovementKm / travel.roundTripKm, 1)}×`,
+          label: `Berlin ↔ ${travel.name}`,
+          note: `hin und zurück, ungefähr ${fmt(travel.roundTripKm)} km pro Reise`,
+          image: "funfact-wursti-weltreise.png"
+        }
       ];
 
       box.innerHTML = `
-    <div class="funfact-grid">
-      ${cards.map(c => `
-        <div class="funfact-card">
-          <div class="funfact-emoji">${c[0]}</div>
-          <div class="funfact-value">${c[1]}</div>
-          <div class="funfact-label">${c[2]}</div>
-          <div class="funfact-note">${c[3]}</div>
-        </div>
+    <div class="funfact-grid-v2">
+      ${cards.map(card => `
+        <article class="funfact-card-v2">
+          <div class="funfact-card-head-v2">
+            <span class="funfact-icon-v2">${card.icon}</span>
+            <img class="funfact-mascot-v2" src="${card.image}" alt="" aria-hidden="true">
+          </div>
+          <div class="funfact-value-v2">${card.value}</div>
+          <div class="funfact-label-v2">${card.label}</div>
+          <div class="funfact-note-v2">${card.note}</div>
+        </article>
       `).join("")}
     </div>
   `;
