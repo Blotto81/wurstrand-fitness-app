@@ -26,6 +26,7 @@
 
   let overlay = null;
   let activeLetter = null;
+  let activeOptions = null;
   let lastFocus = null;
   let streakBaselineReady = false;
   let streakBaseline = {};
@@ -157,6 +158,7 @@
           <h2 id="wrcPostHeading">Ein kleiner Brief für dich</h2>
           <div id="wrcPostText" class="wrc-post-text"></div>
           <div id="wrcPostSignature" class="wrc-post-signature"></div>
+          <button class="wrc-post-action" type="button" hidden></button>
           <div class="wrc-post-paper-mark" aria-hidden="true">WRC</div>
         </article>
       </div>
@@ -165,6 +167,13 @@
     document.body.appendChild(overlay);
     overlay.querySelector(".wrc-post-envelope").addEventListener("click", openLetter);
     overlay.querySelector(".wrc-post-close").addEventListener("click", close);
+    overlay.querySelector(".wrc-post-action").addEventListener("click", () => {
+      const action = activeOptions?.onAction;
+      close();
+      if (typeof action === "function") {
+        window.setTimeout(action, 280);
+      }
+    });
     overlay.addEventListener("click", event => {
       if (event.target === overlay && overlay.classList.contains("is-opened")) close();
     });
@@ -175,17 +184,26 @@
     return overlay;
   }
 
-  function show(letter) {
-    if (!letter || document.querySelector(".bigpop.show")) return false;
+  function show(letter, options = {}) {
+    if (
+      !letter
+      || document.querySelector(".bigpop.show")
+      || overlay?.classList.contains("is-visible")
+    ) return false;
 
     const root = ensureMarkup();
     activeLetter = letter;
+    activeOptions = options;
     lastFocus = document.activeElement;
 
     root.className = `wrc-post-overlay rarity-${letter.rarity}`;
-    root.querySelector("#wrcPostSender").textContent =
-      letter.sender === "Wursti" ? "🌭 Von Wursti" : "🫘 Von Bertha";
-    root.querySelector("#wrcPostRarity").textContent = letter.rarity;
+    root.querySelector("#wrcPostSender").textContent = letter.sender === "Wursti"
+      ? "🌭 Von Wursti"
+      : letter.sender === "Bertha"
+        ? "🫘 Von Bertha"
+        : "📩 Von Wursti & Bertha";
+    root.querySelector("#wrcPostRarity").textContent = options.badge || letter.rarity;
+    root.querySelector("#wrcPostHeading").textContent = options.heading || "Ein kleiner Brief für dich";
     root.querySelector("#wrcPostText").replaceChildren(
       ...letter.text.map(line => {
         const paragraph = document.createElement("p");
@@ -193,7 +211,11 @@
         return paragraph;
       })
     );
-    root.querySelector("#wrcPostSignature").textContent = signatureFor(letter.sender);
+    root.querySelector("#wrcPostSignature").textContent =
+      options.signature || signatureFor(letter.sender);
+    const actionButton = root.querySelector(".wrc-post-action");
+    actionButton.hidden = !options.actionLabel;
+    actionButton.textContent = options.actionLabel || "";
     root.querySelector(".wrc-post-letter").setAttribute("aria-hidden", "true");
     root.setAttribute("aria-hidden", "false");
     document.body.classList.add("wrc-post-active");
@@ -225,6 +247,7 @@
     overlay.setAttribute("aria-hidden", "true");
     document.body.classList.remove("wrc-post-active");
     activeLetter = null;
+    activeOptions = null;
 
     window.setTimeout(() => {
       if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
