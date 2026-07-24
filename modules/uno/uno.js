@@ -468,7 +468,7 @@ function renderPlacements() {
                       </span>
 
                       <strong>
-                        ${result.player}
+                        ${escapeHtml(result.player)}
                       </strong>
                     </div>
                   `
@@ -679,7 +679,7 @@ function renderPlacements() {
                   ${index + 1}.
                 </span>
 
-                <strong>${stats.player}</strong>
+                <strong>${escapeHtml(stats.player)}</strong>
               </div>
 
               <span>${stats.games}</span>
@@ -705,7 +705,7 @@ function renderPlacements() {
                     Platz ${index + 1}
                   </span>
 
-                  <h4>${stats.player}</h4>
+                  <h4>${escapeHtml(stats.player)}</h4>
                 </div>
 
                 <div class="uno-player-card-games">

@@ -681,7 +681,11 @@
   .uno-ranking-row{
     min-width:650px;
   }
+    .uno-player-card-grid{
+    grid-template-columns:1fr;
 }
+}
+
 /* ===== UNO-Treppchen: finale Darstellung wie bei Dart ===== */
 
 .uno-placement-list{
@@ -817,12 +821,17 @@
 
 @media (max-width:600px){
   .uno-podium{
-    grid-template-columns:1fr 1.12fr 1fr !important;
+    grid-template-columns:minmax(0, 1fr) minmax(0, 1.12fr) minmax(0, 1fr) !important;
     gap:6px !important;
   }
 
   .uno-podium-place{
+    min-width:0;
     padding:11px 5px !important;
+  }
+
+  .uno-placement-grid{
+    min-width:0;
   }
 
   .uno-podium-first{

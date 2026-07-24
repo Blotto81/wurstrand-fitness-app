@@ -555,7 +555,7 @@ const historyList = document.getElementById(
             </div>
 
             <div class="frisbee-podium-name">
-              ${result.player}
+              ${escapeHtml(result.player)}
             </div>
 
             <div class="frisbee-podium-score">
@@ -608,7 +608,7 @@ function focusNextScoreInput(currentInput) {
       .map(
         (player) => `
           <th scope="col">
-            ${player}
+            ${escapeHtml(player)}
           </th>
         `
       )
@@ -633,7 +633,7 @@ function focusNextScoreInput(currentInput) {
                   class="frisbee-score-input"
                   data-player-index="${playerIndex}"
                   data-hole="${holeNumber}"
-                  aria-label="${player}, Bahn ${holeNumber}"
+                  aria-label="${escapeHtml(player)}, Bahn ${holeNumber}"
                 >
               </td>
             `
@@ -1264,6 +1264,19 @@ saveButton.addEventListener("click", async () => {
         .insert(scoreRows);
 
     if (scoresError) {
+      const { error: rollbackError } =
+        await supabaseClient
+          .from("discgolf_rounds")
+          .delete()
+          .eq("id", roundData.id);
+
+      if (rollbackError) {
+        console.error(
+          "Leere Discgolf-Runde konnte nicht entfernt werden:",
+          rollbackError
+        );
+      }
+
       throw scoresError;
     }
 

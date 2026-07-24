@@ -344,7 +344,7 @@
 
 @media (max-width: 720px) {
   .frisbee-player-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+grid-template-columns:1fr;
   }
 
   .frisbee-scorecard-head {
@@ -523,7 +523,9 @@
 }
 
 @media (max-width:720px){
-
+.frisbee-stats-values{
+    grid-template-columns:1fr;
+}
   .frisbee-stats-values{
     grid-template-columns:1fr;
   }

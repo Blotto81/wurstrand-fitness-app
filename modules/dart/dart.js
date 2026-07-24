@@ -225,7 +225,7 @@ if (dartPanel) {
         .map(game => `
        <div class="dart-history-card">
   <strong>
-    🎯 ${game.mode}
+    🎯 ${escapeHtml(game.mode)}
  <span style="float:right;">
     📅 ${new Date(game.game_date).toLocaleDateString("de-DE")}
     <button class="dart-delete-icon" data-game-id="${game.id}" title="Spiel löschen">🗑️</button>
@@ -241,7 +241,7 @@ if (dartPanel) {
     result.place === 2 ? "🥈" :
     result.place === 3 ? "🥉" :
     "4️⃣"
-} ${result.player}
+} ${escapeHtml(result.player)}
             </div>
         `)
         .join("")}
@@ -562,7 +562,21 @@ saveButton.addEventListener("click", async () => {
 
     if (resultsError) {
         console.error(resultsError);
-        alert("Das Spiel wurde gespeichert, aber bei den Platzierungen gab es einen Fehler.");
+
+        const { error: rollbackError } =
+            await supabaseClient
+                .from("dart_games")
+                .delete()
+                .eq("id", gameId);
+
+        if (rollbackError) {
+            console.error(
+                "Leeres Dart-Spiel konnte nicht entfernt werden:",
+                rollbackError
+            );
+        }
+
+        alert("Das Dart-Spiel konnte nicht vollständig gespeichert werden.");
         return;
     }
 
