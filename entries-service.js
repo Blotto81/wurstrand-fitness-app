@@ -15,6 +15,9 @@
       if (typeof WRCPost !== "undefined") {
         WRCPost.syncStreakMilestones(allEntries);
       }
+      if (typeof WRCYearReview !== "undefined") {
+        WRCYearReview.onEntriesLoaded(allEntries);
+      }
     }
 
     function getNewPersonalRecords(entry) {
