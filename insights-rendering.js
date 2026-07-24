@@ -320,4 +320,11 @@
       </div>
     `;
       }).join("");
+
+      if (newAchievementKeys.size && typeof WRCPost !== "undefined") {
+        WRCPost.maybeFromEvent("achievement", {
+          eventId: `achievement_${[...newAchievementKeys].sort().join("_")}`,
+          delay: 5200
+        });
+      }
     }

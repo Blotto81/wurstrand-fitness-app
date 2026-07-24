@@ -12,6 +12,9 @@
 
       allEntries = cleanLoadedEntries(data || []);
       renderAll();
+      if (typeof WRCPost !== "undefined") {
+        WRCPost.syncStreakMilestones(allEntries);
+      }
     }
 
     function getNewPersonalRecords(entry) {
@@ -111,6 +114,9 @@
       }
 
       const personalRecords = getNewPersonalRecords(savedEntry);
+      if (typeof WRCPost !== "undefined") {
+        WRCPost.rememberPlayer(savedEntry.person);
+      }
       resetForm();
       await loadEntries();
       showSaveReward(buildSaveReward(savedEntry, {
@@ -118,6 +124,13 @@
         editing: wasEditing,
         personalRecords
       }));
+      if (personalRecords.length && typeof WRCPost !== "undefined") {
+        WRCPost.maybeFromEvent("personal_record", {
+          player: savedEntry.person,
+          eventId: `record_${savedEntry.date}_${personalRecords.map(record => record.key).join("_")}`,
+          delay: 5600
+        });
+      }
       showTab("eintraege", document.querySelectorAll(".tab")[2]);
     }
 

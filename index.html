@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="modules/frisbee/frisbee.css">
   <link rel="stylesheet" href="modules/uno/uno.css">
   <link rel="stylesheet" href="modules/mascots/mascots.css">
+  <link rel="stylesheet" href="modules/post/post.css">
   <link rel="stylesheet" href="modules/pwa/pwa.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -1268,6 +1269,8 @@ background:#0f172a
   <script src="utils.js"></script>
   <script src="scoring.js"></script>
   <script src="entries-utils.js"></script>
+  <script src="modules/post/post-data.js"></script>
+  <script src="modules/post/post.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
   <script src="modules/mascots/mascots.js"></script>
@@ -2298,6 +2301,13 @@ background:#0f172a
                   ? `Stark! Jetzt öffnet sich die nächste Stufe: ${nextAfter.stars} ${nextAfter.title}.`
                   : "All-Time-Rekord-Modus! Jeder weitere Punkt schreibt Geschichte."
               );
+
+              if (typeof WRCPost !== "undefined") {
+                WRCPost.maybeFromEvent("milestone", {
+                  eventId: `month_${key}_${m.value}`,
+                  delay: 5200
+                });
+              }
             }, index * 1800);
           });
         }
