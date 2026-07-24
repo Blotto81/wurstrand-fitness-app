@@ -694,11 +694,6 @@
           </div>
 
           <div class="wrc-dashboard-value">
-            <span>📈 Fortschritt</span>
-            <strong id="goalPercent">0 %</strong>
-          </div>
-
-          <div class="wrc-dashboard-value">
             <span>🏁 Noch offen</span>
             <strong id="goalRest">1700</strong>
           </div>
@@ -1191,6 +1186,17 @@ background:#0f172a
       </div>
 
       <div class="card">
+        <h3>🍩 Aktivitätsverteilung</h3>
+        <p class="sub">So verteilen sich die gesammelten Punkte im ausgewählten Monat.</p>
+        <div class="chartbox">
+          <canvas id="activityDistributionChart"></canvas>
+          <div id="activityDistributionEmpty" class="sub" style="display:none">
+            Noch keine Aktivitäten für diesen Monat.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <h3>📈 Monatsvergleich</h3>
         <p class="sub">Gesamtpunkte je Monat im Saisonverlauf.</p>
         <div class="chartbox">
@@ -1490,6 +1496,7 @@ background:#0f172a
     let editingId = null;
     let stepsChart = null;
     let monthCompareChart = null;
+    let activityDistributionChart = null;
     let chartMode = "7days";
 
     let recordData = {
@@ -2207,7 +2214,6 @@ background:#0f172a
       setText("monthTitle", `${getMonthTitle(key)} · ${ladder.stage.stars} ${ladder.stage.title}`);
       setText("goalTarget", fmt(goal));
       setText("goalCurrent", fmt(total, 1));
-      setText("goalPercent", percent + "%");
       setText("goalRest", fmt(rest, 1));
       setText("barPercentTop", percent + "%");
       setText("barText", `${fmt(total, 1)} / ${fmt(goal, 1)} Punkte`);
@@ -2831,6 +2837,7 @@ background:#0f172a
 
     function renderAnalysisExtras() {
       renderAnalysisHighlights();
+      renderActivityDistributionChart();
       renderMonthCompareChart();
       renderAverageStats();
     }
@@ -2959,6 +2966,78 @@ background:#0f172a
             y: {
               ticks: { color: "#cbd5e1" },
               grid: { color: "rgba(255,255,255,.08)" }
+            }
+          }
+        }
+      });
+    }
+
+    function renderActivityDistributionChart() {
+      const canvas = document.getElementById("activityDistributionChart");
+      const empty = document.getElementById("activityDistributionEmpty");
+      if (!canvas || typeof Chart === "undefined") return;
+
+      const key = monthKeyForAnalysis();
+      const entries = allEntries.filter(e => (e.date || "").startsWith(key));
+      const values = entries.reduce((totals, entry) => {
+        const points = calcPoints(entry);
+        totals[0] += points.stepPts;
+        totals[1] += points.bikePts;
+        totals[2] += points.powerPts;
+        totals[3] += points.exercisePts;
+        totals[4] += points.bonus;
+        return totals;
+      }, [0, 0, 0, 0, 0]).map(value => Math.round(value * 10) / 10);
+
+      const total = values.reduce((sum, value) => sum + value, 0);
+
+      if (activityDistributionChart) {
+        activityDistributionChart.destroy();
+        activityDistributionChart = null;
+      }
+
+      if (!total) {
+        canvas.style.display = "none";
+        if (empty) empty.style.display = "block";
+        return;
+      }
+
+      canvas.style.display = "block";
+      if (empty) empty.style.display = "none";
+
+      activityDistributionChart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+          labels: ["Schritte", "Fahrrad", "Kraft", "Übungen", "Bonus"],
+          datasets: [{
+            data: values,
+            backgroundColor: ["#38bdf8", "#22c55e", "#f97316", "#a78bfa", "#facc15"],
+            borderColor: "#0f172a",
+            borderWidth: 3,
+            hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "66%",
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#f8fafc",
+                padding: 16,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: context => {
+                  const value = context.raw || 0;
+                  const percent = total ? Math.round((value / total) * 100) : 0;
+                  return ` ${context.label}: ${fmt(value, 1)} Punkte (${percent} %)`;
+                }
+              }
             }
           }
         }
