@@ -5,13 +5,14 @@ if (frisbeePanel) {
     <div class="overlay frisbee-page">
       <div class="badge">Game Lounge</div>
 
-      <div class="challenge-row">
+      <div class="challenge-row game-mascot-heading">
         <div>
           <h2>🥏 Discgolf</h2>
           <p class="sub">
             Runde starten, Würfe eintragen und den Zwischenstand live verfolgen.
           </p>
         </div>
+        <img class="game-mascot" src="wursti-discgolf.png" alt="" aria-hidden="true">
       </div>
 
       <div class="frisbee-submenu">

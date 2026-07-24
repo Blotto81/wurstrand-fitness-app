@@ -5,11 +5,12 @@ if (dartPanel) {
     <div class="overlay">
       <div class="badge">Game Lounge</div>
 
-      <div class="challenge-row">
+      <div class="challenge-row game-mascot-heading">
         <div>
           <h2>🎯 Dart</h2>
           <p class="sub">Neues Dart-Ergebnis eintragen.</p>
         </div>
+        <img class="game-mascot" src="wursti-dart.png" alt="" aria-hidden="true">
       </div>
 
       <div class="frisbee-submenu">

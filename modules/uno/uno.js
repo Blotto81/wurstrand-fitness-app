@@ -5,11 +5,12 @@ if (unoPanel) {
     <div class="overlay uno-page">
       <div class="badge">Game Lounge</div>
 
-      <div class="challenge-row">
+      <div class="challenge-row game-mascot-heading">
         <div>
           <h2>🃏 UNO</h2>
           <p class="sub">UNO-Runden, Platzierungen und kleine Statistiken.</p>
         </div>
+        <img class="game-mascot" src="wursti-uno.png" alt="" aria-hidden="true">
       </div>
 
       <div class="uno-submenu">
