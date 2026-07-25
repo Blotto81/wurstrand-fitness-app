@@ -159,6 +159,31 @@ test("mergeEntries behält nach Abbruch den vorhandenen Wert", () => {
   }
 });
 
+test("WRC-Geburtstag findet automatisch den ersten Eintrag", () => {
+  const result = WRCBirthday.firstEntryDate([
+    { date: "2026-03-12" },
+    { date: "2025-02-01" },
+    { date: "ungueltig" }
+  ]);
+
+  assertEqual(result, "2025-02-01");
+});
+
+test("WRC-Geburtstag berechnet das Alter aus dem ersten Eintrag", () => {
+  const result = WRCBirthday.birthdayAge([
+    { date: "2025-02-01" },
+    { date: "2026-07-24" }
+  ], 2028);
+
+  assertEqual(result, 3);
+});
+
+test("WRC-Geburtstag verwendet im ersten Jahr einen passenden Starttext", () => {
+  const result = WRCBirthday.birthdayText(0);
+
+  assertEqual(result[0], "Heute feiern wir den Anfang der WRC.");
+});
+
 const results = document.getElementById("testResults");
 let passed = 0;
 
