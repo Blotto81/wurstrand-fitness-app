@@ -18,6 +18,9 @@
       if (typeof WRCYearReview !== "undefined") {
         WRCYearReview.onEntriesLoaded(allEntries);
       }
+      if (typeof WRCBirthday !== "undefined") {
+        WRCBirthday.onEntriesLoaded(allEntries);
+      }
     }
 
     function getNewPersonalRecords(entry) {
