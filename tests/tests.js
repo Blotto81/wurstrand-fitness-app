@@ -184,6 +184,33 @@ test("WRC-Geburtstag verwendet im ersten Jahr einen passenden Starttext", () => 
   assertEqual(result[0], "Heute feiern wir den Anfang der WRC.");
 });
 
+test("Wurstrandler-Geburtstage erkennen den richtigen Tag", () => {
+  const result = WRCCommunityBirthdays.birthdaysForDate(
+    new Date("2026-10-09T12:00:00")
+  );
+
+  assertEqual(result[0].name, "Marian");
+});
+
+test("Wurstrandler-Geburtstage unterstützen mehrere Personen", () => {
+  const result = WRCCommunityBirthdays.formatNames([
+    { name: "Basti" },
+    { name: "Fabi" },
+    { name: "Marian" }
+  ]);
+
+  assertEqual(result, "Basti, Fabi und Marian");
+});
+
+test("Wurstrandler-Geburtstagsbriefe nennen alle Geburtstagskinder", () => {
+  const result = WRCCommunityBirthdays.buildLetter([
+    { name: "Thorsten" },
+    { name: "Basti" }
+  ], 0);
+
+  assertEqual(result.text[1], "Heute haben Thorsten und Basti Geburtstag.");
+});
+
 const results = document.getElementById("testResults");
 let passed = 0;
 
