@@ -717,6 +717,16 @@
             <strong id="forecast">0</strong>
           </div>
 
+          <button type="button" id="dashboardAchievementCard" class="wrc-dashboard-value dashboard-achievement-card"
+            onclick="showTab('achievementsPanel', document.querySelector('.drawer-link[onclick*=achievementsPanel]')); window.scrollTo({ top: 0, behavior: 'smooth' })">
+            <span>🏆 Nächstes Achievement</span>
+            <strong id="dashboardAchievementTitle">Wird geladen …</strong>
+            <small id="dashboardAchievementProgress"></small>
+            <div class="dashboard-achievement-track" aria-hidden="true">
+              <div id="dashboardAchievementFill"></div>
+            </div>
+          </button>
+
         </div>
 
       </div>
@@ -998,8 +1008,7 @@ background:#0f172a
 
   <div id="achievementsPanel" class="panel">
 
-    <div class="card">
-      <h3>🏆 Team-Achievements</h3>
+    <div class="card achievements-page-card">
       <div id="achievements"></div>
     </div>
 

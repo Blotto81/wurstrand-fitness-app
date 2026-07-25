@@ -250,7 +250,7 @@
 
       const newAchievementKeys = new Set();
 
-      box.innerHTML = groups.map(group => {
+      const groupStates = groups.map(group => {
         const reached = group.milestones.filter(m => group.value >= m[0]);
         const next = group.milestones.find(m => group.value < m[0]);
 
@@ -264,36 +264,89 @@
           }
         });
 
-        const reachedHtml = reached.length
-          ? reached.map(m => {
+        const previousTarget = reached.length ? reached[reached.length - 1][0] : 0;
+        const progress = next
+          ? Math.max(0, Math.min(100, ((group.value - previousTarget) / (next[0] - previousTarget)) * 100))
+          : 100;
+
+        return {
+          ...group,
+          reached,
+          next,
+          previousTarget,
+          progress,
+          remaining: next ? Math.max(0, next[0] - group.value) : 0
+        };
+      });
+
+      const totalReached = groupStates.reduce((sum, group) => sum + group.reached.length, 0);
+      const nextAchievement = groupStates
+        .filter(group => group.next)
+        .sort((a, b) => b.progress - a.progress || a.remaining - b.remaining)[0];
+
+      const nextAchievementHtml = nextAchievement
+        ? `
+          <section class="achievement-next-feature">
+            <div class="achievement-next-emblem">${nextAchievement.icon}</div>
+            <div class="achievement-next-content">
+              <span class="achievement-eyebrow">Nächstes Ziel</span>
+              <h3>${nextAchievement.next[1]}</h3>
+              <p>
+                Noch ${fmtUnit(nextAchievement.remaining, nextAchievement.unit, nextAchievement.decimals)}
+                bis zur Freischaltung.
+              </p>
+              <div class="achievement-progress-line">
+                <div>
+                  <span>${fmtUnit(nextAchievement.value, nextAchievement.unit, nextAchievement.decimals)}</span>
+                  <strong>${Math.round(nextAchievement.progress)} %</strong>
+                </div>
+                <div class="achievement-progress-track" role="progressbar"
+                  aria-label="Fortschritt bis ${nextAchievement.next[1]}"
+                  aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(nextAchievement.progress)}">
+                  <div style="width:${nextAchievement.progress}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="achievement-next-target">
+              <span>Ziel</span>
+              <strong>${fmtUnit(nextAchievement.next[0], nextAchievement.unit, nextAchievement.decimals)}</strong>
+            </div>
+          </section>
+        `
+        : `
+          <section class="achievement-next-feature achievement-all-complete">
+            <div class="achievement-next-emblem">🏆</div>
+            <div class="achievement-next-content">
+              <span class="achievement-eyebrow">Team-Meilenstein</span>
+              <h3>Alle aktuellen Achievements erreicht</h3>
+            </div>
+          </section>
+        `;
+
+      const reachedGroupsHtml = groupStates
+        .filter(group => group.reached.length)
+        .map(group => {
+        const reachedHtml = group.reached.length
+          ? group.reached.map(m => {
             const storageKey = `achievement_${group.key}_${m[0]}`;
             const newClass = newAchievementKeys.has(storageKey) ? " achievement-new" : "";
 
             return `
         <div class="achievement-mini-line${newClass}">
-          <div>${group.icon} ${m[1]}</div>
-          <div>✓ ${fmtUnit(m[0], group.unit, group.decimals)}</div>
+          <div class="achievement-medal">
+            <span>${group.icon}</span>
+            <span>✓</span>
+          </div>
+          <div class="achievement-mini-copy">
+            <strong>${m[1]}</strong>
+            <span>${fmtUnit(m[0], group.unit, group.decimals)}</span>
+          </div>
         </div>
       `;
           }).join("")
-          : `<div class="achievement-mini-line muted">Noch nichts freigeschaltet</div>`;
+          : "";
 
-        const nextHtml = next
-          ? `
-        <div class="achievement-next">
-          <b>🎯 Als Nächstes ${group.icon} ${next[1]}</b>
-          <div>${fmtUnit(group.value, group.unit, group.decimals)} / ${fmtUnit(next[0], group.unit, group.decimals)}</div>
-        </div>
-      `
-          : `
-        <div class="achievement-next">
-          <b>🏆 Alles erreicht!</b>
-          <div>${fmtUnit(group.value, group.unit, group.decimals)}</div>
-        </div>
-      `;
-
-        const hiddenCount = group.milestones.length - reached.length - (next ? 1 : 0);
-        const hasNewAchievement = reached.some(m =>
+        const hasNewAchievement = group.reached.some(m =>
           newAchievementKeys.has(`achievement_${group.key}_${m[0]}`)
         );
 
@@ -304,22 +357,64 @@
             <span class="achievement-group-icon">${group.icon}</span>
             <span>${group.title}</span>
           </div>
-          <div class="achievement-group-count">${reached.length}/${group.milestones.length}</div>
+          <div class="achievement-group-count">${group.reached.length} freigeschaltet</div>
         </div>
 
-        <div class="achievement-section-label">✅ Erreicht</div>
         <div class="achievement-reached-list">
           ${reachedHtml}
-        </div>
-
-        ${nextHtml}
-
-        <div class="achievement-hidden-note">
-          ${hiddenCount > 0 ? `${hiddenCount} weitere Ziele schlummern noch im Hintergrund.` : `Keine weiteren Ziele im Hintergrund.`}
         </div>
       </div>
     `;
       }).join("");
+
+      box.innerHTML = `
+        <header class="achievement-page-hero">
+          <div class="achievement-hero-emblem">🏆</div>
+          <div>
+            <span class="achievement-eyebrow">WRC Ruhmeshalle</span>
+            <h2>Team-Achievements</h2>
+            <p>Jeder Erfolg erzählt ein Stück eurer gemeinsamen Challenge.</p>
+          </div>
+          <div class="achievement-unlocked-total">
+            <strong>${totalReached}</strong>
+            <span>freigeschaltet</span>
+          </div>
+        </header>
+
+        ${nextAchievementHtml}
+
+        ${totalReached
+          ? `
+            <div class="achievement-collection-heading">
+              <span>Errungenschaften</span>
+              <strong>Eure freigeschalteten Meilensteine</strong>
+            </div>
+            <div class="achievement-groups-grid">${reachedGroupsHtml}</div>
+          `
+          : ""}
+      `;
+
+      const dashboardCard = document.getElementById("dashboardAchievementCard");
+      const dashboardTitle = document.getElementById("dashboardAchievementTitle");
+      const dashboardProgress = document.getElementById("dashboardAchievementProgress");
+      const dashboardFill = document.getElementById("dashboardAchievementFill");
+
+      if (dashboardCard && dashboardTitle && dashboardProgress && dashboardFill) {
+        if (nextAchievement) {
+          dashboardTitle.textContent = `${nextAchievement.icon} ${nextAchievement.next[1]}`;
+          dashboardProgress.textContent =
+            `Noch ${fmtUnit(nextAchievement.remaining, nextAchievement.unit, nextAchievement.decimals)}`;
+          dashboardFill.style.width = `${nextAchievement.progress}%`;
+          dashboardCard.setAttribute(
+            "aria-label",
+            `Nächstes Achievement ${nextAchievement.next[1]}, ${Math.round(nextAchievement.progress)} Prozent`
+          );
+        } else {
+          dashboardTitle.textContent = "🏆 Alles erreicht";
+          dashboardProgress.textContent = "Aktuelle Ruhmeshalle komplett";
+          dashboardFill.style.width = "100%";
+        }
+      }
 
       if (newAchievementKeys.size && typeof WRCPost !== "undefined") {
         WRCPost.maybeFromEvent("achievement", {
