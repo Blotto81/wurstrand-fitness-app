@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="modules/dart/dart.css">
   <link rel="stylesheet" href="modules/frisbee/frisbee.css">
   <link rel="stylesheet" href="modules/uno/uno.css">
+  <link rel="stylesheet" href="modules/game-collection/game-collection.css">
   <link rel="stylesheet" href="modules/mascots/mascots.css">
   <link rel="stylesheet" href="modules/post/post.css">
   <link rel="stylesheet" href="modules/seasonal/seasonal.css">
@@ -75,12 +76,16 @@
       </button>
   
   
-      <button class="drawer-link tab drawer-sublink" onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
-        🥏 Frisbee-Golf
-      </button>
-  
       <button class="drawer-link tab drawer-sublink" onclick="showTab('unoPanel',this); toggleMainMenu(false)">
         🃏 UNO
+      </button>
+
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
+        🥏 Discgolf
+      </button>
+
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('gameCollectionPanel',this); toggleMainMenu(false)">
+        🎲 Spielesammlung
       </button>
     </div>
     <div class="drawer-divider"></div>
@@ -594,6 +599,7 @@
 
     </div>
   </div>
+  <div id="gameCollectionPanel" class="panel"></div>
   </div>
 
   <div id="dailyPanel" class="panel">
@@ -3731,6 +3737,7 @@ background:#0f172a
   <script src="modules/dart/dart.js"></script>
   <script src="modules/frisbee/frisbee.js"></script>
   <script src="modules/uno/uno.js"></script>
+  <script src="modules/game-collection/game-collection.js"></script>
   <script src="modules/pwa/pwa.js"></script>
 </body>
 
