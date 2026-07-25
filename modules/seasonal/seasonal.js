@@ -38,6 +38,22 @@
 
   const THEMES = Object.freeze([
     {
+      id: "birthday",
+      priority: 110,
+      label: "Heute hat die WRC Geburtstag",
+      icon: "🎂",
+      accent: "#f4c768",
+      accentSoft: "rgba(244, 199, 104, .17)",
+      glow: "rgba(244, 199, 104, .26)",
+      header: "rgba(67, 48, 79, .42)",
+      accessory: "🥳",
+      sidekick: "🎂",
+      particles: ["✦", "●", "▴", "🎈"],
+      motion: "spark",
+      garland: ["#f4c768", "#70d6c4", "#f39ab5", "#8bb9ff"],
+      matches: date => dayOfYearKey(date) === 201
+    },
+    {
       id: "newyear",
       priority: 100,
       label: "Neues Jahr, neue Runde",
@@ -185,7 +201,12 @@
 
   function resolveTheme(date = new Date()) {
     const preview = new URLSearchParams(window.location.search).get("season");
+    const birthdayPreview = new URLSearchParams(window.location.search).get("birthday") === "1";
     const localPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+    if (birthdayPreview && localPreview) {
+      return THEMES.find(theme => theme.id === "birthday") || null;
+    }
 
     if (preview && localPreview) {
       return THEMES.find(theme => theme.id === preview) || null;
