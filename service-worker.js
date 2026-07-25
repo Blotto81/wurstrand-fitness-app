@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v6";
+const CACHE_NAME = "wrc-app-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -31,6 +31,7 @@ const APP_SHELL = [
   "./modules/post/post.css",
   "./modules/post/post-data.js",
   "./modules/post/post.js",
+  "./modules/community-birthdays/community-birthdays.js",
   "./modules/seasonal/seasonal.css",
   "./modules/seasonal/seasonal.js",
   "./modules/year-review/year-review.css",
