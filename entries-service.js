@@ -1,4 +1,38 @@
+    const ENTRIES_CACHE_KEY = "wrc_entries_quickstart_v1";
+
+    function restoreEntriesQuickstart() {
+      if (allEntries.length) return false;
+
+      try {
+        const cached = JSON.parse(localStorage.getItem(ENTRIES_CACHE_KEY) || "null");
+        if (!Array.isArray(cached?.entries)) return false;
+
+        allEntries = cleanLoadedEntries(cached.entries);
+        renderDashboard();
+        return true;
+      } catch (error) {
+        console.warn("WRC quickstart cache could not be read:", error);
+        return false;
+      }
+    }
+
+    function rememberEntriesQuickstart(entries) {
+      try {
+        localStorage.setItem(ENTRIES_CACHE_KEY, JSON.stringify({
+          savedAt: new Date().toISOString(),
+          entries
+        }));
+      } catch (error) {
+        console.warn("WRC quickstart cache could not be written:", error);
+      }
+    }
+
     async function loadEntries() {
+      const restoredFromCache = restoreEntriesQuickstart();
+      if (!restoredFromCache && !allEntries.length) {
+        renderDashboard();
+      }
+
       const { data, error } = await supabaseClient
         .from("entries")
         .select("*")
@@ -11,6 +45,7 @@
       }
 
       allEntries = cleanLoadedEntries(data || []);
+      rememberEntriesQuickstart(allEntries);
       renderAll();
       if (typeof WRCPost !== "undefined") {
         WRCPost.syncStreakMilestones(allEntries);

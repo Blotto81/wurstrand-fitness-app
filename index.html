@@ -4539,26 +4539,25 @@ background:#0f172a
       history.scrollRestoration = "manual";
     }
 
-    const initialRoute = location.hash.replace(/^#/, "").split("/");
-    const initialPanel = document.getElementById(initialRoute[0]) ? initialRoute[0] : "dashboard";
-    const initialAnalysisSection = ["overview", "development", "team"].includes(initialRoute[1])
-      ? initialRoute[1]
-      : "overview";
+    const initialPanel = "dashboard";
+    const initialAnalysisSection = "overview";
     history.replaceState({
       wrc: true,
       panelId: initialPanel,
       analysisSection: initialAnalysisSection
     }, "", wrcRoute(initialPanel, { analysisSection: initialAnalysisSection }));
-    if (initialPanel !== "dashboard") {
-      applyingWrcHistory = true;
-      showTab(initialPanel, menuLinkForPanel(initialPanel), {
-        history: false,
-        analysisSection: initialAnalysisSection
-      });
-      applyingWrcHistory = false;
-    }
 
-    window.addEventListener("pageshow", () => {
+    window.addEventListener("pageshow", event => {
+      if (event.persisted) {
+        applyingWrcHistory = true;
+        showTab("dashboard", menuLinkForPanel("dashboard"), { history: false });
+        history.replaceState({
+          wrc: true,
+          panelId: "dashboard",
+          analysisSection: "overview"
+        }, "", "#dashboard");
+        applyingWrcHistory = false;
+      }
       window.scrollTo(0, 0);
     });
 
