@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v22";
+const CACHE_NAME = "wrc-app-v23";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -21,6 +21,9 @@ const APP_SHELL = [
   "./merch-assets/anti-ausreden-spray.webp",
   "./merch-assets/wrc-duftbaum.webp",
   "./merch-assets/wrc-energy-drink.webp",
+  "./merch-assets/wrc-power-socken.webp",
+  "./merch-assets/wursti-di-pizza-kochbuch.webp",
+  "./merch-assets/wrc-mystery-box.webp",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
