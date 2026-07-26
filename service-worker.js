@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v10";
+const CACHE_NAME = "wrc-app-v11";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,6 +11,8 @@ const APP_SHELL = [
   "./utils.js",
   "./wurstrand-logo.png",
   "./wursti-monatsziel.png",
+  "./wursti-run-sprite.png",
+  "./wursti-wave.png",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -40,6 +42,9 @@ const APP_SHELL = [
   "./modules/year-review/year-review.css",
   "./modules/year-review/year-review.js",
   "./modules/birthday/birthday.js",
+  "./modules/dashboard/dashboard.css",
+  "./modules/wursti-walk/wursti-walk.css",
+  "./modules/wursti-walk/wursti-walk.js",
   "./modules/pwa/pwa.css",
   "./modules/pwa/pwa.js"
 ];

@@ -26,6 +26,8 @@
   <link rel="stylesheet" href="modules/year-review/year-review.css">
   <link rel="stylesheet" href="modules/pwa/pwa.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="modules/dashboard/dashboard.css">
+  <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
 </head>
 
 <body>
@@ -50,21 +52,30 @@
     <button class="drawer-link tab" onclick="showTab('eintraege',this); toggleMainMenu(false)">📅 Einträge</button>
     <button class="drawer-link tab" onclick="showTab('spieler',this); toggleMainMenu(false)">👤 Spieler</button>
     <button class="drawer-link tab" onclick="showTab('analyse',this); toggleMainMenu(false)">📈 Analyse</button>
-  
-    <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆
-      Rekorde</button>
-    <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
-      Rekorde</button>
-    <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun
-      Facts</button>
     <button class="drawer-link tab" onclick="showTab('achievementsPanel',this); toggleMainMenu(false)">🏆
       Achievements</button>
-  
     <button class="drawer-link tab" onclick="showTab('dailyPanel',this); toggleMainMenu(false)">📅 WRC
       Daily</button>
-  
+
     <div class="drawer-divider"></div>
-    <button class="drawer-group-title drawer-toggle" type="button" onclick="toggleGameLounge()">
+    <button class="drawer-group-title drawer-toggle" type="button"
+      onclick="toggleDrawerGroup('discoverSubmenu','discoverArrow')">
+      <span>✨ Entdecken</span>
+      <span id="discoverArrow">▸</span>
+    </button>
+
+    <div id="discoverSubmenu" class="drawer-submenu">
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte Rekorde</button>
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
+    </div>
+
+    <div class="drawer-divider"></div>
+    <button class="drawer-group-title drawer-toggle" type="button"
+      onclick="toggleDrawerGroup('gameLoungeSubmenu','gameLoungeArrow')">
       <span>🎮 Game Lounge</span>
       <span id="gameLoungeArrow">▸</span>
     </button>
@@ -88,11 +99,22 @@
         🎲 Spielesammlung
       </button>
     </div>
+
     <div class="drawer-divider"></div>
-    <button class="drawer-link tab" onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖
-      WRC-Regeln</button>
-    <button class="drawer-link tab" onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
-    <button class="drawer-link tab" onclick="showTab('mascotsPanel',this); toggleMainMenu(false)">🌭 Wursti &amp; Bertha</button>
+    <button class="drawer-group-title drawer-toggle" type="button"
+      onclick="toggleDrawerGroup('moreSubmenu','moreArrow')">
+      <span>••• Mehr</span>
+      <span id="moreArrow">▸</span>
+    </button>
+
+    <div id="moreSubmenu" class="drawer-submenu">
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('mascotsPanel',this); toggleMainMenu(false)">🌭 Wursti &amp; Bertha</button>
+      <button class="drawer-link tab drawer-sublink"
+        onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖 WRC-Regeln</button>
+    </div>
   </nav>
 
   <button class="mobile-menu-button" onclick="toggleMainMenu()" aria-label="Menü öffnen">☰</button>
@@ -110,7 +132,7 @@
           <div>
             <h1>Wurstrand Challenge</h1>
             <p class="sub">
-              Teamfokus statt Wettbewerb – Punkte sammeln, eskalieren, Bohnen verdienen.
+              Gemeinsam bewegen, Punkte sammeln und Erfolge feiern.
             </p>
             <button class="main-menu-button" onclick="toggleMainMenu()">☰ Menü</button>
 
@@ -618,10 +640,6 @@
             </div>
 
             <h2 id="monthTitle">Mutiger Mai</h2>
-
-            <p id="motivation" class="sub">
-              ⚡ Monat läuft – aber da geht noch einiges.
-            </p>
           </div>
 
           <div class="wrc-dashboard-month">
@@ -682,40 +700,8 @@
         <div id="recordLadder" class="record-ladder"></div>
 
 
-        <div class="wrc-dashboard-values">
-
-          <div class="wrc-dashboard-value">
-            <span>⭐ Erreichte Punkte</span>
-            <strong id="goalCurrent">0</strong>
-            <div id="dashboardWeekTrend"></div>
-          </div>
-
-          <div class="wrc-dashboard-value goal-ring-card">
-            <span>🎯 Aktuelles Ziel</span>
-            <div id="goalProgressRing" class="goal-progress-ring" aria-label="Monatsfortschritt 0 Prozent">
-              <div class="goal-progress-ring-inner">
-                <strong id="goalTarget">1700</strong>
-                <small id="goalRingPercent">0%</small>
-              </div>
-            </div>
-          </div>
-
-          <div class="wrc-dashboard-value">
-            <span>🏁 Noch offen</span>
-            <strong id="goalRest">1700</strong>
-          </div>
-
-          <div class="wrc-dashboard-value">
-            <span>📅 Nötig pro Resttag</span>
-            <strong id="neededPerDay">0</strong>
-          </div>
-
-          <div class="wrc-dashboard-value">
-            <span>🔮 Prognose Monatsende</span>
-            <strong id="forecast">0</strong>
-          </div>
-
-          <button type="button" id="dashboardAchievementCard" class="wrc-dashboard-value dashboard-achievement-card"
+        <div class="wrc-dashboard-focus-grid">
+          <button type="button" id="dashboardAchievementCard" class="dashboard-focus-card dashboard-achievement-card"
             onclick="showTab('achievementsPanel', document.querySelector('.drawer-link[onclick*=achievementsPanel]')); window.scrollTo({ top: 0, behavior: 'smooth' })">
             <span>🏆 Nächstes Achievement</span>
             <strong id="dashboardAchievementTitle">Wird geladen …</strong>
@@ -725,22 +711,15 @@
             </div>
           </button>
 
+          <article id="dashboardHighlight" class="dashboard-focus-card dashboard-highlight-card" aria-live="polite">
+            <span id="dashboardHighlightKicker">✨ Heute bei der WRC</span>
+            <strong id="dashboardHighlightTitle">Gemeinsam in Bewegung</strong>
+            <small id="dashboardHighlightText">Der nächste Eintrag schreibt die Geschichte weiter.</small>
+          </article>
         </div>
 
       </div>
 
-
-      
-
-
-
-      <div class="card">
-        <h3>📊 Monatsübersicht</h3>
-        <p class="sub">Erreichte Punkte je Monat, aktuelle Stufe und Rekordtreppe.</p>
-        <div id="monthlyOverview"></div>
-      </div>
-
-      <div id="randomFactBox" class="randomfact"></div>
 
     </div>
   </div>
@@ -1199,6 +1178,12 @@ background:#0f172a
         <h3>📊 Analyse-Highlights</h3>
         <p class="sub">Teamform, stärkster Wochentag, Serien und bester Monat auf einen Blick.</p>
         <div id="analysisHighlights" class="analysis-highlight-grid"></div>
+      </div>
+
+      <div class="card">
+        <h3>📊 Monatsübersicht</h3>
+        <p class="sub">Erreichte Punkte je Monat, aktuelle Stufe und Rekordtreppe.</p>
+        <div id="monthlyOverview"></div>
       </div>
 
       <div class="card">
@@ -2210,22 +2195,11 @@ background:#0f172a
       let goal = baseGoal;
 
       let total = 0;
-      let totalSteps = 0;
-      let totalBike = 0;
-      let totalSquats = 0;
-      let totalPushups = 0;
-      let exerciseCount = 0;
 
       entries.forEach(e => {
         const p = calcPoints(e);
 
         total += p.total;
-        totalSteps += +e.steps || 0;
-        totalBike += +e.bike || 0;
-        totalSquats += +e.squats || 0;
-        totalPushups += +e.pushups || 0;
-
-        if (e.exercise) exerciseCount++;
       });
 
       const ladder = buildRecordLadder(key, total);
@@ -2252,21 +2226,8 @@ background:#0f172a
 
       setText("monthTitle", `${getMonthTitle(key)} · ${ladder.stage.stars} ${ladder.stage.title}`);
       setText("goalTarget", fmt(goal));
-      setText("goalCurrent", fmt(total, 1));
-      setText("goalRest", fmt(rest, 1));
       setText("barPercentTop", percent + "%");
       setText("barText", `${fmt(total, 1)} / ${fmt(goal, 1)} Punkte`);
-      setText("neededPerDay", fmt(rest / restDays, 1));
-      setText("forecast", fmt(forecast));
-
-      const dashboardWeekTrend = document.getElementById("dashboardWeekTrend");
-      if (dashboardWeekTrend) {
-        const anchorDate = getLastEntryDate(entries);
-        dashboardWeekTrend.innerHTML = trendMarkup(
-          getWeeklyTrend(allEntries, anchorDate, "points"),
-          { decimals: 1 }
-        );
-      }
 
       const fill = document.getElementById("barFill");
       if (fill) {
@@ -2275,25 +2236,59 @@ background:#0f172a
         });
       }
 
-      const goalProgressRing = document.getElementById("goalProgressRing");
-      if (goalProgressRing) {
-        goalProgressRing.setAttribute("aria-label", `Monatsfortschritt ${percent} Prozent`);
-        requestAnimationFrame(() => {
-          goalProgressRing.style.setProperty("--goal-progress", Math.min(percent, 100));
+      renderRecordLadder(key, total);
+      renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder });
+    }
+
+    function renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder }) {
+      const card = document.getElementById("dashboardHighlight");
+      if (!card) return;
+
+      const activeDays = new Set(entries.map(entry => entry.date).filter(Boolean)).size;
+      const lastDate = getLastEntryDate(entries);
+      const latestPeople = lastDate
+        ? [...new Set(entries.filter(entry => entry.date === lastDate).map(entry => entry.person))]
+        : [];
+
+      const highlights = [];
+
+      if (lastDate && latestPeople.length) {
+        highlights.push({
+          kicker: "🤝 Letzter Team-Moment",
+          title: `${latestPeople.length} ${latestPeople.length === 1 ? "Wurstrandler war" : "Wurstrandler waren"} aktiv`,
+          text: `${formatDate(lastDate)} · ${latestPeople.join(", ")}`
         });
       }
-      setText("goalRingPercent", percent + "%");
 
-      renderRecordLadder(key, total);
+      if (activeDays > 0) {
+        highlights.push({
+          kicker: "📅 Euer Rhythmus",
+          title: `${activeDays} aktive ${activeDays === 1 ? "Tag" : "Tage"} im ${getMonthTitle(key)}`,
+          text: "Jeder Eintrag macht den gemeinsamen Monat vollständiger."
+        });
+      }
 
-      setText(
-        "motivation",
-        ladder.allTime
-          ? "👑 All-Time-Rekord-Modus – jeder Punkt schreibt Geschichte."
-          : total >= baseGoal
-            ? `🔥 ${ladder.stage.stars} ${ladder.stage.title} ist jetzt aktiv.`
-            : "⚡ Monat läuft – aber da geht noch einiges."
-      );
+      if (total >= baseGoal) {
+        highlights.push({
+          kicker: "✨ Zugabe",
+          title: ladder.next ? `${ladder.next.stars} ${ladder.next.title} wartet` : "Bestmarke im Blick",
+          text: ladder.next
+            ? `Das Hauptziel ist sicher. Noch ${fmt(Math.max(ladder.next.value - total, 0), 1)} Punkte bis zum Bonus.`
+            : "Das Monatsziel ist geschafft. Alles Weitere schreibt Teamgeschichte."
+        });
+      } else {
+        highlights.push({
+          kicker: forecast >= baseGoal ? "🧭 Auf Zielkurs" : "🌱 Nächster Schritt",
+          title: forecast >= baseGoal ? "Euer aktueller Kurs reicht fürs Monatsziel" : `${fmt(rest / restDays, 1)} Punkte pro Resttag`,
+          text: "Eine Orientierung, kein Druck – jeder Beitrag zählt."
+        });
+      }
+
+      const selected = highlights[new Date().getDate() % highlights.length];
+      setText("dashboardHighlightKicker", selected.kicker);
+      setText("dashboardHighlightTitle", selected.title);
+      setText("dashboardHighlightText", selected.text);
+      card.style.display = "";
     }
 
     function checkGoalEffects() {
@@ -2305,15 +2300,18 @@ background:#0f172a
 
       const goalBanner = document.getElementById("goalBanner");
       const missBanner = document.getElementById("missBanner");
+      const dashboardHighlight = document.getElementById("dashboardHighlight");
 
       if (goalBanner) goalBanner.style.display = "none";
       if (missBanner) missBanner.style.display = "none";
+      if (dashboardHighlight) dashboardHighlight.style.display = "";
 
       const reachedMilestones = ladder.milestones.filter(m => total >= m.value);
 
       if (reachedMilestones.length) {
         if (goalBanner) {
           goalBanner.style.display = "block";
+          if (dashboardHighlight) dashboardHighlight.style.display = "none";
           goalBanner.innerHTML = `
             <div class="goal-banner-content">
               <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
@@ -2405,6 +2403,8 @@ background:#0f172a
 
       if (selectedMonth() === currentMonthKey() && missBanner) {
         missBanner.style.display = "flex";
+        const dashboardHighlight = document.getElementById("dashboardHighlight");
+        if (dashboardHighlight) dashboardHighlight.style.display = "none";
         missBanner.innerHTML = `
           <span class="miss-banner-icon">🌱</span>
           <div>
@@ -3792,17 +3792,13 @@ background:#0f172a
       window.scrollTo(0, 0);
     });
 
-    function toggleGameLounge() {
-      const submenu = document.getElementById("gameLoungeSubmenu");
-      const arrow = document.getElementById("gameLoungeArrow");
+    function toggleDrawerGroup(submenuId, arrowId) {
+      const submenu = document.getElementById(submenuId);
+      const arrow = document.getElementById(arrowId);
+      if (!submenu || !arrow) return;
 
       submenu.classList.toggle("open");
-
-      if (submenu.classList.contains("open")) {
-        arrow.textContent = "▾";
-      } else {
-        arrow.textContent = "▸";
-      }
+      arrow.textContent = submenu.classList.contains("open") ? "▾" : "▸";
     }
 
   </script>
@@ -3815,6 +3811,7 @@ background:#0f172a
   <script src="modules/frisbee/frisbee.js"></script>
   <script src="modules/uno/uno.js"></script>
   <script src="modules/game-collection/game-collection.js"></script>
+  <script src="modules/wursti-walk/wursti-walk.js"></script>
   <script src="modules/pwa/pwa.js"></script>
 </body>
 
