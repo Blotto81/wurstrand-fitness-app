@@ -382,10 +382,15 @@ body.merch-modal-open {
   overflow: hidden;
 }
 
+body.merch-modal-open .mobile-menu-button {
+  visibility: hidden;
+}
+
 .merch-dialog {
   position: relative;
   width: min(1040px, 100%);
   max-height: calc(100vh - 44px);
+  overflow-x: hidden;
   overflow-y: auto;
   border: 1px solid rgba(244, 200, 90, .3);
   border-radius: 28px;
@@ -669,7 +674,7 @@ body.merch-modal-open {
   .merch-hero-mark { flex-basis: 105px; }
   .merch-toolbar { align-items: flex-end; margin-top: 21px; }
   .merch-result-count { padding-bottom: 9px; }
-  .merch-modal { align-items: end; padding: 0; }
+  .merch-modal { align-items: end; overflow-x: hidden; padding: 0; }
   .merch-dialog { width: 100%; max-height: 94vh; border-radius: 24px 24px 0 0; }
   .merch-detail-top { grid-template-columns: 1fr; padding: 22px; }
   .merch-detail-visual { min-height: 290px; }
