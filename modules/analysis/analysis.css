@@ -1,6 +1,7 @@
 .analysis-page {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .analysis-header {
@@ -85,6 +86,7 @@
 .analysis-section {
   display: grid;
   gap: 18px;
+  min-width: 0;
   animation: analysisReveal .28s ease both;
 }
 
@@ -94,6 +96,14 @@
 
 .analysis-section > .card {
   margin: 0;
+  min-width: 0;
+}
+
+#averageStats,
+#averageStats > div {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .analysis-feature-card {
@@ -325,6 +335,84 @@
 
   .player-streak-grid {
     grid-template-columns: 1fr;
+  }
+
+  [data-analysis-section="team"] .average-table {
+    display: block;
+    min-width: 0;
+    margin-top: 14px;
+  }
+
+  [data-analysis-section="team"] .average-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  [data-analysis-section="team"] .average-table tr:first-child {
+    display: none;
+  }
+
+  [data-analysis-section="team"] .average-player-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 14px;
+    padding: 14px;
+    border: 1px solid rgba(148, 163, 184, .14);
+    border-radius: 16px;
+    background: rgba(15, 23, 42, .42);
+  }
+
+  [data-analysis-section="team"] .average-player-row td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, .1);
+    text-align: right;
+  }
+
+  [data-analysis-section="team"] .average-player-row td::before {
+    content: attr(data-label);
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  [data-analysis-section="team"] .average-player-row td:first-child {
+    display: block;
+    grid-column: 1 / -1;
+    padding: 0 0 10px;
+    text-align: left;
+  }
+
+  [data-analysis-section="team"] .average-player-row td:first-child::before {
+    display: none;
+  }
+
+  [data-analysis-section="team"] .average-player-row td:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  [data-analysis-section="team"] .heatmap {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+  }
+
+  [data-analysis-section="team"] .daybox {
+    min-width: 0;
+    min-height: 86px;
+    overflow-wrap: anywhere;
+  }
+
+  [data-analysis-section="team"] .legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-analysis-section="team"] .legend span {
+    padding: 7px 8px;
+    text-align: center;
   }
 }
 
