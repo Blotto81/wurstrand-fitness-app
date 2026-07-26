@@ -13,12 +13,29 @@
   border-top: 1px solid rgba(255, 255, 255, .08);
 }
 
-.wrc-progress-outlook > span {
+.wrc-progress-outlook > button {
   min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
 }
 
-.wrc-progress-outlook small,
-.wrc-progress-outlook strong {
+.wrc-progress-outlook > button:hover,
+.wrc-progress-outlook > button:focus-visible {
+  border-color: rgba(56, 189, 248, .2);
+  background: rgba(56, 189, 248, .08);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.wrc-progress-outlook button small,
+.wrc-progress-outlook button strong {
   display: block;
 }
 
@@ -141,7 +158,7 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .wrc-progress-outlook > span:last-child {
+  .wrc-progress-outlook > button:last-child {
     grid-column: 1 / -1;
   }
 
