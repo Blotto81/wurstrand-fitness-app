@@ -58,20 +58,10 @@
       Daily</button>
 
     <div class="drawer-divider"></div>
-    <button class="drawer-group-title drawer-toggle" type="button"
-      onclick="toggleDrawerGroup('discoverSubmenu','discoverArrow')">
-      <span>✨ Entdecken</span>
-      <span id="discoverArrow">▸</span>
-    </button>
-
-    <div id="discoverSubmenu" class="drawer-submenu">
-      <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
-      <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte Rekorde</button>
-      <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
-    </div>
+    <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
+    <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
+      Rekorde</button>
+    <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
 
     <div class="drawer-divider"></div>
     <button class="drawer-group-title drawer-toggle" type="button"
@@ -695,18 +685,18 @@
           </div>
 
           <div class="wrc-progress-outlook" aria-label="Monatsausblick">
-            <span>
+            <button type="button" onclick="openAnalysisDetails('monthlyOverview')">
               <small>Team pro Resttag</small>
               <strong id="goalPaceTeam">0 Punkte</strong>
-            </span>
-            <span>
+            </button>
+            <button type="button" onclick="openAnalysisDetails('averageStats')">
               <small>Pro Spieler &amp; Resttag</small>
               <strong id="goalPacePlayer">0 Punkte</strong>
-            </span>
-            <span>
+            </button>
+            <button type="button" onclick="openAnalysisDetails('monthlyOverview')">
               <small>Prognose Monatsende</small>
               <strong id="goalForecast">0 Punkte</strong>
-            </span>
+            </button>
           </div>
 
         </div>
@@ -1898,6 +1888,52 @@ background:#0f172a
         renderQuotes();
       }
     }
+
+    function menuLinkForPanel(panelId) {
+      return [...document.querySelectorAll(".drawer-link")]
+        .find(link => (link.getAttribute("onclick") || "").includes(`'${panelId}'`)) || null;
+    }
+
+    function openPanelDetails(panelId, targetId) {
+      showTab(panelId, menuLinkForPanel(panelId));
+      toggleMainMenu(false);
+
+      requestAnimationFrame(() => {
+        const target = targetId ? document.getElementById(targetId) : document.getElementById(panelId);
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    function openAnalysisDetails(targetId) {
+      openPanelDetails("analyse", targetId);
+    }
+
+    function openEntriesForMonth(month) {
+      const monthSelect = document.getElementById("monthSelect");
+
+      if (monthSelect && [...monthSelect.options].some(option => option.value === month)) {
+        monthSelect.value = month;
+        renderAll();
+      }
+
+      openPanelDetails("eintraege", "entriesList");
+    }
+
+    function openPlayerDetails(player, month) {
+      const playerSelect = document.getElementById("playerSelect");
+      const monthSelect = document.getElementById("playerMonthSelect");
+
+      if (playerSelect && [...playerSelect.options].some(option => option.value === player)) {
+        playerSelect.value = player;
+      }
+
+      if (monthSelect && [...monthSelect.options].some(option => option.value === month)) {
+        monthSelect.value = month;
+      }
+
+      openPanelDetails("spieler", "playerStats");
+      renderPlayerOverview();
+    }
     function fillPeople() {
       const select = document.getElementById("person");
       select.innerHTML = "";
@@ -2171,7 +2207,10 @@ background:#0f172a
           : "Ohne Platzierung";
 
         return `
-          <div class="month-card${goalReached ? " done" : ""}${isCurrent ? " current" : ""}${!hasPoints ? " empty" : ""}">
+          <button type="button"
+            class="month-card${goalReached ? " done" : ""}${isCurrent ? " current" : ""}${!hasPoints ? " empty" : ""}"
+            onclick="openEntriesForMonth('${month.key}')"
+            aria-label="${getMonthTitle(month.key)}: ${fmt(month.total, 1)} Punkte – Einträge öffnen">
             <div class="month-card-head">
               <div class="month-card-title">${getMonthTitle(month.key)}</div>
               ${isCurrent ? '<span class="month-current-label">AKTUELL</span>' : ""}
@@ -2197,7 +2236,7 @@ background:#0f172a
               <span class="month-card-badge">${badge}</span>
               <span class="month-card-place">${placeText}</span>
             </div>
-          </div>
+          </button>
         `;
       }).join("")}
     </div>
@@ -3040,11 +3079,13 @@ background:#0f172a
       <div class="big">🔥 ${longest} Tage</div>
       <div class="note">Tage in Folge mit mindestens ca. ${fmt(dailyTarget, 1)} Punkten.</div>
     </div>
-    <div class="analysis-card">
+    <button type="button" class="analysis-card analysis-card-link"
+      onclick="${bestMonth.key ? `openEntriesForMonth('${bestMonth.key}')` : ""}"
+      ${bestMonth.key ? "" : "disabled"}>
       <div class="label">Bester Monat</div>
       <div class="big">🏆 ${bestMonth.key ? getMonthTitle(bestMonth.key) : "-"}</div>
       <div class="note">${fmt(bestMonth.total, 1)} Punkte bisher.</div>
-    </div>
+    </button>
   `;
     }
 
@@ -3072,6 +3113,14 @@ background:#0f172a
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          onClick: (_event, elements) => {
+            if (!elements.length) return;
+            const month = Object.keys(monthGoals)[elements[0].index];
+            if (month) openEntriesForMonth(month);
+          },
+          onHover: (event, elements) => {
+            event.native.target.style.cursor = elements.length ? "pointer" : "default";
+          },
           plugins: {
             legend: { labels: { color: "#f8fafc" } }
           },
@@ -3138,6 +3187,10 @@ background:#0f172a
           responsive: true,
           maintainAspectRatio: false,
           cutout: "66%",
+          onClick: () => openEntriesForMonth(key),
+          onHover: event => {
+            event.native.target.style.cursor = "pointer";
+          },
           plugins: {
             legend: {
               position: "bottom",
@@ -3184,7 +3237,8 @@ background:#0f172a
         const pushups = pe.reduce((s, e) => s + (+e.pushups || 0), 0);
 
         return `
-      <tr>
+      <tr class="average-player-row" onclick="openPlayerDetails('${person}', '${key}')"
+        title="${person} in der Spielerübersicht öffnen">
         <td><b>${person}</b><br><span class="sub">${activeDays} aktive Tage</span></td>
         <td>${fmt(points / div, 1)}</td>
         <td>${fmt(steps / div)}</td>

@@ -4362,3 +4362,40 @@ button:not(:disabled):active {
             font-size: 16px;
           }
         }
+.analysis-card-link {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.analysis-card-link:hover,
+.analysis-card-link:focus-visible {
+  border-color: rgba(56, 189, 248, .38);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.average-player-row {
+  cursor: pointer;
+  transition: background .18s ease;
+}
+
+.average-player-row:hover {
+  background: rgba(56, 189, 248, .08);
+}
+
+.month-card {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.month-card:hover,
+.month-card:focus-visible {
+  border-color: rgba(56, 189, 248, .36);
+  outline: none;
+}
