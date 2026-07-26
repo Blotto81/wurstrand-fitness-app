@@ -4391,11 +4391,14 @@ button:not(:disabled):active {
   color: inherit;
   font: inherit;
   text-align: left;
+}
+
+button.month-card {
   cursor: pointer;
 }
 
-.month-card:hover,
-.month-card:focus-visible {
+button.month-card:hover,
+button.month-card:focus-visible {
   border-color: rgba(56, 189, 248, .36);
   outline: none;
 }

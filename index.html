@@ -1909,6 +1909,12 @@ background:#0f172a
     }
 
     function openEntriesForMonth(month) {
+      const hasDetailedEntries = allEntries.some(entry => (entry.date || "").startsWith(month));
+      if (!hasDetailedEntries) {
+        toast("Für diesen historischen Monat sind nur Gesamtsummen vorhanden.");
+        return;
+      }
+
       const monthSelect = document.getElementById("monthSelect");
 
       if (monthSelect && [...monthSelect.options].some(option => option.value === month)) {
@@ -2187,6 +2193,7 @@ background:#0f172a
         const isCurrent = month.key === current;
         const goalReached = month.total >= month.goal;
         const hasPoints = month.total > 0;
+        const hasDetailedEntries = allEntries.some(entry => (entry.date || "").startsWith(month.key));
 
         const placeIndex = ranking.findIndex(
           (rankedMonth) => rankedMonth.key === month.key
@@ -2207,10 +2214,11 @@ background:#0f172a
           : "Ohne Platzierung";
 
         return `
-          <button type="button"
+          <${hasDetailedEntries ? "button" : "div"} ${hasDetailedEntries ? 'type="button"' : ""}
             class="month-card${goalReached ? " done" : ""}${isCurrent ? " current" : ""}${!hasPoints ? " empty" : ""}"
-            onclick="openEntriesForMonth('${month.key}')"
-            aria-label="${getMonthTitle(month.key)}: ${fmt(month.total, 1)} Punkte – Einträge öffnen">
+            ${hasDetailedEntries
+              ? `onclick="openEntriesForMonth('${month.key}')" aria-label="${getMonthTitle(month.key)}: ${fmt(month.total, 1)} Punkte – Einträge öffnen"`
+              : 'title="Historische Gesamtsumme ohne einzelne Tagesdaten"'}>
             <div class="month-card-head">
               <div class="month-card-title">${getMonthTitle(month.key)}</div>
               ${isCurrent ? '<span class="month-current-label">AKTUELL</span>' : ""}
@@ -2236,7 +2244,7 @@ background:#0f172a
               <span class="month-card-badge">${badge}</span>
               <span class="month-card-place">${placeText}</span>
             </div>
-          </button>
+          </${hasDetailedEntries ? "button" : "div"}>
         `;
       }).join("")}
     </div>
