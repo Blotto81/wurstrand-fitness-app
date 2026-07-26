@@ -28,8 +28,9 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
   <link rel="stylesheet" href="modules/month-archive/month-archive.css">
-  <link rel="stylesheet" href="modules/analysis/analysis.css">
-  <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
+	  <link rel="stylesheet" href="modules/analysis/analysis.css">
+	  <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
+	  <link rel="stylesheet" href="modules/merch/merch.css">
 </head>
 
 <body>
@@ -104,9 +105,11 @@
         onclick="showTab('quotesPanel',this); toggleMainMenu(false)">📜 Chronik</button>
       <button class="drawer-link tab drawer-sublink"
         onclick="showTab('mascotsPanel',this); toggleMainMenu(false)">🌭 Wursti &amp; Bertha</button>
-      <button class="drawer-link tab drawer-sublink"
-        onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖 WRC-Regeln</button>
-    </div>
+	      <button class="drawer-link tab drawer-sublink"
+	        onclick="showTab('rulesPanel',this); toggleMainMenu(false)">📖 WRC-Regeln</button>
+	      <button class="drawer-link tab drawer-sublink"
+	        onclick="showTab('merchPanel',this); toggleMainMenu(false)">🛍️ Merchandise</button>
+	    </div>
   </nav>
 
   <button class="mobile-menu-button" onclick="toggleMainMenu()" aria-label="Menü öffnen">☰</button>
@@ -1041,9 +1044,13 @@ background:#0f172a
 
   </div>
 
-  <div id="mascotsPanel" class="panel"></div>
+	  <div id="mascotsPanel" class="panel"></div>
 
-  <div id="rulesPanel" class="panel">
+	  <div id="merchPanel" class="panel">
+	    <div id="merchRoot"></div>
+	  </div>
+
+	  <div id="rulesPanel" class="panel">
 
     <div class="card rules-hero">
       <div class="badge">WRC-Regeln</div>
@@ -4593,9 +4600,10 @@ background:#0f172a
   <script src="modules/dart/dart.js"></script>
   <script src="modules/frisbee/frisbee.js"></script>
   <script src="modules/uno/uno.js"></script>
-  <script src="modules/game-collection/game-collection.js"></script>
-  <script src="modules/wursti-walk/wursti-walk.js"></script>
-  <script src="modules/pwa/pwa.js"></script>
+	  <script src="modules/game-collection/game-collection.js"></script>
+	  <script src="modules/wursti-walk/wursti-walk.js"></script>
+	  <script src="modules/merch/merch.js"></script>
+	  <script src="modules/pwa/pwa.js"></script>
 </body>
 
 </html>
