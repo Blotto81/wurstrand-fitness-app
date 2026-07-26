@@ -694,6 +694,21 @@
             <div class="fill" id="barFill"></div>
           </div>
 
+          <div class="wrc-progress-outlook" aria-label="Monatsausblick">
+            <span>
+              <small>Team pro Resttag</small>
+              <strong id="goalPaceTeam">0 Punkte</strong>
+            </span>
+            <span>
+              <small>Pro Spieler &amp; Resttag</small>
+              <strong id="goalPacePlayer">0 Punkte</strong>
+            </span>
+            <span>
+              <small>Prognose Monatsende</small>
+              <strong id="goalForecast">0 Punkte</strong>
+            </span>
+          </div>
+
         </div>
 
 
@@ -2228,6 +2243,9 @@ background:#0f172a
       setText("goalTarget", fmt(goal));
       setText("barPercentTop", percent + "%");
       setText("barText", `${fmt(total, 1)} / ${fmt(goal, 1)} Punkte`);
+      setText("goalPaceTeam", `${fmt(rest / restDays, 1)} Punkte`);
+      setText("goalPacePlayer", `${fmt(rest / restDays / Math.max(people.length, 1), 1)} Punkte`);
+      setText("goalForecast", `${fmt(forecast, 0)} Punkte`);
 
       const fill = document.getElementById("barFill");
       if (fill) {
