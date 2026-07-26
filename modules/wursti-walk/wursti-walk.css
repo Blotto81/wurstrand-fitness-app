@@ -1,0 +1,139 @@
+.wursti-walk-stage {
+  position: fixed;
+  z-index: 90;
+  left: 0;
+  right: 0;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  height: 126px;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+.wursti-walk-actor {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 84px;
+  height: 126px;
+  transform: translateX(-120px);
+  animation: wurstiCrossScreen 7.2s linear forwards;
+  will-change: transform;
+}
+
+.wursti-walk-sprite {
+  width: 100%;
+  height: 100%;
+  background-image: url("../../wursti-run-sprite.png");
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 600% 100%;
+  filter: drop-shadow(0 8px 7px rgba(2, 6, 23, .3));
+  animation: wurstiRunFrames .66s steps(1, end) infinite;
+}
+
+.wursti-walk-actor.is-waving .wursti-walk-sprite {
+  background-image: url("../../wursti-wave.png");
+  background-position: center;
+  background-size: contain;
+  animation: wurstiWave .72s ease-in-out infinite alternate;
+}
+
+@keyframes wurstiCrossScreen {
+  0% {
+    transform: translateX(-120px);
+  }
+
+  58% {
+    transform: translateX(62vw);
+  }
+
+  75% {
+    transform: translateX(62vw);
+  }
+
+  100% {
+    transform: translateX(calc(100vw + 120px));
+  }
+}
+
+@keyframes wurstiRunFrames {
+  0%,
+  16.65% {
+    background-position: 0 50%;
+  }
+
+  16.66%,
+  33.31% {
+    background-position: 20% 50%;
+  }
+
+  33.32%,
+  49.97% {
+    background-position: 40% 50%;
+  }
+
+  49.98%,
+  66.63% {
+    background-position: 60% 50%;
+  }
+
+  66.64%,
+  83.29% {
+    background-position: 80% 50%;
+  }
+
+  83.3%,
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes wurstiWave {
+  from {
+    transform: rotate(-2deg) translateY(0);
+  }
+
+  to {
+    transform: rotate(2deg) translateY(-3px);
+  }
+}
+
+@media (max-width: 600px) {
+  .wursti-walk-stage {
+    height: 104px;
+  }
+
+  .wursti-walk-actor {
+    width: 70px;
+    height: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wursti-walk-actor {
+    right: 14px;
+    left: auto;
+    transform: none;
+    animation: wurstiQuietHello 2.4s ease both;
+  }
+
+  .wursti-walk-sprite {
+    background-image: url("../../wursti-wave.png");
+    background-position: center;
+    background-size: contain;
+    animation: none;
+  }
+}
+
+@keyframes wurstiQuietHello {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
