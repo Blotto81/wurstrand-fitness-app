@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
   <link rel="stylesheet" href="modules/month-archive/month-archive.css">
+  <link rel="stylesheet" href="modules/analysis/analysis.css">
   <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
 </head>
 
@@ -1140,107 +1141,154 @@ background:#0f172a
   </div>
 
   <div id="analyse" class="panel">
-    <div class="card">
+    <div class="analysis-page">
       <div class="card" style="display:none">
         <p class="sub">Interne Prüfwerte für historische Daten + neue Einträge.</p>
         <div id="adminStats"></div>
       </div>
-      <div class="card">
 
-        <h3>📈 Schritte-Analyse</h3>
+      <div class="analysis-header">
+        <div>
+          <span class="analysis-kicker">WRC Analyse</span>
+          <h2>Was hinter euren Punkten steckt</h2>
+          <p class="sub">Vom Zielkurs bis zu euren stärksten Tagen – klar geordnet, ohne etwas auszublenden.</p>
+        </div>
+        <label class="analysis-month-control">
+          <span>Monat</span>
+          <select id="chartMonthSelect" onchange="setAnalysisMonth(this.value)"></select>
+        </label>
+      </div>
 
-        <p class="sub">
-          Letzte echte Aktivitätstage statt künstlicher Null-Linien.
-        </p>
+      <div class="analysis-nav" role="tablist" aria-label="Analysebereiche">
+        <button class="analysis-nav-button active" type="button" data-analysis-tab="overview"
+          onclick="setAnalysisSection('overview', this)">Überblick</button>
+        <button class="analysis-nav-button" type="button" data-analysis-tab="development"
+          onclick="setAnalysisSection('development', this)">Entwicklung</button>
+        <button class="analysis-nav-button" type="button" data-analysis-tab="team"
+          onclick="setAnalysisSection('team', this)">Team &amp; Tage</button>
+      </div>
 
-        <div class="chartbuttons">
-
-          <button class="secondary chartbtn active" onclick="setChartMode('7days',this)">
-            7 Tage
-          </button>
-
-          <button class="secondary chartbtn" onclick="setChartMode('month',this)">
-            Monat
-          </button>
-
-          <button class="secondary chartbtn" onclick="setChartMode('quarter',this)">
-            Quartal
-          </button>
-
-          <div id="chartMonthWrap" class="chart-month-picker" style="display:none">
-            <label>Monat anzeigen</label>
-            <select id="chartMonthSelect" onchange="renderStepsChart()"></select>
+      <section class="analysis-section active" data-analysis-section="overview">
+        <div class="card analysis-feature-card">
+          <div class="analysis-card-heading">
+            <div>
+              <span class="analysis-card-eyebrow">Monatsverlauf</span>
+              <h3>🎯 Zielkurs</h3>
+              <p class="sub">Euer tatsächlicher Stand, die ideale Ziellinie und die aktuelle Hochrechnung.</p>
+            </div>
+            <div id="targetCourseSummary" class="analysis-course-summary"></div>
           </div>
-
-        </div>
-
-        <div class="chartbox">
-          <canvas id="stepsChart"></canvas>
-        </div>
-
-      </div>
-
-      <div class="card">
-        <h3>📊 Analyse-Highlights</h3>
-        <p class="sub">Teamform, stärkster Wochentag, Serien und bester Monat auf einen Blick.</p>
-        <div id="analysisHighlights" class="analysis-highlight-grid"></div>
-      </div>
-
-      <div class="card">
-        <h3>🗂️ Monatsarchiv</h3>
-        <p class="sub">Blättere durch eure bisherigen WRC-Monate und öffne ihre Geschichte.</p>
-        <div id="monthArchiveDetail"></div>
-        <div id="monthlyOverview"></div>
-      </div>
-
-      <div class="card">
-        <h3>🍩 Aktivitätsverteilung</h3>
-        <p class="sub">So verteilen sich die gesammelten Punkte im ausgewählten Monat.</p>
-        <div class="chartbox">
-          <canvas id="activityDistributionChart"></canvas>
-          <div id="activityDistributionEmpty" class="sub" style="display:none">
-            Noch keine Aktivitäten für diesen Monat.
+          <div class="chartbox analysis-course-chart">
+            <canvas id="targetCourseChart"></canvas>
+            <div id="targetCourseEmpty" class="sub analysis-empty" style="display:none"></div>
           </div>
         </div>
-      </div>
 
-      <div class="card">
-        <h3>📈 Monatsvergleich</h3>
-        <p class="sub">Gesamtpunkte je Monat im Saisonverlauf.</p>
-        <div class="chartbox">
-          <canvas id="monthCompareChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>📐 Durchschnitt pro aktivem Tag</h3>
-        <p class="sub">Durchschnittswerte je Spieler im ausgewählten Monat.</p>
-        <div id="averageStats"></div>
-      </div>
-
-      <div class="card">
-
-        <h3>🗓️ Team-Heatmap</h3>
-
-        <p class="sub">
-          Dynamische Tagesbewertung basierend auf eurem echten Monatsziel.
-        </p>
-
-        <div class="legend">
-          <span>⬛ noch offen</span>
-          <span>🟥 Bohnenflaute</span>
-          <span>🟨 Stabil</span>
-          <span>🟩 Zielkurs</span>
-          <span>🔥 Eskalation</span>
+        <div class="card">
+          <h3>📊 Analyse-Highlights</h3>
+          <p class="sub">Teamform, stärkster Wochentag, Serien und bester Monat auf einen Blick.</p>
+          <div id="analysisHighlights" class="analysis-highlight-grid"></div>
         </div>
 
-        <div id="heatmapInfo" class="jumpnote" style="display:none">
+        <div class="card">
+          <h3>🍩 Aktivitätsverteilung</h3>
+          <p class="sub">So verteilen sich die gesammelten Punkte im ausgewählten Monat.</p>
+          <div class="chartbox">
+            <canvas id="activityDistributionChart"></canvas>
+            <div id="activityDistributionEmpty" class="sub" style="display:none">
+              Noch keine Aktivitäten für diesen Monat.
+            </div>
+          </div>
         </div>
 
-        <div id="heatmap" class="heatmap"></div>
+        <div class="card">
+          <div class="analysis-card-heading">
+            <div>
+              <h3>👤 Persönlicher Vergleich</h3>
+              <p class="sub">Der gewählte Monat im direkten Vergleich zum Vormonat.</p>
+            </div>
+            <select id="analysisPlayerSelect" onchange="renderPersonalComparison()"></select>
+          </div>
+          <div id="personalComparison"></div>
+        </div>
+      </section>
 
-      </div>
+      <section class="analysis-section" data-analysis-section="development" hidden>
+        <div class="card">
+          <div class="analysis-card-heading">
+            <div>
+              <h3>📈 Aktivitätsentwicklung</h3>
+              <p class="sub">Wähle aus, welche Entwicklung du im ausgewählten Zeitraum sehen möchtest.</p>
+            </div>
+          </div>
 
+          <div class="analysis-metric-switch" role="group" aria-label="Messwert auswählen">
+            <button class="analysis-metric-button active" type="button" data-analysis-metric="points"
+              onclick="setAnalysisMetric('points', this)">Punkte</button>
+            <button class="analysis-metric-button" type="button" data-analysis-metric="steps"
+              onclick="setAnalysisMetric('steps', this)">Schritte</button>
+            <button class="analysis-metric-button" type="button" data-analysis-metric="bike"
+              onclick="setAnalysisMetric('bike', this)">Rad</button>
+            <button class="analysis-metric-button" type="button" data-analysis-metric="strength"
+              onclick="setAnalysisMetric('strength', this)">Kraft</button>
+            <button class="analysis-metric-button" type="button" data-analysis-metric="exercises"
+              onclick="setAnalysisMetric('exercises', this)">Übungen</button>
+          </div>
+
+          <div class="chartbuttons analysis-range-switch">
+            <button class="secondary chartbtn active" onclick="setChartMode('7days',this)">7 Tage</button>
+            <button class="secondary chartbtn" onclick="setChartMode('month',this)">Monat</button>
+            <button class="secondary chartbtn" onclick="setChartMode('quarter',this)">3 Monate</button>
+          </div>
+
+          <div class="chartbox">
+            <canvas id="stepsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📈 Monatsvergleich</h3>
+          <p class="sub">Gesamtpunkte je Monat im Saisonverlauf.</p>
+          <div class="chartbox">
+            <canvas id="monthCompareChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🗂️ Monatsarchiv</h3>
+          <p class="sub">Blättere durch eure bisherigen WRC-Monate und öffne ihre Geschichte.</p>
+          <div id="monthArchiveDetail"></div>
+          <div id="monthlyOverview"></div>
+        </div>
+      </section>
+
+      <section class="analysis-section" data-analysis-section="team" hidden>
+        <div class="card">
+          <h3>📐 Durchschnitt pro aktivem Tag</h3>
+          <p class="sub">Durchschnittswerte je Spieler im ausgewählten Monat.</p>
+          <div id="averageStats"></div>
+        </div>
+
+        <div class="card">
+          <h3>🗓️ Team-Heatmap</h3>
+
+          <p class="sub">
+            Dynamische Tagesbewertung basierend auf eurem echten Monatsziel.
+          </p>
+
+          <div class="legend">
+            <span>⬛ noch offen</span>
+            <span>🟥 Bohnenflaute</span>
+            <span>🟨 Stabil</span>
+            <span>🟩 Zielkurs</span>
+            <span>🔥 Eskalation</span>
+          </div>
+
+          <div id="heatmapInfo" class="jumpnote" style="display:none"></div>
+
+          <div id="heatmap" class="heatmap"></div>
+        </div>
+      </section>
 
     </div>
 
@@ -1520,7 +1568,10 @@ background:#0f172a
     let stepsChart = null;
     let monthCompareChart = null;
     let activityDistributionChart = null;
+    let targetCourseChart = null;
     let chartMode = "7days";
+    let analysisMetric = "points";
+    let activeAnalysisSection = "overview";
 
     let recordData = {
       steps: { date: null, value: 0 },
@@ -1664,12 +1715,21 @@ background:#0f172a
       pop.classList.toggle("goal-pop", options.type === "goal");
       mascot.style.display = options.type === "goal" ? "block" : "none";
       pop.style.display = "flex";
+      if (history.state?.overlay !== "bigPop") {
+        history.pushState({
+          wrc: true,
+          panelId: currentPanelId(),
+          analysisSection: activeAnalysisSection,
+          overlay: "bigPop"
+        }, "", location.hash);
+      }
     }
 
     function hideBigPop() {
       const pop = document.getElementById("bigPop");
       pop.style.display = "none";
       pop.classList.remove("goal-pop");
+      if (history.state?.overlay === "bigPop") history.back();
     }
 
     function createConfetti() {
@@ -1752,6 +1812,12 @@ background:#0f172a
         <span class="save-reward-points-value" aria-hidden="true">+0,0 Punkte</span>
       </div>
       <div class="save-reward-lines">${lines}</div>
+      ${data.player ? `
+        <button class="post-save-player-link" type="button"
+          onclick="openPlayerDetails('${data.player}', '${data.month}'); document.getElementById('saveReward')?.classList.remove('show')">
+          ${data.player}s Spielerübersicht öffnen →
+        </button>
+      ` : ""}
     </div>
   `;
 
@@ -1833,6 +1899,8 @@ background:#0f172a
         icon: personalRecords.length ? "🏆" : points.total >= 30 ? "🔥" : points.total >= 15 ? "🎉" : "✅",
         title,
         subtitle: `${entry.person} · ${formatDate(entry.date)}`,
+        player: entry.person,
+        month: dateKey,
         points: points.total,
         lines,
         duration: personalRecords.length ? 5200 : 3600
@@ -1845,6 +1913,28 @@ background:#0f172a
       document.body.classList.remove("menu-open");
     });
 
+    let wrcMenuStateConsumed = false;
+    let applyingWrcHistory = false;
+
+    function currentPanelId() {
+      return document.querySelector(".panel.active")?.id || "dashboard";
+    }
+
+    function wrcRoute(panelId, details = {}) {
+      return panelId === "analyse" && details.analysisSection
+        ? `#analyse/${details.analysisSection}`
+        : `#${panelId}`;
+    }
+
+    function updateWrcHistory(panelId, details = {}, replace = false) {
+      if (applyingWrcHistory) return;
+      const state = { wrc: true, panelId, ...details };
+      const current = history.state;
+      const method = replace || (current?.overlay === "menu") ? "replaceState" : "pushState";
+      history[method](state, "", wrcRoute(panelId, details));
+      if (current?.overlay === "menu") wrcMenuStateConsumed = true;
+    }
+
     function toggleMainMenu(force) {
       const menu = document.getElementById("mainMenu");
       const backdrop = document.getElementById("menuBackdrop");
@@ -1852,12 +1942,27 @@ background:#0f172a
 
       const open = force === true ? true : force === false ? false : !menu.classList.contains("open");
 
+      if (open && !menu.classList.contains("open")) {
+        history.pushState({
+          wrc: true,
+          panelId: currentPanelId(),
+          analysisSection: activeAnalysisSection,
+          overlay: "menu"
+        }, "", location.hash);
+      } else if (!open && menu.classList.contains("open")) {
+        if (wrcMenuStateConsumed) {
+          wrcMenuStateConsumed = false;
+        } else if (history.state?.overlay === "menu") {
+          history.back();
+        }
+      }
+
       menu.classList.toggle("open", open);
       backdrop.classList.toggle("open", open);
       document.body.classList.toggle("menu-open", open);
     }
 
-    function showTab(id, btn) {
+    function showTab(id, btn, options = {}) {
       document.querySelectorAll(".panel").forEach(p => {
         p.classList.remove("active");
         p.style.display = "none";
@@ -1879,7 +1984,11 @@ background:#0f172a
       }
 
       if (id === "analyse") {
-        setTimeout(renderStepsChart, 150);
+        setTimeout(() => {
+          setAnalysisSection(options.analysisSection || activeAnalysisSection, null, { history: false });
+          renderAnalysisExtras();
+          renderStepsChart();
+        }, 80);
       }
 
       if (id === "spieler") {
@@ -1889,7 +1998,39 @@ background:#0f172a
       if (id === "quotesPanel") {
         renderQuotes();
       }
+
+      if (options.history !== false) {
+        updateWrcHistory(id, id === "analyse" ? { analysisSection: activeAnalysisSection } : {});
+      }
     }
+
+    window.addEventListener("popstate", event => {
+      const menu = document.getElementById("mainMenu");
+      if (menu?.classList.contains("open")) {
+        menu.classList.remove("open");
+        document.getElementById("menuBackdrop")?.classList.remove("open");
+        document.body.classList.remove("menu-open");
+      }
+      const bigPop = document.getElementById("bigPop");
+      if (bigPop?.style.display === "flex") {
+        bigPop.style.display = "none";
+        bigPop.classList.remove("goal-pop");
+      }
+
+      const state = event.state;
+      if (!state?.wrc) return;
+
+      applyingWrcHistory = true;
+      showTab(state.panelId || "dashboard", menuLinkForPanel(state.panelId || "dashboard"), {
+        history: false,
+        analysisSection: state.analysisSection || "overview"
+      });
+      if (state.panelId === "analyse") {
+        setAnalysisSection(state.analysisSection || "overview", null, { history: false });
+      }
+      applyingWrcHistory = false;
+      window.scrollTo(0, 0);
+    });
 
     function menuLinkForPanel(panelId) {
       return [...document.querySelectorAll(".drawer-link")]
@@ -1907,7 +2048,28 @@ background:#0f172a
     }
 
     function openAnalysisDetails(targetId) {
-      openPanelDetails("analyse", targetId);
+      const sections = {
+        targetCourseChart: "overview",
+        analysisHighlights: "overview",
+        activityDistributionChart: "overview",
+        personalComparison: "overview",
+        stepsChart: "development",
+        monthCompareChart: "development",
+        monthArchiveDetail: "development",
+        monthlyOverview: "development",
+        averageStats: "team",
+        heatmap: "team"
+      };
+      const section = sections[targetId] || "overview";
+      activeAnalysisSection = section;
+      showTab("analyse", menuLinkForPanel("analyse"), { analysisSection: section });
+      setAnalysisSection(section, null, { history: false });
+      toggleMainMenu(false);
+
+      requestAnimationFrame(() => {
+        const target = targetId ? document.getElementById(targetId) : document.getElementById("analyse");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
 
     function openEntriesForMonth(month) {
@@ -2000,6 +2162,14 @@ background:#0f172a
       ).join("");
 
       select.value = selectedMonth();
+
+      const playerSelect = document.getElementById("analysisPlayerSelect");
+      if (playerSelect) {
+        playerSelect.innerHTML = people.map(person =>
+          `<option value="${person}">${person}</option>`
+        ).join("");
+        playerSelect.value = people[0];
+      }
     }
 
     function initQuoteForm() {
@@ -2390,7 +2560,7 @@ background:#0f172a
     }
     function renderDashboard() {
       const key = selectedMonth();
-      const entries = monthEntries();
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
       const baseGoal = monthGoals[key] || 1700;
       let goal = baseGoal;
 
@@ -2915,10 +3085,10 @@ background:#0f172a
 
       if (!box) return;
 
-      const key = selectedMonth();
+      const key = monthKeyForAnalysis();
       const [year, month] = key.split("-").map(Number);
       const lastDay = new Date(year, month, 0).getDate();
-      const entries = monthEntries();
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
       const lastDate = getLastEntryDate(entries);
 
       const goal = monthGoals[key] || 1700;
@@ -2986,13 +3156,56 @@ background:#0f172a
 
       if (btn) btn.classList.add("active");
 
-      const monthWrap = document.getElementById("chartMonthWrap");
-      if (monthWrap) {
-        monthWrap.style.display = mode === "month" ? "block" : "none";
+      renderStepsChart();
+    }
+
+    function setAnalysisSection(section, btn, options = {}) {
+      activeAnalysisSection = section;
+
+      document.querySelectorAll("[data-analysis-section]").forEach(panel => {
+        const active = panel.dataset.analysisSection === section;
+        panel.hidden = !active;
+        panel.classList.toggle("active", active);
+      });
+
+      document.querySelectorAll("[data-analysis-tab]").forEach(button => {
+        button.classList.toggle("active", button.dataset.analysisTab === section);
+      });
+
+      if (btn) btn.classList.add("active");
+
+      if (section === "overview") {
+        requestAnimationFrame(() => {
+          renderTargetCourseChart();
+          renderActivityDistributionChart();
+        });
+      } else if (section === "development") {
+        requestAnimationFrame(() => {
+          renderStepsChart();
+          renderMonthCompareChart();
+        });
       }
 
-      renderStepsChart();
+      if (options.history !== false && typeof updateWrcHistory === "function") {
+        updateWrcHistory("analyse", { analysisSection: section });
+      }
+    }
+
+    function setAnalysisMonth(value) {
+      const select = document.getElementById("chartMonthSelect");
+      if (select && value) select.value = value;
       renderAnalysisExtras();
+      renderStepsChart();
+      renderHeatmap();
+    }
+
+    function setAnalysisMetric(metric, btn) {
+      analysisMetric = metric;
+      document.querySelectorAll("[data-analysis-metric]").forEach(button => {
+        button.classList.toggle("active", button.dataset.analysisMetric === metric);
+      });
+      if (btn) btn.classList.add("active");
+      renderStepsChart();
     }
 
     function buildDateRange(start, end) {
@@ -3015,11 +3228,13 @@ background:#0f172a
 
       let dates = [];
       let labels = [];
+      const selectedKey = monthKeyForAnalysis();
 
       if (chartMode === "7days") {
-        const lastDate =
-          getLastEntryDate(allEntries) ||
-          new Date().toISOString().slice(0, 10);
+        const entries = allEntries.filter(entry => (entry.date || "").startsWith(selectedKey));
+        const [year, month] = selectedKey.split("-").map(Number);
+        const monthEnd = `${selectedKey}-${String(new Date(year, month, 0).getDate()).padStart(2, "0")}`;
+        const lastDate = getLastEntryDate(entries) || monthEnd;
 
         const end = new Date(lastDate + "T12:00:00");
         const start = new Date(end);
@@ -3039,7 +3254,7 @@ background:#0f172a
       }
 
       if (chartMode === "month") {
-        const key = document.getElementById("chartMonthSelect")?.value || selectedMonth();
+        const key = selectedKey;
         const [year, month] = key.split("-").map(Number);
         const lastDay = new Date(year, month, 0).getDate();
 
@@ -3053,28 +3268,41 @@ background:#0f172a
       }
 
       if (chartMode === "quarter") {
-        const key = selectedMonth();
+        const key = selectedKey;
         const [year, month] = key.split("-").map(Number);
-        const startMonth = Math.floor((month - 1) / 3) * 3 + 1;
+        const anchor = new Date(year, month - 1, 1);
+        const start = new Date(anchor.getFullYear(), anchor.getMonth() - 2, 1);
 
-        for (let m = startMonth; m < startMonth + 3; m++) {
-          const lastDay = new Date(year, m, 0).getDate();
+        for (let offset = 0; offset < 3; offset++) {
+          const cursor = new Date(start.getFullYear(), start.getMonth() + offset, 1);
+          const rangeYear = cursor.getFullYear();
+          const rangeMonth = cursor.getMonth() + 1;
+          const lastDay = new Date(rangeYear, rangeMonth, 0).getDate();
 
           for (let d = 1; d <= lastDay; d++) {
             const date =
-              `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+              `${rangeYear}-${String(rangeMonth).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
             dates.push(date);
-            labels.push(`${d}.${m}.`);
+            labels.push(`${d}.${rangeMonth}.`);
           }
         }
       }
+
+      const metrics = {
+        points: { label: "Punkte", value: entry => calcPoints(entry).total },
+        steps: { label: "Schritte", value: entry => +entry.steps || 0 },
+        bike: { label: "Rad-km", value: entry => +entry.bike || 0 },
+        strength: { label: "Kraft-Wiederholungen", value: entry => (+entry.squats || 0) + (+entry.pushups || 0) },
+        exercises: { label: "Übungen", value: entry => entry.exercise ? 1 : 0 }
+      };
+      const metric = metrics[analysisMetric] || metrics.points;
 
       const datasets = people.map(person => {
         const data = dates.map(date => {
           return allEntries
             .filter(e => e.date === date && e.person === person)
-            .reduce((sum, e) => sum + (+e.steps || 0), 0);
+            .reduce((sum, e) => sum + metric.value(e), 0);
         });
 
         return {
@@ -3104,6 +3332,26 @@ background:#0f172a
               labels: {
                 color: "#f8fafc"
               }
+            },
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const index = items[0]?.dataIndex;
+                  return dates[index] ? formatDate(dates[index]) : "";
+                },
+                footer(items) {
+                  const date = dates[items[0]?.dataIndex];
+                  return date && allEntries.some(entry => entry.date === date)
+                    ? "Antippen: Einträge öffnen"
+                    : "";
+                }
+              }
+            }
+          },
+          onClick(event, elements) {
+            const date = dates[elements[0]?.index];
+            if (date && allEntries.some(entry => entry.date === date)) {
+              jumpToDate(date);
             }
           },
           scales: {
@@ -3117,6 +3365,11 @@ background:#0f172a
               }
             },
             y: {
+              title: {
+                display: true,
+                text: metric.label,
+                color: "#94a3b8"
+              },
               ticks: {
                 color: "#cbd5e1"
               },
@@ -3142,6 +3395,206 @@ background:#0f172a
       renderActivityDistributionChart();
       renderMonthCompareChart();
       renderAverageStats();
+      renderTargetCourseChart();
+      renderPersonalComparison();
+    }
+
+    function renderTargetCourseChart() {
+      const canvas = document.getElementById("targetCourseChart");
+      const empty = document.getElementById("targetCourseEmpty");
+      const summary = document.getElementById("targetCourseSummary");
+      if (!canvas || typeof Chart === "undefined") return;
+
+      const key = monthKeyForAnalysis();
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
+      const [year, month] = key.split("-").map(Number);
+      const lastDay = new Date(year, month, 0).getDate();
+      const goal = monthGoals[key] || 0;
+      const labels = Array.from({ length: lastDay }, (_, index) => String(index + 1));
+
+      if (!entries.length) {
+        if (targetCourseChart) {
+          targetCourseChart.destroy();
+          targetCourseChart = null;
+        }
+        canvas.style.display = "none";
+        if (empty) {
+          empty.style.display = "block";
+          empty.textContent = monthTotalPoints(key) > 0
+            ? "Für diesen frühen WRC-Monat sind nur Gesamtsummen vorhanden – noch keine Tageskurve."
+            : "Für diesen Monat gibt es noch keine Tagesdaten.";
+        }
+        if (summary) summary.innerHTML = "";
+        return;
+      }
+
+      canvas.style.display = "block";
+      if (empty) empty.style.display = "none";
+
+      const today = new Date();
+      const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+      const lastEntryDay = Math.max(...entries.map(entry => Number((entry.date || "").slice(8, 10)) || 1));
+      const observedDay = key === currentKey
+        ? Math.max(1, Math.min(today.getDate(), lastDay))
+        : lastEntryDay;
+      const dayTotals = Array(lastDay).fill(0);
+      entries.forEach(entry => {
+        const day = Number((entry.date || "").slice(8, 10));
+        if (day >= 1 && day <= lastDay) dayTotals[day - 1] += calcPoints(entry).total;
+      });
+
+      let running = 0;
+      const actual = dayTotals.map((points, index) => {
+        running += points;
+        return index + 1 <= observedDay ? Number(running.toFixed(2)) : null;
+      });
+      const currentTotal = dayTotals.slice(0, observedDay).reduce((sum, points) => sum + points, 0);
+      const forecastEnd = observedDay > 0 ? currentTotal / observedDay * lastDay : 0;
+      const forecast = labels.map((_, index) => {
+        const day = index + 1;
+        if (day < observedDay) return null;
+        if (day === observedDay) return Number(currentTotal.toFixed(2));
+        return Number((currentTotal + ((forecastEnd - currentTotal) * (day - observedDay) / Math.max(lastDay - observedDay, 1))).toFixed(2));
+      });
+      const ideal = labels.map((_, index) => Number((goal * (index + 1) / lastDay).toFixed(2)));
+
+      if (summary) {
+        summary.innerHTML = `
+          <span class="analysis-course-pill">Stand <strong>${fmt(currentTotal, 1)}</strong></span>
+          <span class="analysis-course-pill">Hochrechnung <strong>${fmt(forecastEnd, 0)}</strong></span>
+          <span class="analysis-course-pill">Ziel <strong>${fmt(goal, 0)}</strong></span>
+        `;
+      }
+
+      if (targetCourseChart) targetCourseChart.destroy();
+      targetCourseChart = new Chart(canvas, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Tatsächlicher Stand",
+              data: actual,
+              borderColor: "#38bdf8",
+              backgroundColor: "rgba(56,189,248,.12)",
+              borderWidth: 3,
+              pointRadius: 2,
+              tension: .25,
+              fill: true
+            },
+            {
+              label: "Idealer Zielkurs",
+              data: ideal,
+              borderColor: "#4ade80",
+              borderDash: [7, 6],
+              borderWidth: 2,
+              pointRadius: 0
+            },
+            {
+              label: "Aktuelle Hochrechnung",
+              data: forecast,
+              borderColor: "#fbbf24",
+              borderDash: [3, 5],
+              borderWidth: 2,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          onClick(event, elements) {
+            const day = elements[0]?.index + 1;
+            if (!day) return;
+            const date = `${key}-${String(day).padStart(2, "0")}`;
+            if (allEntries.some(entry => entry.date === date)) jumpToDate(date);
+          },
+          plugins: {
+            legend: { labels: { color: "#e2e8f0", usePointStyle: true } },
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const day = items[0]?.dataIndex + 1;
+                  return `${day}. ${getMonthTitle(key)}`;
+                },
+                footer(items) {
+                  const day = items[0]?.dataIndex + 1;
+                  const date = `${key}-${String(day).padStart(2, "0")}`;
+                  return allEntries.some(entry => entry.date === date) ? "Antippen: Einträge öffnen" : "";
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#94a3b8", maxTicksLimit: 12 },
+              grid: { color: "rgba(255,255,255,.05)" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#94a3b8" },
+              grid: { color: "rgba(255,255,255,.07)" }
+            }
+          }
+        }
+      });
+    }
+
+    function previousMonthKey(key) {
+      const [year, month] = key.split("-").map(Number);
+      const date = new Date(year, month - 2, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function renderPersonalComparison() {
+      const box = document.getElementById("personalComparison");
+      const select = document.getElementById("analysisPlayerSelect");
+      if (!box || !select) return;
+
+      const player = select.value || people[0];
+      const key = monthKeyForAnalysis();
+      const previousKey = previousMonthKey(key);
+      const total = month => {
+        const entries = allEntries.filter(entry => entry.person === player && (entry.date || "").startsWith(month));
+        return {
+          points: entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0),
+          steps: entries.reduce((sum, entry) => sum + (+entry.steps || 0), 0),
+          bike: entries.reduce((sum, entry) => sum + (+entry.bike || 0), 0),
+          strength: entries.reduce((sum, entry) => sum + (+entry.squats || 0) + (+entry.pushups || 0), 0),
+          exercises: entries.filter(entry => entry.exercise).length
+        };
+      };
+      const current = total(key);
+      const previous = total(previousKey);
+      const cards = [
+        ["Punkte", "points", 1, ""],
+        ["Schritte", "steps", 0, ""],
+        ["Rad", "bike", 1, " km"],
+        ["Kraft", "strength", 0, ""],
+        ["Übungen", "exercises", 0, "×"]
+      ];
+
+      box.innerHTML = `
+        <div class="personal-comparison-grid">
+          ${cards.map(([label, metric, decimals, suffix]) => {
+            const difference = current[metric] - previous[metric];
+            const direction = difference > 0 ? "up" : difference < 0 ? "down" : "neutral";
+            const arrow = difference > 0 ? "↑" : difference < 0 ? "↓" : "→";
+            return `
+              <div class="personal-comparison-card">
+                <span>${label}</span>
+                <strong>${fmt(current[metric], decimals)}${suffix}</strong>
+                <div class="personal-comparison-delta ${direction}">
+                  ${arrow} ${difference > 0 ? "+" : ""}${fmt(difference, decimals)}${suffix}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+        <button class="personal-comparison-link" type="button"
+          onclick="openPlayerDetails('${player}', '${key}')">${player} in der Spielerübersicht öffnen →</button>
+      `;
     }
 
     function renderAnalysisHighlights() {
@@ -3412,6 +3865,85 @@ background:#0f172a
   `;
     }
 
+    function dateDiffDays(first, second) {
+      const a = new Date(first + "T12:00:00");
+      const b = new Date(second + "T12:00:00");
+      return Math.round((b - a) / 86400000);
+    }
+
+    function calculateActivityStreak(entries, predicate) {
+      const today = new Date();
+      const todayKey = [
+        today.getFullYear(),
+        String(today.getMonth() + 1).padStart(2, "0"),
+        String(today.getDate()).padStart(2, "0")
+      ].join("-");
+      const dates = [...new Set(entries
+        .filter(entry => entry.date <= todayKey && predicate(entry))
+        .map(entry => entry.date))]
+        .sort();
+
+      if (!dates.length) return { current: 0, best: 0, last: null };
+
+      let best = 1;
+      let running = 1;
+      for (let index = 1; index < dates.length; index++) {
+        running = dateDiffDays(dates[index - 1], dates[index]) === 1 ? running + 1 : 1;
+        best = Math.max(best, running);
+      }
+
+      const last = dates[dates.length - 1];
+      let current = dateDiffDays(last, todayKey) <= 1 ? 1 : 0;
+      if (current) {
+        for (let index = dates.length - 1; index > 0; index--) {
+          if (dateDiffDays(dates[index - 1], dates[index]) !== 1) break;
+          current += 1;
+        }
+      }
+
+      return { current, best, last };
+    }
+
+    function renderPlayerStreaks(entries) {
+      const streaks = [
+        {
+          icon: "💪",
+          label: "Kraft",
+          data: calculateActivityStreak(entries, entry => (+entry.squats || 0) > 0 || (+entry.pushups || 0) > 0)
+        },
+        {
+          icon: "🚴",
+          label: "Rad",
+          data: calculateActivityStreak(entries, entry => (+entry.bike || 0) > 0)
+        },
+        {
+          icon: "🏋️",
+          label: "Übung",
+          data: calculateActivityStreak(entries, entry => !!entry.exercise)
+        }
+      ];
+
+      return `
+        <div class="player-streaks">
+          <div class="player-streaks-head">
+            <b>Leise Serien</b>
+            <span>Ein Tag Pause lässt die laufende Serie morgens noch bestehen.</span>
+          </div>
+          <div class="player-streak-grid">
+            ${streaks.map(streak => `
+              <div class="player-streak-card${streak.data.current > 1 && streak.data.current === streak.data.best ? " best" : ""}">
+                <span>${streak.icon} ${streak.label}</span>
+                <strong>${streak.data.current} ${streak.data.current === 1 ? "Tag" : "Tage"}</strong>
+                <div class="player-streak-meta">
+                  Bestwert ${streak.data.best} · zuletzt ${streak.data.last ? formatDate(streak.data.last) : "noch offen"}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
     async function renderPlayerOverview() {
 
       const player = document.getElementById("playerSelect").value;
@@ -3652,6 +4184,7 @@ background:#0f172a
         </div>
       </div>
 
+        ${renderPlayerStreaks(allPlayerEntries)}
     
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
@@ -4004,6 +4537,25 @@ background:#0f172a
     renderQuotes();
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
+    }
+
+    const initialRoute = location.hash.replace(/^#/, "").split("/");
+    const initialPanel = document.getElementById(initialRoute[0]) ? initialRoute[0] : "dashboard";
+    const initialAnalysisSection = ["overview", "development", "team"].includes(initialRoute[1])
+      ? initialRoute[1]
+      : "overview";
+    history.replaceState({
+      wrc: true,
+      panelId: initialPanel,
+      analysisSection: initialAnalysisSection
+    }, "", wrcRoute(initialPanel, { analysisSection: initialAnalysisSection }));
+    if (initialPanel !== "dashboard") {
+      applyingWrcHistory = true;
+      showTab(initialPanel, menuLinkForPanel(initialPanel), {
+        history: false,
+        analysisSection: initialAnalysisSection
+      });
+      applyingWrcHistory = false;
     }
 
     window.addEventListener("pageshow", () => {

@@ -137,7 +137,8 @@
           delay: 5600
         });
       }
-      showTab("eintraege", document.querySelectorAll(".tab")[2]);
+      showTab("dashboard", menuLinkForPanel("dashboard"));
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function deleteEntry(id) {
