@@ -3838,12 +3838,12 @@ background:#0f172a
         return `
       <tr class="average-player-row" onclick="openPlayerDetails('${person}', '${key}')"
         title="${person} in der Spielerübersicht öffnen">
-        <td><b>${person}</b><br><span class="sub">${activeDays} aktive Tage</span></td>
-        <td>${fmt(points / div, 1)}</td>
-        <td>${fmt(steps / div)}</td>
-        <td>${fmt(bike / div, 1)}</td>
-        <td>${fmt(squats / div, 1)}</td>
-        <td>${fmt(pushups / div, 1)}</td>
+        <td data-label="Spieler"><b>${person}</b><br><span class="sub">${activeDays} aktive Tage</span></td>
+        <td data-label="Ø Punkte">${fmt(points / div, 1)}</td>
+        <td data-label="Ø Schritte">${fmt(steps / div)}</td>
+        <td data-label="Ø Rad">${fmt(bike / div, 1)} km</td>
+        <td data-label="Ø Kniebeugen">${fmt(squats / div, 1)}</td>
+        <td data-label="Ø Liegestütze">${fmt(pushups / div, 1)}</td>
       </tr>
     `;
       }).join("");
