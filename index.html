@@ -3904,7 +3904,7 @@ background:#0f172a
       return { current, best, last };
     }
 
-    function renderPlayerStreaks(entries) {
+    function renderPlayerFireStreak(entries) {
       const streaks = [
         {
           icon: "💪",
@@ -3923,24 +3923,37 @@ background:#0f172a
         }
       ];
 
+      const active = streaks
+        .filter(streak => streak.data.current > 0)
+        .sort((a, b) => b.data.current - a.data.current || b.data.best - a.data.best);
+      if (!active.length) return "";
+
+      const strongest = active[0];
+      const isRecord = strongest.data.current === strongest.data.best;
+      const fire = isRecord
+        ? "🏆🔥"
+        : strongest.data.current >= 5
+          ? "🔥🔥"
+          : "🔥";
+
       return `
-        <div class="player-streaks">
-          <div class="player-streaks-head">
-            <b>Leise Serien</b>
-            <span>Ein Tag Pause lässt die laufende Serie morgens noch bestehen.</span>
-          </div>
-          <div class="player-streak-grid">
+        <details class="player-fire-streak${isRecord ? " record" : ""}">
+          <summary>
+            <span>${fire}</span>
+            <b>${strongest.data.current} ${strongest.data.current === 1 ? "Tag" : "Tage"}</b>
+            <small>${strongest.label}</small>
+          </summary>
+          <div class="player-fire-details">
             ${streaks.map(streak => `
-              <div class="player-streak-card${streak.data.current > 1 && streak.data.current === streak.data.best ? " best" : ""}">
+              <div class="player-fire-detail-row">
                 <span>${streak.icon} ${streak.label}</span>
-                <strong>${streak.data.current} ${streak.data.current === 1 ? "Tag" : "Tage"}</strong>
-                <div class="player-streak-meta">
-                  Bestwert ${streak.data.best} · zuletzt ${streak.data.last ? formatDate(streak.data.last) : "noch offen"}
-                </div>
+                <b>${streak.data.current} ${streak.data.current === 1 ? "Tag" : "Tage"}</b>
+                <small>Bestwert ${streak.data.best}</small>
               </div>
             `).join("")}
+            <p>Ein Tag Pause lässt eine laufende Serie bis zum nächsten Tag bestehen.</p>
           </div>
-        </div>
+        </details>
       `;
     }
 
@@ -4168,7 +4181,10 @@ background:#0f172a
       <div class="player-summary">
         <div class="player-chip">
           <div class="chip-label">Spieler</div>
-          <div class="chip-value">${player}</div>
+          <div class="player-name-line">
+            <div class="chip-value">${player}</div>
+            ${renderPlayerFireStreak(allPlayerEntries)}
+          </div>
         </div>
         <div class="player-chip">
           <div class="chip-label">Punkte-Anteil Monat</div>
@@ -4184,8 +4200,6 @@ background:#0f172a
         </div>
       </div>
 
-        ${renderPlayerStreaks(allPlayerEntries)}
-    
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
         ${card("🚴", "Fahrrad-km", monthPlayer.bike, monthTeam.bike, allPlayer.bike, allTeam.bike, 1, " km")}

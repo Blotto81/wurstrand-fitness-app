@@ -324,7 +324,6 @@
         `;
 
       const reachedGroupsHtml = groupStates
-        .filter(group => group.reached.length)
         .map(group => {
         const reachedHtml = group.reached.length
           ? group.reached.map(m => {
@@ -349,6 +348,38 @@
         const hasNewAchievement = group.reached.some(m =>
           newAchievementKeys.has(`achievement_${group.key}_${m[0]}`)
         );
+        const nextName = group.next
+          ? group.progress >= 80
+            ? group.next[1]
+            : `Nächster ${group.title}-Meilenstein`
+          : "Alle aktuellen Ziele erreicht";
+        const categoryNextHtml = group.next
+          ? `
+            <div class="achievement-category-next">
+              <div class="achievement-category-next-head">
+                <div>
+                  <span class="achievement-category-next-label">Als Nächstes</span>
+                  <strong>${group.progress >= 80 ? "🔓" : "🔒"} ${nextName}</strong>
+                </div>
+                <b>${Math.round(group.progress)} %</b>
+              </div>
+              <div class="achievement-category-progress" role="progressbar"
+                aria-label="${nextName}: ${Math.round(group.progress)} Prozent"
+                aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(group.progress)}">
+                <div style="width:${group.progress}%"></div>
+              </div>
+              <div class="achievement-category-next-values">
+                <span>${fmtUnit(group.value, group.unit, group.decimals)}</span>
+                <span>Noch ${fmtUnit(group.remaining, group.unit, group.decimals)}</span>
+                <strong>Ziel ${fmtUnit(group.next[0], group.unit, group.decimals)}</strong>
+              </div>
+            </div>
+          `
+          : `
+            <div class="achievement-category-next achievement-category-complete">
+              <span>🏆 Alle aktuellen ${group.title}-Meilensteine erreicht</span>
+            </div>
+          `;
 
         return `
       <div class="achievement-group-card${hasNewAchievement ? " achievement-group-new" : ""}">
@@ -363,6 +394,7 @@
         <div class="achievement-reached-list">
           ${reachedHtml}
         </div>
+        ${categoryNextHtml}
       </div>
     `;
       }).join("");
