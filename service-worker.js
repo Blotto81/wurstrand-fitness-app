@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v9";
+const CACHE_NAME = "wrc-app-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const APP_SHELL = [
   "./scoring.js",
   "./utils.js",
   "./wurstrand-logo.png",
+  "./wursti-monatsziel.png",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

@@ -651,9 +651,7 @@
           </div>
         </div>
 
-        <div id="missBanner" class="miss-banner">
-          😳 Monatsziel verpasst – neuer Monat, neues Comeback.
-        </div>
+        <div id="missBanner" class="miss-banner"></div>
 
 
         <div class="wrc-progress-card">
@@ -1262,9 +1260,11 @@ background:#0f172a
 
   <div id="saveReward" class="save-reward" aria-live="polite"></div>
 
-  <div id="bigPop" class="bigpop" onclick="hideBigPop()">
+  <div id="bigPop" class="bigpop" role="dialog" aria-modal="true" aria-labelledby="popTitle" onclick="hideBigPop()">
 
-    <div class="popcard">
+    <div class="popcard" onclick="event.stopPropagation()">
+
+      <img id="popMascot" class="pop-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
 
       <div id="popIcon" class="popicon">
         🏆
@@ -1277,6 +1277,8 @@ background:#0f172a
       <p id="popText" style="margin-top:8px;color:#cbd5e1">
         Wurstrand eskaliert.
       </p>
+
+      <button id="popClose" class="pop-close" type="button" onclick="hideBigPop()">Weiter</button>
 
     </div>
 
@@ -1413,9 +1415,9 @@ background:#0f172a
       const ranking = [...finishedMonths].sort((a, b) => b.points - a.points);
 
       const historicTargets = ranking
-        .slice(0, 3)
         .filter(m => m.points > baseGoal)
         .sort((a, b) => a.points - b.points)
+        .filter((m, index, list) => index === 0 || m.points !== list[index - 1].points)
         .map(m => ({
           value: m.points,
           title: m.title,
@@ -1432,9 +1434,10 @@ background:#0f172a
         },
         ...historicTargets.map((m, i) => ({
           value: m.value,
-          title: (m.rank === 1 ? "Bester Monat" : "Platz " + m.rank + " der besten Monate"),
-          subtitle: m.title,
-          stars: i === 0 ? "⭐⭐" : i === 1 ? "⭐⭐⭐" : "👑",
+          title: "Bonusziel " + (i + 1),
+          subtitle: `${m.title} · bisher Platz ${m.rank}`,
+          stars: i < 2 ? "⭐".repeat(i + 2) : `⭐ × ${i + 2}`,
+          level: i + 2,
           kind: "record"
         }))
       ];
@@ -1479,8 +1482,12 @@ background:#0f172a
 
       const firstOpenIndex = ladder.milestones.findIndex(m => total < m.value);
       const visibleMilestones = firstOpenIndex === -1
-        ? ladder.milestones
-        : ladder.milestones.slice(0, firstOpenIndex + 1);
+        ? ladder.milestones.slice(-2)
+        : ladder.milestones.filter((m, index) =>
+          index === 0 ||
+          index === firstOpenIndex ||
+          (firstOpenIndex > 1 && index === firstOpenIndex - 1)
+        );
 
       const rows = visibleMilestones.map(m => {
         const reached = total >= m.value;
@@ -1656,19 +1663,27 @@ background:#0f172a
       }, 3000);
     }
 
-    function showBigPop(icon, title, text) {
+    function showBigPop(icon, title, text, options = {}) {
+      const pop = document.getElementById("bigPop");
+      const mascot = document.getElementById("popMascot");
       document.getElementById("popIcon").innerText = icon;
       document.getElementById("popTitle").innerText = title;
       document.getElementById("popText").innerText = text;
-      document.getElementById("bigPop").style.display = "flex";
+      pop.classList.toggle("goal-pop", options.type === "goal");
+      mascot.style.display = options.type === "goal" ? "block" : "none";
+      pop.style.display = "flex";
     }
 
     function hideBigPop() {
-      document.getElementById("bigPop").style.display = "none";
+      const pop = document.getElementById("bigPop");
+      pop.style.display = "none";
+      pop.classList.remove("goal-pop");
     }
 
     function createConfetti() {
-      for (let i = 0; i < 120; i++) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      for (let i = 0; i < 72; i++) {
         const c = document.createElement("div");
         c.style.position = "fixed";
         c.style.top = "-10px";
@@ -1683,12 +1698,12 @@ background:#0f172a
           { transform: "translateY(0px) rotate(0deg)", opacity: 1 },
           { transform: "translateY(110vh) rotate(720deg)", opacity: 0 }
         ], {
-          duration: 3000,
+          duration: 2600 + Math.random() * 1200,
           easing: "linear"
         });
 
         document.body.appendChild(c);
-        setTimeout(() => c.remove(), 3000);
+        setTimeout(() => c.remove(), 4000);
       }
     }
 
@@ -2299,9 +2314,17 @@ background:#0f172a
       if (reachedMilestones.length) {
         if (goalBanner) {
           goalBanner.style.display = "block";
-          goalBanner.innerHTML = next
-            ? `🔥 Stufe geknackt – jetzt wurde <b>${next.stars} ${next.title}</b> freigeschaltet.`
-            : `👑 All-Time-Rekord! Jeder weitere Punkt verbessert eure ewige Bestmarke.`;
+          goalBanner.innerHTML = `
+            <div class="goal-banner-content">
+              <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
+              <div>
+                <span class="goal-banner-kicker">Monatsziel geschafft</span>
+                <strong>${next
+                  ? `Bonus freigeschaltet: ${next.stars} ${next.title}`
+                  : "All-Time-Rekord – jeder weitere Punkt verbessert eure Bestmarke."}</strong>
+              </div>
+            </div>
+          `;
         }
 
         const newlyReached = reachedMilestones.filter(m =>
@@ -2316,11 +2339,12 @@ background:#0f172a
             setTimeout(() => {
               createConfetti();
               showBigPop(
-                nextAfter ? "🚀" : "👑",
-                m.kind === "base" ? "Monatsziel erreicht!" : `${m.stars} ${m.title} geknackt!`,
+                m.kind === "base" ? "⭐" : (nextAfter ? "✨" : "👑"),
+                m.kind === "base" ? "Gemeinsam geschafft!" : `${m.stars} ${m.title} erreicht!`,
                 nextAfter
-                  ? `Stark! Jetzt öffnet sich die nächste Stufe: ${nextAfter.stars} ${nextAfter.title}.`
-                  : "All-Time-Rekord-Modus! Jeder weitere Punkt schreibt Geschichte."
+                  ? `Das Monatsziel ist sicher. Als Bonus wartet jetzt ${nextAfter.stars} ${nextAfter.title}.`
+                  : "Ihr habt eure bisherige Bestmarke geknackt. Alles Weitere ist Zugabe.",
+                { type: "goal" }
               );
 
               if (typeof WRCPost !== "undefined") {
@@ -2336,23 +2360,67 @@ background:#0f172a
         return;
       }
 
+      checkPreviousMonthClosure({ missBanner });
+    }
+
+    function previousMonthKey(date = new Date()) {
+      return [
+        date.getMonth() === 0 ? date.getFullYear() - 1 : date.getFullYear(),
+        String(date.getMonth() === 0 ? 12 : date.getMonth()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function checkPreviousMonthClosure({ missBanner }) {
       const now = new Date();
-      const [year, month] = key.split("-").map(Number);
+      if (now.getDate() < 2) return;
 
-      const afterMonth =
-        now.getFullYear() > year ||
-        (now.getFullYear() === year && now.getMonth() + 1 > month);
+      const key = previousMonthKey(now);
+      if (!Object.prototype.hasOwnProperty.call(monthGoals, key)) return;
 
-      if (afterMonth && now.getDate() >= 2) {
-        if (missBanner) missBanner.style.display = "block";
+      const total = monthTotalPoints(key);
+      const ladder = buildRecordLadder(key, total);
+      const reachedMilestones = ladder.milestones.filter(m => total >= m.value);
+      const closureKey = `goalClosureShown_${key}`;
 
-        const missKey = "goalMissShown_" + key;
+      if (reachedMilestones.length) {
+        if (localStorage.getItem(closureKey) === "reached") return;
 
-        if (!localStorage.getItem(missKey)) {
-          localStorage.setItem(missKey, "true");
-          showBigPop("😢", "Monatsziel verpasst", "Die Bohnen bleiben kurz im Schrank. Neuer Monat, neues Comeback.");
-        }
+        reachedMilestones.forEach(m => {
+          localStorage.setItem(`goalCelebrationShown_${key}_${m.value}`, "true");
+        });
+        localStorage.setItem(closureKey, "reached");
+
+        const highest = reachedMilestones[reachedMilestones.length - 1];
+        createConfetti();
+        showBigPop(
+          highest.kind === "base" ? "⭐" : "👑",
+          `${getMonthTitle(key)} ist komplett`,
+          highest.kind === "base"
+            ? "Das gemeinsame Monatsziel ist geschafft. Dieser Stern gehört euch allen."
+            : `${highest.stars} ${highest.title} ist ebenfalls geschafft. Ein starker Abschluss mit Extra-Stern.`,
+          { type: "goal" }
+        );
+        return;
       }
+
+      if (selectedMonth() === currentMonthKey() && missBanner) {
+        missBanner.style.display = "flex";
+        missBanner.innerHTML = `
+          <span class="miss-banner-icon">🌱</span>
+          <div>
+            <strong>${getMonthTitle(key)} ist abgeschlossen.</strong>
+            <span>Das Ziel blieb diesmal offen. Jeder gesammelte Punkt zählt – und der neue Monat beginnt bei null.</span>
+          </div>
+        `;
+      }
+
+      if (localStorage.getItem(closureKey)) return;
+      localStorage.setItem(closureKey, "missed");
+      showBigPop(
+        "🌱",
+        `${getMonthTitle(key)} ist abgeschlossen`,
+        "Das Monatsziel blieb diesmal offen. Die Bewegung war trotzdem echt – und jetzt wartet ein neuer gemeinsamer Anlauf."
+      );
     }
 
     function getDayTotals(entries) {
