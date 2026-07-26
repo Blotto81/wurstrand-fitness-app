@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="modules/pwa/pwa.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
+  <link rel="stylesheet" href="modules/month-archive/month-archive.css">
   <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
 </head>
 
@@ -1186,8 +1187,9 @@ background:#0f172a
       </div>
 
       <div class="card">
-        <h3>📊 Monatsübersicht</h3>
-        <p class="sub">Erreichte Punkte je Monat, aktuelle Stufe und Rekordtreppe.</p>
+        <h3>🗂️ Monatsarchiv</h3>
+        <p class="sub">Blättere durch eure bisherigen WRC-Monate und öffne ihre Geschichte.</p>
+        <div id="monthArchiveDetail"></div>
         <div id="monthlyOverview"></div>
       </div>
 
@@ -2165,13 +2167,149 @@ background:#0f172a
     }
 
 
+    let activeArchiveMonth = null;
+
+    function archiveMonthKeys() {
+      const current = currentMonthKey();
+      return Object.keys(monthGoals)
+        .filter(key => key <= current)
+        .filter(key => monthTotalPoints(key) > 0);
+    }
+
+    function openMonthArchive(key) {
+      if (!archiveMonthKeys().includes(key)) return;
+      activeArchiveMonth = key;
+      renderMonthArchive();
+
+      requestAnimationFrame(() => {
+        document.getElementById("monthArchiveDetail")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      });
+    }
+
+    function shiftMonthArchive(direction) {
+      const keys = archiveMonthKeys();
+      const currentIndex = keys.indexOf(activeArchiveMonth);
+      if (currentIndex < 0) return;
+
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= keys.length) return;
+      openMonthArchive(keys[nextIndex]);
+    }
+
+    function renderMonthArchive() {
+      const box = document.getElementById("monthArchiveDetail");
+      if (!box) return;
+
+      const keys = archiveMonthKeys();
+      if (!keys.length) {
+        box.innerHTML = "";
+        return;
+      }
+
+      if (!activeArchiveMonth || !keys.includes(activeArchiveMonth)) {
+        box.innerHTML = `
+          <button type="button" class="month-archive-invitation"
+            onclick="openMonthArchive('${keys[keys.length - 1]}')">
+            <span>📖</span>
+            <span>
+              <strong>WRC-Geschichte öffnen</strong>
+              <small>${keys.length} ${keys.length === 1 ? "Monat" : "Monate"} warten im Archiv.</small>
+            </span>
+            <b>›</b>
+          </button>
+        `;
+        return;
+      }
+
+      const key = activeArchiveMonth;
+      const index = keys.indexOf(key);
+      const total = monthTotalPoints(key);
+      const goal = monthGoals[key] || 1700;
+      const difference = total - goal;
+      const reached = difference >= 0;
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
+      const hasDetails = entries.length > 0;
+      const activeDays = new Set(entries.map(entry => entry.date).filter(Boolean)).size;
+      const participants = [...new Set(entries.map(entry => entry.person).filter(Boolean))];
+      const ladder = buildRecordLadder(key, total);
+      const ranked = keys
+        .map(monthKey => ({ key: monthKey, total: monthTotalPoints(monthKey) }))
+        .sort((a, b) => b.total - a.total);
+      const rank = ranked.findIndex(month => month.key === key) + 1;
+      const current = key === currentMonthKey();
+
+      const playerTotals = people.map(person => ({
+        person,
+        total: entries
+          .filter(entry => entry.person === person)
+          .reduce((sum, entry) => sum + calcPoints(entry).total, 0)
+      })).sort((a, b) => b.total - a.total);
+      const leadingPlayer = playerTotals.find(player => player.total > 0);
+
+      box.innerHTML = `
+        <section class="month-archive-detail${reached ? " reached" : ""}">
+          <div class="month-archive-toolbar">
+            <button type="button" onclick="shiftMonthArchive(-1)" ${index === 0 ? "disabled" : ""}>
+              ← Vorheriger Monat
+            </button>
+            <span>${index + 1} von ${keys.length}</span>
+            <button type="button" onclick="shiftMonthArchive(1)" ${index === keys.length - 1 ? "disabled" : ""}>
+              Nächster Monat →
+            </button>
+          </div>
+
+          <div class="month-archive-hero">
+            <div>
+              <span class="month-archive-eyebrow">${current ? "Aktueller Monat" : "Aus dem WRC-Archiv"}</span>
+              <h4>${getMonthTitle(key)}</h4>
+              <p>${reached
+                ? `Das Monatsziel wurde um ${fmt(difference, 1)} Punkte übertroffen.`
+                : current
+                  ? `Noch ${fmt(Math.abs(difference), 1)} Punkte bis zum Monatsziel.`
+                  : `Zum Monatsziel fehlten ${fmt(Math.abs(difference), 1)} Punkte.`}</p>
+            </div>
+            <div class="month-archive-seal">
+              <span>${ladder.stage.stars}</span>
+              <strong>${ladder.stage.title}</strong>
+            </div>
+          </div>
+
+          <div class="month-archive-stats">
+            <div><small>Erreicht</small><strong>${fmt(total, 1)}</strong><span>Punkte</span></div>
+            <div><small>Monatsziel</small><strong>${fmt(goal, 1)}</strong><span>Punkte</span></div>
+            <div><small>Ergebnis</small><strong>${reached ? "+" : "−"}${fmt(Math.abs(difference), 1)}</strong><span>zum Ziel</span></div>
+            <div><small>Rang</small><strong>#${rank}</strong><span>aller Monate</span></div>
+          </div>
+
+          <div class="month-archive-progress" aria-label="${Math.round((total / goal) * 100)} Prozent des Monatsziels">
+            <div style="width:${Math.min((total / goal) * 100, 100)}%"></div>
+          </div>
+
+          <div class="month-archive-foot">
+            <div>
+              <strong>${hasDetails ? `${activeDays} aktive Tage · ${participants.length} Wurstrandler` : "Historische Gesamtsumme"}</strong>
+              <span>${hasDetails && leadingPlayer
+                ? `Stärkster Monatsbeitrag: ${leadingPlayer.person} mit ${fmt(leadingPlayer.total, 1)} Punkten.`
+                : "Für diesen frühen WRC-Monat liegen keine einzelnen Tagesdatensätze vor."}</span>
+            </div>
+            ${hasDetails
+              ? `<button type="button" class="primary" onclick="openEntriesForMonth('${key}')">Einträge ansehen →</button>`
+              : '<span class="month-archive-history-label">Originalwert bewahrt</span>'}
+          </div>
+        </section>
+      `;
+    }
+
     function renderMonthlyOverview() {
       const box = document.getElementById("monthlyOverview");
       if (!box) return;
 
       const current = selectedMonth();
 
-      const months = Object.keys(monthGoals).map((key) => {
+      const months = archiveMonthKeys().map((key) => {
         const goal = monthGoals[key] || 1700;
         const total = monthTotalPoints(key);
 
@@ -2214,11 +2352,10 @@ background:#0f172a
           : "Ohne Platzierung";
 
         return `
-          <${hasDetailedEntries ? "button" : "div"} ${hasDetailedEntries ? 'type="button"' : ""}
+          <button type="button"
             class="month-card${goalReached ? " done" : ""}${isCurrent ? " current" : ""}${!hasPoints ? " empty" : ""}"
-            ${hasDetailedEntries
-              ? `onclick="openEntriesForMonth('${month.key}')" aria-label="${getMonthTitle(month.key)}: ${fmt(month.total, 1)} Punkte – Einträge öffnen"`
-              : 'title="Historische Gesamtsumme ohne einzelne Tagesdaten"'}>
+            onclick="openMonthArchive('${month.key}')"
+            aria-label="${getMonthTitle(month.key)}: ${fmt(month.total, 1)} Punkte – Archiv öffnen">
             <div class="month-card-head">
               <div class="month-card-title">${getMonthTitle(month.key)}</div>
               ${isCurrent ? '<span class="month-current-label">AKTUELL</span>' : ""}
@@ -2241,14 +2378,15 @@ background:#0f172a
             </div>
 
             <div class="month-card-footer">
-              <span class="month-card-badge">${badge}</span>
+              <span class="month-card-badge">${hasDetailedEntries ? badge : "Historischer Monat"}</span>
               <span class="month-card-place">${placeText}</span>
             </div>
-          </${hasDetailedEntries ? "button" : "div"}>
+          </button>
         `;
       }).join("")}
     </div>
   `;
+      renderMonthArchive();
     }
     function renderDashboard() {
       const key = selectedMonth();
