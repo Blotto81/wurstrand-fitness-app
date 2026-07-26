@@ -4,6 +4,37 @@
   gap: 14px;
 }
 
+.wrc-progress-outlook {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.wrc-progress-outlook > span {
+  min-width: 0;
+}
+
+.wrc-progress-outlook small,
+.wrc-progress-outlook strong {
+  display: block;
+}
+
+.wrc-progress-outlook small {
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.wrc-progress-outlook strong {
+  color: #f8fafc;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
 .dashboard-focus-card {
   position: relative;
   display: flex;
@@ -106,6 +137,14 @@
     grid-template-columns: 1fr;
   }
 
+  .wrc-progress-outlook {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wrc-progress-outlook > span:last-child {
+    grid-column: 1 / -1;
+  }
+
   .dashboard-focus-card {
     min-height: 126px;
     padding: 17px;
@@ -120,5 +159,9 @@
 
   .dashboard-focus-card {
     min-height: 116px;
+  }
+
+  .wrc-progress-outlook {
+    gap: 12px 8px;
   }
 }
