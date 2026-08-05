@@ -3101,6 +3101,88 @@ body {
   gap: 12px;
 }
 
+.month-transition {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 14px 0 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(96, 165, 250, .32);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(30, 64, 175, .16), rgba(15, 23, 42, .72));
+}
+
+.month-transition > div {
+  display: grid;
+  gap: 3px;
+}
+
+.month-transition span {
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.month-transition strong {
+  color: #f8fafc;
+  line-height: 1.35;
+}
+
+.month-transition button,
+.entry-date-context button {
+  width: auto;
+  flex: 0 0 auto;
+  border: 1px solid rgba(96, 165, 250, .42);
+  background: rgba(30, 41, 59, .88);
+  color: #dbeafe;
+  font-weight: 800;
+}
+
+.entry-date-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 12px 0 18px;
+  padding: 13px 15px;
+  border: 1px solid rgba(52, 211, 153, .3);
+  border-radius: 16px;
+  background: rgba(6, 78, 59, .14);
+}
+
+.entry-date-context > div {
+  display: grid;
+  gap: 3px;
+}
+
+.entry-date-context span {
+  color: #6ee7b7;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.entry-date-context strong {
+  color: #f8fafc;
+}
+
+@media (max-width: 600px) {
+  .month-transition,
+  .entry-date-context {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .month-transition button,
+  .entry-date-context button {
+    width: 100%;
+  }
+}
+
 .goal-banner-mascot {
   flex: 0 0 auto;
   width: 76px;
