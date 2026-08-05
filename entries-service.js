@@ -56,6 +56,9 @@
       if (typeof WRCBirthday !== "undefined") {
         WRCBirthday.onEntriesLoaded(allEntries);
       }
+      if (typeof maybeShowMonthStart === "function") {
+        setTimeout(maybeShowMonthStart, 350);
+      }
     }
 
     function getNewPersonalRecords(entry) {
