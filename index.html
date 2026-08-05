@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="modules/seasonal/seasonal.css">
   <link rel="stylesheet" href="modules/year-review/year-review.css">
   <link rel="stylesheet" href="modules/pwa/pwa.css">
+  <link rel="stylesheet" href="modules/clubs/clubs.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
   <link rel="stylesheet" href="modules/month-archive/month-archive.css">
@@ -1345,6 +1346,7 @@ background:#0f172a
   <script src="modules/seasonal/seasonal.js"></script>
   <script src="modules/year-review/year-review.js"></script>
   <script src="modules/birthday/birthday.js"></script>
+  <script src="modules/clubs/clubs.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
   <script src="modules/mascots/mascots.js"></script>
@@ -4392,6 +4394,8 @@ background:#0f172a
           <div class="chip-value">${trendMarkup(playerWeekTrend, { decimals: 1 })}</div>
         </div>
       </div>
+
+        ${typeof WRCClubs !== "undefined" ? WRCClubs.renderPlayerClubs(player, allEntries) : ""}
 
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
