@@ -160,11 +160,16 @@
       }
       resetForm();
       await loadEntries();
-      showSaveReward(buildSaveReward(savedEntry, {
-        merged: wasMerged,
-        editing: wasEditing,
-        personalRecords
-      }));
+      showTab("dashboard", menuLinkForPanel("dashboard"));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      requestAnimationFrame(() => {
+        showSaveReward(buildSaveReward(savedEntry, {
+          merged: wasMerged,
+          editing: wasEditing,
+          personalRecords,
+          duration: 5000
+        }));
+      });
       if (personalRecords.length && typeof WRCPost !== "undefined") {
         WRCPost.maybeFromEvent("personal_record", {
           player: savedEntry.person,
@@ -172,8 +177,6 @@
           delay: 5600
         });
       }
-      showTab("dashboard", menuLinkForPanel("dashboard"));
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function deleteEntry(id) {
