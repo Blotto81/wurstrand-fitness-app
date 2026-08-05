@@ -645,6 +645,8 @@
         </div>
 
 
+        <div id="monthTransition" class="month-transition" aria-live="polite"></div>
+
         <button type="button" class="wrc-dashboard-entry-button" onclick="showTab('eintragen', this)">
           <span class="wrc-dashboard-entry-icon">➕</span>
 
@@ -863,6 +865,8 @@
     <div class="card">
 
       <h3 id="formTitle">Neuen Tageseintrag erfassen</h3>
+
+      <div id="entryDateContext" class="entry-date-context" aria-live="polite"></div>
 
       <div class="grid grid3">
 
@@ -2002,6 +2006,10 @@ background:#0f172a
         renderPlayerOverview();
       }
 
+      if (id === "eintragen" && !editingId) {
+        prepareSuggestedEntryDate();
+      }
+
       if (id === "quotesPanel") {
         renderQuotes();
       }
@@ -2199,14 +2207,128 @@ background:#0f172a
       editingId = null;
       document.getElementById("formTitle").innerText = "Neuen Tageseintrag erfassen";
       document.getElementById("saveButton").innerText = "Eintrag speichern";
-      document.getElementById("date").value = new Date().toISOString().slice(0, 10);
       document.getElementById("person").value = people[0];
+      prepareSuggestedEntryDate(true);
       document.getElementById("steps").value = "";
       document.getElementById("bike").value = "";
       document.getElementById("squats").value = "";
       document.getElementById("pushups").value = "";
       document.getElementById("exercise").checked = false;
       updateBonusPreview();
+    }
+
+    function localDateKey(date = new Date()) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function mostRecentMissingDate(person, monthKey, throughDateKey) {
+      if (!person || !monthKey || !throughDateKey?.startsWith(monthKey)) return null;
+
+      const throughDay = Number(throughDateKey.slice(8, 10));
+      const enteredDates = new Set(allEntries
+        .filter(entry => entry.person === person && (entry.date || "").startsWith(monthKey))
+        .map(entry => entry.date));
+
+      for (let day = throughDay; day >= 1; day--) {
+        const dateKey = `${monthKey}-${String(day).padStart(2, "0")}`;
+        if (!enteredDates.has(dateKey)) return dateKey;
+      }
+
+      return null;
+    }
+
+    function previousMonthCatchupDate(person) {
+      const now = new Date();
+      if (now.getDate() > 3) return null;
+
+      const key = previousCalendarMonthKey(now);
+      if (!Object.prototype.hasOwnProperty.call(monthGoals, key)) return null;
+
+      const [year, month] = key.split("-").map(Number);
+      const lastDay = new Date(year, month, 0).getDate();
+      return mostRecentMissingDate(person, key, `${key}-${String(lastDay).padStart(2, "0")}`);
+    }
+
+    function suggestedCurrentEntryDate(person) {
+      const today = localDateKey();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayKey = localDateKey(yesterday);
+      const currentKey = currentMonthKey();
+
+      if (yesterdayKey.startsWith(currentKey)) {
+        return mostRecentMissingDate(person, currentKey, yesterdayKey) || today;
+      }
+
+      return today;
+    }
+
+    function prepareSuggestedEntryDate(force = false) {
+      if (editingId) return;
+
+      const dateInput = document.getElementById("date");
+      const person = document.getElementById("person")?.value || people[0];
+      if (!dateInput) return;
+
+      if (force || !dateInput.value || dateInput.dataset.smartDate === "true") {
+        dateInput.value = suggestedCurrentEntryDate(person);
+        dateInput.dataset.smartDate = "true";
+      }
+
+      renderEntryDateContext();
+      updateBonusPreview();
+    }
+
+    function chooseEntryDate(dateKey) {
+      const dateInput = document.getElementById("date");
+      if (!dateInput || !dateKey) return;
+      dateInput.value = dateKey;
+      dateInput.dataset.smartDate = "true";
+      renderEntryDateContext();
+      updateBonusPreview();
+    }
+
+    function renderEntryDateContext() {
+      const box = document.getElementById("entryDateContext");
+      const dateInput = document.getElementById("date");
+      const person = document.getElementById("person")?.value || people[0];
+      if (!box || !dateInput?.value) return;
+
+      const today = localDateKey();
+      const catchupDate = previousMonthCatchupDate(person);
+      const selectedLabel = dateInput.value === today
+        ? `Eintrag für heute · ${formatDate(dateInput.value)}`
+        : `Nachtrag für ${formatDate(dateInput.value)}`;
+
+      box.innerHTML = `
+        <div>
+          <span>📅 Ausgewählter Tag</span>
+          <strong>${selectedLabel}</strong>
+        </div>
+        ${catchupDate && catchupDate !== dateInput.value ? `
+          <button type="button" onclick="chooseEntryDate('${catchupDate}')">
+            ${formatDate(catchupDate)} ist noch offen · nachtragen
+          </button>
+        ` : ""}
+      `;
+    }
+
+    function initSmartEntryForm() {
+      const personSelect = document.getElementById("person");
+      const dateInput = document.getElementById("date");
+
+      personSelect?.addEventListener("change", () => {
+        if (!editingId) prepareSuggestedEntryDate(true);
+      });
+
+      dateInput?.addEventListener("change", () => {
+        dateInput.dataset.smartDate = "false";
+        renderEntryDateContext();
+      });
     }
 
     function cleanLoadedEntries(rawEntries) {
@@ -2618,6 +2740,68 @@ background:#0f172a
 
       renderRecordLadder(key, total);
       renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder });
+      renderMonthTransition();
+    }
+
+    function selectDashboardMonth(key) {
+      const select = document.getElementById("monthSelect");
+      if (!select || ![...select.options].some(option => option.value === key)) return;
+      select.value = key;
+      renderAll();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderMonthTransition() {
+      const box = document.getElementById("monthTransition");
+      if (!box) return;
+
+      const now = new Date();
+      const currentKey = currentMonthKey();
+      const previousKey = previousCalendarMonthKey(now);
+      const withinTransition = now.getDate() <= 3 && Object.prototype.hasOwnProperty.call(monthGoals, previousKey);
+
+      if (!withinTransition) {
+        box.innerHTML = "";
+        box.style.display = "none";
+        return;
+      }
+
+      const showingPrevious = selectedMonth() === previousKey;
+      box.style.display = "flex";
+      box.innerHTML = `
+        <div>
+          <span>${showingPrevious ? "↩️ Kurzer Blick zurück" : "📖 Der letzte Monat bleibt noch offen"}</span>
+          <strong>${showingPrevious
+            ? `${getMonthTitle(previousKey)} · ${fmt(monthTotalPoints(previousKey), 1)} Punkte`
+            : `${getMonthTitle(previousKey)} ansehen oder fehlende Tage nachtragen.`}</strong>
+        </div>
+        <button type="button" onclick="selectDashboardMonth('${showingPrevious ? currentKey : previousKey}')">
+          ${showingPrevious ? `${getMonthTitle(currentKey)} öffnen →` : `${getMonthTitle(previousKey)} öffnen →`}
+        </button>
+      `;
+    }
+
+    function maybeShowMonthStart() {
+      const now = new Date();
+      if (now.getDate() > 5) return;
+
+      const key = currentMonthKey();
+      const shownKey = `monthStartShown_${key}`;
+      if (localStorage.getItem(shownKey)) return;
+
+      const previousKey = previousCalendarMonthKey(now);
+      const previousClosureKey = `goalClosureShown_${previousKey}`;
+      if (now.getDate() >= 2 && Object.prototype.hasOwnProperty.call(monthGoals, previousKey) && !localStorage.getItem(previousClosureKey)) {
+        return;
+      }
+
+      localStorage.setItem(shownKey, "true");
+      showBigPop(
+        "🌭",
+        `Auf in den ${getMonthTitle(key)}!`,
+        `Das neue gemeinsame Ziel liegt bei ${fmt(monthGoals[key] || 0, 0)} Punkten. ${getMonthTitle(previousKey)} bleibt in den ersten drei Tagen noch direkt erreichbar.`,
+        { type: "goal" }
+      );
     }
 
     function renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder }) {
@@ -2741,7 +2925,7 @@ background:#0f172a
       checkPreviousMonthClosure({ missBanner });
     }
 
-    function previousMonthKey(date = new Date()) {
+    function previousCalendarMonthKey(date = new Date()) {
       return [
         date.getMonth() === 0 ? date.getFullYear() - 1 : date.getFullYear(),
         String(date.getMonth() === 0 ? 12 : date.getMonth()).padStart(2, "0")
@@ -2752,7 +2936,7 @@ background:#0f172a
       const now = new Date();
       if (now.getDate() < 2 || now.getDate() > 5) return;
 
-      const key = previousMonthKey(now);
+      const key = previousCalendarMonthKey(now);
       if (!Object.prototype.hasOwnProperty.call(monthGoals, key)) return;
 
       const total = monthTotalPoints(key);
@@ -2767,6 +2951,7 @@ background:#0f172a
           localStorage.setItem(`goalCelebrationShown_${key}_${m.value}`, "true");
         });
         localStorage.setItem(closureKey, "reached");
+        localStorage.setItem(`monthStartShown_${currentMonthKey()}`, "true");
 
         const highest = reachedMilestones[reachedMilestones.length - 1];
         createConfetti();
@@ -2774,8 +2959,8 @@ background:#0f172a
           highest.kind === "base" ? "⭐" : "👑",
           `${getMonthTitle(key)} ist komplett`,
           highest.kind === "base"
-            ? "Das gemeinsame Monatsziel ist geschafft. Dieser Stern gehört euch allen."
-            : `${highest.stars} ${highest.title} ist ebenfalls geschafft. Ein starker Abschluss mit Extra-Stern.`,
+            ? `Das gemeinsame Monatsziel ist geschafft. Dieser Stern gehört euch allen. Jetzt wartet ${getMonthTitle(currentMonthKey())} mit ${fmt(monthGoals[currentMonthKey()] || 0)} Punkten.`
+            : `${highest.stars} ${highest.title} ist ebenfalls geschafft. Jetzt wartet ${getMonthTitle(currentMonthKey())} mit ${fmt(monthGoals[currentMonthKey()] || 0)} Punkten.`,
           { type: "goal" }
         );
         return;
@@ -2796,10 +2981,11 @@ background:#0f172a
 
       if (localStorage.getItem(closureKey)) return;
       localStorage.setItem(closureKey, "missed");
+      localStorage.setItem(`monthStartShown_${currentMonthKey()}`, "true");
       showBigPop(
         "🌱",
         `${getMonthTitle(key)} ist abgeschlossen`,
-        "Das Monatsziel blieb diesmal offen. Die Bewegung war trotzdem echt – und jetzt wartet ein neuer gemeinsamer Anlauf."
+        `Das Monatsziel blieb diesmal offen. Die Bewegung war trotzdem echt – und ${getMonthTitle(currentMonthKey())} startet mit einem neuen Ziel von ${fmt(monthGoals[currentMonthKey()] || 0)} Punkten.`
       );
     }
 
@@ -4552,6 +4738,7 @@ background:#0f172a
     initChartMonthFilter();
     initQuoteForm();
     initBonusPreview();
+    initSmartEntryForm();
     resetForm();
     loadEntries();
     renderCurses();
