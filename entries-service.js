@@ -157,6 +157,9 @@
         return;
       }
 
+      const clubUnlocks = typeof WRCClubs !== "undefined"
+        ? WRCClubs.findNewUnlocks(savedEntry, allEntries)
+        : [];
       const personalRecords = getNewPersonalRecords(savedEntry);
       if (typeof WRCPost !== "undefined") {
         WRCPost.rememberPlayer(savedEntry.person);
@@ -173,11 +176,14 @@
           duration: 5000
         }));
       });
+      if (clubUnlocks.length && typeof WRCClubs !== "undefined") {
+        setTimeout(() => WRCClubs.showUnlocks(clubUnlocks), 5200);
+      }
       if (personalRecords.length && typeof WRCPost !== "undefined") {
         WRCPost.maybeFromEvent("personal_record", {
           player: savedEntry.person,
           eventId: `record_${savedEntry.date}_${personalRecords.map(record => record.key).join("_")}`,
-          delay: 5600
+          delay: clubUnlocks.length ? 9800 : 5600
         });
       }
     }
