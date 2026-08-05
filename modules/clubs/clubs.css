@@ -1,0 +1,453 @@
+.player-clubs {
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, .22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 20% 0, rgba(96, 165, 250, .09), transparent 34%),
+    linear-gradient(145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .98));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+.player-clubs-head,
+.club-card-top,
+.club-next-rank,
+.club-unlock-actions {
+  display: flex;
+  align-items: center;
+}
+
+.player-clubs-head {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.player-clubs-head span,
+.club-eyebrow,
+.club-unlock-kicker {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.player-clubs-head h3 {
+  margin: 3px 0 0;
+  color: #f8fafc;
+  font-size: 24px;
+}
+
+.player-clubs-head > strong {
+  padding: 8px 12px;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 999px;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.player-clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.club-card {
+  --club-accent: #60a5fa;
+  --club-accent-soft: rgba(96, 165, 250, .17);
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--club-accent) 34%, #334155);
+  border-radius: 22px;
+  background: linear-gradient(150deg, var(--club-accent-soft), rgba(15, 23, 42, .92) 55%);
+}
+
+.club-amber {
+  --club-accent: #f59e0b;
+  --club-accent-soft: rgba(245, 158, 11, .15);
+}
+
+.club-card-top {
+  align-items: flex-start;
+  gap: 17px;
+}
+
+.club-patch {
+  --patch-size: 138px;
+  position: relative;
+  display: flex;
+  width: var(--patch-size);
+  height: var(--patch-size);
+  flex: 0 0 var(--patch-size);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 18px;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--club-accent) 68%, #e2e8f0);
+  border-radius: 50%;
+  background:
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, .035) 0 2px, transparent 2px 5px),
+    radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--club-accent) 30%, #334155), #0f172a 72%);
+  color: #f8fafc;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .35), inset 0 0 0 4px rgba(15, 23, 42, .78);
+  transition: transform .25s ease, filter .25s ease;
+}
+
+button.club-patch:not(:disabled) {
+  cursor: pointer;
+}
+
+button.club-patch:not(:disabled):hover {
+  transform: translateY(-3px) rotate(-1deg);
+  filter: brightness(1.08);
+}
+
+.club-patch.locked {
+  filter: grayscale(.7);
+  opacity: .62;
+}
+
+.club-patch-stitches {
+  position: absolute;
+  inset: 7px;
+  border: 2px dashed rgba(226, 232, 240, .5);
+  border-radius: inherit;
+}
+
+.club-patch-icon {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  color: var(--club-accent);
+}
+
+.club-patch-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.club-patch-icon svg circle,
+.club-patch-icon svg path {
+  vector-effect: non-scaling-stroke;
+}
+
+.club-patch-icon svg circle {
+  fill: none;
+}
+
+.club-patch-icon .club-icon-bike path {
+  fill: none;
+}
+
+.club-patch-level {
+  position: relative;
+  color: #cbd5e1;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.club-patch strong,
+.club-patch small {
+  position: relative;
+  max-width: 105px;
+}
+
+.club-patch strong {
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.club-patch small {
+  color: color-mix(in srgb, var(--club-accent) 64%, #fff);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.club-card-copy {
+  min-width: 0;
+  padding-top: 7px;
+}
+
+.club-card-copy h4 {
+  margin: 4px 0 7px;
+  color: #f8fafc;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.club-card-copy p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.club-entry-link {
+  width: auto;
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--club-accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.club-next-rank {
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.club-next-rank > div {
+  display: grid;
+  gap: 2px;
+}
+
+.club-next-rank span {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.club-next-rank strong,
+.club-next-rank > b {
+  color: #e2e8f0;
+  font-size: 12px;
+}
+
+.club-next-rank > b {
+  color: var(--club-accent);
+  white-space: nowrap;
+}
+
+.club-progress {
+  height: 7px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, .82);
+}
+
+.club-progress > div {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--club-accent), color-mix(in srgb, var(--club-accent) 55%, #fff));
+}
+
+.club-ranks {
+  margin-top: 13px;
+  border-top: 1px solid rgba(148, 163, 184, .15);
+  padding-top: 11px;
+}
+
+.club-ranks summary {
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.club-rank-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.club-rank-list button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 2px 9px;
+  align-items: center;
+  padding: 10px 11px;
+  border: 1px solid rgba(148, 163, 184, .16);
+  background: rgba(15, 23, 42, .62);
+  text-align: left;
+}
+
+.club-rank-list button span {
+  grid-row: 1 / 3;
+  color: var(--club-accent);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.club-rank-list button strong {
+  color: #f8fafc;
+  font-size: 12px;
+}
+
+.club-rank-list button small {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.club-rank-list button b {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  color: #cbd5e1;
+  font-size: 10px;
+}
+
+.club-rank-list p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.club-unlock {
+  position: fixed;
+  inset: 0;
+  z-index: 10030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(2, 6, 23, .84);
+  opacity: 0;
+  backdrop-filter: blur(8px);
+  transition: opacity .22s ease;
+}
+
+.club-unlock.show {
+  opacity: 1;
+}
+
+.club-unlock-card {
+  width: min(94vw, 470px);
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--club-accent) 48%, #475569);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0, var(--club-accent-soft), transparent 42%),
+    linear-gradient(155deg, #1e293b, #0f172a 72%);
+  text-align: center;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .62);
+  transform: translateY(20px) scale(.95);
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.club-unlock.show .club-unlock-card {
+  transform: translateY(0) scale(1);
+}
+
+.club-patch-unlock {
+  --patch-size: 166px;
+  margin: 18px auto;
+  animation: clubPatchReveal .8s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.club-unlock-card h2 {
+  margin: 8px 0;
+  color: #f8fafc;
+  font-size: 25px;
+}
+
+.club-unlock-card p {
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.club-unlock-actions {
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.club-unlock-actions button {
+  width: auto;
+  min-width: 130px;
+}
+
+@keyframes clubPatchReveal {
+  0% { opacity: 0; transform: scale(.72) rotate(-8deg); }
+  65% { opacity: 1; transform: scale(1.06) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@media (max-width: 760px) {
+  .player-clubs {
+    padding: 16px;
+  }
+
+  .player-clubs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .player-clubs-head {
+    align-items: flex-start;
+  }
+
+  .player-clubs-head h3 {
+    font-size: 21px;
+  }
+
+  .club-card-top {
+    gap: 13px;
+  }
+
+  .club-patch {
+    --patch-size: 118px;
+    padding: 14px;
+  }
+
+  .club-patch-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .club-card-copy h4 {
+    font-size: 17px;
+  }
+
+  .club-entry-link {
+    line-height: 1.35;
+    text-align: left;
+  }
+
+  .club-unlock {
+    align-items: flex-end;
+    padding: 9px;
+    padding-bottom: max(9px, env(safe-area-inset-bottom));
+  }
+
+  .club-unlock-card {
+    width: 100%;
+    padding: 23px 18px;
+    border-radius: 27px;
+  }
+
+  .club-patch-unlock {
+    --patch-size: 145px;
+  }
+
+  .club-unlock-actions {
+    flex-direction: column-reverse;
+  }
+
+  .club-unlock-actions button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .club-patch,
+  .club-unlock,
+  .club-unlock-card,
+  .club-patch-unlock {
+    animation: none;
+    transition: none;
+  }
+}
