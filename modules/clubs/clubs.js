@@ -87,14 +87,7 @@
 
     const reached = tiers.filter(tier => tier.reached);
     const highest = reached[reached.length - 1] || null;
-    const next = tiers.find(tier => !tier.reached) || null;
-    const progressBase = highest?.threshold || 0;
-    const progressRange = Math.max((next?.threshold || progressBase) - progressBase, 1);
-    const progress = next
-      ? Math.min(Math.max(((best - progressBase) / progressRange) * 100, 0), 100)
-      : 100;
-
-    return { club, best, bestEntry, tiers, reached, highest, next, progress };
+    return { club, best, bestEntry, tiers, reached, highest };
   }
 
   function formatAchievement(club, value) {
@@ -112,12 +105,10 @@
   }
 
   function renderClubCard(state, player) {
-    const { club, best, highest, next, reached, progress } = state;
+    const { club, highest, reached } = state;
     const patchTitle = highest?.title || "Noch kein Rang";
     const patchValue = highest ? formatAchievement(club, highest.threshold) : club.name;
     const triggerDate = highest?.triggerEntry?.date || "";
-    const firstTarget = club.tiers[0].threshold;
-    const remaining = next ? Math.max(next.threshold - best, 0) : 0;
 
     return `
       <article class="club-card club-${club.accent}">
@@ -140,20 +131,9 @@
                 Entscheidenden Eintrag öffnen →
               </button>
             ` : `
-              <p>Der erste Patch wartet bei ${formatAchievement(club, firstTarget)} an einem einzelnen Tag.</p>
+              <p>Dieser Club läuft leise mit. Ein Patch zeigt sich erst, wenn er verdient wurde.</p>
             `}
           </div>
-        </div>
-
-        <div class="club-next-rank">
-          <div>
-            <span>${next ? "Nächster Rang" : "Höchster Rang erreicht"}</span>
-            <strong>${next ? `${next.title} · noch ${formatAchievement(club, remaining)}` : `${highest.title} · komplett`}</strong>
-          </div>
-          <b>${number(best, club.decimals)} ${club.unit}</b>
-        </div>
-        <div class="club-progress" aria-label="${Math.round(progress)} Prozent bis zum nächsten Rang">
-          <div style="width:${progress}%"></div>
         </div>
 
         <details class="club-ranks">
