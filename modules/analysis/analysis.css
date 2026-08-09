@@ -132,6 +132,13 @@
   gap: 8px;
 }
 
+.analysis-course-basis {
+  flex-basis: 100%;
+  color: #94a3b8;
+  font-size: 11px;
+  text-align: right;
+}
+
 .analysis-course-pill {
   padding: 8px 11px;
   border: 1px solid rgba(148, 163, 184, .16);
