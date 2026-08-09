@@ -94,83 +94,86 @@
     return `${number(value, club.decimals)} ${club.unit}`;
   }
 
-  function safePlayer(player) {
-    return String(player || "").replace(/[\\'\n\r]/g, "");
-  }
-
   function openEntry(date) {
     if (date && typeof window.jumpToDate === "function") {
       window.jumpToDate(date);
     }
   }
 
-  function renderClubCard(state, player) {
-    const { club, highest, reached } = state;
-    const patchTitle = highest?.title || "Noch kein Rang";
-    const patchValue = highest ? formatAchievement(club, highest.threshold) : club.name;
-    const triggerDate = highest?.triggerEntry?.date || "";
+  const visiblePatches = new Map();
+
+  function renderPlayerPatches(player, entries) {
+    visiblePatches.clear();
+    const patches = CLUBS.flatMap(club =>
+      clubState(club, player, entries).reached.map(tier => ({ club, tier }))
+    ).sort((a, b) => String(a.tier.triggerEntry.date).localeCompare(String(b.tier.triggerEntry.date)));
+
+    patches.forEach(({ club, tier }) => {
+      visiblePatches.set(`${club.id}-${tier.level}`, { club, tier, player });
+    });
+
+    if (!patches.length) return `<div class="player-patch-empty">Noch keine Patches</div>`;
 
     return `
-      <article class="club-card club-${club.accent}">
-        <div class="club-card-top">
-          <button type="button" class="club-patch${highest ? " earned" : " locked"}"
-            ${triggerDate ? `onclick="WRCClubs.openEntry('${triggerDate}')" title="Freischaltenden Eintrag öffnen"` : "disabled"}>
+      <div class="player-patch-shelf" aria-label="Erreichte Patches von ${player}">
+        ${patches.map(({ club, tier }, index) => `
+          <button type="button"
+            class="player-mini-patch club-${club.accent}"
+            style="--patch-index:${index}"
+            title="${tier.title}"
+            aria-label="Patch ${tier.title} öffnen"
+            onclick="WRCClubs.showPatch('${club.id}-${tier.level}')">
             <span class="club-patch-stitches" aria-hidden="true"></span>
             <span class="club-patch-icon">${iconMarkup(club)}</span>
-            <span class="club-patch-level">${highest ? `Rang ${highest.level}` : "Club"}</span>
-            <strong>${patchTitle}</strong>
-            <small>${patchValue}</small>
+            <strong>${tier.level}</strong>
           </button>
-
-          <div class="club-card-copy">
-            <span class="club-eyebrow">Persönlicher Leistungsclub</span>
-            <h4>${club.name}</h4>
-            ${highest ? `
-              <p><strong>${patchTitle}</strong> wurde erstmals am ${window.formatDate(triggerDate)} erreicht.</p>
-              <button type="button" class="club-entry-link" onclick="WRCClubs.openEntry('${triggerDate}')">
-                Entscheidenden Eintrag öffnen →
-              </button>
-            ` : `
-              <p>Dieser Club läuft leise mit. Ein Patch zeigt sich erst, wenn er verdient wurde.</p>
-            `}
-          </div>
-        </div>
-
-        <details class="club-ranks">
-          <summary>${reached.length} ${reached.length === 1 ? "Patch" : "Patches"} ansehen</summary>
-          <div class="club-rank-list">
-            ${reached.length ? reached.map(tier => `
-              <button type="button" onclick="WRCClubs.openEntry('${tier.triggerEntry.date}')">
-                <span>Rang ${tier.level}</span>
-                <strong>${tier.title}</strong>
-                <small>${formatAchievement(club, tier.threshold)} · ${window.formatDate(tier.triggerEntry.date)}</small>
-                <b>Eintrag →</b>
-              </button>
-            `).join("") : `<p>Noch kein Patch freigeschaltet. Der Club läuft trotzdem schon mit.</p>`}
-          </div>
-        </details>
-      </article>
+        `).join("")}
+      </div>
     `;
   }
 
-  function renderPlayerClubs(player, entries) {
-    const states = CLUBS.map(club => clubState(club, player, entries));
-    const patchCount = states.reduce((sum, state) => sum + state.reached.length, 0);
+  function showPatch(key) {
+    const patch = visiblePatches.get(key);
+    if (!patch) return;
+    const { club, tier, player } = patch;
+    const date = tier.triggerEntry.date;
+    const existing = document.getElementById("clubPatchDetail");
+    existing?.remove();
 
-    return `
-      <section class="player-clubs" aria-label="Leistungsclubs von ${safePlayer(player)}">
-        <div class="player-clubs-head">
-          <div>
-            <span>Persönliche Auszeichnungen</span>
-            <h3>Leistungsclubs</h3>
-          </div>
-          <strong>${patchCount} ${patchCount === 1 ? "Patch" : "Patches"}</strong>
+    const modal = document.createElement("div");
+    modal.id = "clubPatchDetail";
+    modal.className = `club-patch-detail club-${club.accent}`;
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "clubPatchDetailTitle");
+    modal.innerHTML = `
+      <div class="club-patch-detail-card">
+        <button type="button" class="club-patch-detail-close" aria-label="Schließen" onclick="WRCClubs.closePatch()">×</button>
+        <div class="club-patch earned club-patch-detail-art">
+          <span class="club-patch-stitches" aria-hidden="true"></span>
+          <span class="club-patch-icon">${iconMarkup(club)}</span>
+          <span class="club-patch-level">Rang ${tier.level}</span>
+          <strong>${tier.title}</strong>
+          <small>${formatAchievement(club, tier.threshold)}</small>
         </div>
-        <div class="player-clubs-grid">
-          ${states.map(state => renderClubCard(state, player)).join("")}
-        </div>
-      </section>
+        <span class="club-unlock-kicker">${club.name}</span>
+        <h2 id="clubPatchDetailTitle">${tier.title}</h2>
+        <p>${player} hat diesen Patch am ${window.formatDate(date)} freigeschaltet.</p>
+        <button type="button" class="primary" onclick="WRCClubs.closePatch(); WRCClubs.openEntry('${date}')">Entscheidenden Eintrag öffnen</button>
+      </div>
     `;
+    modal.addEventListener("click", event => {
+      if (event.target === modal) closePatch();
+    });
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add("show"));
+  }
+
+  function closePatch() {
+    const modal = document.getElementById("clubPatchDetail");
+    if (!modal) return;
+    modal.classList.remove("show");
+    setTimeout(() => modal.remove(), 220);
   }
 
   function findNewUnlocks(entry, previousEntries) {
@@ -248,9 +251,11 @@
 
   window.WRCClubs = {
     definitions: CLUBS,
-    renderPlayerClubs,
+    renderPlayerPatches,
     findNewUnlocks,
     showUnlocks,
+    showPatch,
+    closePatch,
     openEntry,
     closeUnlock
   };
