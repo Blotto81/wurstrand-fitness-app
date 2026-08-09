@@ -1,8 +1,8 @@
 .player-profile-hero {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  gap: 26px;
-  align-items: center;
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
   margin-top: 18px;
   padding: 24px;
   border: 1px solid rgba(96, 165, 250, .22);
@@ -21,12 +21,12 @@
 
 .player-profile-avatar {
   display: grid;
-  width: 154px;
-  height: 154px;
+  width: 100%;
+  aspect-ratio: 1;
   place-items: center;
   overflow: hidden;
   border: 2px solid rgba(148, 163, 184, .3);
-  border-radius: 34px;
+  border-radius: 28px;
   background: linear-gradient(145deg, rgba(59, 130, 246, .22), rgba(15, 23, 42, .9));
   color: #dbeafe;
   font-size: 44px;
@@ -38,7 +38,11 @@
 .player-profile-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+}
+
+.player-profile-initials {
+  place-self: center;
 }
 
 .player-profile-kicker,
@@ -57,11 +61,97 @@
   margin: 4px 0 20px;
 }
 
+.player-profile-number {
+  display: block;
+  margin-bottom: 6px;
+  color: #60a5fa;
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: .15em;
+}
+
 .player-profile-name-line h2 {
   margin: 0;
   color: #f8fafc;
-  font-size: clamp(32px, 5vw, 50px);
+  font-size: clamp(30px, 4.3vw, 48px);
+  line-height: 1.08;
+}
+
+.player-personal-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.player-personal-fact {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(96, 165, 250, .16);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, .48);
+}
+
+.player-personal-fact-icon {
+  font-size: 24px;
   line-height: 1;
+}
+
+.player-personal-fact strong,
+.player-personal-fact span {
+  display: block;
+}
+
+.player-personal-fact strong {
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .045em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.player-personal-fact div > span {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.player-alf-quote {
+  position: relative;
+  margin: 0 0 14px;
+  padding: 13px 16px 13px 18px;
+  border-left: 3px solid #60a5fa;
+  border-radius: 0 15px 15px 0;
+  background: linear-gradient(90deg, rgba(37, 99, 235, .17), rgba(30, 41, 59, .38));
+}
+
+.player-alf-quote > span {
+  color: #60a5fa;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.player-alf-quote p {
+  margin: 5px 0 2px;
+  color: #dbeafe;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.player-alf-quote cite {
+  color: #94a3b8;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .player-profile-facts,
@@ -302,19 +392,20 @@
     text-align: center;
   }
 
-  .player-profile-avatar { width: 132px; height: 132px; border-radius: 29px; }
+  .player-profile-avatar { width: min(100%, 330px); border-radius: 24px; }
   .player-profile-name-line { justify-content: center; margin-bottom: 16px; }
-  .player-profile-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .player-profile-facts .player-chip { padding: 10px 7px; }
-  .player-profile-facts .chip-label { font-size: 9px; }
-  .player-profile-facts .chip-value { font-size: 18px; }
+  .player-profile-number { text-align: center; }
+  .player-personal-facts { grid-template-columns: 1fr; text-align: left; }
+  .player-alf-quote { text-align: left; }
+  .player-profile-facts { grid-template-columns: 1fr; }
+  .player-profile-facts .player-chip { padding: 12px; }
+  .player-profile-facts .chip-label { font-size: 10px; }
+  .player-profile-facts .chip-value { font-size: 21px; }
   .player-metric-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 430px) {
   .player-profile-name-line { flex-direction: column; gap: 8px; }
-  .player-profile-facts { grid-template-columns: 1fr 1fr; }
-  .player-profile-facts .player-chip:last-child { grid-column: 1 / -1; }
   .player-mini-patch { width: 45px; height: 45px; flex-basis: 45px; }
   .club-patch-detail,
   .club-unlock { align-items: flex-end; padding: 9px; padding-bottom: max(9px, env(safe-area-inset-bottom)); }
