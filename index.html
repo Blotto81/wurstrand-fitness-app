@@ -4437,8 +4437,19 @@ background:#0f172a
         ? (playerProfiles[player] || {})
         : {};
       const avatarMarkup = profile.image
-        ? `<img src="${profile.image}" alt="${player}" loading="lazy">`
+        ? `<img src="${profile.image}" alt="WRC-Sammelkarte von ${profile.displayName || player}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="player-profile-initials" hidden aria-hidden="true">${profile.initials || player.slice(0, 2).toUpperCase()}</span>`
         : `<span aria-hidden="true">${profile.initials || player.slice(0, 2).toUpperCase()}</span>`;
+      const profileFacts = Array.isArray(profile.facts)
+        ? profile.facts.map(fact => `
+          <div class="player-personal-fact">
+            <span class="player-personal-fact-icon" aria-hidden="true">${fact.icon}</span>
+            <div>
+              <strong>${fact.title}</strong>
+              <span>${fact.text}</span>
+            </div>
+          </div>
+        `).join("")
+        : "";
 
       box.innerHTML = `
       <section class="player-profile-hero">
@@ -4449,9 +4460,20 @@ background:#0f172a
         <div class="player-profile-content">
           <span class="player-profile-kicker">WRC Spielerprofil</span>
           <div class="player-profile-name-line">
-            <h2>${player}</h2>
+            <div>
+              <span class="player-profile-number">#${profile.number || "--"}</span>
+              <h2>${profile.displayName || player}</h2>
+            </div>
             ${renderPlayerFireStreak(allPlayerEntries)}
           </div>
+          ${profileFacts ? `<div class="player-personal-facts">${profileFacts}</div>` : ""}
+          ${profile.quote ? `
+            <blockquote class="player-alf-quote">
+              <span>ALF-Weisheit</span>
+              <p>„${profile.quote}“</p>
+              <cite>— ALF</cite>
+            </blockquote>
+          ` : ""}
           <div class="player-profile-facts">
             <div class="player-chip">
               <div class="chip-label">Monatsanteil</div>
