@@ -5,6 +5,13 @@ const people = [
   "Fabi"
 ];
 
+const playerProfiles = Object.freeze({
+  Thorsten: { image: "", initials: "TH" },
+  Basti: { image: "", initials: "BA" },
+  Marian: { image: "", initials: "MA" },
+  Fabi: { image: "", initials: "FA" }
+});
+
 const birthdays = Object.freeze([
   { name: "Thorsten", day: 20, month: 5 },
   { name: "Basti", day: 21, month: 2 },
