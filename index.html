@@ -702,8 +702,9 @@
               <strong id="goalPacePlayer">0 Punkte</strong>
             </button>
             <button type="button" onclick="openAnalysisDetails('monthlyOverview')">
-              <small>Prognose Monatsende</small>
+              <small id="goalForecastLabel">Prognose Monatsende</small>
               <strong id="goalForecast">0 Punkte</strong>
+              <span id="goalForecastBasis" class="dashboard-forecast-basis"></span>
             </button>
           </div>
 
@@ -2689,6 +2690,58 @@ background:#0f172a
   `;
       renderMonthArchive();
     }
+    function getTeamMonthForecast(key) {
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
+      const [year, month] = key.split("-").map(Number);
+      const lastDay = new Date(year, month, 0).getDate();
+      const total = entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0);
+      const today = new Date();
+      const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+
+      if (key < currentKey) {
+        return {
+          available: true,
+          finalized: true,
+          forecast: total,
+          basisTotal: total,
+          basisDay: lastDay,
+          basisDate: `${key}-${String(lastDay).padStart(2, "0")}`
+        };
+      }
+
+      if (key > currentKey || !entries.length) {
+        return { available: false, finalized: false, forecast: 0, basisTotal: 0, basisDay: 0, basisDate: "" };
+      }
+
+      const todayDay = Math.min(today.getDate(), lastDay);
+      let completeDay = 0;
+
+      for (let day = 1; day <= todayDay; day += 1) {
+        const date = `${key}-${String(day).padStart(2, "0")}`;
+        const enteredPeople = new Set(
+          entries.filter(entry => entry.date === date).map(entry => entry.person)
+        );
+        if (people.every(person => enteredPeople.has(person))) completeDay = day;
+      }
+
+      if (!completeDay) {
+        return { available: false, finalized: false, forecast: 0, basisTotal: 0, basisDay: 0, basisDate: "" };
+      }
+
+      const basisTotal = entries
+        .filter(entry => Number((entry.date || "").slice(8, 10)) <= completeDay)
+        .reduce((sum, entry) => sum + calcPoints(entry).total, 0);
+
+      return {
+        available: true,
+        finalized: false,
+        forecast: basisTotal / completeDay * lastDay,
+        basisTotal,
+        basisDay: completeDay,
+        basisDate: `${key}-${String(completeDay).padStart(2, "0")}`
+      };
+    }
+
     function renderDashboard() {
       const key = selectedMonth();
       const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
@@ -2721,9 +2774,8 @@ background:#0f172a
 
       const restDays = Math.max(lastDay - currentDay, 1);
 
-      const forecast = lastDate
-        ? Math.round((total / Math.max(currentDay, 1)) * lastDay)
-        : 0;
+      const forecastData = getTeamMonthForecast(key);
+      const forecast = forecastData.available ? Math.round(forecastData.forecast) : 0;
 
       setText("monthTitle", `${getMonthTitle(key)} · ${ladder.stage.stars} ${ladder.stage.title}`);
       setText("goalTarget", fmt(goal));
@@ -2731,7 +2783,14 @@ background:#0f172a
       setText("barText", `${fmt(total, 1)} / ${fmt(goal, 1)} Punkte`);
       setText("goalPaceTeam", `${fmt(rest / restDays, 1)} Punkte`);
       setText("goalPacePlayer", `${fmt(rest / restDays / Math.max(people.length, 1), 1)} Punkte`);
-      setText("goalForecast", `${fmt(forecast, 0)} Punkte`);
+      setText("goalForecastLabel", forecastData.finalized ? "Endstand" : "Prognose Monatsende");
+      setText("goalForecast", forecastData.available ? `${fmt(forecast, 0)} Punkte` : "Noch offen");
+      setText(
+        "goalForecastBasis",
+        forecastData.available && !forecastData.finalized
+          ? `Vollständig bis ${formatDate(forecastData.basisDate)}`
+          : ""
+      );
 
       const fill = document.getElementById("barFill");
       if (fill) {
@@ -3632,6 +3691,7 @@ background:#0f172a
       const observedDay = key === currentKey
         ? Math.max(1, Math.min(today.getDate(), lastDay))
         : lastEntryDay;
+      const forecastData = getTeamMonthForecast(key);
       const dayTotals = Array(lastDay).fill(0);
       entries.forEach(entry => {
         const day = Number((entry.date || "").slice(8, 10));
@@ -3644,20 +3704,21 @@ background:#0f172a
         return index + 1 <= observedDay ? Number(running.toFixed(2)) : null;
       });
       const currentTotal = dayTotals.slice(0, observedDay).reduce((sum, points) => sum + points, 0);
-      const forecastEnd = observedDay > 0 ? currentTotal / observedDay * lastDay : 0;
+      const forecastEnd = forecastData.available ? forecastData.forecast : 0;
       const forecast = labels.map((_, index) => {
         const day = index + 1;
-        if (day < observedDay) return null;
-        if (day === observedDay) return Number(currentTotal.toFixed(2));
-        return Number((currentTotal + ((forecastEnd - currentTotal) * (day - observedDay) / Math.max(lastDay - observedDay, 1))).toFixed(2));
+        if (!forecastData.available || forecastData.finalized || day < forecastData.basisDay) return null;
+        if (day === forecastData.basisDay) return Number(forecastData.basisTotal.toFixed(2));
+        return Number((forecastData.basisTotal + ((forecastEnd - forecastData.basisTotal) * (day - forecastData.basisDay) / Math.max(lastDay - forecastData.basisDay, 1))).toFixed(2));
       });
       const ideal = labels.map((_, index) => Number((goal * (index + 1) / lastDay).toFixed(2)));
 
       if (summary) {
         summary.innerHTML = `
           <span class="analysis-course-pill">Stand <strong>${fmt(currentTotal, 1)}</strong></span>
-          <span class="analysis-course-pill">Hochrechnung <strong>${fmt(forecastEnd, 0)}</strong></span>
+          <span class="analysis-course-pill">${forecastData.finalized ? "Endstand" : "Hochrechnung"} <strong>${forecastData.available ? fmt(forecastEnd, 0) : "Noch offen"}</strong></span>
           <span class="analysis-course-pill">Ziel <strong>${fmt(goal, 0)}</strong></span>
+          ${forecastData.available && !forecastData.finalized ? `<small class="analysis-course-basis">Vollständig eingetragen bis ${formatDate(forecastData.basisDate)}</small>` : ""}
         `;
       }
 
@@ -4372,31 +4433,43 @@ background:#0f172a
       `;
       };
 
+      const profile = typeof playerProfiles !== "undefined"
+        ? (playerProfiles[player] || {})
+        : {};
+      const avatarMarkup = profile.image
+        ? `<img src="${profile.image}" alt="${player}" loading="lazy">`
+        : `<span aria-hidden="true">${profile.initials || player.slice(0, 2).toUpperCase()}</span>`;
+
       box.innerHTML = `
-      <div class="player-summary">
-        <div class="player-chip">
-          <div class="chip-label">Spieler</div>
-          <div class="player-name-line">
-            <div class="chip-value">${player}</div>
+      <section class="player-profile-hero">
+        <div class="player-profile-portrait-column">
+          <div class="player-profile-avatar">${avatarMarkup}</div>
+          ${typeof WRCClubs !== "undefined" ? WRCClubs.renderPlayerPatches(player, allEntries) : ""}
+        </div>
+        <div class="player-profile-content">
+          <span class="player-profile-kicker">WRC Spielerprofil</span>
+          <div class="player-profile-name-line">
+            <h2>${player}</h2>
             ${renderPlayerFireStreak(allPlayerEntries)}
           </div>
+          <div class="player-profile-facts">
+            <div class="player-chip">
+              <div class="chip-label">Monatsanteil</div>
+              <div class="chip-value">${fmt(pct(monthPlayer.points, monthTeam.points), 1)}%</div>
+            </div>
+            <div class="player-chip">
+              <div class="chip-label">Gesamtanteil</div>
+              <div class="chip-value">${fmt(pct(allPlayer.points, allTeam.points), 1)}%</div>
+            </div>
+            <div class="player-chip">
+              <div class="chip-label">Wochentrend</div>
+              <div class="chip-value">${trendMarkup(playerWeekTrend, { decimals: 1 })}</div>
+            </div>
+          </div>
         </div>
-        <div class="player-chip">
-          <div class="chip-label">Punkte-Anteil Monat</div>
-          <div class="chip-value">${fmt(pct(monthPlayer.points, monthTeam.points), 1)}%</div>
-        </div>
-        <div class="player-chip">
-          <div class="chip-label">Punkte-Anteil Gesamt</div>
-          <div class="chip-value">${fmt(pct(allPlayer.points, allTeam.points), 1)}%</div>
-        </div>
-        <div class="player-chip">
-          <div class="chip-label">Wochentrend Punkte</div>
-          <div class="chip-value">${trendMarkup(playerWeekTrend, { decimals: 1 })}</div>
-        </div>
-      </div>
+      </section>
 
-        ${typeof WRCClubs !== "undefined" ? WRCClubs.renderPlayerClubs(player, allEntries) : ""}
-
+      <div class="player-metric-grid">
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
         ${card("🚴", "Fahrrad-km", monthPlayer.bike, monthTeam.bike, allPlayer.bike, allTeam.bike, 1, " km")}
@@ -4404,6 +4477,7 @@ background:#0f172a
         ${card("💪", "Liegestütze", monthPlayer.pushups, monthTeam.pushups, allPlayer.pushups, allTeam.pushups, 0)}
         ${card("🏋️", "Übungen", monthPlayer.exercises, monthTeam.exercises, allPlayer.exercises, allTeam.exercises, 0)}
         ${card("🔥", "Bonus", monthPlayer.bonusCount, monthTeam.bonusCount, allPlayer.bonusCount, allTeam.bonusCount, 0, "×")}
+      </div>
   <div class="player-contribution-grid">
         ${dartCard()}
         ${unoCard()}
