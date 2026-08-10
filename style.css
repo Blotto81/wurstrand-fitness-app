@@ -1967,6 +1967,35 @@
       margin-top: 4px;
     }
 
+    .player-game-result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(100, 116, 139, .28);
+    }
+
+    .player-game-result-row:first-child {
+      padding-top: 0;
+    }
+
+    .player-game-result-row:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .player-game-result-row strong {
+      overflow-wrap: anywhere;
+    }
+
+    .player-game-result-row span {
+      flex: 0 0 auto;
+      color: #e2e8f0;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
     .player-share-bar {
       height: 8px;
       border-radius: 999px;
@@ -1994,6 +2023,12 @@
 
       .player-share-main {
         font-size: 20px;
+      }
+
+      .player-game-result-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
       }
     }
 

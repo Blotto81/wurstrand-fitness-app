@@ -4353,6 +4353,40 @@ background:#0f172a
         });
       });
 
+      const { data: gameCollectionRounds, error: gameCollectionPlayerError } =
+        await supabaseClient
+          .from("game_collection_rounds")
+          .select("game_name, results");
+
+      if (gameCollectionPlayerError) {
+        console.error("GAME COLLECTION PLAYER STATS ERROR:", gameCollectionPlayerError);
+      }
+
+      const gameCollectionStats = new Map();
+
+      (gameCollectionRounds || []).forEach(round => {
+        const gameName = String(round.game_name || "").trim();
+        if (!gameName || !Array.isArray(round.results)) return;
+
+        const playerResult = round.results.find(result =>
+          String(result.player || "").trim() === player
+        );
+        const place = Number(playerResult?.place);
+        if (!Number.isInteger(place) || place < 1 || place > 4) return;
+
+        const gameKey = gameName.toLocaleLowerCase("de-DE");
+        if (!gameCollectionStats.has(gameKey)) {
+          gameCollectionStats.set(gameKey, {
+            name: gameName,
+            places: [0, 0, 0, 0]
+          });
+        }
+        gameCollectionStats.get(gameKey).places[place - 1] += 1;
+      });
+
+      const playerGameCollectionStats = Array.from(gameCollectionStats.values())
+        .sort((a, b) => a.name.localeCompare(b.name, "de"));
+
       const allTeam = {
         points: currentAllTeam.points + HISTORIC_TOTALS.points,
         steps: currentAllTeam.steps + HISTORIC_TOTALS.steps,
@@ -4406,6 +4440,28 @@ background:#0f172a
         <div class="player-share-main">🥉 ${frisbeeStats[2]}</div>
         <div class="player-share-main">4️⃣ ${frisbeeStats[3]}</div>
     </div>
+</div>
+`;
+      const gameCollectionCard = () => `
+<div class="player-share-card">
+    <div class="player-share-title">
+        <span>🎲 Spielesammlung</span>
+    </div>
+
+    ${playerGameCollectionStats.length
+      ? `<div class="player-share-block">
+          ${playerGameCollectionStats.map(game => `
+            <div class="player-game-result-row">
+              <strong>${escapeHtml(game.name)}</strong>
+              <span aria-label="${game.places[0]} Gold, ${game.places[1]} Silber, ${game.places[2]} Bronze und ${game.places[3]} vierte Plätze">
+                🥇 ${game.places[0]} &nbsp; 🥈 ${game.places[1]} &nbsp; 🥉 ${game.places[2]} &nbsp; 4️⃣ ${game.places[3]}
+              </span>
+            </div>
+          `).join("")}
+        </div>`
+      : `<div class="player-share-block">
+          <div class="player-share-sub">Noch keine Platzierung in der Spielesammlung.</div>
+        </div>`}
 </div>
 `;
       const card = (icon, title, monthValue, monthTotal, allValue, allTotal, dec = 0, suffix = "") => {
@@ -4504,6 +4560,7 @@ background:#0f172a
         ${dartCard()}
         ${unoCard()}
         ${frisbeeCard()}
+        ${gameCollectionCard()}
 
         <div class="card" style="margin-bottom:18px;">
           <h3>🎁 WRC Daily</h3>
