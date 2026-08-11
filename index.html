@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="modules/dart/dart.css">
   <link rel="stylesheet" href="modules/frisbee/frisbee.css">
   <link rel="stylesheet" href="modules/uno/uno.css">
+  <link rel="stylesheet" href="modules/table-tennis/table-tennis.css">
   <link rel="stylesheet" href="modules/game-collection/game-collection.css">
   <link rel="stylesheet" href="modules/mascots/mascots.css">
   <link rel="stylesheet" href="modules/post/post.css">
@@ -87,6 +88,10 @@
 
       <button class="drawer-link tab drawer-sublink" onclick="showTab('frisbeePanel',this); toggleMainMenu(false)">
         🥏 Discgolf
+      </button>
+
+      <button class="drawer-link tab drawer-sublink" onclick="showTab('tableTennisPanel',this); toggleMainMenu(false)">
+        🏓 Tischtennis
       </button>
 
       <button class="drawer-link tab drawer-sublink" onclick="showTab('gameCollectionPanel',this); toggleMainMenu(false)">
@@ -617,6 +622,7 @@
 
     </div>
   </div>
+  <div id="tableTennisPanel" class="panel"></div>
   <div id="gameCollectionPanel" class="panel"></div>
   </div>
 
@@ -4363,6 +4369,7 @@ background:#0f172a
       }
 
       const gameCollectionStats = new Map();
+      const tableTennisStats = [0, 0, 0, 0];
 
       (gameCollectionRounds || []).forEach(round => {
         const gameName = String(round.game_name || "").trim();
@@ -4373,6 +4380,11 @@ background:#0f172a
         );
         const place = Number(playerResult?.place);
         if (!Number.isInteger(place) || place < 1 || place > 4) return;
+
+        if (playerResult.source === "table-tennis") {
+          tableTennisStats[place - 1] += 1;
+          return;
+        }
 
         const gameKey = gameName.toLocaleLowerCase("de-DE");
         if (!gameCollectionStats.has(gameKey)) {
@@ -4439,6 +4451,20 @@ background:#0f172a
         <div class="player-share-main">🥈 ${frisbeeStats[1]}</div>
         <div class="player-share-main">🥉 ${frisbeeStats[2]}</div>
         <div class="player-share-main">4️⃣ ${frisbeeStats[3]}</div>
+    </div>
+</div>
+`;
+      const tableTennisCard = () => `
+<div class="player-share-card">
+    <div class="player-share-title">
+        <span>🏓 Tischtennis</span>
+    </div>
+
+    <div class="player-share-block">
+        <div class="player-share-main">🥇 ${tableTennisStats[0]}</div>
+        <div class="player-share-main">🥈 ${tableTennisStats[1]}</div>
+        <div class="player-share-main">🥉 ${tableTennisStats[2]}</div>
+        <div class="player-share-main">4️⃣ ${tableTennisStats[3]}</div>
     </div>
 </div>
 `;
@@ -4560,6 +4586,7 @@ background:#0f172a
         ${dartCard()}
         ${unoCard()}
         ${frisbeeCard()}
+        ${tableTennisCard()}
         ${gameCollectionCard()}
 
         <div class="card" style="margin-bottom:18px;">
@@ -4944,6 +4971,7 @@ background:#0f172a
   <script src="modules/dart/dart.js"></script>
   <script src="modules/frisbee/frisbee.js"></script>
   <script src="modules/uno/uno.js"></script>
+	  <script src="modules/table-tennis/table-tennis.js"></script>
 	  <script src="modules/game-collection/game-collection.js"></script>
 	  <script src="modules/wursti-walk/wursti-walk.js"></script>
 	  <script src="modules/merch/merch.js"></script>

@@ -324,7 +324,11 @@
       return;
     }
 
-    loadedRounds = data || [];
+    loadedRounds = (data || []).filter(round => !(
+      round.game_name === "Tischtennis"
+      && Array.isArray(round.results)
+      && round.results.some(result => result.source === "table-tennis")
+    ));
     refreshGameChoices();
     renderHistory();
     renderStatistics();
