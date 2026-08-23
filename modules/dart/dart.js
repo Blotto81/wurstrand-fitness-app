@@ -2,7 +2,35 @@ const dartPanel = document.getElementById("dartPanel");
 
 if (dartPanel) {
   dartPanel.innerHTML = `
-    <div class="overlay">
+    <div id="dartModeSelection" class="overlay dart-mode-selection">
+      <div class="badge">Game Lounge</div>
+
+      <div class="challenge-row game-mascot-heading">
+        <div>
+          <h2>🎯 Dart</h2>
+          <p class="sub">Wie möchtet ihr heute spielen?</p>
+        </div>
+        <img class="game-mascot" src="wursti-dart.png" alt="" aria-hidden="true">
+      </div>
+
+      <div class="dart-entry-choice-grid">
+        <button type="button" id="openDartCaller" class="dart-entry-choice">
+          <span class="dart-entry-choice-icon">🎯</span>
+          <strong>WRC Caller</strong>
+          <small>Live mitzählen am normalen Dartboard</small>
+        </button>
+        <button type="button" id="openDartResultCapture" class="dart-entry-choice">
+          <span class="dart-entry-choice-icon">⚡</span>
+          <strong>Ergebnis erfassen</strong>
+          <small>Ergebnisse der elektronischen Dartscheibe eintragen</small>
+        </button>
+      </div>
+    </div>
+
+    <div id="dartCallerMount" hidden></div>
+
+    <div id="dartResultCapture" class="overlay" hidden>
+      <button type="button" class="dart-back-to-selection" data-dart-back>← Zur Dart-Auswahl</button>
       <div class="badge">Game Lounge</div>
 
       <div class="challenge-row game-mascot-heading">
@@ -194,6 +222,25 @@ if (dartPanel) {
 
     </div>
 `;
+
+  const modeSelection = document.getElementById("dartModeSelection");
+  const resultCapture = document.getElementById("dartResultCapture");
+  const callerMount = document.getElementById("dartCallerMount");
+
+  function showDartSelection() {
+    modeSelection.hidden = false;
+    resultCapture.hidden = true;
+    callerMount.hidden = true;
+  }
+
+  document.getElementById("openDartResultCapture").addEventListener("click", () => {
+    modeSelection.hidden = true;
+    callerMount.hidden = true;
+    resultCapture.hidden = false;
+  });
+
+  document.querySelector("[data-dart-back]").addEventListener("click", showDartSelection);
+  window.WRCOpenDartSelection = showDartSelection;
 
   const playerGrid = document.getElementById("dartPlayerGrid");
 
