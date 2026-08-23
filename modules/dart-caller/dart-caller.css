@@ -1,0 +1,76 @@
+.dart-caller-shell { max-width: 980px; margin: 0 auto; }
+.dart-caller-header { display: flex; align-items: center; gap: 18px; margin: 20px 0 24px; }
+.dart-caller-header h2 { margin: 0 0 5px; }
+.dart-caller-target { font-size: clamp(3rem, 8vw, 4.6rem); }
+.dart-caller-card { margin-top: 18px; padding: 22px; border: 1px solid rgba(148,163,184,.2); border-radius: 20px; background: rgba(15,23,42,.48); }
+.dart-caller-card h3 { margin: 0 0 16px; display: flex; justify-content: space-between; }
+.dart-caller-count { color: #7dd3fc; font-size: .9rem; }
+.dart-caller-mode-grid, .dart-caller-player-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+.dart-caller-mode, .dart-caller-player { min-height: 72px; padding: 15px 18px; border: 1px solid rgba(148,163,184,.25); border-radius: 15px; color: inherit; background: rgba(30,41,59,.72); cursor: pointer; }
+.dart-caller-mode strong, .dart-caller-mode small { display: block; }
+.dart-caller-mode strong { font-size: 1.45rem; }
+.dart-caller-mode small { margin-top: 3px; color: var(--muted,#94a3b8); }
+.dart-caller-mode.selected, .dart-caller-player.selected { border-color: #38bdf8; background: linear-gradient(135deg,rgba(14,165,233,.22),rgba(37,99,235,.14)); box-shadow: 0 0 0 1px rgba(56,189,248,.16) inset; }
+.dart-caller-player { display: flex; align-items: center; justify-content: space-between; font-weight: 750; }
+.dart-caller-check { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #06131f; background: #38bdf8; opacity: 0; }
+.dart-caller-player.selected .dart-caller-check { opacity: 1; }
+.dart-caller-primary { width: 100%; margin-top: 20px; padding: 16px 22px; border: 0; border-radius: 15px; color: #06131f; background: linear-gradient(135deg,#38bdf8,#22c55e); font-size: 1.05rem; font-weight: 850; cursor: pointer; }
+.dart-caller-primary:disabled { opacity: .38; cursor: not-allowed; }
+.dart-caller-gamebar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.dart-caller-game-mode { color: #7dd3fc; font-weight: 750; }
+.dart-caller-scoreboard { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 10px; margin-bottom: 16px; }
+.dart-caller-score { padding: 14px; border: 1px solid rgba(148,163,184,.2); border-radius: 15px; background: rgba(15,23,42,.52); text-align: center; }
+.dart-caller-score span, .dart-caller-score strong { display: block; }
+.dart-caller-score span { overflow: hidden; text-overflow: ellipsis; color: var(--muted,#94a3b8); font-size: .88rem; white-space: nowrap; }
+.dart-caller-score strong { margin-top: 4px; font-size: clamp(1.7rem,5vw,2.45rem); }
+.dart-caller-score.active { border-color: #38bdf8; background: rgba(14,165,233,.15); box-shadow: 0 0 22px rgba(56,189,248,.1); }
+.dart-caller-turn { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; border-radius: 19px; background: linear-gradient(135deg,rgba(37,99,235,.25),rgba(14,165,233,.1)); }
+.dart-caller-turn h2 { margin: 2px 0 0; }
+.dart-caller-eyebrow { color: #7dd3fc; font-size: .76rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.dart-caller-turn-total { text-align: right; }
+.dart-caller-turn-total span, .dart-caller-turn-total strong { display: block; }
+.dart-caller-turn-total span { color: var(--muted,#94a3b8); font-size: .78rem; }
+.dart-caller-turn-total strong { font-size: 2rem; }
+.dart-caller-darts { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin: 12px 0; }
+.dart-caller-dart { padding: 10px; border: 1px solid rgba(148,163,184,.18); border-radius: 13px; text-align: center; background: rgba(15,23,42,.46); }
+.dart-caller-dart span, .dart-caller-dart strong { display: block; }
+.dart-caller-dart span { color: var(--muted,#94a3b8); font-size: .72rem; }
+.dart-caller-dart strong { min-height: 1.35em; margin-top: 2px; }
+.dart-caller-dart.filled { border-color: rgba(56,189,248,.45); }
+.dart-caller-input { padding: 14px; border: 1px solid rgba(148,163,184,.18); border-radius: 18px; background: rgba(2,6,23,.34); }
+.dart-caller-multipliers { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 11px; }
+.dart-caller-multipliers button, .dart-caller-numbers button, .dart-caller-actions button { border: 1px solid rgba(148,163,184,.24); color: inherit; background: rgba(30,41,59,.84); cursor: pointer; }
+.dart-caller-multipliers button { padding: 11px 8px; border-radius: 11px; font-weight: 750; }
+.dart-caller-multipliers button.selected { border-color: #38bdf8; color: #7dd3fc; background: rgba(14,165,233,.18); }
+.dart-caller-numbers { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
+.dart-caller-numbers button { min-height: 46px; border-radius: 11px; font-size: 1rem; font-weight: 800; }
+.dart-caller-numbers button:active { transform: scale(.96); }
+.dart-caller-numbers .dart-caller-bull { color: #fbbf24; }
+.dart-caller-numbers .dart-caller-bullseye { color: #fb7185; }
+.dart-caller-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.dart-caller-actions button { padding: 13px; border-radius: 12px; font-weight: 750; }
+.dart-caller-actions button:last-child { border-color: rgba(56,189,248,.4); }
+.dart-caller-actions button:disabled { opacity: .35; cursor: not-allowed; }
+.dart-caller-winner { min-height: 440px; display: grid; place-items: center; align-content: center; padding: 30px; text-align: center; border: 1px solid rgba(250,204,21,.35); border-radius: 24px; background: radial-gradient(circle at top,rgba(250,204,21,.14),transparent 52%),rgba(15,23,42,.52); }
+.dart-caller-winner > span { font-size: 5rem; }
+.dart-caller-winner p { margin: 12px 0 3px; color: #facc15; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.dart-caller-winner h2 { margin: 0; font-size: clamp(2rem,8vw,3.4rem); }
+.dart-caller-winner > strong { margin-top: 10px; color: var(--muted,#94a3b8); }
+.dart-caller-winner .dart-caller-primary { max-width: 340px; }
+
+@media (max-width: 640px) {
+  .dart-caller-card { padding: 17px; }
+  .dart-caller-header { margin-top: 16px; }
+  .dart-caller-player-grid { grid-template-columns: 1fr; }
+  .dart-caller-scoreboard { grid-template-columns: repeat(2,1fr); }
+  .dart-caller-gamebar { align-items: flex-start; flex-direction: column; }
+  .dart-caller-game-mode { padding-left: 2px; font-size: .88rem; }
+  .dart-caller-numbers { gap: 6px; }
+  .dart-caller-numbers button { min-height: 43px; padding: 0; }
+  .dart-caller-actions { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dart-caller-score.active, .dart-caller-winner > span { animation: dart-caller-arrive .35s ease-out; }
+  @keyframes dart-caller-arrive { from { opacity: .55; transform: translateY(5px); } }
+}
