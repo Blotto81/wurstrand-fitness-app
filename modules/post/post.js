@@ -1,5 +1,8 @@
 (function () {
-  const RANDOM_CHANCE = 0.025;
+  const RANDOM_CHANCE = 0.05;
+  const RANDOM_BOOST_AFTER_DAYS = 7;
+  const RANDOM_STRONG_BOOST_AFTER_DAYS = 10;
+  const RANDOM_GUARANTEE_AFTER_DAYS = 14;
   const STREAK_MILESTONES = [7, 14, 30, 50, 100, 150, 200, 365];
   const EVENT_CHANCES = {
     achievement: 0.42,
@@ -60,6 +63,19 @@
     const now = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
     return local.toISOString().slice(0, 10);
+  }
+
+  function daysSince(timestamp, fallback = RANDOM_BOOST_AFTER_DAYS) {
+    const value = Number(timestamp);
+    if (!Number.isFinite(value) || value <= 0) return fallback;
+    return Math.max(0, Math.floor((Date.now() - value) / 86400000));
+  }
+
+  function randomChanceFor(daysWithoutLetter) {
+    if (daysWithoutLetter >= RANDOM_GUARANTEE_AFTER_DAYS) return 1;
+    if (daysWithoutLetter >= RANDOM_STRONG_BOOST_AFTER_DAYS) return 0.3;
+    if (daysWithoutLetter >= RANDOM_BOOST_AFTER_DAYS) return 0.12;
+    return RANDOM_CHANCE;
   }
 
   function currentPlayer() {
@@ -228,6 +244,27 @@
     return true;
   }
 
+  function showWithRetries(letter, options = {}, retryOptions = {}) {
+    const attempt = retryOptions.attempt || 0;
+    const maxAttempts = retryOptions.maxAttempts ?? 5;
+
+    if (show(letter, options)) {
+      if (typeof retryOptions.onShown === "function") retryOptions.onShown();
+      return true;
+    }
+
+    if (attempt >= maxAttempts) return false;
+
+    window.setTimeout(() => {
+      showWithRetries(letter, options, {
+        ...retryOptions,
+        attempt: attempt + 1
+      });
+    }, 2200 + attempt * 500);
+
+    return true;
+  }
+
   function openLetter() {
     if (!overlay || !activeLetter || overlay.classList.contains("is-opened")) return;
     overlay.classList.add("is-opening");
@@ -258,13 +295,19 @@
     const player = currentPlayer();
     const playerKey = normalizePlayer(player);
     const dailyKey = `wrcPostRandom_${todayKey()}_${playerKey}`;
+    const lastShownKey = `wrcPostLastRandomShown_${playerKey}`;
     if (safeStorageGet(dailyKey)) return false;
 
     safeStorageSet(dailyKey, "checked");
-    if (Math.random() >= RANDOM_CHANCE) return false;
+    const daysWithoutLetter = daysSince(safeStorageGet(lastShownKey));
+    if (Math.random() >= randomChanceFor(daysWithoutLetter)) return false;
 
     const letter = selectLetter("random", player);
-    return show(letter);
+    if (!letter) return false;
+
+    return showWithRetries(letter, {}, {
+      onShown: () => safeStorageSet(lastShownKey, String(Date.now()))
+    });
   }
 
   function maybeFromEvent(eventName, options = {}) {
@@ -281,9 +324,7 @@
     if (!letter) return false;
 
     window.setTimeout(() => {
-      if (!show(letter)) {
-        window.setTimeout(() => show(letter), 2400);
-      }
+      showWithRetries(letter);
     }, options.delay ?? 4200);
 
     return true;
