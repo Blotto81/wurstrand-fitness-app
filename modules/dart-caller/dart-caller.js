@@ -23,7 +23,12 @@
       turnBusted: false,
       multiplier: 1,
       undoStack: [],
-      winner: null
+      winner: null,
+      finishOrder: [],
+      completed: false,
+      saving: false,
+      saved: false,
+      saveError: ""
     };
   }
 
@@ -82,11 +87,12 @@
           <span class="dart-caller-game-mode">${state.mode} · Straight Out</span>
         </div>
 
-        ${state.winner ? winnerMarkup() : `
+        ${state.completed ? winnerMarkup() : `
           <section class="dart-caller-scoreboard" aria-label="Spielstand">
             ${state.players.map((player, index) => `
-              <article class="dart-caller-score ${index === state.currentPlayer ? "active" : ""}">
+              <article class="dart-caller-score ${index === state.currentPlayer ? "active" : ""} ${player.finished ? "finished" : ""}">
                 <span>${escapeHtml(player.name)}</span><strong>${player.score}</strong>
+                <small>${player.finished ? `${player.place}. Platz` : `Ø ${formatAverage(playerAverage(player, index))}`}</small>
               </article>
             `).join("")}
           </section>
@@ -125,13 +131,47 @@
   }
 
   function winnerMarkup() {
+    const ranking = state.players.slice().sort((a, b) => a.place - b.place);
     return `
       <section class="dart-caller-winner">
         <span aria-hidden="true">🏆</span><p>WRC Caller meldet</p>
         <h2>${escapeHtml(state.winner.name)} gewinnt!</h2>
-        <strong>${state.winner.dartsThrown} Darts gespielt</strong>
+        <strong>${state.mode} · Spiel beendet</strong>
+        <div class="dart-caller-ranking">
+          ${ranking.map(player => `
+            <div><span>${placeMedal(player.place)} ${escapeHtml(player.name)}</span><strong>Ø ${formatAverage(finalAverage(player))}</strong></div>
+          `).join("")}
+        </div>
+        <div class="dart-caller-save-state ${state.saveError ? "error" : ""}">
+          ${state.saving ? "Spiel wird gespeichert …" : state.saved ? "✓ Ergebnis gespeichert und Statistiken aktualisiert" : state.saveError || ""}
+        </div>
+        ${state.saveError ? `<button type="button" class="dart-caller-secondary" data-retry-save>Erneut speichern</button>` : ""}
         <button type="button" class="dart-caller-primary" data-rematch>Noch eine Runde</button>
       </section>`;
+  }
+
+  function placeMedal(place) {
+    return place === 1 ? "🥇" : place === 2 ? "🥈" : place === 3 ? "🥉" : "4️⃣";
+  }
+
+  function formatAverage(value) {
+    return Number(value || 0).toLocaleString("de-DE", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    });
+  }
+
+  function playerAverage(player, index) {
+    const liveTurn = index === state.currentPlayer && !state.turnBusted
+      ? state.darts.reduce((sum, dart) => sum + dart.score, 0)
+      : 0;
+    return player.dartsThrown > 0
+      ? ((player.scoredPoints + liveTurn) / player.dartsThrown) * 3
+      : 0;
+  }
+
+  function finalAverage(player) {
+    return player.dartsThrown > 0 ? (player.scoredPoints / player.dartsThrown) * 3 : 0;
   }
 
   function render() {
@@ -155,6 +195,7 @@
     }));
     mount.querySelector("[data-start-game]")?.addEventListener("click", startGame);
     mount.querySelector("[data-rematch]")?.addEventListener("click", startGame);
+    mount.querySelector("[data-retry-save]")?.addEventListener("click", saveCompletedGame);
     mount.querySelectorAll("[data-multiplier]").forEach(button => button.addEventListener("click", () => {
       state.multiplier = Number(button.dataset.multiplier);
       render();
@@ -170,7 +211,14 @@
 
   function startGame() {
     if (!state.selectedPlayers.length) return;
-    state.players = state.selectedPlayers.map(name => ({ name, score: state.mode, dartsThrown: 0 }));
+    state.players = state.selectedPlayers.map(name => ({
+      name,
+      score: state.mode,
+      dartsThrown: 0,
+      scoredPoints: 0,
+      finished: false,
+      place: 0
+    }));
     state.currentPlayer = 0;
     state.turnStartScore = state.mode;
     state.darts = [];
@@ -178,12 +226,17 @@
     state.multiplier = 1;
     state.undoStack = [];
     state.winner = null;
+    state.finishOrder = [];
+    state.completed = false;
+    state.saving = false;
+    state.saved = false;
+    state.saveError = "";
     state.screen = "game";
     render();
   }
 
   function addDart(base, multiplier, customLabel) {
-    if (state.winner || state.darts.length >= 3) return;
+    if (state.completed || state.darts.length >= 3) return;
     const player = state.players[state.currentPlayer];
     const score = base * multiplier;
     const remaining = player.score - score;
@@ -205,9 +258,23 @@
     player.score = remaining;
     state.multiplier = 1;
     if (remaining === 0) {
-      state.winner = { ...player };
-      render();
-      window.WRCDartCallerAudio?.playSpecial("winner");
+      player.scoredPoints += state.darts.reduce((sum, dart) => sum + dart.score, 0);
+      player.finished = true;
+      player.place = state.finishOrder.length + 1;
+      state.finishOrder.push(player.name);
+      if (!state.winner) state.winner = { ...player };
+
+      const unfinished = state.players.filter(candidate => !candidate.finished);
+      if (unfinished.length <= 1) {
+        if (unfinished.length === 1) {
+          unfinished[0].place = state.finishOrder.length + 1;
+          state.finishOrder.push(unfinished[0].name);
+        }
+        completeGame();
+      } else {
+        render();
+        scheduleNextTurn(650);
+      }
       return;
     }
     render();
@@ -220,14 +287,18 @@
   }
 
   function finishTurn() {
-    if (state.winner || !state.players.length) return;
+    if (state.completed || !state.players.length) return;
     window.clearTimeout(turnTimer);
     turnTimer = null;
     const turnTotal = state.darts.reduce((sum, dart) => sum + dart.score, 0);
-    if (!state.turnBusted && state.darts.length === 3) {
+    const activePlayer = state.players[state.currentPlayer];
+    if (!state.turnBusted && state.darts.length && !activePlayer.finished) {
+      state.players[state.currentPlayer].scoredPoints += turnTotal;
+    }
+    if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished) {
       window.WRCDartCallerAudio?.playTurnScore(turnTotal);
     }
-    state.currentPlayer = (state.currentPlayer + 1) % state.players.length;
+    state.currentPlayer = nextActivePlayerIndex();
     state.turnStartScore = state.players[state.currentPlayer].score;
     state.darts = [];
     state.turnBusted = false;
@@ -236,13 +307,84 @@
     render();
   }
 
+  function nextActivePlayerIndex() {
+    for (let offset = 1; offset <= state.players.length; offset += 1) {
+      const index = (state.currentPlayer + offset) % state.players.length;
+      if (!state.players[index].finished) return index;
+    }
+    return state.currentPlayer;
+  }
+
+  function completeGame() {
+    window.clearTimeout(turnTimer);
+    turnTimer = null;
+    state.completed = true;
+    state.darts = [];
+    state.undoStack = [];
+    render();
+    window.WRCDartCallerAudio?.playSpecial("winner");
+    saveCompletedGame();
+  }
+
+  async function saveCompletedGame() {
+    if (!state.completed || state.saving || state.saved) return;
+    if (typeof supabaseClient === "undefined") {
+      state.saveError = "Speichern derzeit nicht möglich.";
+      render();
+      return;
+    }
+
+    state.saving = true;
+    state.saveError = "";
+    render();
+
+    const gameDate = new Date().toISOString().split("T")[0];
+    const { data: game, error: gameError } = await supabaseClient
+      .from("dart_games")
+      .insert({ game_date: gameDate, mode: `WRC Caller ${state.mode}` })
+      .select()
+      .single();
+
+    if (gameError) {
+      state.saving = false;
+      state.saveError = "Das Ergebnis konnte nicht gespeichert werden.";
+      console.error("WRC CALLER GAME SAVE ERROR:", gameError);
+      render();
+      return;
+    }
+
+    const resultRows = state.players.map(player => ({
+      game_id: game.id,
+      player: player.name,
+      place: player.place
+    }));
+    const { error: resultsError } = await supabaseClient.from("dart_results").insert(resultRows);
+
+    if (resultsError) {
+      await supabaseClient.from("dart_games").delete().eq("id", game.id);
+      state.saving = false;
+      state.saveError = "Das Ergebnis konnte nicht vollständig gespeichert werden.";
+      console.error("WRC CALLER RESULT SAVE ERROR:", resultsError);
+      render();
+      return;
+    }
+
+    state.saving = false;
+    state.saved = true;
+    render();
+    if (typeof window.WRCRefreshDartHistory === "function") await window.WRCRefreshDartHistory();
+    if (typeof window.loadDartStatistics === "function") window.loadDartStatistics();
+    window.dispatchEvent(new CustomEvent("wrc:dart-game-saved", { detail: { mode: state.mode } }));
+  }
+
   function snapshot() {
     return {
       players: state.players.map(player => ({ ...player })),
       darts: state.darts.map(dart => ({ ...dart })),
       turnBusted: state.turnBusted,
       multiplier: state.multiplier,
-      winner: state.winner ? { ...state.winner } : null
+      winner: state.winner ? { ...state.winner } : null,
+      finishOrder: state.finishOrder.slice()
     };
   }
 
@@ -256,6 +398,7 @@
     state.turnBusted = previous.turnBusted;
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;
+    state.finishOrder = previous.finishOrder;
     render();
   }
 
@@ -273,7 +416,7 @@
 
   function confirmNewGame() {
     const untouched = state.players.every(player => player.score === state.mode);
-    if (untouched || window.confirm("Laufendes Spiel beenden und zur Auswahl zurückkehren?")) showSetup();
+    if (state.completed || untouched || window.confirm("Laufendes Spiel beenden und zur Auswahl zurückkehren?")) showSetup();
   }
 
   function openDartSelection() {
