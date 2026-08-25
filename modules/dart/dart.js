@@ -652,4 +652,5 @@ saveButton.addEventListener("click", async () => {
     renderPlacements();
 });
   renderPlacements();
+  window.WRCRefreshDartHistory = loadHistory;
 }
