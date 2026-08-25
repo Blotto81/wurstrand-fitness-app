@@ -20,6 +20,7 @@
       currentPlayer: 0,
       turnStartScore: 0,
       darts: [],
+      turnBusted: false,
       multiplier: 1,
       undoStack: [],
       winner: null
@@ -173,6 +174,7 @@
     state.currentPlayer = 0;
     state.turnStartScore = state.mode;
     state.darts = [];
+    state.turnBusted = false;
     state.multiplier = 1;
     state.undoStack = [];
     state.winner = null;
@@ -193,6 +195,7 @@
 
     if (remaining < 0) {
       player.score = state.turnStartScore;
+      state.turnBusted = true;
       state.darts[state.darts.length - 1].label = `${label} · Bust`;
       render();
       scheduleNextTurn(700);
@@ -204,6 +207,7 @@
     if (remaining === 0) {
       state.winner = { ...player };
       render();
+      window.WRCDartCallerAudio?.playSpecial("winner");
       return;
     }
     render();
@@ -219,9 +223,14 @@
     if (state.winner || !state.players.length) return;
     window.clearTimeout(turnTimer);
     turnTimer = null;
+    const turnTotal = state.darts.reduce((sum, dart) => sum + dart.score, 0);
+    if (!state.turnBusted && state.darts.length === 3) {
+      window.WRCDartCallerAudio?.playTurnScore(turnTotal);
+    }
     state.currentPlayer = (state.currentPlayer + 1) % state.players.length;
     state.turnStartScore = state.players[state.currentPlayer].score;
     state.darts = [];
+    state.turnBusted = false;
     state.multiplier = 1;
     state.undoStack = [];
     render();
@@ -231,6 +240,7 @@
     return {
       players: state.players.map(player => ({ ...player })),
       darts: state.darts.map(dart => ({ ...dart })),
+      turnBusted: state.turnBusted,
       multiplier: state.multiplier,
       winner: state.winner ? { ...state.winner } : null
     };
@@ -243,6 +253,7 @@
     if (!previous) return;
     state.players = previous.players;
     state.darts = previous.darts;
+    state.turnBusted = previous.turnBusted;
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;
     render();
@@ -251,6 +262,7 @@
   function showSetup() {
     window.clearTimeout(turnTimer);
     turnTimer = null;
+    window.WRCDartCallerAudio?.stop();
     const selectedPlayers = state.selectedPlayers.slice();
     const mode = state.mode;
     state = freshState();
