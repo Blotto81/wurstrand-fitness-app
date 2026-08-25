@@ -1495,21 +1495,59 @@ background:#0f172a
         },
         ...historicTargets.map((m, i) => ({
           value: m.value,
-          title: "Bonusziel " + (i + 1),
+          title: m.rank === 1 ? "Teamrekord" : `Platz ${m.rank} knacken`,
           subtitle: `${m.title} · bisher Platz ${m.rank}`,
-          stars: i < 2 ? "⭐".repeat(i + 2) : `⭐ × ${i + 2}`,
+          stars: m.rank === 1 ? "👑" : "🏆",
           level: i + 2,
+          rank: m.rank,
           kind: "record"
         }))
       ];
 
-      const next = milestones.find(m => total < m.value) || null;
+      const historicRecord = ranking[0] || null;
+      const historicRecordValue = historicRecord?.points || baseGoal;
+      const nextHistoric = milestones.find(m => total < m.value) || null;
+      const recordBroken = Boolean(historicRecord && total >= historicRecordValue);
+      const nextRoundValue = Math.max(
+        Math.ceil((Math.max(total, historicRecordValue) + 0.001) / 100) * 100,
+        Math.ceil((historicRecordValue + 0.001) / 100) * 100
+      );
+      const stretch = recordBroken
+        ? {
+            value: nextRoundValue,
+            title: `Nächste Marke: ${fmt(nextRoundValue, 0)}`,
+            subtitle: "Ein runder Bonus nach dem Teamrekord",
+            stars: "🚀",
+            kind: "stretch"
+          }
+        : null;
+      const next = nextHistoric || stretch;
       const reached = milestones.filter(m => total >= m.value).slice(-1)[0] || null;
-      const allTime = !next && milestones.length > 1;
-      const goal = next ? next.value : (milestones[milestones.length - 1]?.value || baseGoal);
-      const stage = next || { title: "All-Time-Rekord", subtitle: "Jeder weitere Punkt baut den Rekord aus", stars: "👑", value: goal, kind: "crown" };
+      const allTime = recordBroken;
+      const goal = next?.value || baseGoal;
+      const isRecordHunt = Boolean(nextHistoric && nextHistoric.value === historicRecordValue);
+      const stage = recordBroken
+        ? { title: "Neuer Teamrekord", subtitle: "Jeder weitere Punkt baut den Rekord aus", stars: "👑", value: historicRecordValue, kind: "crown" }
+        : isRecordHunt
+          ? { ...nextHistoric, title: "Teamrekord-Jagd", stars: "🏆" }
+          : nextHistoric
+            ? { ...nextHistoric, title: `Jagd auf Platz ${nextHistoric.rank}`, stars: "🏆" }
+            : milestones[0];
 
-      return { baseGoal, milestones, next, reached, allTime, goal, stage };
+      return {
+        baseGoal,
+        milestones,
+        next,
+        nextHistoric,
+        reached,
+        allTime,
+        goal,
+        stage,
+        stretch,
+        historicRecord,
+        historicRecordValue,
+        recordBroken
+      };
     }
 
     function dynamicMonthGoal(baseGoal, total, monthKey = selectedMonth()) {
@@ -1541,14 +1579,13 @@ background:#0f172a
         return;
       }
 
-      const firstOpenIndex = ladder.milestones.findIndex(m => total < m.value);
-      const visibleMilestones = firstOpenIndex === -1
-        ? ladder.milestones.slice(-2)
-        : ladder.milestones.filter((m, index) =>
-          index === 0 ||
-          index === firstOpenIndex ||
-          (firstOpenIndex > 1 && index === firstOpenIndex - 1)
-        );
+      const visibleMilestones = ladder.recordBroken
+        ? []
+        : ladder.nextHistoric
+          ? [ladder.milestones[0], ladder.nextHistoric].filter((m, index, list) =>
+              list.findIndex(item => item.value === m.value) === index
+            )
+          : [ladder.milestones[0]];
 
       const rows = visibleMilestones.map(m => {
         const reached = total >= m.value;
@@ -1567,15 +1604,23 @@ background:#0f172a
     `;
       }).join("");
 
-      const crown = ladder.allTime
+      const crown = ladder.recordBroken
         ? `
-      <div class="record-ladder-row active">
+      <div class="record-ladder-row reached record-ladder-crown">
         <div class="record-ladder-stars">👑</div>
         <div>
-          <div class="record-ladder-title">All-Time-Rekord</div>
-          <div class="record-ladder-sub">Ihr seid über allen bisherigen Monaten.</div>
+          <div class="record-ladder-title">Neuer WRC-Teamrekord</div>
+          <div class="record-ladder-sub">Bisherige Bestmarke ${fmt(ladder.historicRecordValue, 1)} Punkte</div>
         </div>
-        <div class="record-ladder-value">${fmt(total, 1)} Punkte</div>
+        <div class="record-ladder-value">+${fmt(Math.max(total - ladder.historicRecordValue, 0), 1)} Punkte</div>
+      </div>
+      <div class="record-ladder-row active">
+        <div class="record-ladder-stars">${ladder.stretch.stars}</div>
+        <div>
+          <div class="record-ladder-title">${ladder.stretch.title}</div>
+          <div class="record-ladder-sub">Noch ${fmt(Math.max(ladder.stretch.value - total, 0), 1)} Punkte</div>
+        </div>
+        <div class="record-ladder-value">${fmt(ladder.stretch.value, 1)} Punkte</div>
       </div>
     `
         : "";
@@ -2465,6 +2510,9 @@ background:#0f172a
       renderHeatmap();
       renderFunFacts();
       renderAchievements();
+      if (typeof WRCPost !== "undefined") {
+        WRCPost.syncStreakMilestones(allEntries);
+      }
       renderCurses();
       renderStepsChart();
       renderAnalysisExtras();
@@ -2766,7 +2814,10 @@ background:#0f172a
       const ladder = buildRecordLadder(key, total);
       goal = ladder.goal;
 
-      const percent = goal ? Math.round((total / goal) * 100) : 0;
+      const rawPercent = goal ? (total / goal) * 100 : 0;
+      const percent = rawPercent >= 99 && rawPercent < 100
+        ? Math.floor(rawPercent * 10) / 10
+        : Math.round(rawPercent);
       const rest = Math.max(goal - total, 0);
 
       const [year, month] = key.split("-").map(Number);
@@ -2786,7 +2837,7 @@ background:#0f172a
 
       setText("monthTitle", `${getMonthTitle(key)} · ${ladder.stage.stars} ${ladder.stage.title}`);
       setText("goalTarget", fmt(goal));
-      setText("barPercentTop", percent + "%");
+      setText("barPercentTop", fmt(percent, Number.isInteger(percent) ? 0 : 1) + "%");
       setText("barText", `${fmt(total, 1)} / ${fmt(goal, 1)} Punkte`);
       setText("goalPaceTeam", `${fmt(rest / restDays, 1)} Punkte`);
       setText("goalPacePlayer", `${fmt(rest / restDays / Math.max(people.length, 1), 1)} Punkte`);
@@ -2802,7 +2853,7 @@ background:#0f172a
       const fill = document.getElementById("barFill");
       if (fill) {
         requestAnimationFrame(() => {
-          fill.style.width = Math.min(percent, 100) + "%";
+          fill.style.width = Math.min(rawPercent, 100) + "%";
         });
       }
 
@@ -2948,10 +2999,22 @@ background:#0f172a
             <div class="goal-banner-content">
               <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
               <div>
-                <span class="goal-banner-kicker">Monatsziel geschafft</span>
-                <strong>${next
-                  ? `Bonus freigeschaltet: ${next.stars} ${next.title}`
-                  : "All-Time-Rekord – jeder weitere Punkt verbessert eure Bestmarke."}</strong>
+                <span class="goal-banner-kicker">${ladder.recordBroken
+                  ? "Neuer WRC-Teamrekord"
+                  : ladder.nextHistoric
+                    ? ladder.nextHistoric.value === ladder.historicRecordValue
+                      ? "Teamrekord zum Greifen"
+                      : "Nächster Rekordplatz"
+                    : "Monatsziel geschafft"}</span>
+                <strong>${ladder.recordBroken
+                  ? `Rekordpolster: +${fmt(total - ladder.historicRecordValue, 1)} Punkte · Nächste Marke ${fmt(ladder.stretch.value, 0)}`
+                  : ladder.nextHistoric
+                    ? ladder.nextHistoric.value === ladder.historicRecordValue
+                      ? `Noch ${fmt(ladder.historicRecordValue - total, 1)} Punkte bis zum bisherigen Teamrekord.`
+                      : `Noch ${fmt(ladder.nextHistoric.value - total, 1)} Punkte bis Platz ${ladder.nextHistoric.rank}.`
+                    : next
+                      ? `Nächstes Extra: ${next.stars} ${next.title}`
+                      : "Das gemeinsame Monatsziel ist geschafft."}</strong>
               </div>
             </div>
           `;
