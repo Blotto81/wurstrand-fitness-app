@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v41";
+const CACHE_NAME = "wrc-app-v42";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -112,6 +112,24 @@ self.addEventListener("fetch", event => {
           return response;
         })
         .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  const isCodeAsset = ["script", "style"].includes(request.destination)
+    || /\.(?:js|css)$/.test(requestUrl.pathname);
+
+  if (isCodeAsset) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
