@@ -21,7 +21,11 @@
     60: voigt(60, 1), 89: voigt(89, 1)
   };
   for (let score = 1; score <= 180; score += 1) {
-    turnScores[score] = [...(turnScores[score] || []), judith(score)];
+    // Judith accidentally repeated 45 in place of 46 in the source recording.
+    // Keep 46 on the verified caller pool until a correct take is available.
+    if (score !== 46) {
+      turnScores[score] = [...(turnScores[score] || []), judith(score)];
+    }
   }
 
   const specialCalls = {
