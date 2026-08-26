@@ -4,6 +4,7 @@
     { length: count },
     (_, index) => `${basePath}/score-${score}-voigt-${String(index + 1).padStart(2, "0")}.wav`
   );
+  const judith = score => `${basePath}/score-${score}-judith-01.wav`;
 
   // Each score owns a list so further callers and alternative takes can be
   // appended without changing the game logic.
@@ -19,13 +20,34 @@
     45: voigt(45, 1), 48: voigt(48, 1), 51: voigt(51, 2), 56: voigt(56, 1),
     60: voigt(60, 1), 89: voigt(89, 1)
   };
+  for (let score = 1; score <= 180; score += 1) {
+    turnScores[score] = [...(turnScores[score] || []), judith(score)];
+  }
 
   const specialCalls = {
-    zero: [`${basePath}/special-zero-voigt-01.wav`],
-    winner: [`${basePath}/special-winner-voigt-01.wav`]
+    zero: [
+      `${basePath}/special-zero-voigt-01.wav`,
+      `${basePath}/special-zero-judith-01.wav`
+    ],
+    winner: [
+      `${basePath}/special-winner-voigt-01.wav`,
+      `${basePath}/special-winner-judith-01.wav`,
+      `${basePath}/special-winner-judith-02.wav`
+    ],
+    bust: [
+      `${basePath}/special-bust-judith-01.wav`,
+      `${basePath}/special-bust-judith-02.wav`,
+      `${basePath}/special-bust-judith-03.wav`
+    ]
   };
+  const bonusCalls = [
+    `${basePath}/bonus-judith-neutral-01.wav`,
+    `${basePath}/bonus-judith-positive-01.wav`,
+    `${basePath}/bonus-judith-tease-01.wav`
+  ];
   let currentAudio = null;
   let lastSource = "";
+  let playbackToken = 0;
 
   function randomSource(sources) {
     if (!sources?.length) return "";
@@ -35,24 +57,39 @@
     return alternatives[Math.floor(Math.random() * alternatives.length)];
   }
 
-  function play(sources) {
+  function play(sources, onEnded) {
     const source = randomSource(sources);
     if (!source) return Promise.resolve(false);
+    playbackToken += 1;
+    const token = playbackToken;
     currentAudio?.pause();
     currentAudio = new Audio(source);
     currentAudio.preload = "auto";
     lastSource = source;
+    currentAudio.addEventListener("ended", () => {
+      if (token === playbackToken) onEnded?.();
+    }, { once: true });
     return currentAudio.play().then(() => true).catch(() => false);
+  }
+
+  function maybePlayBonus() {
+    if (Math.random() >= 0.12) return;
+    play(bonusCalls);
   }
 
   window.WRCDartCallerAudio = {
     playTurnScore(score) {
-      return play(Number(score) === 0 ? specialCalls.zero : turnScores[Number(score)]);
+      const numericScore = Number(score);
+      return play(
+        numericScore === 0 ? specialCalls.zero : turnScores[numericScore],
+        numericScore === 0 ? undefined : maybePlayBonus
+      );
     },
     playSpecial(event) {
       return play(specialCalls[event]);
     },
     stop() {
+      playbackToken += 1;
       currentAudio?.pause();
       currentAudio = null;
     }

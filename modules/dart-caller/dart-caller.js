@@ -251,6 +251,7 @@
       state.turnBusted = true;
       state.darts[state.darts.length - 1].label = `${label} · Bust`;
       render();
+      window.WRCDartCallerAudio?.playSpecial("bust");
       scheduleNextTurn(700);
       return;
     }
