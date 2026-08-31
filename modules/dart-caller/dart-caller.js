@@ -165,10 +165,7 @@
     const liveTurn = index === state.currentPlayer && !state.turnBusted
       ? state.darts.reduce((sum, dart) => sum + dart.score, 0)
       : 0;
-    const liveDarts = index === state.currentPlayer && !state.turnBusted
-      ? state.darts.length
-      : 0;
-    const darts = player.dartsThrown + liveDarts;
+    const darts = player.dartsThrown;
     return darts > 0
       ? ((player.scoredPoints + liveTurn) / darts) * 3
       : 0;

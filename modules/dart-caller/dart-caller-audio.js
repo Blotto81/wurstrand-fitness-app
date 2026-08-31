@@ -1,24 +1,24 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const voigt = (score, count) => Array.from(
-    { length: count },
-    (_, index) => `${basePath}/score-${score}-voigt-${String(index + 1).padStart(2, "0")}.wav`
+  const audioVersion = "43";
+  const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
+  const voigt = (score, takes = [1]) => takes.map(
+    take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
   );
-  const judith = score => `${basePath}/score-${score}-judith-01.wav`;
+  const judith = score => asset(`score-${score}-judith-01.wav`);
 
   // Each score owns a list so further callers and alternative takes can be
   // appended without changing the game logic.
   const turnScores = {
-    1: voigt(1, 1), 2: voigt(2, 1), 3: voigt(3, 1), 4: voigt(4, 1),
-    5: voigt(5, 1), 6: voigt(6, 3), 7: voigt(7, 1), 8: voigt(8, 1),
-    9: voigt(9, 3), 10: voigt(10, 1), 11: voigt(11, 1), 12: voigt(12, 3),
-    13: voigt(13, 1), 14: voigt(14, 2), 15: voigt(15, 1), 16: voigt(16, 2),
-    17: voigt(17, 2), 18: voigt(18, 3), 19: voigt(19, 1), 20: voigt(20, 3),
-    21: voigt(21, 2), 22: voigt(22, 1), 24: voigt(24, 2), 26: voigt(26, 1),
-    27: voigt(27, 1), 28: voigt(28, 1), 30: voigt(30, 2), 32: voigt(32, 1),
-    33: voigt(33, 1), 36: voigt(36, 2), 39: voigt(39, 1), 42: voigt(42, 1),
-    45: voigt(45, 1), 48: voigt(48, 1), 51: voigt(51, 2), 56: voigt(56, 1),
-    60: voigt(60, 1), 89: voigt(89, 1)
+    1: voigt(1), 2: voigt(2), 3: voigt(3), 4: voigt(4), 5: voigt(5),
+    6: voigt(6, [1, 2]), 7: voigt(7), 8: voigt(8), 9: voigt(9, [1, 2]),
+    10: voigt(10), 11: voigt(11), 12: voigt(12), 13: voigt(13), 14: voigt(14),
+    15: voigt(15), 16: voigt(16), 17: voigt(17, [1, 2]), 18: voigt(18),
+    19: voigt(19), 20: voigt(20, [1, 2]), 21: voigt(21, [1, 2]), 22: voigt(22),
+    24: voigt(24), 26: voigt(26), 28: voigt(28), 30: voigt(30), 32: voigt(32),
+    33: voigt(33), 36: voigt(36, [1, 2]), 39: voigt(39), 42: voigt(42),
+    45: voigt(45), 48: voigt(48), 51: voigt(51, [1, 2, 3]),
+    56: voigt(56, [2]), 89: voigt(89)
   };
   for (let score = 1; score <= 180; score += 1) {
     // Judith accidentally repeated 45 in place of 46 in the source recording.
@@ -30,24 +30,24 @@
 
   const specialCalls = {
     zero: [
-      `${basePath}/special-zero-voigt-01.wav`,
-      `${basePath}/special-zero-judith-01.wav`
+      asset("special-zero-voigt-01.wav"),
+      asset("special-zero-judith-01.wav")
     ],
     winner: [
-      `${basePath}/special-winner-voigt-01.wav`,
-      `${basePath}/special-winner-judith-01.wav`,
-      `${basePath}/special-winner-judith-02.wav`
+      asset("special-winner-voigt-01.wav"),
+      asset("special-winner-judith-01.wav"),
+      asset("special-winner-judith-02.wav")
     ],
     bust: [
-      `${basePath}/special-bust-judith-01.wav`,
-      `${basePath}/special-bust-judith-02.wav`,
-      `${basePath}/special-bust-judith-03.wav`
+      asset("special-bust-judith-01.wav"),
+      asset("special-bust-judith-02.wav"),
+      asset("special-bust-judith-03.wav")
     ]
   };
   const bonusCalls = [
-    `${basePath}/bonus-judith-neutral-01.wav`,
-    `${basePath}/bonus-judith-positive-01.wav`,
-    `${basePath}/bonus-judith-tease-01.wav`
+    asset("bonus-judith-neutral-01.wav"),
+    asset("bonus-judith-positive-01.wav"),
+    asset("bonus-judith-tease-01.wav")
   ];
   let currentAudio = null;
   let lastSource = "";
@@ -81,11 +81,23 @@
     play(bonusCalls);
   }
 
+  function speakFallback(score) {
+    if (!("speechSynthesis" in window)) return Promise.resolve(false);
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(String(score));
+    utterance.lang = "de-DE";
+    utterance.rate = 0.92;
+    window.speechSynthesis.speak(utterance);
+    return Promise.resolve(true);
+  }
+
   window.WRCDartCallerAudio = {
     playTurnScore(score) {
       const numericScore = Number(score);
+      const sources = numericScore === 0 ? specialCalls.zero : turnScores[numericScore];
+      if (!sources?.length) return speakFallback(numericScore);
       return play(
-        numericScore === 0 ? specialCalls.zero : turnScores[numericScore],
+        sources,
         numericScore === 0 ? undefined : maybePlayBonus
       );
     },
