@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "43";
+  const audioVersion = "44";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const voigt = (score, takes = [1]) => takes.map(
     take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
