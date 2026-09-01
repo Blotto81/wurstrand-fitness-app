@@ -5,12 +5,17 @@
   const resultCapture = document.getElementById("dartResultCapture");
   if (!mount || !openButton || !selection || !resultCapture) return;
 
+  const GAME_STORAGE_KEY = "wrc-dart-caller-game-v1";
+
   const availablePlayers = typeof people !== "undefined" && Array.isArray(people)
     ? people.slice(0, 4)
     : ["Thorsten", "Basti", "Marian", "Fabi"];
   let state = freshState();
   let turnTimer = null;
   let inputFeedbackTimer = null;
+  let toastTimer = null;
+  let wakeLock = null;
+  let savedGame = readSavedGame();
 
   function freshState() {
     return {
@@ -24,6 +29,8 @@
       turnBusted: false,
       multiplier: 1,
       lastInput: null,
+      transition: null,
+      toast: "",
       undoStack: [],
       winner: null,
       finishOrder: [],
@@ -43,6 +50,108 @@
       .replaceAll("'", "&#039;");
   }
 
+  function formatSavedAt(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Laufender Spielstand";
+    return `Gesichert ${date.toLocaleDateString("de-DE")} · ${date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}`;
+  }
+
+  function readSavedGame() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(GAME_STORAGE_KEY));
+      if (!saved || saved.version !== 1 || !saved.state || ![301, 501].includes(saved.state.mode)) return null;
+      if (!Array.isArray(saved.state.players) || !saved.state.players.length || saved.state.players.length > 4) return null;
+      if (saved.state.players.some(player => !availablePlayers.includes(player.name))) return null;
+      return saved;
+    } catch (error) {
+      console.warn("WRC Caller: Spielstand konnte nicht gelesen werden.", error);
+      return null;
+    }
+  }
+
+  function persistGame() {
+    if (state.screen !== "game" || state.completed || !state.players.length) return;
+    try {
+      const persistedState = {
+        ...state,
+        players: state.players.map(player => ({ ...player })),
+        darts: state.darts.map(dart => ({ ...dart })),
+        undoStack: state.undoStack.map(item => ({
+          ...item,
+          players: item.players.map(player => ({ ...player })),
+          darts: item.darts.map(dart => ({ ...dart }))
+        })),
+        lastInput: null,
+        transition: null,
+        toast: "",
+        saving: false,
+        saved: false,
+        saveError: ""
+      };
+      savedGame = { version: 1, savedAt: new Date().toISOString(), state: persistedState };
+      localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(savedGame));
+    } catch (error) {
+      console.warn("WRC Caller: Spielstand konnte nicht gesichert werden.", error);
+    }
+  }
+
+  function clearSavedGame() {
+    savedGame = null;
+    try {
+      localStorage.removeItem(GAME_STORAGE_KEY);
+    } catch (error) {
+      console.warn("WRC Caller: Spielstand konnte nicht entfernt werden.", error);
+    }
+  }
+
+  function restoreSavedGame() {
+    if (!savedGame) return;
+    state = {
+      ...freshState(),
+      ...savedGame.state,
+      screen: "game",
+      players: savedGame.state.players.map(player => ({ highestTurn: 0, ...player })),
+      darts: (savedGame.state.darts || []).map(dart => ({ ...dart })),
+      undoStack: (savedGame.state.undoStack || []).map(item => ({
+        ...item,
+        players: item.players.map(player => ({ highestTurn: 0, ...player })),
+        darts: item.darts.map(dart => ({ ...dart }))
+      })),
+      transition: null,
+      toast: "",
+      lastInput: null
+    };
+    render();
+    requestWakeLock();
+    if (state.darts.length >= 3 || state.turnBusted) scheduleNextTurn(900);
+  }
+
+  function discardSavedGame() {
+    clearSavedGame();
+    render();
+  }
+
+  async function requestWakeLock() {
+    if (!("wakeLock" in navigator) || wakeLock || state.screen !== "game" || state.completed || document.visibilityState !== "visible") return;
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; }, { once: true });
+    } catch (error) {
+      console.info("WRC Caller: Bildschirm-Wachhalten ist auf diesem Gerät nicht verfügbar.", error);
+    }
+  }
+
+  async function releaseWakeLock() {
+    if (!wakeLock) return;
+    try {
+      await wakeLock.release();
+    } catch (error) {
+      console.info("WRC Caller: Wake Lock war bereits beendet.", error);
+    } finally {
+      wakeLock = null;
+    }
+  }
+
   function setupMarkup() {
     return `
       <div class="overlay dart-caller-shell">
@@ -52,6 +161,19 @@
           <span class="dart-caller-target" aria-hidden="true">🎯</span>
           <div><h2>WRC Caller</h2><p class="sub">Das Board hängt. Die WRC zählt.</p></div>
         </header>
+
+        ${savedGame ? `
+          <section class="dart-caller-resume">
+            <div>
+              <span>Gespeichertes Spiel</span>
+              <strong>${savedGame.state.mode} · ${savedGame.state.players.map(player => escapeHtml(player.name)).join(" · ")}</strong>
+              <small>${formatSavedAt(savedGame.savedAt)}</small>
+            </div>
+            <div class="dart-caller-resume-actions">
+              <button type="button" data-resume-game>Spiel fortsetzen</button>
+              <button type="button" data-discard-game>Verwerfen</button>
+            </div>
+          </section>` : ""}
 
         <section class="dart-caller-card">
           <h3>1. Spiel wählen</h3>
@@ -82,6 +204,7 @@
   function gameMarkup() {
     const active = state.players[state.currentPlayer];
     const turnTotal = state.darts.reduce((sum, dart) => sum + dart.score, 0);
+    const checkout = checkoutSuggestion(active?.score, Math.max(0, 3 - state.darts.length));
     return `
       <div class="overlay dart-caller-shell">
         <div class="dart-caller-gamebar">
@@ -89,6 +212,7 @@
           <span class="dart-caller-game-mode">${state.mode} · Straight Out</span>
         </div>
 
+        ${state.toast ? `<div class="dart-caller-toast" role="status">✓ ${escapeHtml(state.toast)}</div>` : ""}
         ${state.completed ? winnerMarkup() : `
           <section class="dart-caller-scoreboard" aria-label="Spielstand">
             ${state.players.map((player, index) => `
@@ -99,7 +223,7 @@
             `).join("")}
           </section>
 
-          <section class="dart-caller-turn">
+          ${state.transition ? transitionMarkup() : `<section class="dart-caller-turn">
             <div><span class="dart-caller-eyebrow">Am Board</span><h2>${escapeHtml(active.name)}</h2></div>
             <div class="dart-caller-turn-total"><span>Aufnahme</span><strong>${turnTotal}</strong></div>
           </section>
@@ -110,6 +234,8 @@
               return `<div class="dart-caller-dart ${dart ? "filled" : ""}"><span>Dart ${index + 1}</span><strong>${dart ? escapeHtml(dart.label) : "–"}</strong></div>`;
             }).join("")}
           </div>
+
+          ${checkout ? `<div class="dart-caller-checkout"><span>🎯 Straight-Out-Weg</span><strong>${escapeHtml(checkout)}</strong></div>` : ""}
 
           <section class="dart-caller-input">
             <div class="dart-caller-multipliers" aria-label="Multiplikator">
@@ -128,12 +254,31 @@
           <div class="dart-caller-actions">
             <button type="button" data-undo ${state.undoStack.length ? "" : "disabled"}>↶ Letzten Dart zurück</button>
             <button type="button" data-end-turn>Aufnahme beenden →</button>
-          </div>`}
+          </div>`}`}
       </div>`;
+  }
+
+  function transitionMarkup() {
+    const transition = state.transition;
+    if (transition.type === "bust") {
+      return `<section class="dart-caller-transition bust" role="status">
+        <span>Zu viel</span><strong>Bust</strong><p>Zurück auf ${transition.returnScore}</p>
+      </section>`;
+    }
+    if (transition.type === "player") {
+      return `<section class="dart-caller-transition player" role="status">
+        <span>Als Nächstes</span><strong>${escapeHtml(transition.player)}</strong><p>ist am Board</p>
+      </section>`;
+    }
+    return `<section class="dart-caller-transition turn" role="status">
+      <span>${escapeHtml(transition.player)} · Aufnahme</span><strong>${transition.total}</strong>
+      <p>Weiter mit ${escapeHtml(transition.nextPlayer)}</p>
+    </section>`;
   }
 
   function winnerMarkup() {
     const ranking = state.players.slice().sort((a, b) => a.place - b.place);
+    const awards = gameAwards();
     return `
       <section class="dart-caller-winner">
         <span aria-hidden="true">🏆</span><p>WRC Caller meldet</p>
@@ -143,6 +288,9 @@
           ${ranking.map(player => `
             <div><span>${placeMedal(player.place)} ${escapeHtml(player.name)}</span><strong>Ø ${formatAverage(finalAverage(player))}</strong></div>
           `).join("")}
+        </div>
+        <div class="dart-caller-awards" aria-label="Spielauszeichnungen">
+          ${awards.map(award => `<article><span>${award.icon} ${award.label}</span><strong>${escapeHtml(award.value)}</strong><small>${escapeHtml(award.detail)}</small></article>`).join("")}
         </div>
         <div class="dart-caller-save-state ${state.saveError ? "error" : ""}">
           ${state.saving ? "Spiel wird gespeichert …" : state.saved ? "✓ Ergebnis gespeichert und Statistiken aktualisiert" : state.saveError || ""}
@@ -163,6 +311,53 @@
     });
   }
 
+  function gameAwards() {
+    const bestAverage = state.players.reduce((best, player) => finalAverage(player) > finalAverage(best) ? player : best, state.players[0]);
+    const highestTurn = state.players.reduce((best, player) => player.highestTurn > best.highestTurn ? player : best, state.players[0]);
+    return [
+      { icon: "📈", label: "Bester Average", value: formatAverage(finalAverage(bestAverage)), detail: bestAverage.name },
+      { icon: "🔥", label: "Höchste Aufnahme", value: String(highestTurn.highestTurn || 0), detail: highestTurn.name },
+      { icon: "🎯", label: "Sieg in", value: `${state.winner.dartsThrown} Darts`, detail: state.winner.name }
+    ];
+  }
+
+  function checkoutSuggestion(remaining, dartsLeft) {
+    const target = Number(remaining);
+    if (!Number.isFinite(target) || target <= 0 || dartsLeft <= 0 || target > dartsLeft * 60) return "";
+    const throws = [
+      ...Array.from({ length: 20 }, (_, index) => ({ score: (20 - index) * 3, label: `T${20 - index}`, rank: 3 })),
+      { score: 50, label: "Bull", rank: 4 },
+      ...Array.from({ length: 20 }, (_, index) => ({ score: (20 - index) * 2, label: `D${20 - index}`, rank: 2 })),
+      { score: 25, label: "25", rank: 2 },
+      ...Array.from({ length: 20 }, (_, index) => ({ score: 20 - index, label: String(20 - index), rank: 1 }))
+    ].sort((a, b) => b.score - a.score || a.rank - b.rank);
+
+    const memo = new Map();
+    function findRoute(rest, darts) {
+      if (rest === 0) return [];
+      if (!darts || rest < 0 || rest > darts * 60) return null;
+      const key = `${rest}:${darts}`;
+      if (memo.has(key)) return memo.get(key);
+      for (const dart of throws) {
+        if (dart.score > rest) continue;
+        const tail = findRoute(rest - dart.score, darts - 1);
+        if (tail) {
+          const found = [dart.label, ...tail];
+          memo.set(key, found);
+          return found;
+        }
+      }
+      memo.set(key, null);
+      return null;
+    }
+
+    for (let darts = 1; darts <= dartsLeft; darts += 1) {
+      const route = findRoute(target, darts);
+      if (route) return route.join(" · ");
+    }
+    return "";
+  }
+
   function inputFeedbackClass(base, multiplier) {
     if (!state.lastInput || state.lastInput.base !== base) return "";
     if (multiplier !== undefined && state.lastInput.multiplier !== multiplier) return "";
@@ -181,7 +376,7 @@
   }
 
   function playerAverage(player, index) {
-    const liveTurn = index === state.currentPlayer && !state.turnBusted
+    const liveTurn = index === state.currentPlayer && !state.turnBusted && !state.transition
       ? state.darts.reduce((sum, dart) => sum + dart.score, 0)
       : 0;
     const darts = player.dartsThrown;
@@ -202,6 +397,8 @@
   function bindEvents() {
     mount.querySelector("[data-caller-back]")?.addEventListener("click", openDartSelection);
     mount.querySelector("[data-caller-setup]")?.addEventListener("click", confirmNewGame);
+    mount.querySelector("[data-resume-game]")?.addEventListener("click", restoreSavedGame);
+    mount.querySelector("[data-discard-game]")?.addEventListener("click", discardSavedGame);
     mount.querySelectorAll("[data-caller-mode]").forEach(button => button.addEventListener("click", () => {
       state.mode = Number(button.dataset.callerMode);
       render();
@@ -236,6 +433,7 @@
       score: state.mode,
       dartsThrown: 0,
       scoredPoints: 0,
+      highestTurn: 0,
       finished: false,
       place: 0
     }));
@@ -252,7 +450,10 @@
     state.saved = false;
     state.saveError = "";
     state.screen = "game";
+    clearSavedGame();
+    persistGame();
     render();
+    requestWakeLock();
   }
 
   function addDart(base, multiplier, customLabel) {
@@ -271,16 +472,19 @@
       player.score = state.turnStartScore;
       state.turnBusted = true;
       state.darts[state.darts.length - 1].label = `${label} · Bust`;
+      state.transition = { type: "bust", returnScore: state.turnStartScore };
       render();
       window.WRCDartCallerAudio?.playSpecial("bust");
-      scheduleNextTurn(700);
+      scheduleAdvanceTurn(1450);
       return;
     }
 
     player.score = remaining;
     state.multiplier = 1;
     if (remaining === 0) {
-      player.scoredPoints += state.darts.reduce((sum, dart) => sum + dart.score, 0);
+      const winningTurn = state.darts.reduce((sum, dart) => sum + dart.score, 0);
+      player.scoredPoints += winningTurn;
+      player.highestTurn = Math.max(player.highestTurn, winningTurn);
       player.finished = true;
       player.place = state.finishOrder.length + 1;
       state.finishOrder.push(player.name);
@@ -299,13 +503,19 @@
       }
       return;
     }
+    persistGame();
     render();
-    if (state.darts.length === 3) scheduleNextTurn(450);
+    if (state.darts.length === 3) scheduleNextTurn(420);
   }
 
   function scheduleNextTurn(delay) {
     window.clearTimeout(turnTimer);
     turnTimer = window.setTimeout(finishTurn, delay);
+  }
+
+  function scheduleAdvanceTurn(delay) {
+    window.clearTimeout(turnTimer);
+    turnTimer = window.setTimeout(advanceTurn, delay);
   }
 
   function finishTurn() {
@@ -316,10 +526,26 @@
     const activePlayer = state.players[state.currentPlayer];
     if (!state.turnBusted && state.darts.length && !activePlayer.finished) {
       state.players[state.currentPlayer].scoredPoints += turnTotal;
+      state.players[state.currentPlayer].highestTurn = Math.max(activePlayer.highestTurn, turnTotal);
     }
     if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished) {
       window.WRCDartCallerAudio?.playTurnScore(turnTotal);
     }
+    const nextPlayerIndex = nextActivePlayerIndex();
+    state.transition = {
+      type: "turn",
+      player: activePlayer.name,
+      total: turnTotal,
+      nextPlayer: state.players[nextPlayerIndex].name
+    };
+    render();
+    scheduleAdvanceTurn(1650);
+  }
+
+  function advanceTurn() {
+    if (state.completed || !state.players.length) return;
+    window.clearTimeout(turnTimer);
+    turnTimer = null;
     state.currentPlayer = nextActivePlayerIndex();
     state.turnStartScore = state.players[state.currentPlayer].score;
     state.darts = [];
@@ -327,7 +553,14 @@
     state.multiplier = 1;
     state.lastInput = null;
     state.undoStack = [];
+    state.transition = { type: "player", player: state.players[state.currentPlayer].name };
+    persistGame();
     render();
+    turnTimer = window.setTimeout(() => {
+      turnTimer = null;
+      state.transition = null;
+      render();
+    }, 850);
   }
 
   function nextActivePlayerIndex() {
@@ -345,6 +578,9 @@
     state.darts = [];
     state.lastInput = null;
     state.undoStack = [];
+    state.transition = null;
+    clearSavedGame();
+    releaseWakeLock();
     render();
     window.WRCDartCallerAudio?.playSpecial("winner");
     saveCompletedGame();
@@ -417,30 +653,46 @@
     turnTimer = null;
     const previous = state.undoStack.pop();
     if (!previous) return;
+    const removedDart = state.darts[state.darts.length - 1];
     state.players = previous.players;
     state.darts = previous.darts;
     state.turnBusted = previous.turnBusted;
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;
     state.finishOrder = previous.finishOrder;
+    state.transition = null;
+    state.toast = `${removedDart?.label || "Dart"} zurückgenommen`;
+    persistGame();
     render();
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+      state.toast = "";
+      mount.querySelector(".dart-caller-toast")?.remove();
+    }, 1400);
   }
 
   function showSetup() {
     window.clearTimeout(turnTimer);
     turnTimer = null;
+    window.clearTimeout(inputFeedbackTimer);
+    window.clearTimeout(toastTimer);
     window.WRCDartCallerAudio?.stop();
+    releaseWakeLock();
     const selectedPlayers = state.selectedPlayers.slice();
     const mode = state.mode;
     state = freshState();
     state.selectedPlayers = selectedPlayers;
     state.mode = mode;
+    savedGame = readSavedGame();
     render();
   }
 
   function confirmNewGame() {
     const untouched = state.players.every(player => player.score === state.mode);
-    if (state.completed || untouched || window.confirm("Laufendes Spiel beenden und zur Auswahl zurückkehren?")) showSetup();
+    if (state.completed || untouched || window.confirm("Laufendes Spiel beenden und zur Auswahl zurückkehren?")) {
+      clearSavedGame();
+      showSetup();
+    }
   }
 
   function openDartSelection() {
@@ -453,6 +705,9 @@
     resultCapture.hidden = true;
     mount.hidden = false;
     render();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") requestWakeLock();
   });
   render();
 })();
