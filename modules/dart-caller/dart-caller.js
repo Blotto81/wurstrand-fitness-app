@@ -10,6 +10,7 @@
     : ["Thorsten", "Basti", "Marian", "Fabi"];
   let state = freshState();
   let turnTimer = null;
+  let inputFeedbackTimer = null;
 
   function freshState() {
     return {
@@ -22,6 +23,7 @@
       darts: [],
       turnBusted: false,
       multiplier: 1,
+      lastInput: null,
       undoStack: [],
       winner: null,
       finishOrder: [],
@@ -116,10 +118,10 @@
               `).join("")}
             </div>
             <div class="dart-caller-numbers">
-              ${Array.from({ length: 20 }, (_, index) => index + 1).map(number => `<button type="button" data-score="${number}">${number}</button>`).join("")}
-              <button type="button" class="dart-caller-miss" data-score="0">Miss</button>
-              <button type="button" class="dart-caller-bull" data-bull="25">25</button>
-              <button type="button" class="dart-caller-bullseye" data-bull="50">Bull</button>
+              ${Array.from({ length: 20 }, (_, index) => index + 1).map(number => `<button type="button" class="${inputFeedbackClass(number)}" data-score="${number}">${number}</button>`).join("")}
+              <button type="button" class="dart-caller-miss ${inputFeedbackClass(0)}" data-score="0">Miss</button>
+              <button type="button" class="dart-caller-bull ${inputFeedbackClass(25, 1)}" data-bull="25">25</button>
+              <button type="button" class="dart-caller-bullseye ${inputFeedbackClass(25, 2)}" data-bull="50">Bull</button>
             </div>
           </section>
 
@@ -159,6 +161,23 @@
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
     });
+  }
+
+  function inputFeedbackClass(base, multiplier) {
+    if (!state.lastInput || state.lastInput.base !== base) return "";
+    if (multiplier !== undefined && state.lastInput.multiplier !== multiplier) return "";
+    return `dart-caller-hit dart-caller-hit-${state.lastInput.multiplier}`;
+  }
+
+  function showInputFeedback(base, multiplier) {
+    state.lastInput = { base, multiplier };
+    window.clearTimeout(inputFeedbackTimer);
+    inputFeedbackTimer = window.setTimeout(() => {
+      state.lastInput = null;
+      mount.querySelectorAll(".dart-caller-hit").forEach(button => {
+        button.classList.remove("dart-caller-hit", "dart-caller-hit-1", "dart-caller-hit-2", "dart-caller-hit-3");
+      });
+    }, 650);
   }
 
   function playerAverage(player, index) {
@@ -238,6 +257,7 @@
 
   function addDart(base, multiplier, customLabel) {
     if (state.completed || state.darts.length >= 3) return;
+    showInputFeedback(base, multiplier);
     const player = state.players[state.currentPlayer];
     const score = base * multiplier;
     const remaining = player.score - score;
@@ -305,6 +325,7 @@
     state.darts = [];
     state.turnBusted = false;
     state.multiplier = 1;
+    state.lastInput = null;
     state.undoStack = [];
     render();
   }
@@ -322,6 +343,7 @@
     turnTimer = null;
     state.completed = true;
     state.darts = [];
+    state.lastInput = null;
     state.undoStack = [];
     render();
     window.WRCDartCallerAudio?.playSpecial("winner");

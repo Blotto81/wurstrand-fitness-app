@@ -45,8 +45,11 @@
 .dart-caller-multipliers button { padding: 11px 8px; border-radius: 11px; font-weight: 750; }
 .dart-caller-multipliers button.selected { border-color: #38bdf8; color: #7dd3fc; background: rgba(14,165,233,.18); }
 .dart-caller-numbers { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
-.dart-caller-numbers button { min-height: 46px; border-radius: 11px; font-size: 1rem; font-weight: 800; }
+.dart-caller-numbers button { min-height: 46px; border-radius: 11px; font-size: 1rem; font-weight: 800; transition: transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease; }
 .dart-caller-numbers button:active { transform: scale(.96); }
+.dart-caller-numbers button.dart-caller-hit { position: relative; z-index: 1; color: #f8fafc; transform: translateY(-2px) scale(1.045); border-color: #7dd3fc; background: linear-gradient(145deg,rgba(14,165,233,.72),rgba(37,99,235,.66)); box-shadow: 0 0 0 2px rgba(125,211,252,.2),0 8px 22px rgba(14,165,233,.34); }
+.dart-caller-numbers button.dart-caller-hit-2 { border-color: #fbbf24; background: linear-gradient(145deg,rgba(245,158,11,.75),rgba(217,119,6,.66)); box-shadow: 0 0 0 2px rgba(251,191,36,.2),0 8px 22px rgba(245,158,11,.32); }
+.dart-caller-numbers button.dart-caller-hit-3 { border-color: #fb7185; background: linear-gradient(145deg,rgba(244,63,94,.75),rgba(190,24,93,.66)); box-shadow: 0 0 0 2px rgba(251,113,133,.2),0 8px 22px rgba(244,63,94,.3); }
 .dart-caller-numbers .dart-caller-bull { color: #fbbf24; }
 .dart-caller-numbers .dart-caller-bullseye { color: #fb7185; }
 .dart-caller-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
@@ -90,5 +93,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .dart-caller-score.active, .dart-caller-winner > span { animation: dart-caller-arrive .35s ease-out; }
+  .dart-caller-numbers button.dart-caller-hit { animation: dart-caller-hit .32s cubic-bezier(.2,.85,.32,1.25); }
   @keyframes dart-caller-arrive { from { opacity: .55; transform: translateY(5px); } }
+  @keyframes dart-caller-hit { 0% { transform: scale(.92); } 55% { transform: translateY(-3px) scale(1.07); } 100% { transform: translateY(-2px) scale(1.045); } }
 }
