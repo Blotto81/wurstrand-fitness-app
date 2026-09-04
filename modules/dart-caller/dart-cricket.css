@@ -1,0 +1,34 @@
+.dart-caller-mode-cricket { grid-column: 1 / -1; border-color: rgba(250,204,21,.35); background: linear-gradient(135deg,rgba(250,204,21,.12),rgba(14,165,233,.1)); }
+.dart-cricket-team-picker { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.dart-cricket-team-picker article { padding:14px; border:1px solid rgba(148,163,184,.2); border-radius:16px; background:rgba(15,23,42,.45); }
+.dart-cricket-team-title { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.dart-cricket-team-title img { width:48px; height:48px; object-fit:contain; border-radius:12px; }
+.dart-cricket-team-picker button { width:100%; margin-top:7px; padding:10px; border:1px solid rgba(148,163,184,.22); border-radius:10px; color:inherit; background:rgba(30,41,59,.74); font-weight:750; }
+.dart-cricket-team-picker button.selected { border-color:#38bdf8; color:#bae6fd; background:rgba(14,165,233,.2); }
+.dart-cricket-hint { margin:12px 2px 0; color:var(--muted,#94a3b8); font-size:.82rem; }
+.dart-cricket-board { margin-bottom:14px; overflow:hidden; border:1px solid rgba(148,163,184,.22); border-radius:18px; background:rgba(2,6,23,.36); }
+.dart-cricket-board-head,.dart-cricket-board-row { display:grid; grid-template-columns:64px repeat(var(--columns),minmax(0,1fr)); align-items:stretch; }
+.dart-cricket-board-head { min-height:78px; border-bottom:1px solid rgba(148,163,184,.2); }
+.dart-cricket-board-head>span,.dart-cricket-board-row>strong { display:grid; place-items:center; color:#facc15; font-weight:900; }
+.dart-cricket-board-head>div { display:grid; grid-template-columns:auto 1fr; align-content:center; column-gap:7px; min-width:0; padding:9px; border-left:1px solid rgba(148,163,184,.15); }
+.dart-cricket-board-head>div.active { background:linear-gradient(135deg,rgba(14,165,233,.24),rgba(37,99,235,.12)); }
+.dart-cricket-board-head img { grid-row:1 / span 2; width:34px; height:34px; align-self:center; object-fit:contain; border-radius:8px; }
+.dart-cricket-board-head strong,.dart-cricket-board-head small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dart-cricket-board-head small { color:var(--muted,#94a3b8); font-size:.72rem; }
+.dart-cricket-board-row { min-height:58px; border-bottom:1px solid rgba(148,163,184,.12); }
+.dart-cricket-board-row:last-child { border-bottom:0; }
+.dart-cricket-board-row>div { display:grid; place-items:center; border-left:1px solid rgba(148,163,184,.15); }
+.dart-cricket-board-row span { color:#cbd5e1; font-size:1.75rem; font-weight:900; line-height:1; }
+.dart-cricket-board-row .closed { background:rgba(34,197,94,.1); }
+.dart-cricket-board-row .closed span { color:#86efac; text-shadow:0 0 16px rgba(34,197,94,.3); }
+.dart-cricket-turn { margin-top:0; }
+@media (min-width:800px) { .dart-cricket-shell { max-width:1120px; } .dart-cricket-board-head,.dart-cricket-board-row { grid-template-columns:80px repeat(var(--columns),minmax(0,1fr)); } }
+@media (max-width:640px) {
+  .dart-cricket-team-picker { grid-template-columns:1fr; }
+  .dart-cricket-board { overflow-x:auto; }
+  .dart-cricket-board-head,.dart-cricket-board-row { min-width:calc(64px + var(--columns) * 112px); }
+  .dart-cricket-board-head>div { grid-template-columns:1fr; text-align:center; }
+  .dart-cricket-board-head img { display:none; }
+  .dart-cricket-board-row { min-height:52px; }
+  .dart-cricket-board-row span { font-size:1.5rem; }
+}

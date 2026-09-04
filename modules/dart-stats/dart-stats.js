@@ -152,6 +152,11 @@
     const hitRanking = [...new Map(rows.map(dart => [fieldLabel(dart), 0])).keys()]
       .map(label => [label, rows.filter(dart => fieldLabel(dart) === label).length])
       .sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const gameModes = new Map(cachedGames.map(game => [String(game.id), game.mode || ""]));
+    const cricketRows = rows.filter(dart => gameModes.get(String(dart.game_id)).includes("Cricket"));
+    const cricketHits = cricketRows.filter(dart => [15, 16, 17, 18, 19, 20, 25].includes(Number(dart.base_value)));
+    const cricketFavorite = mostCommon(cricketHits.map(fieldLabel));
+    const cricketMarks = cricketHits.reduce((sum, dart) => sum + Number(dart.multiplier), 0);
 
     mount.innerHTML = `
       <section class="dart-throw-stats">
@@ -170,6 +175,12 @@
           <div class="dart-position-favorites">
             ${positionFavorites.map((favoriteAtPosition, index) => `<article><span>Dart ${index + 1}</span><strong>${escapeHtml(favoriteAtPosition?.[0] || "–")}</strong><small>${favoriteAtPosition ? `${favoriteAtPosition[1]}×` : "Noch offen"}</small></article>`).join("")}
           </div>
+          ${cricketRows.length ? `<div class="dart-throw-summary dart-cricket-stat-summary">
+            <article><span>Cricket-Pfeile</span><strong>${cricketRows.length.toLocaleString("de-DE")}</strong><small>persönlich protokolliert</small></article>
+            <article><span>Cricket-Markierungen</span><strong>${cricketMarks.toLocaleString("de-DE")}</strong><small>Roh-Treffer auf 15–Bull</small></article>
+            <article><span>Stärkstes Cricket-Feld</span><strong>${escapeHtml(cricketFavorite?.[0] || "–")}</strong><small>${cricketFavorite?.[1] || 0}× getroffen</small></article>
+            <article><span>Außerhalb</span><strong>${(cricketRows.length - cricketHits.length).toLocaleString("de-DE")}</strong><small>Darts neben den Cricket-Feldern</small></article>
+          </div>` : ""}
           <div class="dart-board-layout">
             <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail">Kreis antippen für Details</div></div>
             <div class="dart-hit-ranking"><h4>Am häufigsten getroffen</h4>${hitRanking.map(([label, count], index) => `<div><span>${index + 1}. ${escapeHtml(label)}</span><strong>${count}×</strong></div>`).join("")}</div>
@@ -200,7 +211,7 @@
     try {
       [cachedThrows, cachedGames] = await Promise.all([
         fetchAll("dart_throws", "id,game_id,player,turn_number,dart_position,base_value,multiplier,scored_value,is_miss,is_bust,created_at", "id"),
-        fetchAll("dart_games", "id,game_date,created_at", "created_at")
+        fetchAll("dart_games", "id,game_date,mode,created_at", "created_at")
       ]);
       render();
     } catch (error) {

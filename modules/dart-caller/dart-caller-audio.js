@@ -133,10 +133,27 @@
     playSpecial(event) {
       return play(specialCalls[event]);
     },
+    playCricketTurn(closedTargets, points) {
+      const closed = Array.isArray(closedTargets) ? closedTargets.filter(Boolean) : [];
+      const numericPoints = Number(points) || 0;
+      if (!closed.length && numericPoints <= 0) return Promise.resolve(false);
+      if (!closed.length) return this.playTurnScore(numericPoints);
+      if (!("speechSynthesis" in window)) return numericPoints > 0 ? this.playTurnScore(numericPoints) : Promise.resolve(false);
+      playbackToken += 1;
+      currentAudio?.pause();
+      window.speechSynthesis.cancel();
+      const closureText = `${closed.join(" und ")} geschlossen`;
+      const utterance = new SpeechSynthesisUtterance(numericPoints > 0 ? `${closureText}, ${numericPoints} Punkte` : closureText);
+      utterance.lang = "de-DE";
+      utterance.rate = 0.92;
+      window.speechSynthesis.speak(utterance);
+      return Promise.resolve(true);
+    },
     stop() {
       playbackToken += 1;
       currentAudio?.pause();
       currentAudio = null;
+      window.speechSynthesis?.cancel();
     }
   };
 })();

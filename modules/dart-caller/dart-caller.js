@@ -197,6 +197,9 @@
                 <strong>${mode}</strong><small>Einfach losspielen</small>
               </button>
             `).join("")}
+            <button type="button" class="dart-caller-mode dart-caller-mode-cricket" data-caller-cricket>
+              <strong>Cricket</strong><small>Einzel oder Team Wursti gegen Team Bertha</small>
+            </button>
           </div>
         </section>
 
@@ -468,6 +471,7 @@
       state.mode = Number(button.dataset.callerMode);
       render();
     }));
+    mount.querySelector("[data-caller-cricket]")?.addEventListener("click", () => window.WRCDartCricket?.open());
     mount.querySelectorAll("[data-caller-player]").forEach(button => button.addEventListener("click", () => {
       const name = button.dataset.callerPlayer;
       state.selectedPlayers = state.selectedPlayers.includes(name)
@@ -837,6 +841,8 @@
     savedGame = readSavedGame();
     render();
   }
+
+  window.WRCShowDartCallerSetup = showSetup;
 
   function confirmNewGame() {
     const untouched = state.players.every(player => player.score === state.mode);
