@@ -15,6 +15,7 @@
   let inputFeedbackTimer = null;
   let toastTimer = null;
   let wakeLock = null;
+  let saveGeneration = 0;
   let savedGame = readSavedGame();
 
   function freshState() {
@@ -37,6 +38,7 @@
       completed: false,
       saving: false,
       saved: false,
+      savedGameId: null,
       saveError: ""
     };
   }
@@ -79,7 +81,9 @@
         undoStack: state.undoStack.map(item => ({
           ...item,
           players: item.players.map(player => ({ ...player })),
-          darts: item.darts.map(dart => ({ ...dart }))
+          darts: item.darts.map(dart => ({ ...dart })),
+          winner: item.winner ? { ...item.winner } : null,
+          finishOrder: (item.finishOrder || []).slice()
         })),
         lastInput: null,
         transition: null,
@@ -115,7 +119,9 @@
       undoStack: (savedGame.state.undoStack || []).map(item => ({
         ...item,
         players: item.players.map(player => ({ highestTurn: 0, ...player })),
-        darts: item.darts.map(dart => ({ ...dart }))
+        darts: item.darts.map(dart => ({ ...dart })),
+        winner: item.winner ? { ...item.winner } : null,
+        finishOrder: (item.finishOrder || []).slice()
       })),
       transition: null,
       toast: "",
@@ -296,6 +302,7 @@
           ${state.saving ? "Spiel wird gespeichert …" : state.saved ? "✓ Ergebnis gespeichert und Statistiken aktualisiert" : state.saveError || ""}
         </div>
         ${state.saveError ? `<button type="button" class="dart-caller-secondary" data-retry-save>Erneut speichern</button>` : ""}
+        <button type="button" class="dart-caller-secondary" data-undo ${state.undoStack.length ? "" : "disabled"}>↶ Letzten Dart zurück</button>
         <button type="button" class="dart-caller-primary" data-rematch>Noch eine Runde</button>
       </section>`;
   }
@@ -448,6 +455,7 @@
     state.completed = false;
     state.saving = false;
     state.saved = false;
+    state.savedGameId = null;
     state.saveError = "";
     state.screen = "game";
     clearSavedGame();
@@ -464,7 +472,7 @@
     const remaining = player.score - score;
     const label = customLabel || (base === 0 ? "Miss" : `${multiplier === 3 ? "T" : multiplier === 2 ? "D" : ""}${base}`);
 
-    state.undoStack.push(snapshot());
+    state.undoStack.push(snapshot(label));
     state.darts.push({ base, multiplier, score, label });
     player.dartsThrown += 1;
 
@@ -552,7 +560,6 @@
     state.turnBusted = false;
     state.multiplier = 1;
     state.lastInput = null;
-    state.undoStack = [];
     state.transition = { type: "player", player: state.players[state.currentPlayer].name };
     persistGame();
     render();
@@ -577,7 +584,6 @@
     state.completed = true;
     state.darts = [];
     state.lastInput = null;
-    state.undoStack = [];
     state.transition = null;
     clearSavedGame();
     releaseWakeLock();
@@ -594,6 +600,7 @@
       return;
     }
 
+    const generation = ++saveGeneration;
     state.saving = true;
     state.saveError = "";
     render();
@@ -606,10 +613,16 @@
       .single();
 
     if (gameError) {
+      if (generation !== saveGeneration) return;
       state.saving = false;
       state.saveError = "Das Ergebnis konnte nicht gespeichert werden.";
       console.error("WRC CALLER GAME SAVE ERROR:", gameError);
       render();
+      return;
+    }
+
+    if (generation !== saveGeneration) {
+      await supabaseClient.from("dart_games").delete().eq("id", game.id);
       return;
     }
 
@@ -622,6 +635,7 @@
 
     if (resultsError) {
       await supabaseClient.from("dart_games").delete().eq("id", game.id);
+      if (generation !== saveGeneration) return;
       state.saving = false;
       state.saveError = "Das Ergebnis konnte nicht vollständig gespeichert werden.";
       console.error("WRC CALLER RESULT SAVE ERROR:", resultsError);
@@ -629,41 +643,72 @@
       return;
     }
 
+    if (generation !== saveGeneration) {
+      await supabaseClient.from("dart_games").delete().eq("id", game.id);
+      return;
+    }
+
     state.saving = false;
     state.saved = true;
+    state.savedGameId = game.id;
     render();
     if (typeof window.WRCRefreshDartHistory === "function") await window.WRCRefreshDartHistory();
     if (typeof window.loadDartStatistics === "function") window.loadDartStatistics();
     window.dispatchEvent(new CustomEvent("wrc:dart-game-saved", { detail: { mode: state.mode } }));
   }
 
-  function snapshot() {
+  function snapshot(removedLabel) {
     return {
       players: state.players.map(player => ({ ...player })),
       darts: state.darts.map(dart => ({ ...dart })),
+      currentPlayer: state.currentPlayer,
+      turnStartScore: state.turnStartScore,
       turnBusted: state.turnBusted,
       multiplier: state.multiplier,
       winner: state.winner ? { ...state.winner } : null,
-      finishOrder: state.finishOrder.slice()
+      finishOrder: state.finishOrder.slice(),
+      removedLabel
     };
   }
 
-  function undoLastDart() {
+  async function undoLastDart() {
     window.clearTimeout(turnTimer);
     turnTimer = null;
+    window.WRCDartCallerAudio?.stop();
     const previous = state.undoStack.pop();
     if (!previous) return;
-    const removedDart = state.darts[state.darts.length - 1];
+    const savedGameId = state.savedGameId;
+    saveGeneration += 1;
     state.players = previous.players;
     state.darts = previous.darts;
+    state.currentPlayer = previous.currentPlayer ?? state.currentPlayer;
+    state.turnStartScore = previous.turnStartScore ?? previous.players[state.currentPlayer]?.score ?? state.mode;
     state.turnBusted = previous.turnBusted;
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;
     state.finishOrder = previous.finishOrder;
+    state.completed = false;
+    state.saving = false;
+    state.saved = false;
+    state.savedGameId = null;
+    state.saveError = "";
     state.transition = null;
-    state.toast = `${removedDart?.label || "Dart"} zurückgenommen`;
+    state.lastInput = null;
+    state.toast = `${previous.removedLabel || "Letzter Dart"} zurückgenommen`;
     persistGame();
     render();
+    requestWakeLock();
+    if (savedGameId && typeof supabaseClient !== "undefined") {
+      const { error } = await supabaseClient.from("dart_games").delete().eq("id", savedGameId);
+      if (error) {
+        console.error("WRC CALLER UNDO SAVE ROLLBACK ERROR:", error);
+        state.toast = "Dart korrigiert · gespeichertes Ergebnis bitte prüfen";
+        render();
+      } else {
+        if (typeof window.WRCRefreshDartHistory === "function") await window.WRCRefreshDartHistory();
+        if (typeof window.loadDartStatistics === "function") window.loadDartStatistics();
+      }
+    }
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(() => {
       state.toast = "";
