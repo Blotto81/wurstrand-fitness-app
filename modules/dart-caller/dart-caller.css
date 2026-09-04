@@ -94,6 +94,12 @@
 .dart-caller-save-state { min-height: 1.4em; margin-top: 14px; color: #86efac; font-size: .88rem; font-weight: 750; }
 .dart-caller-save-state.error { color: #fda4af; }
 .dart-caller-secondary { width: min(100%,340px); margin-top: 10px; padding: 12px 18px; border: 1px solid rgba(248,113,113,.4); border-radius: 13px; color: inherit; background: rgba(127,29,29,.18); font-weight: 800; cursor: pointer; }
+.dart-caller-first-winner { min-height: 560px; }
+.dart-caller-live-stand { width:min(100%,460px); display:grid; gap:8px; margin:22px 0 6px; }
+.dart-caller-live-stand div { display:flex; justify-content:space-between; gap:16px; padding:11px 14px; border:1px solid rgba(148,163,184,.18); border-radius:12px; background:rgba(15,23,42,.5); }
+.dart-caller-live-stand strong { color:#7dd3fc; }
+.dart-caller-decision-actions { width:min(100%,460px); display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.dart-caller-decision-actions .dart-caller-primary,.dart-caller-decision-actions .dart-caller-secondary { width:100%; margin:0; }
 
 @media (min-width: 700px) and (max-width: 1180px) {
   .dart-caller-shell { max-width: 1080px; }
@@ -123,6 +129,7 @@
   .dart-caller-awards article { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; text-align: left; }
   .dart-caller-awards strong { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
   .dart-caller-awards small { grid-column: 1; }
+  .dart-caller-decision-actions { grid-template-columns:1fr; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

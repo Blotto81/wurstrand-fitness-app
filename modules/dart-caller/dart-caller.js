@@ -39,6 +39,8 @@
       undoStack: [],
       winner: null,
       finishOrder: [],
+      awaitingPlacementDecision: false,
+      winnerCelebrated: false,
       completed: false,
       saving: false,
       saved: false,
@@ -231,7 +233,7 @@
         </div>
 
         ${state.toast ? `<div class="dart-caller-toast" role="status">✓ ${escapeHtml(state.toast)}</div>` : ""}
-        ${state.completed ? winnerMarkup() : `
+        ${state.completed ? winnerMarkup() : state.awaitingPlacementDecision ? placementDecisionMarkup() : `
           <section class="dart-caller-scoreboard" aria-label="Spielstand">
             ${state.players.map((player, index) => `
               <article class="dart-caller-score ${index === state.currentPlayer ? "active" : ""} ${player.finished ? "finished" : ""}">
@@ -291,6 +293,24 @@
     return `<section class="dart-caller-transition turn" role="status">
       <span>${escapeHtml(transition.player)} · Aufnahme</span><strong>${transition.total}</strong>
       <p>Weiter mit ${escapeHtml(transition.nextPlayer)}</p>
+    </section>`;
+  }
+
+  function placementDecisionMarkup() {
+    const remaining = currentRemainingPlacements();
+    return `<section class="dart-caller-winner dart-caller-first-winner">
+      <span aria-hidden="true">🏆</span>
+      <p>Erster Platz entschieden</p>
+      <h2>${escapeHtml(state.winner.name)} gewinnt!</h2>
+      <strong>Wie soll die Partie weitergehen?</strong>
+      <div class="dart-caller-live-stand">
+        ${remaining.map(({ player, place }) => `<div><span>${place}. ${escapeHtml(player.name)}</span><strong>${player.score} Rest</strong></div>`).join("")}
+      </div>
+      <div class="dart-caller-decision-actions">
+        <button type="button" class="dart-caller-primary" data-play-placements>Platzierungen ausspielen</button>
+        <button type="button" class="dart-caller-secondary" data-finish-by-score>Aktuellen Stand werten</button>
+      </div>
+      <button type="button" class="dart-caller-secondary" data-undo ${state.undoStack.length ? "" : "disabled"}>↶ Siegdart zurücknehmen</button>
     </section>`;
   }
 
@@ -482,6 +502,8 @@
     mount.querySelector("[data-start-game]")?.addEventListener("click", startGame);
     mount.querySelector("[data-caller-stats]")?.addEventListener("click", () => window.WRCOpenSharedDartStatistics?.());
     mount.querySelector("[data-rematch]")?.addEventListener("click", startGame);
+    mount.querySelector("[data-play-placements]")?.addEventListener("click", continuePlacements);
+    mount.querySelector("[data-finish-by-score]")?.addEventListener("click", finishByCurrentScore);
     mount.querySelector("[data-retry-save]")?.addEventListener("click", saveCompletedGame);
     mount.querySelectorAll("[data-multiplier]").forEach(button => button.addEventListener("click", () => {
       state.multiplier = Number(button.dataset.multiplier);
@@ -498,7 +520,10 @@
 
   function startGame() {
     if (!state.selectedPlayers.length) return;
-    state.players = state.selectedPlayers.map(name => ({
+    const startOrder = state.completed
+      ? state.finishOrder.slice().reverse()
+      : shuffledPlayers(state.selectedPlayers);
+    state.players = startOrder.map(name => ({
       name,
       score: state.mode,
       dartsThrown: 0,
@@ -519,6 +544,8 @@
     state.undoStack = [];
     state.winner = null;
     state.finishOrder = [];
+    state.awaitingPlacementDecision = false;
+    state.winnerCelebrated = false;
     state.completed = false;
     state.saving = false;
     state.saved = false;
@@ -529,6 +556,15 @@
     persistGame();
     render();
     requestWakeLock();
+  }
+
+  function shuffledPlayers(players) {
+    const shuffled = players.slice();
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
   }
 
   function addDart(base, multiplier, customLabel) {
@@ -574,10 +610,19 @@
       player.finished = true;
       player.place = state.finishOrder.length + 1;
       state.finishOrder.push(player.name);
-      if (!state.winner) state.winner = { ...player };
+      const isFirstWinner = !state.winner;
+      if (isFirstWinner) {
+        state.winner = { ...player };
+        state.winnerCelebrated = true;
+        window.WRCDartCallerAudio?.playSpecial("winner");
+      }
 
       const unfinished = state.players.filter(candidate => !candidate.finished);
-      if (unfinished.length <= 1) {
+      if (isFirstWinner && unfinished.length) {
+        state.awaitingPlacementDecision = true;
+        persistGame();
+        render();
+      } else if (unfinished.length <= 1) {
         if (unfinished.length === 1) {
           unfinished[0].place = state.finishOrder.length + 1;
           state.finishOrder.push(unfinished[0].name);
@@ -592,6 +637,34 @@
     persistGame();
     render();
     if (state.darts.length === 3) scheduleNextTurn(420);
+  }
+
+  function continuePlacements() {
+    if (!state.awaitingPlacementDecision) return;
+    state.awaitingPlacementDecision = false;
+    persistGame();
+    finishTurn();
+  }
+
+  function finishByCurrentScore() {
+    if (!state.awaitingPlacementDecision) return;
+    currentRemainingPlacements().forEach(({ player, place }) => {
+      player.place = place;
+      state.finishOrder.push(player.name);
+    });
+    state.awaitingPlacementDecision = false;
+    completeGame();
+  }
+
+  function currentRemainingPlacements() {
+    const remaining = state.players.filter(player => !player.finished).slice().sort((a, b) => a.score - b.score);
+    let previousScore = null;
+    let place = state.finishOrder.length + 1;
+    return remaining.map((player, index) => {
+      if (previousScore !== null && player.score !== previousScore) place = state.finishOrder.length + index + 1;
+      previousScore = player.score;
+      return { player, place };
+    });
   }
 
   function scheduleNextTurn(delay) {
@@ -668,7 +741,7 @@
     clearSavedGame();
     releaseWakeLock();
     render();
-    window.WRCDartCallerAudio?.playSpecial("winner");
+    if (!state.winnerCelebrated) window.WRCDartCallerAudio?.playSpecial("winner");
     saveCompletedGame();
   }
 
@@ -775,6 +848,8 @@
       multiplier: state.multiplier,
       winner: state.winner ? { ...state.winner } : null,
       finishOrder: state.finishOrder.slice(),
+      awaitingPlacementDecision: state.awaitingPlacementDecision,
+      winnerCelebrated: state.winnerCelebrated,
       removedLabel
     };
   }
@@ -797,6 +872,8 @@
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;
     state.finishOrder = previous.finishOrder;
+    state.awaitingPlacementDecision = previous.awaitingPlacementDecision || false;
+    state.winnerCelebrated = previous.winnerCelebrated || false;
     state.completed = false;
     state.saving = false;
     state.saved = false;
