@@ -27,6 +27,8 @@
       currentPlayer: 0,
       turnStartScore: 0,
       turnNumber: 1,
+      startedAt: null,
+      completedAt: null,
       darts: [],
       throwLog: [],
       turnBusted: false,
@@ -302,7 +304,7 @@
             <div><span>${placeMedal(player.place)} ${escapeHtml(player.name)}</span><strong>Ø ${formatAverage(finalAverage(player))}</strong></div>
           `).join("")}
         </div>
-        <div class="dart-caller-awards" aria-label="Spielauszeichnungen">
+        <div class="dart-caller-awards" aria-label="Partie-Fakten">
           ${awards.map(award => `<article><span>${award.icon} ${award.label}</span><strong>${escapeHtml(award.value)}</strong><small>${escapeHtml(award.detail)}</small></article>`).join("")}
         </div>
         <div class="dart-caller-save-state ${state.saveError ? "error" : ""}">
@@ -328,11 +330,60 @@
   function gameAwards() {
     const bestAverage = state.players.reduce((best, player) => finalAverage(player) > finalAverage(best) ? player : best, state.players[0]);
     const highestTurn = state.players.reduce((best, player) => player.highestTurn > best.highestTurn ? player : best, state.players[0]);
-    return [
+    const ranking = state.players.slice().sort((a, b) => a.place - b.place);
+    const lastPlayer = ranking[ranking.length - 1];
+    const facts = [
       { icon: "📈", label: "Bester Average", value: formatAverage(finalAverage(bestAverage)), detail: bestAverage.name },
       { icon: "🔥", label: "Höchste Aufnahme", value: String(highestTurn.highestTurn || 0), detail: highestTurn.name },
-      { icon: "🎯", label: "Sieg in", value: `${state.winner.dartsThrown} Darts`, detail: state.winner.name }
+      state.players.length > 1
+        ? { icon: "🎯", label: "Dart-Spanne", value: `${state.winner.dartsThrown} ↔ ${lastPlayer.dartsThrown}`, detail: `${state.winner.name} / ${lastPlayer.name}` }
+        : { icon: "🎯", label: "Sieg in", value: `${state.winner.dartsThrown} Darts`, detail: state.winner.name }
     ];
+    const duration = gameDurationLabel();
+    if (duration) facts.push({ icon: "⏱️", label: "Spielzeit", value: duration, detail: `${state.mode} Straight Out` });
+    const funFact = pickGameFunFact();
+    if (funFact) facts.push(funFact);
+    return facts.slice(0, 5);
+  }
+
+  function gameDurationLabel() {
+    const start = Number(state.startedAt);
+    const end = Number(state.completedAt);
+    if (!start || !end || end < start) return "";
+    const seconds = Math.max(1, Math.round((end - start) / 1000));
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}:${String(seconds % 60).padStart(2, "0")} min`;
+  }
+
+  function gameFieldLabel(dart) {
+    if (dart.isMiss || Number(dart.baseValue) === 0) return "Miss";
+    if (Number(dart.baseValue) === 25) return Number(dart.multiplier) === 2 ? "Bull" : "25";
+    const prefix = Number(dart.multiplier) === 3 ? "T" : Number(dart.multiplier) === 2 ? "D" : "";
+    return `${prefix}${dart.baseValue}`;
+  }
+
+  function pickGameFunFact() {
+    const throws = state.throwLog || [];
+    if (!throws.length) return null;
+    const misses = throws.filter(dart => dart.isMiss);
+    const triples = throws.filter(dart => Number(dart.multiplier) === 3);
+    const busts = throws.filter(dart => dart.isBust);
+    const fieldCounts = new Map();
+    throws.filter(dart => !dart.isMiss).forEach(dart => {
+      const label = gameFieldLabel(dart);
+      fieldCounts.set(label, (fieldCounts.get(label) || 0) + 1);
+    });
+    const favorite = [...fieldCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+    const playerDarts = state.players.slice().sort((a, b) => b.dartsThrown - a.dartsThrown)[0];
+    const candidates = [
+      favorite && { icon: "🧲", label: "Pfeil-Magnet", value: favorite[0], detail: `${favorite[1]}× besucht` },
+      { icon: "🫣", label: "Vornehm vorbei", value: `${misses.length} Miss`, detail: misses.length === 1 ? "Einer wollte nicht" : "Das Board war kurz zu klein" },
+      { icon: "⚡", label: "Triple-Alarm", value: `${triples.length}×`, detail: triples.length ? "Dreifach hält besser" : "Heute lieber solide" },
+      busts.length && { icon: "💥", label: "Knapp daneben", value: `${busts.length} ${busts.length === 1 ? "Bust" : "Busts"}`, detail: busts.length === 1 ? "Kurz zu viel gewollt" : "Mut war reichlich da" },
+      playerDarts && { icon: "🏠", label: "Board-Stammgast", value: `${playerDarts.dartsThrown} Darts`, detail: playerDarts.name },
+      { icon: "🧮", label: "Pfeil-Verbrauch", value: `${throws.length}`, detail: "Alle Darts dieser Partie" }
+    ].filter(Boolean);
+    return candidates[throws.length % candidates.length];
   }
 
   function checkoutSuggestion(remaining, dartsLeft) {
@@ -455,6 +506,8 @@
     state.currentPlayer = 0;
     state.turnStartScore = state.mode;
     state.turnNumber = 1;
+    state.startedAt = Date.now();
+    state.completedAt = null;
     state.darts = [];
     state.throwLog = [];
     state.turnBusted = false;
@@ -604,6 +657,7 @@
     window.clearTimeout(turnTimer);
     turnTimer = null;
     state.completed = true;
+    state.completedAt = Date.now();
     state.darts = [];
     state.lastInput = null;
     state.transition = null;

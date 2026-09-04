@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "45";
+  const audioVersion = "46";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const voigt = (score, takes = [1]) => takes.map(
     take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
@@ -31,6 +31,9 @@
   [5, 6, 11, 18, 29, 69].forEach(score => {
     turnScores[score] = [...(turnScores[score] || []), marco(score)];
   });
+  turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav")];
+  turnScores[20] = [...turnScores[20], asset("score-20-fun-20cm-01.wav")];
+  turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
 
   const specialCalls = {
     zero: [
@@ -58,6 +61,7 @@
   let playbackToken = 0;
 
   function callerName(source) {
+    if (source.includes("-fun-")) return "fun";
     return source.match(/-(voigt|judith|marco)-/)?.[1] || "wrc";
   }
 
@@ -75,7 +79,7 @@
     const groups = [...callerGroups.entries()].map(([caller, takes]) => ({
       caller,
       takes,
-      weight: caller === "marco" ? 1.25 : 1
+      weight: caller === "marco" ? 1.25 : caller === "fun" ? 0.35 : 1
     }));
     const totalWeight = groups.reduce((sum, group) => sum + group.weight, 0);
     let draw = Math.random() * totalWeight;

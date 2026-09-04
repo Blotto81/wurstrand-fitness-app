@@ -85,7 +85,7 @@
 .dart-caller-ranking div { display: flex; justify-content: space-between; gap: 18px; padding: 11px 14px; border: 1px solid rgba(148,163,184,.18); border-radius: 12px; background: rgba(15,23,42,.5); }
 .dart-caller-ranking span { font-weight: 750; }
 .dart-caller-ranking strong { color: #7dd3fc; }
-.dart-caller-awards { width: min(100%,620px); display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin: 14px 0 2px; }
+.dart-caller-awards { width: min(100%,760px); display: grid; grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); gap: 9px; margin: 14px 0 2px; }
 .dart-caller-awards article { min-width: 0; padding: 13px 10px; border: 1px solid rgba(250,204,21,.2); border-radius: 13px; background: rgba(30,41,59,.54); }
 .dart-caller-awards span, .dart-caller-awards strong, .dart-caller-awards small { display: block; }
 .dart-caller-awards span { color: #fde68a; font-size: .68rem; font-weight: 820; text-transform: uppercase; }
