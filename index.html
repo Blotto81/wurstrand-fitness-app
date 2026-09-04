@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="modules/year-review/year-review.css">
   <link rel="stylesheet" href="modules/pwa/pwa.css">
   <link rel="stylesheet" href="modules/clubs/clubs.css">
+  <link rel="stylesheet" href="modules/mood/mood.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
   <link rel="stylesheet" href="modules/month-archive/month-archive.css">
@@ -931,6 +932,8 @@ background:#0f172a
         Individuelle Übung gemacht?
 
       </label>
+
+      <div id="wrcMoodEntryMount"></div>
 
       <div id="bonusPreview" class="bonus-preview"></div>
 
@@ -2273,6 +2276,7 @@ background:#0f172a
       document.getElementById("squats").value = "";
       document.getElementById("pushups").value = "";
       document.getElementById("exercise").checked = false;
+      if (typeof WRCMood !== "undefined") WRCMood.clearDraft();
       updateBonusPreview();
     }
 
@@ -2429,6 +2433,7 @@ background:#0f172a
       document.getElementById("squats").value = e.squats || "";
       document.getElementById("pushups").value = e.pushups || "";
       document.getElementById("exercise").checked = !!e.exercise;
+      if (typeof WRCMood !== "undefined") WRCMood.syncPicker();
 
       showTab("eintragen", document.querySelectorAll(".tab")[1]);
     }
@@ -4600,6 +4605,9 @@ background:#0f172a
           </div>
         `).join("")
         : "";
+      const moodProfileMarkup = typeof WRCMood !== "undefined"
+        ? await WRCMood.playerMarkup(player, monthPlayerEntries, month)
+        : "";
 
       box.innerHTML = `
       <section class="player-profile-hero">
@@ -4641,6 +4649,8 @@ background:#0f172a
         </div>
       </section>
 
+      ${moodProfileMarkup}
+
       <div class="player-metric-grid">
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
@@ -4668,6 +4678,9 @@ background:#0f172a
     `;
       if (typeof WRCDaily !== "undefined") {
         WRCDaily.renderPlayerHistory();
+      }
+      if (typeof WRCMood !== "undefined") {
+        WRCMood.bindPlayerSection(box);
       }
     }
 
@@ -5047,6 +5060,7 @@ background:#0f172a
 	  <script src="modules/game-collection/game-collection.js"></script>
 	  <script src="modules/wursti-walk/wursti-walk.js"></script>
 	  <script src="modules/merch/merch.js"></script>
+	  <script src="modules/mood/mood.js"></script>
 	  <script src="modules/pwa/pwa.js"></script>
 </body>
 

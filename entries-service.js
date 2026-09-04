@@ -164,6 +164,9 @@
       if (typeof WRCPost !== "undefined") {
         WRCPost.rememberPlayer(savedEntry.person);
       }
+      if (typeof WRCMood !== "undefined") {
+        await WRCMood.saveDay(savedEntry.person, savedEntry.date);
+      }
       resetForm();
       await loadEntries();
       showTab("dashboard", menuLinkForPanel("dashboard"));
