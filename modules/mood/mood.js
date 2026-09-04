@@ -84,16 +84,13 @@
   function pickerMarkup() {
     return `<section class="wrc-mood-entry" aria-labelledby="wrcMoodEntryTitle">
       <div class="wrc-mood-entry-copy">
-        <span class="wrc-mood-eyebrow">KLEINER TAGESCHECK · FREIWILLIG</span>
-        <strong id="wrcMoodEntryTitle">Wie war dein Tag?</strong>
-        <small>Ein Antippen genügt. Ohne Auswahl wird nichts gespeichert.</small>
+        <strong id="wrcMoodEntryTitle">Wie war dein Tag?</strong><span>optional</span>
       </div>
       <div class="wrc-mood-options" role="radiogroup" aria-label="Tagesgefühl">
-        ${moods.map(mood => `<button type="button" class="wrc-mood-option" data-mood-value="${mood.value}" role="radio" aria-checked="false" aria-label="${mood.label}">
-          ${face(mood)}<span>${mood.label}</span>
+        ${moods.map(mood => `<button type="button" class="wrc-mood-option" data-mood-value="${mood.value}" role="radio" aria-checked="false" aria-label="${mood.label}" title="${mood.label}">
+          ${face(mood)}<span class="wrc-mood-option-label">${mood.label}</span>
         </button>`).join("")}
       </div>
-      <button type="button" class="wrc-mood-clear" data-mood-clear hidden>Auswahl entfernen</button>
     </section>`;
   }
 
@@ -110,10 +107,6 @@
         renderPickerState();
         return;
       }
-      if (event.target.closest("[data-mood-clear]")) {
-        draft = { value: null, dirty: true };
-        renderPickerState();
-      }
     });
     document.getElementById("person")?.addEventListener("change", syncPicker);
     document.getElementById("date")?.addEventListener("change", syncPicker);
@@ -129,8 +122,6 @@
       button.classList.toggle("selected", selected);
       button.setAttribute("aria-checked", String(selected));
     });
-    const clear = mount.querySelector("[data-mood-clear]");
-    if (clear) clear.hidden = draft.value === null;
   }
 
   async function syncPicker() {
