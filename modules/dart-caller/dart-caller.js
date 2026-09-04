@@ -26,7 +26,9 @@
       players: [],
       currentPlayer: 0,
       turnStartScore: 0,
+      turnNumber: 1,
       darts: [],
+      throwLog: [],
       turnBusted: false,
       multiplier: 1,
       lastInput: null,
@@ -78,10 +80,12 @@
         ...state,
         players: state.players.map(player => ({ ...player })),
         darts: state.darts.map(dart => ({ ...dart })),
+        throwLog: (state.throwLog || []).map(dart => ({ ...dart })),
         undoStack: state.undoStack.map(item => ({
           ...item,
           players: item.players.map(player => ({ ...player })),
           darts: item.darts.map(dart => ({ ...dart })),
+          throwLog: (item.throwLog || []).map(dart => ({ ...dart })),
           winner: item.winner ? { ...item.winner } : null,
           finishOrder: (item.finishOrder || []).slice()
         })),
@@ -116,10 +120,12 @@
       screen: "game",
       players: savedGame.state.players.map(player => ({ highestTurn: 0, ...player })),
       darts: (savedGame.state.darts || []).map(dart => ({ ...dart })),
+      throwLog: (savedGame.state.throwLog || []).map(dart => ({ ...dart })),
       undoStack: (savedGame.state.undoStack || []).map(item => ({
         ...item,
         players: item.players.map(player => ({ highestTurn: 0, ...player })),
         darts: item.darts.map(dart => ({ ...dart })),
+        throwLog: (item.throwLog || []).map(dart => ({ ...dart })),
         winner: item.winner ? { ...item.winner } : null,
         finishOrder: (item.finishOrder || []).slice()
       })),
@@ -203,6 +209,7 @@
           </div>
         </section>
 
+        <button type="button" class="dart-caller-secondary dart-caller-stats-link" data-caller-stats>📊 Dart-Statistiken ansehen</button>
         <button type="button" class="dart-caller-primary" data-start-game ${state.selectedPlayers.length ? "" : "disabled"}>Spiel starten</button>
       </div>`;
   }
@@ -418,6 +425,7 @@
       render();
     }));
     mount.querySelector("[data-start-game]")?.addEventListener("click", startGame);
+    mount.querySelector("[data-caller-stats]")?.addEventListener("click", () => window.WRCOpenSharedDartStatistics?.());
     mount.querySelector("[data-rematch]")?.addEventListener("click", startGame);
     mount.querySelector("[data-retry-save]")?.addEventListener("click", saveCompletedGame);
     mount.querySelectorAll("[data-multiplier]").forEach(button => button.addEventListener("click", () => {
@@ -446,7 +454,9 @@
     }));
     state.currentPlayer = 0;
     state.turnStartScore = state.mode;
+    state.turnNumber = 1;
     state.darts = [];
+    state.throwLog = [];
     state.turnBusted = false;
     state.multiplier = 1;
     state.undoStack = [];
@@ -474,12 +484,23 @@
 
     state.undoStack.push(snapshot(label));
     state.darts.push({ base, multiplier, score, label });
+    state.throwLog.push({
+      player: player.name,
+      turnNumber: state.turnNumber,
+      dartPosition: state.darts.length,
+      baseValue: base,
+      multiplier,
+      scoredValue: score,
+      isMiss: base === 0,
+      isBust: false
+    });
     player.dartsThrown += 1;
 
     if (remaining < 0) {
       player.score = state.turnStartScore;
       state.turnBusted = true;
       state.darts[state.darts.length - 1].label = `${label} · Bust`;
+      state.throwLog[state.throwLog.length - 1].isBust = true;
       state.transition = { type: "bust", returnScore: state.turnStartScore };
       render();
       window.WRCDartCallerAudio?.playSpecial("bust");
@@ -555,6 +576,7 @@
     window.clearTimeout(turnTimer);
     turnTimer = null;
     state.currentPlayer = nextActivePlayerIndex();
+    state.turnNumber += 1;
     state.turnStartScore = state.players[state.currentPlayer].score;
     state.darts = [];
     state.turnBusted = false;
@@ -643,6 +665,32 @@
       return;
     }
 
+    const throwRows = (state.throwLog || []).map(dart => ({
+      game_id: game.id,
+      player: dart.player,
+      turn_number: dart.turnNumber,
+      dart_position: dart.dartPosition,
+      base_value: dart.baseValue,
+      multiplier: dart.multiplier,
+      scored_value: dart.scoredValue,
+      is_miss: dart.isMiss,
+      is_bust: dart.isBust
+    }));
+    const { error: throwsError } = throwRows.length
+      ? await supabaseClient.from("dart_throws").insert(throwRows)
+      : { error: null };
+
+    if (throwsError) {
+      await supabaseClient.from("dart_results").delete().eq("game_id", game.id);
+      await supabaseClient.from("dart_games").delete().eq("id", game.id);
+      if (generation !== saveGeneration) return;
+      state.saving = false;
+      state.saveError = "Das Wurfprotokoll konnte nicht gespeichert werden.";
+      console.error("WRC CALLER THROW SAVE ERROR:", throwsError);
+      render();
+      return;
+    }
+
     if (generation !== saveGeneration) {
       await supabaseClient.from("dart_games").delete().eq("id", game.id);
       return;
@@ -661,8 +709,10 @@
     return {
       players: state.players.map(player => ({ ...player })),
       darts: state.darts.map(dart => ({ ...dart })),
+      throwLog: (state.throwLog || []).map(dart => ({ ...dart })),
       currentPlayer: state.currentPlayer,
       turnStartScore: state.turnStartScore,
+      turnNumber: state.turnNumber,
       turnBusted: state.turnBusted,
       multiplier: state.multiplier,
       winner: state.winner ? { ...state.winner } : null,
@@ -681,8 +731,10 @@
     saveGeneration += 1;
     state.players = previous.players;
     state.darts = previous.darts;
+    state.throwLog = previous.throwLog || [];
     state.currentPlayer = previous.currentPlayer ?? state.currentPlayer;
     state.turnStartScore = previous.turnStartScore ?? previous.players[state.currentPlayer]?.score ?? state.mode;
+    state.turnNumber = previous.turnNumber ?? state.turnNumber;
     state.turnBusted = previous.turnBusted;
     state.multiplier = previous.multiplier;
     state.winner = previous.winner;

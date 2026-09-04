@@ -239,6 +239,13 @@ if (dartPanel) {
     resultCapture.hidden = false;
   });
 
+  window.WRCOpenSharedDartStatistics = () => {
+    modeSelection.hidden = true;
+    callerMount.hidden = true;
+    resultCapture.hidden = false;
+    document.getElementById("dartStatsTab")?.click();
+  };
+
   document.querySelector("[data-dart-back]").addEventListener("click", showDartSelection);
   window.WRCOpenDartSelection = showDartSelection;
 
@@ -540,6 +547,9 @@ dartStatsTab.addEventListener("click", () => {
 
   if (typeof window.loadDartStatistics === "function") {
     window.loadDartStatistics();
+  }
+  if (typeof window.WRCLoadDartThrowStats === "function") {
+    window.WRCLoadDartThrowStats();
   }
 });
 

@@ -135,3 +135,5 @@
   @keyframes dart-caller-callout { from { opacity: .3; transform: scale(.88); } }
   @keyframes dart-caller-toast { from { opacity: 0; transform: translateY(-6px); } }
 }
+
+.dart-caller-stats-link { width: 100%; margin: 22px 0 10px; }
