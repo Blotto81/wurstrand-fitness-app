@@ -14,6 +14,11 @@
   let turnTimer = null;
   let inputFeedbackTimer = null;
   let toastTimer = null;
+  let highTurnTimer = null;
+  let highTurnHighlight = null;
+  let highTurnHistory = new Map();
+  let highTurnHistoryReady = false;
+  let highTurnHistoryRequest = 0;
   let wakeLock = null;
   let saveGeneration = 0;
   let savedGame = readSavedGame();
@@ -138,6 +143,7 @@
       lastInput: null
     };
     render();
+    refreshHighTurnHistory();
     requestWakeLock();
     if (state.darts.length >= 3 || state.turnBusted) scheduleNextTurn(900);
   }
@@ -225,6 +231,7 @@
     const active = state.players[state.currentPlayer];
     const turnTotal = state.darts.reduce((sum, dart) => sum + dart.score, 0);
     const checkout = checkoutSuggestion(active?.score, Math.max(0, 3 - state.darts.length));
+    const highTurns = lifetimeHighTurnCounts();
     return `
       <div class="overlay dart-caller-shell">
         <div class="dart-caller-gamebar">
@@ -233,17 +240,32 @@
         </div>
 
         ${state.toast ? `<div class="dart-caller-toast" role="status">✓ ${escapeHtml(state.toast)}</div>` : ""}
+        ${highTurnHighlight ? `<aside class="dart-caller-high-turn" role="status" aria-live="polite">
+          <div><span>Über 100 · Aufnahme</span><strong>${highTurnHighlight.score}</strong><span>${escapeHtml(highTurnHighlight.player)}</span></div>
+          <div class="dart-caller-high-turn-count"><strong>${highTurns ? highTurns.total : "–"}</strong><span>${highTurns ? "insgesamt · alle Partien" : "Gesamtstand lädt / offline"}</span></div>
+        </aside>` : ""}
         ${state.completed ? winnerMarkup() : state.awaitingPlacementDecision ? placementDecisionMarkup() : `
-          <section class="dart-caller-scoreboard" aria-label="Spielstand">
+          <section class="dart-caller-scoreboard" aria-label="Spielstand" data-player-count="${state.players.length}">
             ${state.players.map((player, index) => `
               <article class="dart-caller-score ${index === state.currentPlayer ? "active" : ""} ${player.finished ? "finished" : ""}">
-                <span>${escapeHtml(player.name)}</span><strong>${player.score}</strong>
-                <small>${player.finished ? `${player.place}. Platz` : `Ø ${formatAverage(playerAverage(player, index))}`}</small>
+                <span class="dart-caller-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>
+                <span class="dart-caller-player-status">${player.finished ? `${player.place}. Platz` : index === state.currentPlayer ? "Am Board" : "Bereit"}</span>
+                <div class="dart-caller-score-ring">
+                  <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+                    <circle class="dart-caller-ring-track" cx="60" cy="60" r="52" />
+                    <circle class="dart-caller-ring-value" cx="60" cy="60" r="52" pathLength="100"
+                      data-ring-player="${index}" data-ring-mode="${state.mode}"
+                      style="stroke-dashoffset: ${100 - Math.max(0, Math.min(1, player.score / state.mode)) * 100}" />
+                  </svg>
+                  <div class="dart-caller-ring-label"><strong>${player.score}</strong><span>Restpunkte</span></div>
+                </div>
+                <small>${player.finished ? "Ausgecheckt" : `Ø ${formatAverage(playerAverage(player, index))}`}</small>
+                <span class="dart-caller-high-turn-badge" title="${highTurns ? "Aufnahmen über 100 aus gespeicherten 301/501-Partien plus laufender Partie" : "Gemeinsamer Gesamtstand noch nicht verfügbar"}">Über 100 · gesamt <b>${highTurns ? highTurns.byPlayer.get(player.name) || 0 : "–"}</b></span>
               </article>
             `).join("")}
           </section>
 
-          ${state.transition ? transitionMarkup() : `<section class="dart-caller-turn">
+          ${state.transition ? transitionMarkup() : `<div class="dart-caller-play-area"><div class="dart-caller-turn-panel"><section class="dart-caller-turn">
             <div><span class="dart-caller-eyebrow">Am Board</span><h2>${escapeHtml(active.name)}</h2></div>
             <div class="dart-caller-turn-total"><span>Aufnahme</span><strong>${turnTotal}</strong></div>
           </section>
@@ -256,7 +278,7 @@
           </div>
 
           ${checkout ? `<div class="dart-caller-checkout"><span>🎯 Straight-Out-Weg</span><strong>${escapeHtml(checkout)}</strong></div>` : ""}
-
+          </div><div class="dart-caller-controls-panel">
           <section class="dart-caller-input">
             <div class="dart-caller-multipliers" aria-label="Multiplikator">
               ${[{ value: 1, label: "Single" }, { value: 2, label: "Double" }, { value: 3, label: "Triple" }].map(item => `
@@ -274,7 +296,7 @@
           <div class="dart-caller-actions">
             <button type="button" data-undo ${state.undoStack.length ? "" : "disabled"}>↶ Letzten Dart zurück</button>
             <button type="button" data-end-turn>Aufnahme beenden →</button>
-          </div>`}`}
+          </div></div></div>`}`}
       </div>`;
   }
 
@@ -478,7 +500,23 @@
   }
 
   function render() {
+    // Preserve the visible ring position across the existing full markup render,
+    // including when another dart arrives before an animation has finished.
+    const previousRings = new Map(Array.from(mount.querySelectorAll("[data-ring-player]"), ring => [
+      `${ring.dataset.ringMode}:${ring.dataset.ringPlayer}`, getComputedStyle(ring).strokeDashoffset
+    ]));
     mount.innerHTML = state.screen === "setup" ? setupMarkup() : gameMarkup();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      mount.querySelectorAll("[data-ring-player]").forEach(ring => {
+        const previous = previousRings.get(`${ring.dataset.ringMode}:${ring.dataset.ringPlayer}`);
+        const next = getComputedStyle(ring).strokeDashoffset;
+        if (previous !== undefined && previous !== next && typeof ring.animate === "function") {
+          ring.animate([{ strokeDashoffset: previous }, { strokeDashoffset: next }], {
+            duration: 360, easing: "cubic-bezier(.22,.61,.36,1)"
+          });
+        }
+      });
+    }
     bindEvents();
   }
 
@@ -520,6 +558,7 @@
 
   function startGame() {
     if (!state.selectedPlayers.length) return;
+    clearHighTurnHighlight();
     const startOrder = state.completed
       ? state.finishOrder.slice().reverse()
       : shuffledPlayers(state.selectedPlayers);
@@ -555,6 +594,7 @@
     clearSavedGame();
     persistGame();
     render();
+    refreshHighTurnHistory();
     requestWakeLock();
   }
 
@@ -565,6 +605,104 @@
       [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
     }
     return shuffled;
+  }
+
+  // Derive counts from the existing throw log so undo and saved games stay in sync.
+  // A visit counts only once it has ended, and never if any dart caused a bust.
+  function highTurnCounts() {
+    const visits = new Map();
+    for (const dart of state.throwLog || []) {
+      const key = `${dart.turnNumber}:${dart.player}`;
+      const visit = visits.get(key) || { player: dart.player, turn: dart.turnNumber, score: 0, bust: false, darts: 0 };
+      visit.score += dart.scoredValue;
+      visit.bust ||= dart.isBust;
+      visit.darts += 1;
+      visits.set(key, visit);
+    }
+    const byPlayer = new Map();
+    let total = 0;
+    for (const visit of visits.values()) {
+      const current = visit.turn === state.turnNumber;
+      const finished = state.players.find(player => player.name === visit.player)?.finished;
+      const closed = !current || state.completed || visit.darts === 3 || finished || state.transition?.type === "turn";
+      if (closed && !visit.bust && !(current && state.turnBusted) && visit.score > 100) {
+        total += 1;
+        byPlayer.set(visit.player, (byPlayer.get(visit.player) || 0) + 1);
+      }
+    }
+    return { total, byPlayer };
+  }
+
+  function clearHighTurnHighlight() {
+    window.clearTimeout(highTurnTimer);
+    highTurnTimer = null;
+    highTurnHighlight = null;
+  }
+
+  function highlightHighTurn(player, score) {
+    if (score <= 100 || state.turnBusted) return;
+    clearHighTurnHighlight();
+    highTurnHighlight = { player, score };
+    refreshHighTurnHistory();
+    highTurnTimer = window.setTimeout(() => {
+      highTurnHighlight = null;
+      highTurnTimer = null;
+      render();
+    }, 2800);
+  }
+
+  function lifetimeHighTurnCounts() {
+    if (!highTurnHistoryReady) return null;
+    const counts = highTurnCounts();
+    for (const [gameId, players] of highTurnHistory) {
+      // The current game remains in the local log after saving: count it once.
+      if (String(state.savedGameId) === gameId) continue;
+      for (const [player, count] of players) {
+        counts.total += count;
+        counts.byPlayer.set(player, (counts.byPlayer.get(player) || 0) + count);
+      }
+    }
+    return counts;
+  }
+
+  async function refreshHighTurnHistory() {
+    if (typeof supabaseClient === "undefined") return;
+    const request = ++highTurnHistoryRequest;
+    const visits = new Map();
+    try {
+      // Read the shared source of truth, including historical games; Cricket is excluded.
+      // Pagination avoids silently truncating the counter at Supabase's row limit.
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await supabaseClient.from("dart_throws")
+          .select("id,game_id,player,turn_number,scored_value,is_bust,dart_games!inner(mode)")
+          .in("dart_games.mode", ["WRC Caller 301", "WRC Caller 501"])
+          .order("id", { ascending: true }).range(from, from + 999);
+        if (request !== highTurnHistoryRequest) return;
+        if (error) throw error;
+        for (const dart of data || []) {
+          const key = JSON.stringify([dart.game_id, dart.turn_number, dart.player]);
+          const visit = visits.get(key) || { gameId: String(dart.game_id), player: dart.player, score: 0, bust: false };
+          visit.score += dart.scored_value;
+          visit.bust ||= dart.is_bust;
+          visits.set(key, visit);
+        }
+        if ((data || []).length < 1000) break;
+      }
+      const history = new Map();
+      for (const visit of visits.values()) {
+        if (visit.bust || visit.score <= 100) continue;
+        const players = history.get(visit.gameId) || new Map();
+        players.set(visit.player, (players.get(visit.player) || 0) + 1);
+        history.set(visit.gameId, players);
+      }
+      highTurnHistory = history;
+      highTurnHistoryReady = true;
+    } catch (error) {
+      if (request !== highTurnHistoryRequest) return;
+      highTurnHistoryReady = false;
+      console.warn("WRC Caller: Gemeinsamer Über-100-Zähler nicht verfügbar.", error);
+    }
+    if (state.screen === "game") render();
   }
 
   function addDart(base, multiplier, customLabel) {
@@ -610,6 +748,7 @@
       player.finished = true;
       player.place = state.finishOrder.length + 1;
       state.finishOrder.push(player.name);
+      highlightHighTurn(player.name, winningTurn);
       const isFirstWinner = !state.winner;
       if (isFirstWinner) {
         state.winner = { ...player };
@@ -697,6 +836,7 @@
       total: turnTotal,
       nextPlayer: state.players[nextPlayerIndex].name
     };
+    if (!activePlayer.finished) highlightHighTurn(activePlayer.name, turnTotal);
     render();
     scheduleAdvanceTurn(1650);
   }
@@ -830,6 +970,7 @@
     state.saving = false;
     state.saved = true;
     state.savedGameId = game.id;
+    await refreshHighTurnHistory();
     render();
     if (typeof window.WRCRefreshDartHistory === "function") await window.WRCRefreshDartHistory();
     if (typeof window.loadDartStatistics === "function") window.loadDartStatistics();
@@ -855,12 +996,15 @@
   }
 
   async function undoLastDart() {
+    clearHighTurnHighlight();
     window.clearTimeout(turnTimer);
     turnTimer = null;
     window.WRCDartCallerAudio?.stop();
     const previous = state.undoStack.pop();
     if (!previous) return;
     const savedGameId = state.savedGameId;
+    if (savedGameId) highTurnHistory.delete(String(savedGameId));
+    highTurnHistoryRequest += 1;
     saveGeneration += 1;
     state.players = previous.players;
     state.darts = previous.darts;
@@ -892,6 +1036,7 @@
         state.toast = "Dart korrigiert · gespeichertes Ergebnis bitte prüfen";
         render();
       } else {
+        await refreshHighTurnHistory();
         if (typeof window.WRCRefreshDartHistory === "function") await window.WRCRefreshDartHistory();
         if (typeof window.loadDartStatistics === "function") window.loadDartStatistics();
       }
@@ -904,6 +1049,7 @@
   }
 
   function showSetup() {
+    clearHighTurnHighlight();
     window.clearTimeout(turnTimer);
     turnTimer = null;
     window.clearTimeout(inputFeedbackTimer);
@@ -941,7 +1087,10 @@
     render();
   });
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") requestWakeLock();
+    if (document.visibilityState === "visible") {
+      requestWakeLock();
+      if (state.screen === "game") refreshHighTurnHistory();
+    }
   });
   render();
 })();
