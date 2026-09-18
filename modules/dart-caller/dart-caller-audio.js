@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "46";
+  const audioVersion = "47";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const voigt = (score, takes = [1]) => takes.map(
     take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
@@ -31,6 +31,9 @@
   [5, 6, 11, 18, 29, 69].forEach(score => {
     turnScores[score] = [...(turnScores[score] || []), marco(score)];
   });
+  [25, 27, 30, 52, 99].forEach(score => {
+    turnScores[score] = [...turnScores[score], asset(`score-${score}-marco-01.ogg`)];
+  });
   turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav")];
   turnScores[20] = [...turnScores[20], asset("score-20-fun-20cm-01.wav")];
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
@@ -48,7 +51,8 @@
     bust: [
       asset("special-bust-judith-01.wav"),
       asset("special-bust-judith-02.wav"),
-      asset("special-bust-judith-03.wav")
+      asset("special-bust-judith-03.wav"),
+      asset("special-bust-marco-01.ogg")
     ]
   };
   const bonusCalls = [
