@@ -96,7 +96,20 @@
       const key = `${dart.player}:${dart.base_value}:${dart.multiplier}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
-    const maxCount = Math.max(1, ...counts.values());
+    const missCounts = new Map();
+    rows.filter(dart => fieldLabel(dart) === "Miss").forEach(dart => {
+      missCounts.set(dart.player, (missCounts.get(dart.player) || 0) + 1);
+    });
+    const maxCount = Math.max(1, ...counts.values(), ...missCounts.values());
+    const bubbleRadius = count => 4 + 10 * Math.sqrt(count / maxCount);
+    const totalMisses = [...missCounts.values()].reduce((sum, count) => sum + count, 0);
+    const missBubbles = [...missCounts.entries()].sort(([a], [b]) => a.localeCompare(b, "de")).map(([player, count]) => {
+      const detail = escapeHtml(`${player}: Miss · ${count}×`);
+      return `<button type="button" class="dart-miss-marker" data-detail="${detail}" aria-label="${detail}">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="${bubbleRadius(count)}" fill="${COLORS[player] || "#facc15"}" fill-opacity=".72" stroke="#fff" stroke-width="1.6"/></svg>
+        <span>${escapeHtml(player)}</span><strong>${count}×</strong>
+      </button>`;
+    }).join("");
     const wedges = BOARD_ORDER.map((number, index) => {
       const start = index * 18 - 9;
       const end = start + 18;
@@ -119,7 +132,7 @@
       const offset = polar(6, playerIndex * 90);
       const x = point.x + offset.x - 200;
       const y = point.y + offset.y - 200;
-      const radius = 4 + 10 * Math.sqrt(count / maxCount);
+      const radius = bubbleRadius(count);
       const dart = { base_value: base, multiplier, is_miss: false };
       return `<circle class="dart-hit-bubble" cx="${x}" cy="${y}" r="${radius}" fill="${COLORS[player] || "#facc15"}" fill-opacity=".72" stroke="#fff" stroke-width="1.6" tabindex="0" role="button" data-detail="${escapeHtml(`${player}: ${fieldLabel(dart)} · ${count}×`)}"><title>${escapeHtml(`${player}: ${fieldLabel(dart)} · ${count} Treffer`)}</title></circle>`;
     }).join("");
@@ -131,7 +144,10 @@
       <circle cx="200" cy="200" r="27" fill="#16a34a" stroke="#e2e8f0" stroke-width="2"/>
       <circle cx="200" cy="200" r="11" fill="#dc2626" stroke="#e2e8f0" stroke-width="2"/>
       ${bubbles}
-    </svg>`;
+    </svg><section class="dart-miss-zone" aria-label="Fehlwürfe neben der Dartscheibe">
+      <div class="dart-miss-heading"><strong>Miss · neben dem Board</strong><span>${totalMisses}×</span></div>
+      ${missBubbles ? `<div class="dart-miss-grid">${missBubbles}</div>` : '<p class="dart-miss-empty">Keine Miss-Würfe in dieser Auswahl.</p>'}
+    </section>`;
   }
 
   function render() {
@@ -144,7 +160,7 @@
     });
     const favorite = mostCommon(rows.map(fieldLabel));
     const turnFavorite = mostCommon(threeDartTotals(rows));
-    const misses = rows.filter(dart => dart.is_miss).length;
+    const misses = rows.filter(dart => fieldLabel(dart) === "Miss").length;
     const missRate = rows.length ? (misses / rows.length) * 100 : 0;
     const positionFavorites = [1, 2, 3].map(position => mostCommon(
       rows.filter(dart => Number(dart.dart_position) === position).map(fieldLabel)
@@ -182,7 +198,7 @@
             <article><span>Außerhalb</span><strong>${(cricketRows.length - cricketHits.length).toLocaleString("de-DE")}</strong><small>Darts neben den Cricket-Feldern</small></article>
           </div>` : ""}
           <div class="dart-board-layout">
-            <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail">Kreis antippen für Details</div></div>
+            <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort – auch bei Miss.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail" aria-live="polite">Kreis antippen für Details</div></div>
             <div class="dart-hit-ranking"><h4>Am häufigsten getroffen</h4>${hitRanking.map(([label, count], index) => `<div><span>${index + 1}. ${escapeHtml(label)}</span><strong>${count}×</strong></div>`).join("")}</div>
           </div>` : `<div class="dart-throw-empty"><strong>Noch kein Wurfprofil vorhanden.</strong><span>Die ersten Detaildaten entstehen automatisch mit der nächsten abgeschlossenen WRC-Caller-Partie.</span></div>`}
       </section>`;
@@ -198,10 +214,16 @@
       selectedPeriod = button.dataset.dartPeriod;
       render();
     }));
-    mount.querySelectorAll(".dart-hit-bubble").forEach(bubble => bubble.addEventListener("click", () => {
-      const detail = document.getElementById("dartBoardDetail");
-      if (detail) detail.textContent = bubble.dataset.detail;
-    }));
+    mount.querySelectorAll(".dart-hit-bubble, .dart-miss-marker").forEach(bubble => {
+      const showDetail = () => {
+        const detail = document.getElementById("dartBoardDetail");
+        if (detail) detail.textContent = bubble.dataset.detail;
+      };
+      bubble.addEventListener("click", showDetail);
+      if (bubble.matches(".dart-hit-bubble")) bubble.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); showDetail(); }
+      });
+    });
   }
 
   async function load() {
