@@ -20,6 +20,20 @@
 .dart-caller-mode small { margin-top: 3px; color: var(--muted,#94a3b8); }
 .dart-caller-mode.selected, .dart-caller-player.selected { border-color: #38bdf8; background: linear-gradient(135deg,rgba(14,165,233,.22),rgba(37,99,235,.14)); box-shadow: 0 0 0 1px rgba(56,189,248,.16) inset; }
 .dart-caller-player { display: flex; align-items: center; justify-content: space-between; font-weight: 750; }
+.dart-caller-player > span:first-child { min-width: 0; overflow-wrap: anywhere; text-align: left; }
+.dart-caller-player:disabled { opacity: .45; cursor: not-allowed; }
+.dart-caller-guest-toggle { margin-top: 14px; padding: 11px 14px; border: 1px dashed rgba(56,189,248,.5); border-radius: 12px; background: rgba(14,165,233,.08); color: #bae6fd; font: inherit; font-weight: 750; cursor: pointer; }
+.dart-caller-guest-form { margin-top: 14px; }
+.dart-caller-guest-form[hidden] { display: none; }
+.dart-caller-guest-form label { display: block; margin-bottom: 7px; color: #e2e8f0; font-weight: 750; }
+.dart-caller-guest-fields { display: flex; flex-wrap: wrap; gap: 8px; }
+.dart-caller-guest-fields input { flex: 1 1 180px; min-width: 0; box-sizing: border-box; min-height: 44px; padding: 10px 12px; border: 1px solid #64748b; border-radius: 11px; background: #0f172a; color: #f8fafc; font: inherit; }
+.dart-caller-guest-fields button { flex: 1 0 auto; min-height: 44px; padding: 10px 14px; border: 1px solid #38bdf8; border-radius: 11px; background: #0c4a6e; color: #e0f2fe; font: inherit; font-weight: 750; cursor: pointer; }
+.dart-caller-guest-form small { display: block; margin-top: 8px; color: #94a3b8; }
+.dart-caller-guest-form p { margin: 8px 0 0; color: #fda4af; font-size: .88rem; }
+.dart-caller-guest-form p:empty { display: none; }
+.dart-caller-guest-fields input:focus-visible, .dart-caller-guest-fields button:focus-visible, .dart-caller-guest-toggle:focus-visible, .dart-caller-player:focus-visible { outline: 2px solid #7dd3fc; outline-offset: 3px; }
+.dart-caller-check { flex-shrink: 0; }
 .dart-caller-check { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #06131f; background: #38bdf8; opacity: 0; }
 .dart-caller-player.selected .dart-caller-check { opacity: 1; }
 .dart-caller-primary { width: 100%; margin-top: 20px; padding: 16px 22px; border: 0; border-radius: 15px; color: #06131f; background: linear-gradient(135deg,#38bdf8,#22c55e); font-size: 1.05rem; font-weight: 850; cursor: pointer; }

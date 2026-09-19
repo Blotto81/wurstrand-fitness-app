@@ -28,6 +28,7 @@
       screen: "setup",
       mode: 501,
       selectedPlayers: [],
+      guestPlayers: [],
       players: [],
       currentPlayer: 0,
       turnStartScore: 0,
@@ -74,7 +75,8 @@
       const saved = JSON.parse(localStorage.getItem(GAME_STORAGE_KEY));
       if (!saved || saved.version !== 1 || !saved.state || ![301, 501].includes(saved.state.mode)) return null;
       if (!Array.isArray(saved.state.players) || !saved.state.players.length || saved.state.players.length > 4) return null;
-      if (saved.state.players.some(player => !availablePlayers.includes(player.name))) return null;
+      if (saved.state.players.some(player => !validPlayerName(player?.name))) return null;
+      if (new Set(saved.state.players.map(player => player.name.toLowerCase())).size !== saved.state.players.length) return null;
       return saved;
     } catch (error) {
       console.warn("WRC Caller: Spielstand konnte nicht gelesen werden.", error);
@@ -127,6 +129,8 @@
       ...freshState(),
       ...savedGame.state,
       screen: "game",
+      selectedPlayers: savedGame.state.players.map(player => player.name),
+      guestPlayers: savedGame.state.players.map(player => player.name).filter(name => !availablePlayers.includes(name)),
       players: savedGame.state.players.map(player => ({ highestTurn: 0, ...player })),
       darts: (savedGame.state.darts || []).map(dart => ({ ...dart })),
       throwLog: (savedGame.state.throwLog || []).map(dart => ({ ...dart })),
@@ -214,12 +218,22 @@
         <section class="dart-caller-card">
           <h3>2. Spieler wählen <span class="dart-caller-count">${state.selectedPlayers.length}/4</span></h3>
           <div class="dart-caller-player-grid">
-            ${availablePlayers.map(name => `
-              <button type="button" class="dart-caller-player ${state.selectedPlayers.includes(name) ? "selected" : ""}" data-caller-player="${escapeHtml(name)}">
+            ${[...availablePlayers, ...state.guestPlayers].map(name => `
+              <button type="button" class="dart-caller-player ${state.selectedPlayers.includes(name) ? "selected" : ""}" data-caller-player="${escapeHtml(name)}" aria-pressed="${state.selectedPlayers.includes(name)}" ${state.selectedPlayers.length >= 4 && !state.selectedPlayers.includes(name) ? "disabled" : ""}>
                 <span>${escapeHtml(name)}</span><span class="dart-caller-check" aria-hidden="true">✓</span>
               </button>
             `).join("")}
           </div>
+          <button type="button" class="dart-caller-guest-toggle" data-caller-guest-toggle aria-expanded="false" aria-controls="dartCallerGuestForm">➕ Gast hinzufügen</button>
+          <form id="dartCallerGuestForm" class="dart-caller-guest-form" hidden>
+            <label for="dartCallerGuestName">Name des Gastes</label>
+            <div class="dart-caller-guest-fields">
+              <input id="dartCallerGuestName" name="guestName" type="text" maxlength="80" autocomplete="off" placeholder="z. B. Marco" aria-describedby="dartCallerGuestHint dartCallerGuestError">
+              <button type="submit">Gast übernehmen</button>
+            </div>
+            <small id="dartCallerGuestHint">Bis zu 4 Spieler insgesamt. Gäste zählen mit.</small>
+            <p id="dartCallerGuestError" role="alert"></p>
+          </form>
         </section>
 
         <button type="button" class="dart-caller-secondary dart-caller-stats-link" data-caller-stats>📊 Dart-Statistiken ansehen</button>
@@ -521,6 +535,32 @@
   }
 
   function bindEvents() {
+    const guestForm = mount.querySelector("#dartCallerGuestForm");
+    mount.querySelector("[data-caller-guest-toggle]")?.addEventListener("click", event => {
+      guestForm.hidden = !guestForm.hidden;
+      event.currentTarget.setAttribute("aria-expanded", String(!guestForm.hidden));
+      if (!guestForm.hidden) guestForm.elements.guestName.focus();
+    });
+    guestForm?.addEventListener("submit", event => {
+      event.preventDefault();
+      const input = guestForm.elements.guestName;
+      const name = input.value.trim().replace(/\s+/g, " ");
+      const existing = [...availablePlayers, ...state.guestPlayers].find(player => player.toLowerCase() === name.toLowerCase());
+      const selectedName = existing || name;
+      const error = !validPlayerName(name) ? "Bitte einen Namen mit 1 bis 80 Zeichen eingeben."
+        : state.selectedPlayers.length >= 4 && !state.selectedPlayers.includes(selectedName)
+          ? "Schon 4 Spieler gewählt. Bitte zuerst einen Spieler abwählen." : "";
+      if (error) {
+        mount.querySelector("#dartCallerGuestError").textContent = error;
+        input.setAttribute("aria-invalid", "true");
+        input.focus();
+        return;
+      }
+      if (!existing) state.guestPlayers.push(name);
+      if (!state.selectedPlayers.includes(selectedName)) state.selectedPlayers.push(selectedName);
+      render();
+      Array.from(mount.querySelectorAll("[data-caller-player]")).find(button => button.dataset.callerPlayer === selectedName)?.focus();
+    });
     mount.querySelector("[data-caller-back]")?.addEventListener("click", openDartSelection);
     mount.querySelector("[data-caller-setup]")?.addEventListener("click", confirmNewGame);
     mount.querySelector("[data-resume-game]")?.addEventListener("click", restoreSavedGame);
@@ -596,6 +636,10 @@
     render();
     refreshHighTurnHistory();
     requestWakeLock();
+  }
+
+  function validPlayerName(name) {
+    return typeof name === "string" && name.trim().length > 0 && name.length <= 80;
   }
 
   function shuffledPlayers(players) {
@@ -1057,9 +1101,11 @@
     window.WRCDartCallerAudio?.stop();
     releaseWakeLock();
     const selectedPlayers = state.selectedPlayers.slice();
+    const guestPlayers = state.guestPlayers.slice();
     const mode = state.mode;
     state = freshState();
     state.selectedPlayers = selectedPlayers;
+    state.guestPlayers = guestPlayers;
     state.mode = mode;
     savedGame = readSavedGame();
     render();
