@@ -749,6 +749,10 @@
     if (state.screen === "game") render();
   }
 
+  function isThreeFives() {
+    return state.darts.length === 3 && state.darts.every(dart => dart.base === 5 && dart.multiplier === 1);
+  }
+
   function addDart(base, multiplier, customLabel) {
     if (state.completed || state.darts.length >= 3) return;
     showInputFeedback(base, multiplier);
@@ -770,6 +774,8 @@
       isBust: false
     });
     player.dartsThrown += 1;
+
+    if (isThreeFives()) window.WRCDartCallerAudio?.playSpecial("threeFives");
 
     if (remaining < 0) {
       player.score = state.turnStartScore;
@@ -870,7 +876,7 @@
       state.players[state.currentPlayer].scoredPoints += turnTotal;
       state.players[state.currentPlayer].highestTurn = Math.max(activePlayer.highestTurn, turnTotal);
     }
-    if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished) {
+    if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished && !isThreeFives()) {
       window.WRCDartCallerAudio?.playTurnScore(turnTotal);
     }
     const nextPlayerIndex = nextActivePlayerIndex();

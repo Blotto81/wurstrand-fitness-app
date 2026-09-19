@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "47";
+  const audioVersion = "48";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const voigt = (score, takes = [1]) => takes.map(
     take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
@@ -39,6 +39,7 @@
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
 
   const specialCalls = {
+    threeFives: [asset("special-three-fives-fun-01.wav")],
     zero: [
       asset("special-zero-voigt-01.wav"),
       asset("special-zero-judith-01.wav")
@@ -63,6 +64,8 @@
   let currentAudio = null;
   let lastSource = "";
   let playbackToken = 0;
+  let priorityPlaying = false;
+  let pendingThreeFives = 0;
 
   function callerName(source) {
     if (source.includes("-fun-")) return "fun";
@@ -94,19 +97,34 @@
     return selectedGroup.takes[Math.floor(Math.random() * selectedGroup.takes.length)];
   }
 
-  function play(sources, onEnded) {
+  function play(sources, onEnded, priority = false) {
+    if (priorityPlaying) {
+      if (priority) pendingThreeFives += 1;
+      return Promise.resolve(false);
+    }
     const source = randomSource(sources);
     if (!source) return Promise.resolve(false);
     playbackToken += 1;
     const token = playbackToken;
     currentAudio?.pause();
+    window.speechSynthesis?.cancel();
+    priorityPlaying = priority;
     currentAudio = new Audio(source);
     currentAudio.preload = "auto";
     lastSource = source;
-    currentAudio.addEventListener("ended", () => {
-      if (token === playbackToken) onEnded?.();
-    }, { once: true });
-    return currentAudio.play().then(() => true).catch(() => false);
+    let settled = false;
+    const finish = completed => {
+      if (settled || token !== playbackToken) return;
+      settled = true;
+      priorityPlaying = false;
+      if (pendingThreeFives > 0) {
+        pendingThreeFives -= 1;
+        play(specialCalls.threeFives, undefined, true);
+      } else if (completed) onEnded?.();
+    };
+    currentAudio.addEventListener("ended", () => finish(true), { once: true });
+    currentAudio.addEventListener("error", () => finish(false), { once: true });
+    return currentAudio.play().then(() => true).catch(() => { finish(false); return false; });
   }
 
   function maybePlayBonus() {
@@ -115,6 +133,7 @@
   }
 
   function speakFallback(score) {
+    if (priorityPlaying) return Promise.resolve(false);
     if (!("speechSynthesis" in window)) return Promise.resolve(false);
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(String(score));
@@ -135,9 +154,10 @@
       );
     },
     playSpecial(event) {
-      return play(specialCalls[event]);
+      return play(specialCalls[event], undefined, event === "threeFives");
     },
     playCricketTurn(closedTargets, points) {
+      if (priorityPlaying) return Promise.resolve(false);
       const closed = Array.isArray(closedTargets) ? closedTargets.filter(Boolean) : [];
       const numericPoints = Number(points) || 0;
       if (!closed.length && numericPoints <= 0) return Promise.resolve(false);
@@ -155,6 +175,8 @@
     },
     stop() {
       playbackToken += 1;
+      priorityPlaying = false;
+      pendingThreeFives = 0;
       currentAudio?.pause();
       currentAudio = null;
       window.speechSynthesis?.cancel();
