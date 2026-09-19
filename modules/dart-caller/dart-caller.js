@@ -74,7 +74,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(GAME_STORAGE_KEY));
       if (!saved || saved.version !== 1 || !saved.state || ![301, 501].includes(saved.state.mode)) return null;
-      if (!Array.isArray(saved.state.players) || !saved.state.players.length || saved.state.players.length > 4) return null;
+      if (!Array.isArray(saved.state.players) || !saved.state.players.length || saved.state.players.length > 6) return null;
       if (saved.state.players.some(player => !validPlayerName(player?.name))) return null;
       if (new Set(saved.state.players.map(player => player.name.toLowerCase())).size !== saved.state.players.length) return null;
       return saved;
@@ -216,10 +216,10 @@
         </section>
 
         <section class="dart-caller-card">
-          <h3>2. Spieler wählen <span class="dart-caller-count">${state.selectedPlayers.length}/4</span></h3>
+          <h3>2. Spieler wählen <span class="dart-caller-count">${state.selectedPlayers.length}/6</span></h3>
           <div class="dart-caller-player-grid">
             ${[...availablePlayers, ...state.guestPlayers].map(name => `
-              <button type="button" class="dart-caller-player ${state.selectedPlayers.includes(name) ? "selected" : ""}" data-caller-player="${escapeHtml(name)}" aria-pressed="${state.selectedPlayers.includes(name)}" ${state.selectedPlayers.length >= 4 && !state.selectedPlayers.includes(name) ? "disabled" : ""}>
+              <button type="button" class="dart-caller-player ${state.selectedPlayers.includes(name) ? "selected" : ""}" data-caller-player="${escapeHtml(name)}" aria-pressed="${state.selectedPlayers.includes(name)}" ${state.selectedPlayers.length >= 6 && !state.selectedPlayers.includes(name) ? "disabled" : ""}>
                 <span>${escapeHtml(name)}</span><span class="dart-caller-check" aria-hidden="true">✓</span>
               </button>
             `).join("")}
@@ -231,7 +231,7 @@
               <input id="dartCallerGuestName" name="guestName" type="text" maxlength="80" autocomplete="off" placeholder="z. B. Marco" aria-describedby="dartCallerGuestHint dartCallerGuestError">
               <button type="submit">Gast übernehmen</button>
             </div>
-            <small id="dartCallerGuestHint">Bis zu 4 Spieler insgesamt. Gäste zählen mit.</small>
+            <small id="dartCallerGuestHint">Bis zu 6 Spieler insgesamt. Gäste zählen mit.</small>
             <p id="dartCallerGuestError" role="alert"></p>
           </form>
         </section>
@@ -376,7 +376,7 @@
   }
 
   function placeMedal(place) {
-    return place === 1 ? "🥇" : place === 2 ? "🥈" : place === 3 ? "🥉" : "4️⃣";
+    return place === 1 ? "🥇" : place === 2 ? "🥈" : place === 3 ? "🥉" : place === 4 ? "4️⃣" : place === 5 ? "5️⃣" : "6️⃣";
   }
 
   function formatAverage(value) {
@@ -548,8 +548,8 @@
       const existing = [...availablePlayers, ...state.guestPlayers].find(player => player.toLowerCase() === name.toLowerCase());
       const selectedName = existing || name;
       const error = !validPlayerName(name) ? "Bitte einen Namen mit 1 bis 80 Zeichen eingeben."
-        : state.selectedPlayers.length >= 4 && !state.selectedPlayers.includes(selectedName)
-          ? "Schon 4 Spieler gewählt. Bitte zuerst einen Spieler abwählen." : "";
+        : state.selectedPlayers.length >= 6 && !state.selectedPlayers.includes(selectedName)
+          ? "Schon 6 Spieler gewählt. Bitte zuerst einen Spieler abwählen." : "";
       if (error) {
         mount.querySelector("#dartCallerGuestError").textContent = error;
         input.setAttribute("aria-invalid", "true");
@@ -574,7 +574,7 @@
       const name = button.dataset.callerPlayer;
       state.selectedPlayers = state.selectedPlayers.includes(name)
         ? state.selectedPlayers.filter(player => player !== name)
-        : [...state.selectedPlayers, name].slice(0, 4);
+        : [...state.selectedPlayers, name].slice(0, 6);
       render();
     }));
     mount.querySelector("[data-start-game]")?.addEventListener("click", startGame);
