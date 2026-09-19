@@ -877,7 +877,7 @@
       state.players[state.currentPlayer].highestTurn = Math.max(activePlayer.highestTurn, turnTotal);
     }
     if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished && !isThreeFives()) {
-      window.WRCDartCallerAudio?.playTurnScore(turnTotal);
+      window.WRCDartCallerAudio?.playTurnScore(turnTotal, { dartCount: state.darts.length });
     }
     const nextPlayerIndex = nextActivePlayerIndex();
     state.transition = {

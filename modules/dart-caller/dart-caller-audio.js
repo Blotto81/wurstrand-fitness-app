@@ -1,7 +1,8 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "49";
+  const audioVersion = "50";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
+  const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
     take => asset(`score-${score}-voigt-${String(take).padStart(2, "0")}.wav`)
   );
@@ -34,7 +35,7 @@
   [25, 27, 30, 52, 99].forEach(score => {
     turnScores[score] = [...turnScores[score], asset(`score-${score}-marco-01.ogg`)];
   });
-  turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav")];
+  turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav"), alfSeven];
   turnScores[20] = [...turnScores[20], asset("score-20-fun-20cm-01.wav")];
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
 
@@ -68,6 +69,7 @@
   let pendingThreeFives = 0;
 
   function callerName(source) {
+    if (source === alfSeven) return "alf";
     if (source.includes("-fun-")) return "fun";
     return source.match(/-(voigt|judith|marco)-/)?.[1] || "wrc";
   }
@@ -86,7 +88,8 @@
     const groups = [...callerGroups.entries()].map(([caller, takes]) => ({
       caller,
       takes,
-      weight: caller === "marco" ? 1.25 : caller === "fun" ? 0.35 : 1
+      // ALF gets two thirds more weight than a standard caller, not a 2/3 share.
+      weight: caller === "alf" ? 5 / 3 : caller === "marco" ? 1.25 : caller === "fun" ? 0.35 : 1
     }));
     const totalWeight = groups.reduce((sum, group) => sum + group.weight, 0);
     let draw = Math.random() * totalWeight;
@@ -144,9 +147,10 @@
   }
 
   window.WRCDartCallerAudio = {
-    playTurnScore(score) {
+    playTurnScore(score, { dartCount = 0 } = {}) {
       const numericScore = Number(score);
-      const sources = numericScore === 0 ? specialCalls.zero : turnScores[numericScore];
+      const candidates = numericScore === 0 ? specialCalls.zero : turnScores[numericScore];
+      const sources = candidates?.filter(source => source !== alfSeven || dartCount === 3);
       if (!sources?.length) return speakFallback(numericScore);
       return play(
         sources,
