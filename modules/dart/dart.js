@@ -60,7 +60,9 @@ if (dartPanel) {
       </div>
 <div id="dartGameView" class="active">
       <div class="dart-section">
-        <h3>👥 Teilnehmer</h3>
+        <h3>👥 Teilnehmer <span id="dartParticipantCount">0/6</span></h3>
+        <p>Maximal 6 Spieler insgesamt, einschließlich Gäste.</p>
+        <p id="dartParticipantError" role="alert"></p>
 
         <div id="dartPlayerGrid" class="dart-player-grid">
           <button type="button" class="dart-player-button">Thorsten</button>
@@ -79,6 +81,7 @@ if (dartPanel) {
           <input
             type="text"
             id="dartGuestName"
+            maxlength="80"
             placeholder="z. B. Paul"
             autocomplete="off"
           >
@@ -134,7 +137,7 @@ if (dartPanel) {
         <h3>🏆 Ergebnis</h3>
 
         <p class="dart-result-hint">
-          Die Platzierungen können auch teilweise leer bleiben.
+          Bitte jedem ausgewählten Teilnehmer einen Platz zuweisen, damit alle Ergebnisse gespeichert werden.
         </p>
 
         <div class="dart-podium">
@@ -183,6 +186,16 @@ if (dartPanel) {
             ></div>
           </div>
 
+          <div class="dart-podium-place dart-podium-fourth" hidden>
+            <div class="dart-medal">5️⃣</div>
+            <div class="dart-place-title">Platz 5</div>
+            <div id="dartPlace5Grid" class="dart-placement-grid" data-place="5"></div>
+          </div>
+          <div class="dart-podium-place dart-podium-fourth" hidden>
+            <div class="dart-medal">6️⃣</div>
+            <div class="dart-place-title">Platz 6</div>
+            <div id="dartPlace6Grid" class="dart-placement-grid" data-place="6"></div>
+          </div>
         </div>
       </div>
       <div class="dart-save-section">
@@ -295,7 +308,7 @@ if (dartPanel) {
     result.place === 1 ? "🥇" :
     result.place === 2 ? "🥈" :
     result.place === 3 ? "🥉" :
-    "4️⃣"
+    result.place === 4 ? "4️⃣" : result.place === 5 ? "5️⃣" : "6️⃣"
 } ${escapeHtml(result.player)}
             </div>
         `)
@@ -347,14 +360,18 @@ if (resultsDeleteError) {
     1: document.getElementById("dartWinnerGrid"),
     2: document.getElementById("dartSecondGrid"),
     3: document.getElementById("dartThirdGrid"),
-    4: document.getElementById("dartFourthGrid")
+    4: document.getElementById("dartFourthGrid"),
+    5: document.getElementById("dartPlace5Grid"),
+    6: document.getElementById("dartPlace6Grid")
   };
 
   const placements = {
     1: null,
     2: null,
     3: null,
-    4: null
+    4: null,
+    5: null,
+    6: null
   };
 
   function getSelectedPlayers() {
@@ -369,7 +386,7 @@ if (resultsDeleteError) {
     Object.keys(placements).forEach((place) => {
       if (
         placements[place] &&
-        !selectedPlayers.includes(placements[place])
+        (!selectedPlayers.includes(placements[place]) || Number(place) > selectedPlayers.length)
       ) {
         placements[place] = null;
       }
@@ -378,10 +395,17 @@ if (resultsDeleteError) {
 
   function renderPlacements() {
     clearInvalidPlacements();
+    document.getElementById("dartParticipantError").textContent = "";
 
     const selectedPlayers = getSelectedPlayers();
 
+    document.getElementById("dartParticipantCount").textContent = `${selectedPlayers.length}/6`;
+    playerGrid.querySelectorAll(".dart-player-button").forEach(button => {
+      button.disabled = selectedPlayers.length >= 6 && !button.classList.contains("selected");
+    });
+
     Object.entries(placementGrids).forEach(([place, grid]) => {
+      if (Number(place) >= 5) grid.parentElement.hidden = Number(place) > selectedPlayers.length;
       grid.innerHTML = "";
 
       selectedPlayers.forEach((playerName) => {
@@ -429,6 +453,7 @@ if (resultsDeleteError) {
 
   function connectPlayerButton(button) {
     button.addEventListener("click", () => {
+      if (!button.classList.contains("selected") && getSelectedPlayers().length >= 6) return;
       button.classList.toggle("selected");
       renderPlacements();
     });
@@ -443,9 +468,9 @@ if (resultsDeleteError) {
   });
 
   guestAddButton.addEventListener("click", () => {
-    const guestName = guestNameInput.value.trim();
+    const guestName = guestNameInput.value.trim().replace(/\s+/g, " ");
 
-    if (!guestName) {
+    if (!guestName || guestName.length > 80) {
       guestNameInput.focus();
       return;
     }
@@ -457,6 +482,11 @@ if (resultsDeleteError) {
         button.textContent.trim().toLowerCase() ===
         guestName.toLowerCase()
     );
+
+    if (getSelectedPlayers().length >= 6 && !existingPlayer?.classList.contains("selected")) {
+      document.getElementById("dartParticipantError").textContent = "Schon 6 Spieler gewählt. Bitte zuerst einen Spieler abwählen.";
+      return;
+    }
 
     if (existingPlayer) {
       existingPlayer.classList.add("selected");
@@ -570,14 +600,16 @@ saveButton.addEventListener("click", async () => {
         return;
     }
 
-    if (placements[3] && !placements[2]) {
-        alert("Platz 2 fehlt.");
+    if (selectedPlayers.length > 6) {
+        alert("Es dürfen maximal 6 Spieler teilnehmen.");
         return;
     }
 
-    if (placements[4] && !placements[3]) {
-        alert("Platz 3 fehlt.");
-        return;
+    for (let place = 1; place <= selectedPlayers.length; place += 1) {
+        if (!placements[place]) {
+            alert(`Bitte Platz ${place} zuweisen, damit alle Teilnehmer gespeichert werden.`);
+            return;
+        }
     }
 
     const gameMode =

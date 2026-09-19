@@ -2,6 +2,20 @@
   margin-top:36px;
 }
 
+.dart-podium-place[hidden] { display: none; }
+.dart-player-button:disabled { opacity: .45; cursor: not-allowed; }
+#dartStatsRanking .dart-ranking-row {
+  grid-template-columns: 34px minmax(90px, 1fr) repeat(6, 48px);
+}
+.dart-player-stat-card .dart-player-medals {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 650px) {
+  #dartStatsRanking .dart-ranking-row { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 3px; }
+  #dartStatsRanking .dart-ranking-position { grid-row: 1; }
+  #dartStatsRanking .dart-ranking-player { grid-row: 1; grid-column: 2 / -1; }
+}
+
 .dart-result-hint{
   margin:0 0 24px;
   color:#aeb9cc;
