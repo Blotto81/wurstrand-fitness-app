@@ -314,7 +314,7 @@
           ];
 
 
-          const stats = {};
+          const stats = Object.create(null);
 
           players.forEach(player => {
 
@@ -324,7 +324,9 @@
                 1: 0,
                 2: 0,
                 3: 0,
-                4: 0
+                4: 0,
+                5: 0,
+                6: 0
               },
               games: 0,
               placeSum: 0,
@@ -345,7 +347,7 @@
 
               const place = Number(result.place);
 
-              if (place >= 1 && place <= 4) {
+              if (place >= 1 && place <= 6) {
                 playerStats.places[place] += 1;
               }
 
@@ -369,7 +371,7 @@
 
             for (const place of playerStats.recent) {
 
-              if (place === 4) break;
+              if (place >= 4) break;
 
               streak += 1;
             }
@@ -385,7 +387,7 @@
               b.places[1] - a.places[1] ||
               b.places[2] - a.places[2] ||
               b.places[3] - a.places[3] ||
-              a.places[4] - b.places[4] ||
+              a.placeSum / a.games - b.placeSum / b.games ||
               a.player.localeCompare(b.player, "de")
             );
 
@@ -473,6 +475,8 @@
                         <div class="dart-ranking-place">
                             4️⃣ ${player.places[4]}
                         </div>
+                        <div class="dart-ranking-place">5️⃣ ${player.places[5]}</div>
+                        <div class="dart-ranking-place">6️⃣ ${player.places[6]}</div>
 
                     </div>
 
@@ -515,6 +519,8 @@
                                 <div class="dart-player-medal">
                                     4️⃣ ${player.places[4]}
                                 </div>
+                        <div class="dart-player-medal">5️⃣ ${player.places[5]}</div>
+                        <div class="dart-player-medal">6️⃣ ${player.places[6]}</div>
 
                             </div>
 
@@ -537,7 +543,7 @@
                                         ${player.currentNoFourthStreak === 1
                   ? "Spiel"
                   : "Spiele"}
-                                        ohne Platz 4
+                                        auf dem Podium
                                     </strong>
                                 </div>
 
@@ -557,7 +563,7 @@
             if (place === 2) return "🥈";
             if (place === 3) return "🥉";
 
-            return "4️⃣";
+            return place === 4 ? "4️⃣" : place === 5 ? "5️⃣" : "6️⃣";
           };
 
 
