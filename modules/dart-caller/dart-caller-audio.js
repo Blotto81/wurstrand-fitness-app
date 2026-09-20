@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "54";
+  const audioVersion = "55";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
@@ -50,6 +50,7 @@
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
 
   const specialCalls = {
+    threeMisses: [asset("special-three-misses-fun-alf-01.wav")],
     threeFives: [asset("special-three-fives-fun-01.wav")],
     zero: [
       asset("special-zero-voigt-01.wav"),
@@ -77,7 +78,7 @@
   let lastSource = "";
   let playbackToken = 0;
   let priorityPlaying = false;
-  let pendingThreeFives = 0;
+  const pendingPriorityCalls = [];
 
   function callerName(source) {
     if (source === alfSeven) return "alf";
@@ -113,7 +114,7 @@
 
   function play(sources, onEnded, priority = false) {
     if (priorityPlaying) {
-      if (priority) pendingThreeFives += 1;
+      if (priority) pendingPriorityCalls.push(sources);
       return Promise.resolve(false);
     }
     const source = randomSource(sources);
@@ -131,9 +132,8 @@
       if (settled || token !== playbackToken) return;
       settled = true;
       priorityPlaying = false;
-      if (pendingThreeFives > 0) {
-        pendingThreeFives -= 1;
-        play(specialCalls.threeFives, undefined, true);
+      if (pendingPriorityCalls.length) {
+        play(pendingPriorityCalls.shift(), undefined, true);
       } else if (completed) onEnded?.();
     };
     currentAudio.addEventListener("ended", () => finish(true), { once: true });
@@ -169,7 +169,7 @@
       );
     },
     playSpecial(event) {
-      return play(specialCalls[event], undefined, event === "threeFives");
+      return play(specialCalls[event], undefined, event === "threeFives" || event === "threeMisses");
     },
     playCricketTurn(closedTargets, points) {
       if (priorityPlaying) return Promise.resolve(false);
@@ -191,7 +191,7 @@
     stop() {
       playbackToken += 1;
       priorityPlaying = false;
-      pendingThreeFives = 0;
+      pendingPriorityCalls.length = 0;
       currentAudio?.pause();
       currentAudio = null;
       window.speechSynthesis?.cancel();
