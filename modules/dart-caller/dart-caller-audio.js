@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "50";
+  const audioVersion = "51";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
@@ -8,6 +8,9 @@
   );
   const judith = score => asset(`score-${score}-judith-01.wav`);
   const marco = score => asset(`score-${score}-marco-01.wav`);
+  const niebel = (score, takes = [1]) => takes.map(
+    take => asset(`score-${score}-niebel-${String(take).padStart(2, "0")}.ogg`)
+  );
 
   // Each score owns a list so further callers and alternative takes can be
   // appended without changing the game logic.
@@ -35,6 +38,9 @@
   [25, 27, 30, 52, 99].forEach(score => {
     turnScores[score] = [...turnScores[score], asset(`score-${score}-marco-01.ogg`)];
   });
+  [1, 2, 9, 10, 17, 18, 20, 22, 33, 50, 89, 90, 100].forEach(score => {
+    turnScores[score] = [...turnScores[score], ...niebel(score, score === 2 ? [1, 2] : [1])];
+  });
   turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav"), alfSeven];
   turnScores[20] = [...turnScores[20], asset("score-20-fun-20cm-01.wav")];
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
@@ -54,7 +60,8 @@
       asset("special-bust-judith-01.wav"),
       asset("special-bust-judith-02.wav"),
       asset("special-bust-judith-03.wav"),
-      asset("special-bust-marco-01.ogg")
+      asset("special-bust-marco-01.ogg"),
+      asset("special-bust-niebel-01.ogg")
     ]
   };
   const bonusCalls = [
@@ -71,7 +78,7 @@
   function callerName(source) {
     if (source === alfSeven) return "alf";
     if (source.includes("-fun-")) return "fun";
-    return source.match(/-(voigt|judith|marco)-/)?.[1] || "wrc";
+    return source.match(/-(voigt|judith|marco|niebel)-/)?.[1] || "wrc";
   }
 
   function randomSource(sources) {
