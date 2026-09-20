@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "56";
+  const audioVersion = "57";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
@@ -71,7 +71,8 @@
       asset("special-bust-judith-02.wav"),
       asset("special-bust-judith-03.wav"),
       asset("special-bust-marco-01.ogg"),
-      asset("special-bust-niebel-01.ogg")
+      asset("special-bust-niebel-01.ogg"),
+      asset("special-bust-gomesch-01.wav")
     ]
   };
   const bonusCalls = [
@@ -106,7 +107,7 @@
       caller,
       takes,
       // ALF gets two thirds more weight than a standard caller, not a 2/3 share.
-      weight: caller === "alf" ? 5 / 3 : caller === "marco" ? 1.25 : caller === "fun" ? 0.35 : 1
+      weight: caller === "alf" ? 5 / 3 : (caller === "marco" || caller === "niebel") ? 1.25 : caller === "fun" ? 0.35 : 1
     }));
     const totalWeight = groups.reduce((sum, group) => sum + group.weight, 0);
     let draw = Math.random() * totalWeight;
@@ -146,9 +147,30 @@
     return currentAudio.play().then(() => true).catch(() => { finish(false); return false; });
   }
 
-  function maybePlayBonus() {
+  function contextualBonusCalls(score, darts) {
+    const calls = [...bonusCalls];
+    // A complete, consistent visit is required for remarks about board hits.
+    if (darts.length !== 3 || darts.some(dart => !Number.isFinite(dart.base) || ![1, 2, 3].includes(dart.multiplier)) ||
+        darts.reduce((sum, dart) => sum + dart.base * dart.multiplier, 0) !== score) return calls;
+    const has = (base, multiplier) => darts.some(dart => dart.base === base && dart.multiplier === multiplier);
+    const add = name => calls.push(asset(`bonus-gomesch-${name}.wav`));
+    [1, 5, 19, 20].forEach(base => { if (has(base, 1)) add(`single-${base}-01`); });
+    if (darts.filter(dart => dart.base === 19 && dart.multiplier === 1).length > 1) add("repeat-19-01");
+    if (has(25, 2)) { add("bull-01"); add("bull-02"); }
+    if (has(20, 2)) add("tops-01");
+    if (has(20, 3)) add("triple-20-01");
+    if (darts.some(dart => dart.base === 0)) { add("miss-01"); add("miss-02"); }
+    if (score > 0 && score <= 40) { add("tease-01"); add("tease-02"); }
+    if (darts.every(dart => dart.base > 0)) add("three-hits-01");
+    if (score >= 100) add("hundred-club-01");
+    return calls;
+  }
+
+  function maybePlayBonus(score, darts) {
     if (Math.random() >= 0.12) return;
-    play(bonusCalls);
+    // Keep the existing 12% bonus rate. Caller grouping gives Gomesch and
+    // Judith equal weight regardless of how many matching clips they have.
+    play(contextualBonusCalls(score, darts));
   }
 
   function speakFallback(score) {
@@ -163,14 +185,15 @@
   }
 
   window.WRCDartCallerAudio = {
-    playTurnScore(score, { dartCount = 0 } = {}) {
+    playTurnScore(score, { dartCount = 0, darts = [] } = {}) {
       const numericScore = Number(score);
+      const visitDarts = Array.isArray(darts) ? darts.map(({ base, multiplier }) => ({ base, multiplier })) : [];
       const candidates = numericScore === 0 ? specialCalls.zero : turnScores[numericScore];
       const sources = candidates?.filter(source => source !== alfSeven || dartCount === 3);
       if (!sources?.length) return speakFallback(numericScore);
       return play(
         sources,
-        numericScore === 0 ? undefined : maybePlayBonus
+        numericScore === 0 ? undefined : () => maybePlayBonus(numericScore, visitDarts)
       );
     },
     playSpecial(event) {
