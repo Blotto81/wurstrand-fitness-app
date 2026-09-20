@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "52";
+  const audioVersion = "53";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
@@ -44,6 +44,7 @@
   turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav"), alfSeven];
   turnScores[16] = [...turnScores[16], asset("score-16-fun-albundy-01.wav")];
   turnScores[20] = [...turnScores[20], asset("score-20-fun-20cm-01.wav")];
+  turnScores[32] = [...turnScores[32], asset("score-32-fun-homer-01.wav")];
   turnScores[51] = [...turnScores[51], asset("score-51-fun-playboy-01.wav")];
 
   const specialCalls = {
