@@ -1,6 +1,6 @@
 (() => {
   const basePath = "modules/dart-caller/audio";
-  const audioVersion = "55";
+  const audioVersion = "56";
   const asset = filename => `${basePath}/${filename}?v=${audioVersion}`;
   const alfSeven = asset("score-7-fun-alf-01.wav");
   const voigt = (score, takes = [1]) => takes.map(
@@ -40,6 +40,11 @@
   });
   [1, 2, 9, 10, 17, 18, 20, 22, 33, 50, 89, 90, 100].forEach(score => {
     turnScores[score] = [...turnScores[score], ...niebel(score, score === 2 ? [1, 2] : [1])];
+  });
+  // Gomesch: 61–90, then tens through 180; keep both recordings of 90.
+  [...Array.from({ length: 30 }, (_, index) => index + 61), 100, 110, 120, 130, 140, 150, 160, 170, 180].forEach(score => {
+    const takes = score === 90 ? [1, 2] : [1];
+    turnScores[score] = [...turnScores[score], ...takes.map(take => asset(`score-${score}-gomesch-${String(take).padStart(2, "0")}.wav`))];
   });
   turnScores[7] = [...turnScores[7], asset("score-7-fun-seven-days-01.wav"), alfSeven];
   turnScores[16] = [...turnScores[16], asset("score-16-fun-albundy-01.wav")];
@@ -83,7 +88,7 @@
   function callerName(source) {
     if (source === alfSeven) return "alf";
     if (source.includes("-fun-")) return "fun";
-    return source.match(/-(voigt|judith|marco|niebel)-/)?.[1] || "wrc";
+    return source.match(/-(voigt|judith|marco|niebel|gomesch)-/)?.[1] || "wrc";
   }
 
   function randomSource(sources) {
