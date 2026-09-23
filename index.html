@@ -2773,6 +2773,7 @@ background:#0f172a
           available: true,
           finalized: true,
           forecast: total,
+          currentTotal: total,
           basisTotal: total,
           basisDay: lastDay,
           basisDate: `${key}-${String(lastDay).padStart(2, "0")}`
@@ -2780,7 +2781,7 @@ background:#0f172a
       }
 
       if (key > currentKey || !entries.length) {
-        return { available: false, finalized: false, forecast: 0, basisTotal: 0, basisDay: 0, basisDate: "" };
+        return { available: false, finalized: false, forecast: total, currentTotal: total, basisTotal: 0, basisDay: 0, basisDate: "" };
       }
 
       const todayDay = Math.min(today.getDate(), lastDay);
@@ -2795,7 +2796,7 @@ background:#0f172a
       }
 
       if (!completeDay) {
-        return { available: false, finalized: false, forecast: 0, basisTotal: 0, basisDay: 0, basisDate: "" };
+        return { available: false, finalized: false, forecast: total, currentTotal: total, basisTotal: 0, basisDay: 0, basisDate: "" };
       }
 
       const basisTotal = entries
@@ -2805,7 +2806,10 @@ background:#0f172a
       return {
         available: true,
         finalized: false,
-        forecast: basisTotal / completeDay * lastDay,
+        // Only complete team days determine the pace; retain every posted point.
+        forecast: Math.max(total, total + (basisTotal / completeDay) * Math.max(lastDay - todayDay, 0)),
+        currentTotal: total,
+        projectionDay: todayDay,
         basisTotal,
         basisDay: completeDay,
         basisDate: `${key}-${String(completeDay).padStart(2, "0")}`
@@ -3748,7 +3752,8 @@ background:#0f172a
       const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
       const [year, month] = key.split("-").map(Number);
       const lastDay = new Date(year, month, 0).getDate();
-      const goal = monthGoals[key] || 0;
+      const forecastData = getTeamMonthForecast(key);
+      const goal = buildRecordLadder(key, forecastData.currentTotal).goal;
       const labels = Array.from({ length: lastDay }, (_, index) => String(index + 1));
 
       if (!entries.length) {
@@ -3776,7 +3781,6 @@ background:#0f172a
       const observedDay = key === currentKey
         ? Math.max(1, Math.min(today.getDate(), lastDay))
         : lastEntryDay;
-      const forecastData = getTeamMonthForecast(key);
       const dayTotals = Array(lastDay).fill(0);
       entries.forEach(entry => {
         const day = Number((entry.date || "").slice(8, 10));
@@ -3788,13 +3792,13 @@ background:#0f172a
         running += points;
         return index + 1 <= observedDay ? Number(running.toFixed(2)) : null;
       });
-      const currentTotal = dayTotals.slice(0, observedDay).reduce((sum, points) => sum + points, 0);
+      const currentTotal = forecastData.currentTotal;
       const forecastEnd = forecastData.available ? forecastData.forecast : 0;
       const forecast = labels.map((_, index) => {
         const day = index + 1;
-        if (!forecastData.available || forecastData.finalized || day < forecastData.basisDay) return null;
-        if (day === forecastData.basisDay) return Number(forecastData.basisTotal.toFixed(2));
-        return Number((forecastData.basisTotal + ((forecastEnd - forecastData.basisTotal) * (day - forecastData.basisDay) / Math.max(lastDay - forecastData.basisDay, 1))).toFixed(2));
+        if (!forecastData.available || forecastData.finalized || day < forecastData.projectionDay) return null;
+        if (day === forecastData.projectionDay) return Number(currentTotal.toFixed(2));
+        return Number((currentTotal + ((forecastEnd - currentTotal) * (day - forecastData.projectionDay) / Math.max(lastDay - forecastData.projectionDay, 1))).toFixed(2));
       });
       const ideal = labels.map((_, index) => Number((goal * (index + 1) / lastDay).toFixed(2)));
 
