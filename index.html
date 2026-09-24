@@ -37,6 +37,7 @@
 	  <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
 	  <link rel="stylesheet" href="modules/merch/merch.css">
 	  <link rel="stylesheet" href="modules/mood/mood.css">
+  <link rel="stylesheet" href="modules/birthday/member-birthday.css">
 </head>
 
 <body>
@@ -1368,6 +1369,8 @@ background:#0f172a
   <script src="modules/year-review/year-review.js"></script>
   <script src="modules/birthday/birthday.js"></script>
   <script src="modules/clubs/clubs.js"></script>
+  <script src="modules/birthday/member-birthday-data.js"></script>
+  <script src="modules/birthday/member-birthday.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
   <script src="modules/mascots/mascots.js"></script>
@@ -1466,7 +1469,7 @@ background:#0f172a
 
       const historic = HISTORIC_MONTH_POINTS[key] || 0;
 
-      return historic + allEntries
+      return historic + WRCBirthdayGifts.points({ key }) + allEntries
         .filter(e => (e.date || "").startsWith(key))
         .reduce((sum, e) => sum + calcPoints(e).total, 0);
 
@@ -1715,7 +1718,7 @@ background:#0f172a
       return entries.map(e => e.date).sort().reverse()[0];
     }
 
-    function getWeeklyTrend(entries, anchorDate, metric = "points") {
+    function getWeeklyTrend(entries, anchorDate, metric = "points", person = null) {
       if (!anchorDate) {
         return { current: 0, previous: 0, percent: null, direction: "neutral" };
       }
@@ -1745,7 +1748,7 @@ background:#0f172a
 
       const sumRange = (start, end) => entries
         .filter(entry => entry.date >= dateKey(start) && entry.date <= dateKey(end))
-        .reduce((sum, entry) => sum + value(entry), 0);
+        .reduce((sum, entry) => sum + value(entry), metric === "points" ? WRCBirthdayGifts.points({ person, from: dateKey(start), through: dateKey(end) }) : 0);
 
       const current = sumRange(currentStart, anchor);
       const previous = sumRange(previousStart, previousEnd);
@@ -1916,8 +1919,8 @@ background:#0f172a
       const personalRecords = options.personalRecords || [];
       const dateKey = (entry.date || "").slice(0, 7);
       const dayEntries = allEntries.filter(e => e.date === entry.date);
-      const dayTotal = dayEntries.reduce((sum, e) => sum + calcPoints(e).total, 0);
-      const monthTotal = allEntries
+      const dayTotal = WRCBirthdayGifts.points({ date: entry.date }) + dayEntries.reduce((sum, e) => sum + calcPoints(e).total, 0);
+      const monthTotal = WRCBirthdayGifts.points({ key: dateKey }) + allEntries
         .filter(e => (e.date || "").startsWith(dateKey))
         .reduce((sum, e) => sum + calcPoints(e).total, 0);
 
@@ -2536,6 +2539,7 @@ background:#0f172a
       checkGoalEffects();
       renderAdminStats();
       setText("entryCount", allEntries.length);
+      WRCMemberBirthdays.render();
     }
 
 
@@ -2615,7 +2619,7 @@ background:#0f172a
 
       const playerTotals = people.map(person => ({
         person,
-        total: entries
+        total: WRCBirthdayGifts.points({ person, key }) + entries
           .filter(entry => entry.person === person)
           .reduce((sum, entry) => sum + calcPoints(entry).total, 0)
       })).sort((a, b) => b.total - a.total);
@@ -2764,7 +2768,7 @@ background:#0f172a
       const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
       const [year, month] = key.split("-").map(Number);
       const lastDay = new Date(year, month, 0).getDate();
-      const total = entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0);
+      const total = WRCBirthdayGifts.points({ key }) + entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0);
       const today = new Date();
       const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
@@ -2822,7 +2826,7 @@ background:#0f172a
       const baseGoal = monthGoals[key] || 1700;
       let goal = baseGoal;
 
-      let total = 0;
+      let total = WRCBirthdayGifts.points({ key });
 
       entries.forEach(e => {
         const p = calcPoints(e);
@@ -2996,7 +3000,7 @@ background:#0f172a
     function checkGoalEffects() {
       const key = selectedMonth();
       const entries = monthEntries();
-      const total = entries.reduce((sum, e) => sum + calcPoints(e).total, 0);
+      const total = WRCBirthdayGifts.points({ key: selectedMonth() }) + entries.reduce((sum, e) => sum + calcPoints(e).total, 0);
       const ladder = buildRecordLadder(key, total);
       const next = ladder.next;
 
@@ -3445,7 +3449,7 @@ background:#0f172a
           `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
         const dayEntries = entries.filter(e => e.date === date);
-        const pts = dayEntries.reduce((sum, e) => sum + calcPoints(e).total, 0);
+        const pts = WRCBirthdayGifts.points({ date }) + dayEntries.reduce((sum, e) => sum + calcPoints(e).total, 0);
 
         let bg = "rgba(148,163,184,.10)";
         let border = "rgba(148,163,184,.25)";
@@ -3645,7 +3649,7 @@ background:#0f172a
         const data = dates.map(date => {
           return allEntries
             .filter(e => e.date === date && e.person === person)
-            .reduce((sum, e) => sum + metric.value(e), 0);
+            .reduce((sum, e) => sum + metric.value(e), analysisMetric === "points" ? WRCBirthdayGifts.points({ person, date }) : 0);
         });
 
         return {
@@ -3756,7 +3760,7 @@ background:#0f172a
       const goal = buildRecordLadder(key, forecastData.currentTotal).goal;
       const labels = Array.from({ length: lastDay }, (_, index) => String(index + 1));
 
-      if (!entries.length) {
+      if (!entries.length && !WRCBirthdayGifts.points({ key })) {
         if (targetCourseChart) {
           targetCourseChart.destroy();
           targetCourseChart = null;
@@ -3777,7 +3781,7 @@ background:#0f172a
 
       const today = new Date();
       const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-      const lastEntryDay = Math.max(...entries.map(entry => Number((entry.date || "").slice(8, 10)) || 1));
+      const lastEntryDay = Math.max(1, ...entries.map(entry => Number((entry.date || "").slice(8, 10)) || 1), ...WRCBirthdayGifts.matching({ key }).map(gift => Number(gift.gift_date.slice(8, 10))));
       const observedDay = key === currentKey
         ? Math.max(1, Math.min(today.getDate(), lastDay))
         : lastEntryDay;
@@ -3787,6 +3791,9 @@ background:#0f172a
         if (day >= 1 && day <= lastDay) dayTotals[day - 1] += calcPoints(entry).total;
       });
 
+      WRCBirthdayGifts.matching({ key }).forEach(gift => {
+        dayTotals[Number(gift.gift_date.slice(8, 10)) - 1] += gift.points;
+      });
       let running = 0;
       const actual = dayTotals.map((points, index) => {
         running += points;
@@ -3903,7 +3910,7 @@ background:#0f172a
       const total = month => {
         const entries = allEntries.filter(entry => entry.person === player && (entry.date || "").startsWith(month));
         return {
-          points: entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0),
+          points: WRCBirthdayGifts.points({ person: player, key: month }) + entries.reduce((sum, entry) => sum + calcPoints(entry).total, 0),
           steps: entries.reduce((sum, entry) => sum + (+entry.steps || 0), 0),
           bike: entries.reduce((sum, entry) => sum + (+entry.bike || 0), 0),
           strength: entries.reduce((sum, entry) => sum + (+entry.squats || 0) + (+entry.pushups || 0), 0),
@@ -3995,7 +4002,7 @@ background:#0f172a
 
       let bestMonth = { key: null, total: 0 };
       Object.keys(monthGoals).forEach(mKey => {
-        const total = allEntries
+        const total = WRCBirthdayGifts.points({ key: mKey }) + allEntries
           .filter(e => (e.date || "").startsWith(mKey))
           .reduce((s, e) => s + calcPoints(e).total, 0);
         if (total > bestMonth.total) {
@@ -4099,6 +4106,8 @@ background:#0f172a
         return totals;
       }, [0, 0, 0, 0, 0]).map(value => Math.round(value * 10) / 10);
 
+      const birthdayPoints = WRCBirthdayGifts.points({ key });
+      if (birthdayPoints) values.push(birthdayPoints);
       const total = values.reduce((sum, value) => sum + value, 0);
 
       if (activityDistributionChart) {
@@ -4118,10 +4127,10 @@ background:#0f172a
       activityDistributionChart = new Chart(canvas, {
         type: "doughnut",
         data: {
-          labels: ["Schritte", "Fahrrad", "Kraft", "Übungen", "Bonus"],
+          labels: ["Schritte", "Fahrrad", "Kraft", "Übungen", "Bonus", ...(birthdayPoints ? ["Geburtstagsgeschenke"] : [])],
           datasets: [{
             data: values,
-            backgroundColor: ["#38bdf8", "#22c55e", "#f97316", "#a78bfa", "#facc15"],
+            backgroundColor: ["#38bdf8", "#22c55e", "#f97316", "#a78bfa", "#facc15", ...(birthdayPoints ? ["#e9c777"] : [])],
             borderColor: "#0f172a",
             borderWidth: 3,
             hoverOffset: 8
@@ -4174,7 +4183,7 @@ background:#0f172a
         const pe = entries.filter(e => e.person === person);
         const activeDays = pe.filter(e => (+e.steps || 0) || (+e.bike || 0) || (+e.squats || 0) || (+e.pushups || 0) || e.exercise).length;
         const div = Math.max(activeDays, 1);
-        const points = pe.reduce((s, e) => s + calcPoints(e).total, 0);
+        const points = WRCBirthdayGifts.points({ person, key }) + pe.reduce((s, e) => s + calcPoints(e).total, 0);
         const steps = pe.reduce((s, e) => s + (+e.steps || 0), 0);
         const bike = pe.reduce((s, e) => s + (+e.bike || 0), 0);
         const squats = pe.reduce((s, e) => s + (+e.squats || 0), 0);
@@ -4183,7 +4192,7 @@ background:#0f172a
         return `
       <tr class="average-player-row" onclick="openPlayerDetails('${person}', '${key}')"
         title="${person} in der Spielerübersicht öffnen">
-        <td data-label="Spieler"><b>${person}</b><br><span class="sub">${activeDays} aktive Tage</span></td>
+        <td data-label="Spieler"><b>${person}</b>${WRCMemberBirthdays.badge(person)}<br><span class="sub">${activeDays} aktive Tage</span></td>
         <td data-label="Ø Punkte">${fmt(points / div, 1)}</td>
         <td data-label="Ø Schritte">${fmt(steps / div)}</td>
         <td data-label="Ø Rad">${fmt(bike / div, 1)} km</td>
@@ -4332,14 +4341,18 @@ background:#0f172a
 
       const monthPlayer = sumData(monthPlayerEntries);
       const monthTeam = sumData(monthTeamEntries);
+      monthPlayer.points += WRCBirthdayGifts.points({ person: player, key: month });
+      monthTeam.points += WRCBirthdayGifts.points({ key: month });
       const playerWeekTrend = getWeeklyTrend(
         allPlayerEntries,
         getLastEntryDate(monthTeamEntries),
-        "points"
+        "points", player
       );
 
       const currentAllPlayer = sumData(allPlayerEntries);
       const currentAllTeam = sumData(allTeamEntries);
+      currentAllPlayer.points += WRCBirthdayGifts.points({ person: player });
+      currentAllTeam.points += WRCBirthdayGifts.points();
       const historicPlayer = HISTORIC_PLAYER_TOTALS[player] || {
         points: 0,
         steps: 0,
@@ -4627,6 +4640,7 @@ background:#0f172a
         </div>
         <div class="player-profile-content">
           <span class="player-profile-kicker">WRC Spielerprofil</span>
+          <div id="memberBirthdayProfile">${WRCMemberBirthdays.badge(player)}</div>
           <div class="player-profile-name-line">
             <div>
               <span class="player-profile-number">#${profile.number || "--"}</span>

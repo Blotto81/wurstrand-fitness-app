@@ -46,7 +46,9 @@
 
       allEntries = cleanLoadedEntries(data || []);
       rememberEntriesQuickstart(allEntries);
+      await WRCBirthdayGifts.load();
       renderAll();
+      WRCMemberBirthdays.onEntriesLoaded();
       if (typeof WRCPost !== "undefined") {
         WRCPost.syncStreakMilestones(allEntries);
       }
