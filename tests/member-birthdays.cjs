@@ -21,8 +21,13 @@ function extract(name) {
 (async () => {
   for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) if (!match[1].includes('src=') && match[2].trim()) new vm.Script(match[2]);
   const storage = new Map(); const c = context('2026-09-25', storage); const D = c.WRCBirthdayData; const G = c.WRCBirthdayGifts;
-  assert.equal(D.celebrating().person, 'Fabi'); assert.equal(D.celebrating().age, 50);
-  assert.equal(D.celebrating('2026-10-09').age, 50);
+  assert.equal(D.celebrating().person, 'Fabi'); assert.equal(D.celebrating().age, 49);
+  assert.equal(D.celebrating('2026-10-09').age, 49);
+  assert.deepEqual(JSON.parse(JSON.stringify(D.members)), { Thorsten: '1981-05-20', Marian: '1977-10-09', Basti: '1982-02-21', Fabi: '1977-09-25' });
+  for (const [date, person, age, jubilee] of [['2026-09-25','Fabi',49,false],['2027-09-25','Fabi',50,true],['2026-10-09','Marian',49,false],['2027-10-09','Marian',50,true],['2027-02-21','Basti',45,false],['2027-05-20','Thorsten',46,false]]) {
+    const birthday = D.celebrating(date);
+    assert.equal(birthday.person, person); assert.equal(birthday.age, age); assert.equal(birthday.jubilee, jubilee);
+  }
   assert.equal(D.celebrating('2027-02-21').age, 45);
   assert.equal(D.celebrating('2031-05-20').age, 50);
   assert.equal(D.celebrating('2027-02-01'), null);
@@ -67,5 +72,29 @@ function extract(name) {
   clock='2026-09-30T12:00:00'; assert.equal(c.getTeamMonthForecast(c.key).forecast,935);
   const letter=JSON.parse(fs.readFileSync(path.join(root,'modules/birthday/fabi-2026.json'),'utf8'));
   assert.equal(letter.paragraphs[0],'Lieber Fabi,'); assert.equal(letter.paragraphs.length,13); assert.ok(letter.paragraphs.at(-1).endsWith('🌭🫘'));
+  assert.ok(letter.paragraphs.includes('Heute wirst du 49.')); assert.ok(letter.paragraphs.some(p => p.startsWith('Alles Liebe zum 49., Fabi.'))); assert.ok(!letter.paragraphs.some(p => /\b50\b/.test(p)));
+  // Exercise the actual scene renderer for ordinary birthdays and jubilee upgrades.
+  const ui = fs.readFileSync(path.join(root, 'modules/birthday/member-birthday.js'), 'utf8');
+  vm.runInContext(ui.slice(ui.indexOf('  function badge('), ui.indexOf('  function stats(')), c);
+  c.D = D; assert.ok(c.badge('Fabi').includes('Level 49')); assert.equal(c.badge('Thorsten'), '');
+  const draw = ui.slice(ui.indexOf('  function drawStep()'), ui.indexOf('  async function finalStage()'));
+  const ownership = ui.slice(ui.indexOf('  function ownsShow()'), ui.indexOf('  async function openShow('));
+  for (const [date, person, age, jubilee] of [['2026-09-25','Fabi',49,false],['2027-09-25','Fabi',50,true],['2026-10-09','Marian',49,false],['2027-10-09','Marian',50,true],['2027-02-21','Basti',45,false],['2027-05-20','Thorsten',46,false]]) {
+    const scene = { D, active: D.celebrating(date), step: 0, letter: null, player: () => person, stamp: x => x, esc: x => x,
+      stats: () => '<p>VERIFIED_LIFETIME</p>', next() {}, closeShow() { this.closed = true; },
+      dialog: { innerHTML: '', classList: { toggle() {} }, querySelector: () => ({ addEventListener() {}, focus() {} }) } };
+    scene.closeShow = () => { scene.closed = true; };
+    vm.createContext(scene); vm.runInContext(ownership + draw, scene);
+    const scenes=[];
+    for (let step=0;step<=4;step++) { scene.step=step; scene.drawStep(); scenes.push(scene.dialog.innerHTML); }
+    assert.ok(scenes[0].includes(`${person.toUpperCase()} WIRD ${age}!`));
+    assert.ok(scenes[1].includes(`${age} Jahre ${person}.`));
+    assert.ok(scenes[2].includes('VERIFIED_LIFETIME')); assert.ok(scenes[3].includes('Der WRC verneigt sich.'));
+    assert.ok(scenes[4].includes(`${age} & noch punktfähig`)); assert.ok(scenes[4].includes('Geschenk anfordern'));
+    assert.equal(scenes[4].includes('WRC GOLD-EDITION'), jubilee); assert.equal(scenes[4].includes('Verdienstorden'), jubilee);
+    if (!jubilee) assert.ok(!scenes.join('').includes('JUBILÄUMSAUSGABE'));
+    if (person === 'Fabi' && age === 49) { scene.letter=letter; scene.step=6; scene.drawStep(); assert.ok(!/\b50\b/.test(scene.dialog.innerHTML)); }
+    scene.player=()=>person==='Fabi'?'Thorsten':'Fabi'; scene.closed=false; scene.drawStep(); assert.equal(scene.closed,true);
+  }
   console.log('PASS: birthdays/ages, annual/catch-up/seen, production preview guard, all givers +15, recipient only, duplicate/reload/self/day-after, immutable fitness, real monthly totals and shared forecast/chart, letter.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
