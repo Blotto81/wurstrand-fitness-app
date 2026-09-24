@@ -1,7 +1,7 @@
 /* Member birthdays and a separate, append-only points ledger. Fitness entries stay untouched. */
 (function () {
   "use strict";
-  const members = Object.freeze({ Thorsten: "1981-05-20", Marian: "1976-10-09", Basti: "1982-02-21", Fabi: "1976-09-25" });
+  const members = Object.freeze({ Thorsten: "1981-05-20", Marian: "1977-10-09", Basti: "1982-02-21", Fabi: "1977-09-25" });
   const launchDate = "2026-09-24";
   const params = new URLSearchParams(location.search);
   const previewDate = params.get("member-birthday");
