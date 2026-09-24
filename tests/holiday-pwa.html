@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="de"><meta charset="utf-8"><title>Holiday PWA-Prüfung</title><h1>Holiday PWA-Prüfung</h1><pre id="result">Prüfung läuft …</pre><script>
+(async () => {
+  if (!["localhost", "127.0.0.1"].includes(location.hostname)) throw new Error("Nur lokal ausführen.");
+  await navigator.serviceWorker.register("../service-worker.js");
+  await navigator.serviceWorker.ready;
+  const source = await (await fetch("../service-worker.js")).text();
+  const name = source.match(/CACHE_NAME = "([^"]+)"/)[1];
+  const cache = await caches.open(name);
+  const files = ["holiday-calendar.js", "holiday-data.js", "holidays.js", "holidays.css"];
+  for (const file of files) {
+    const response = await cache.match(new URL("../modules/holidays/" + file, location.href).href);
+    if (!response?.ok) throw new Error("Asset fehlt im Cache: " + file);
+  }
+  document.getElementById("result").textContent = "PASS: " + name + " aktiv; alle vier Holiday-Assets im PWA-Cache vorhanden.";
+})().catch(error => { document.getElementById("result").textContent = "FAIL: " + error.message; });
+</script></html>

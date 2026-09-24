@@ -10,6 +10,7 @@ function context(date = '2026-09-25', storage = new Map(), hostname = 'localhost
     localStorage: { getItem: k => storage.get(k) ?? null, setItem: (k, v) => storage.set(k, v) } };
   ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(path.join(root, 'scoring.js'), 'utf8') + '\n' + source, ctx);
+  vm.runInContext(fs.readFileSync(path.join(root, "modules/holidays/holiday-calendar.js"), "utf8") + "\n" + fs.readFileSync(path.join(root, "modules/holidays/holiday-data.js"), "utf8"), ctx);
   return ctx;
 }
 function extract(name) {
