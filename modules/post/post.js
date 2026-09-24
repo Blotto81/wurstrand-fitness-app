@@ -203,6 +203,7 @@
   function show(letter, options = {}) {
     if (
       !letter
+      || document.body.classList.contains("wrc-member-birthday-active")
       || document.querySelector(".bigpop.show")
       || overlay?.classList.contains("is-visible")
     ) return false;
