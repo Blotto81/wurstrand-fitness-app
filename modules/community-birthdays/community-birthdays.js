@@ -183,7 +183,9 @@
   function checkToday() {
     const preview = previewDate();
     const date = preview || new Date();
-    const items = birthdaysForDate(date);
+    const items = birthdaysForDate(date).filter(item =>
+      !window.WRCMemberBirthdays || !WRCBirthdayData.members[item.name]
+    );
     if (!items.length) return;
 
     window.setTimeout(() => {
