@@ -1063,6 +1063,16 @@
       align-items: center;
     }
 
+    #wrcHomeBanner {
+      cursor: pointer;
+    }
+
+    #wrcHomeBanner:focus-visible {
+      outline: 2px solid #86efac;
+      outline-offset: 5px;
+      border-radius: 8px;
+    }
+
     .app-header .logo-header img {
       width: 115px;
       max-width: 32vw;

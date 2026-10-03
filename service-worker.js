@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v56";
+const CACHE_NAME = "wrc-app-v57";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -85,8 +85,6 @@ const APP_SHELL = [
   "./modules/pwa/pwa.js",
   "./modules/clubs/clubs.css",
   "./modules/clubs/clubs.js",
-  "./modules/mood/mood.css",
-  "./modules/mood/mood.js"
 ];
 
 self.addEventListener("install", event => {
