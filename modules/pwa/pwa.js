@@ -1,19 +1,18 @@
 (() => {
-  const DISMISSED_KEY = "wrc-install-hint-dismissed";
-  const DISMISS_TIME = 30 * 24 * 60 * 60 * 1000;
   let installPrompt = null;
   let installHint = null;
+  let installed = false;
+  const standalone = window.matchMedia("(display-mode: standalone)");
+  const isInstalled = () => installed || standalone.matches || navigator.standalone === true;
+  const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-  const isInstalled = () =>
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
-
-  const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = () => /android/i.test(navigator.userAgent);
-
-  const wasRecentlyDismissed = () => {
-    const dismissedAt = Number(localStorage.getItem(DISMISSED_KEY));
-    return dismissedAt && Date.now() - dismissedAt < DISMISS_TIME;
+  const installHelp = () => {
+    if (isIos()) return "Öffne die WRC in Safari. Tippe auf Teilen → Zum Home-Bildschirm → Hinzufügen.";
+    if (/android/i.test(navigator.userAgent)) {
+      return "Öffne das Browser-Menü und wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“, falls angeboten. Fehlt der Eintrag, versuche es in Chrome.";
+    }
+    return "Öffne das Browser-Menü und suche nach „Installieren“ oder „Als App installieren“. Falls dein Browser dies nicht anbietet, öffne die WRC in Chrome oder Edge.";
   };
 
   const hideInstallHint = () => {
@@ -22,57 +21,57 @@
   };
 
   const createInstallHint = () => {
-    if (installHint || isInstalled() || wasRecentlyDismissed()) return;
+    const dashboard = document.getElementById("dashboard");
+    if (!dashboard || installHint || isInstalled()) return;
 
     installHint = document.createElement("aside");
     installHint.className = "pwa-install-hint";
-    installHint.setAttribute("aria-label", "App installieren");
+    installHint.setAttribute("aria-label", "WRC auf diesem Gerät installieren");
 
     const message = document.createElement("p");
-    message.innerHTML = "<strong>📱 Tipp:</strong> Installiere die WRC auf deinem Startbildschirm. Sie fühlt sich dann wie eine richtige App an.";
+    message.innerHTML = "<strong>📲 WRC auf diesem Gerät installieren</strong><br>Die Wurstrand Challenge wie eine App direkt vom Startbildschirm öffnen.";
+    const installButton = document.createElement("button");
+    installButton.type = "button";
+    installButton.className = "pwa-install-button";
+    installButton.textContent = "WRC installieren";
+    installButton.setAttribute("aria-controls", "wrcInstallHelp");
+    const help = document.createElement("p");
+    help.id = "wrcInstallHelp";
+    help.className = "pwa-install-help";
+    help.setAttribute("role", "status");
+    help.hidden = true;
 
-    const actions = document.createElement("div");
-    actions.className = "pwa-install-actions";
-
-    if (installPrompt) {
-      const installButton = document.createElement("button");
-      installButton.type = "button";
-      installButton.className = "pwa-install-button";
-      installButton.textContent = "Installieren";
-      installButton.addEventListener("click", async () => {
-        installPrompt.prompt();
-        await installPrompt.userChoice;
-        installPrompt = null;
-        hideInstallHint();
-      });
-      actions.appendChild(installButton);
-    } else if (isIos()) {
-      const iosHelp = document.createElement("span");
-      iosHelp.className = "pwa-install-help";
-      iosHelp.textContent = "In Safari: Teilen → Zum Home-Bildschirm";
-      actions.appendChild(iosHelp);
-    } else if (isAndroid()) {
-      const androidHelp = document.createElement("span");
-      androidHelp.className = "pwa-install-help";
-      androidHelp.textContent = "Im Browser-Menü: App installieren";
-      actions.appendChild(androidHelp);
-    } else {
-      return;
-    }
-
-    const dismissButton = document.createElement("button");
-    dismissButton.type = "button";
-    dismissButton.className = "pwa-install-dismiss";
-    dismissButton.setAttribute("aria-label", "Installationshinweis schließen");
-    dismissButton.textContent = "×";
-    dismissButton.addEventListener("click", () => {
-      localStorage.setItem(DISMISSED_KEY, String(Date.now()));
-      hideInstallHint();
+    installButton.addEventListener("click", async () => {
+      if (isInstalled()) { hideInstallHint(); return; }
+      if (!installPrompt) {
+        help.textContent = installHelp();
+        help.hidden = false;
+        return;
+      }
+      const prompt = installPrompt;
+      installPrompt = null; // Browser events can only be prompted once.
+      installButton.disabled = true;
+      help.hidden = true;
+      try {
+        await prompt.prompt();
+        const choice = await prompt.userChoice;
+        if (choice.outcome === "accepted") {
+          installed = true;
+          hideInstallHint();
+        } else {
+          help.textContent = "Installation abgebrochen. Du kannst es später erneut versuchen. " + installHelp();
+          help.hidden = false;
+        }
+      } catch {
+        help.textContent = "Der Installationsdialog ist gerade nicht verfügbar. " + installHelp();
+        help.hidden = false;
+      } finally {
+        installButton.disabled = false;
+      }
     });
 
-    actions.appendChild(dismissButton);
-    installHint.append(message, actions);
-    document.body.appendChild(installHint);
+    installHint.append(message, installButton, help);
+    dashboard.appendChild(installHint);
   };
 
   if ("serviceWorker" in navigator) {
@@ -86,23 +85,16 @@
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     installPrompt = event;
-    hideInstallHint();
     createInstallHint();
   });
-
   window.addEventListener("appinstalled", () => {
+    installed = true;
     installPrompt = null;
-    localStorage.removeItem(DISMISSED_KEY);
     hideInstallHint();
   });
-
-  window.matchMedia("(display-mode: standalone)").addEventListener?.("change", event => {
-    if (event.matches) hideInstallHint();
+  standalone.addEventListener?.("change", () => {
+    if (isInstalled()) hideInstallHint();
+    else createInstallHint();
   });
-
-  if (isIos() || isAndroid()) {
-    window.addEventListener("load", () => {
-      window.setTimeout(createInstallHint, 1500);
-    });
-  }
+  window.addEventListener("load", createInstallHint);
 })();
