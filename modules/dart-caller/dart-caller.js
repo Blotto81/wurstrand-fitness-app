@@ -779,8 +779,8 @@
     });
     player.dartsThrown += 1;
 
-    if (isThreeFives()) window.WRCDartCallerAudio?.playSpecial("threeFives");
-    if (isThreeMisses()) window.WRCDartCallerAudio?.playSpecial("threeMisses");
+    if (isThreeFives()) window.WRCDartCallerAudio?.playSpecial("threeFives", { playerName: player.name });
+    if (isThreeMisses()) window.WRCDartCallerAudio?.playSpecial("threeMisses", { playerName: player.name });
 
     if (remaining < 0) {
       player.score = state.turnStartScore;
@@ -789,7 +789,7 @@
       state.throwLog[state.throwLog.length - 1].isBust = true;
       state.transition = { type: "bust", returnScore: state.turnStartScore };
       render();
-      window.WRCDartCallerAudio?.playSpecial("bust");
+      window.WRCDartCallerAudio?.playSpecial("bust", { playerName: player.name });
       scheduleAdvanceTurn(1450);
       return;
     }
@@ -808,7 +808,7 @@
       if (isFirstWinner) {
         state.winner = { ...player };
         state.winnerCelebrated = true;
-        window.WRCDartCallerAudio?.playSpecial("winner");
+        window.WRCDartCallerAudio?.playSpecial("winner", { playerName: state.winner?.name });
       }
 
       const unfinished = state.players.filter(candidate => !candidate.finished);
@@ -882,7 +882,7 @@
       state.players[state.currentPlayer].highestTurn = Math.max(activePlayer.highestTurn, turnTotal);
     }
     if (!state.turnBusted && state.darts.length === 3 && !activePlayer.finished && !isThreeFives() && !isThreeMisses()) {
-      window.WRCDartCallerAudio?.playTurnScore(turnTotal, { dartCount: state.darts.length, darts: state.darts });
+      window.WRCDartCallerAudio?.playTurnScore(turnTotal, { dartCount: state.darts.length, darts: state.darts, playerName: activePlayer.name });
     }
     const nextPlayerIndex = nextActivePlayerIndex();
     state.transition = {
@@ -936,7 +936,7 @@
     clearSavedGame();
     releaseWakeLock();
     render();
-    if (!state.winnerCelebrated) window.WRCDartCallerAudio?.playSpecial("winner");
+    if (!state.winnerCelebrated) window.WRCDartCallerAudio?.playSpecial("winner", { playerName: state.winner?.name });
     saveCompletedGame();
   }
 

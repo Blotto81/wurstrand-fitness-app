@@ -97,7 +97,9 @@
     const alternatives = sources.length > 1
       ? sources.filter(source => source !== lastSource)
       : sources;
-    const pool = alternatives.length ? alternatives : sources;
+    // Avoid forcing Gomesch when the only other caller just played.
+    const pool = alternatives.length && !alternatives.every(source => callerName(source) === "gomesch")
+      ? alternatives : sources;
     const callerGroups = new Map();
     pool.forEach(source => {
       const caller = callerName(source);
@@ -107,7 +109,7 @@
       caller,
       takes,
       // ALF gets two thirds more weight than a standard caller, not a 2/3 share.
-      weight: caller === "alf" ? 5 / 3 : (caller === "marco" || caller === "niebel") ? 1.25 : caller === "fun" ? 0.35 : 1
+      weight: caller === "alf" ? 5 / 3 : (caller === "marco" || caller === "niebel") ? 1.25 : caller === "fun" ? 0.35 : caller === "gomesch" ? 0.5 : 1
     }));
     const totalWeight = groups.reduce((sum, group) => sum + group.weight, 0);
     let draw = Math.random() * totalWeight;
@@ -118,7 +120,10 @@
     return selectedGroup.takes[Math.floor(Math.random() * selectedGroup.takes.length)];
   }
 
-  function play(sources, onEnded, priority = false) {
+  function play(sources, onEnded, priority = false, playerName = "") {
+    if (String(playerName).trim().toLowerCase() === "marian") {
+      sources = sources?.filter(source => callerName(source) !== "gomesch");
+    }
     if (priorityPlaying) {
       if (priority) pendingPriorityCalls.push(sources);
       return Promise.resolve(false);
@@ -166,11 +171,11 @@
     return calls;
   }
 
-  function maybePlayBonus(score, darts) {
+  function maybePlayBonus(score, darts, playerName) {
     if (Math.random() >= 0.12) return;
-    // Keep the existing 12% bonus rate. Caller grouping gives Gomesch and
-    // Judith equal weight regardless of how many matching clips they have.
-    play(contextualBonusCalls(score, darts));
+    // Keep the 12% bonus rate; Gomesch has half a standard caller
+    // weight and is excluded for the player whose visit triggered this call.
+    play(contextualBonusCalls(score, darts), undefined, false, playerName);
   }
 
   function speakFallback(score) {
@@ -185,7 +190,7 @@
   }
 
   window.WRCDartCallerAudio = {
-    playTurnScore(score, { dartCount = 0, darts = [] } = {}) {
+    playTurnScore(score, { dartCount = 0, darts = [], playerName = "" } = {}) {
       const numericScore = Number(score);
       const visitDarts = Array.isArray(darts) ? darts.map(({ base, multiplier }) => ({ base, multiplier })) : [];
       const candidates = numericScore === 0 ? specialCalls.zero : turnScores[numericScore];
@@ -193,19 +198,21 @@
       if (!sources?.length) return speakFallback(numericScore);
       return play(
         sources,
-        numericScore === 0 ? undefined : () => maybePlayBonus(numericScore, visitDarts)
+        numericScore === 0 ? undefined : () => maybePlayBonus(numericScore, visitDarts, playerName),
+        false,
+        playerName
       );
     },
-    playSpecial(event) {
-      return play(specialCalls[event], undefined, event === "threeFives" || event === "threeMisses");
+    playSpecial(event, { playerName = "" } = {}) {
+      return play(specialCalls[event], undefined, event === "threeFives" || event === "threeMisses", playerName);
     },
-    playCricketTurn(closedTargets, points) {
+    playCricketTurn(closedTargets, points, { playerName = "" } = {}) {
       if (priorityPlaying) return Promise.resolve(false);
       const closed = Array.isArray(closedTargets) ? closedTargets.filter(Boolean) : [];
       const numericPoints = Number(points) || 0;
       if (!closed.length && numericPoints <= 0) return Promise.resolve(false);
-      if (!closed.length) return this.playTurnScore(numericPoints);
-      if (!("speechSynthesis" in window)) return numericPoints > 0 ? this.playTurnScore(numericPoints) : Promise.resolve(false);
+      if (!closed.length) return this.playTurnScore(numericPoints, { playerName });
+      if (!("speechSynthesis" in window)) return numericPoints > 0 ? this.playTurnScore(numericPoints, { playerName }) : Promise.resolve(false);
       playbackToken += 1;
       currentAudio?.pause();
       window.speechSynthesis.cancel();
