@@ -972,3 +972,36 @@ existing UNO forms are untouched. */
     scroll-behavior:auto!important
   }
 }
+
+/* Original photos stay inside the existing fixed-size card window. */
+.ur-photo-original {
+  border-style:solid;
+  background:#172238;
+}
+.ur-photo-media {
+  position:absolute;
+  width:calc(100% - 8px);
+  aspect-ratio:2/3;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+.ur-photo-media img {
+  position:absolute;
+  inset:0;
+  border-radius:3px;
+}
+.ur-photo-rotated img {
+  inset:auto;
+  top:50%;
+  left:50%;
+  width:150%;
+  height:66.6666667%;
+  max-width:none;
+  transform:translate(-50%,-50%) rotate(90deg);
+}
+.ur-point-source {
+  display:block;
+  color:var(--ur-muted);
+  margin-top:4px;
+}

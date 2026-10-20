@@ -6,13 +6,15 @@ Das Regelwerk wird ausschließlich aus dem vorhandenen UNO-Bereich geöffnet.
 ## Fotos ergänzen
 
 1. Originalfoto in `modules/uno/uno-rules-images/` ablegen (Ordner bei Bedarf anlegen).
-2. In **uno-rules-data.js**, im Objekt `images`, den stabilen Karten-Schlüssel zuordnen:
+2. In **uno-rules-data.js**, im Objekt `photoCatalog`, den stabilen Karten-Schlüssel mit Dateiname und WRC-Punktwert zuordnen:
 
 ```js
-const images = {
-  'classic-0': 'modules/uno/uno-rules-images/classic-0.webp',
-  'flip-light-1': 'modules/uno/uno-rules-images/flip-light-1.webp',
-  'flip-dark-wildcolor': 'modules/uno/uno-rules-images/flip-dark-wildcolor.webp'
+const photoCatalog = {
+  'flip-dark-wildcolor': {
+    file: 'uno-flip-dunkel-ziehen-bis-farbe.png',
+    points: 70,
+    rotation: 90 // optionale reine Anzeigedrehung, Original bleibt unverändert
+  }
 };
 ```
 
@@ -40,3 +42,20 @@ Verlust erst über 1.000. Dieses Modul ist ausschließlich eine Lesehilfe.
 Tests: `node tests/uno-rules.cjs`. Die lokale Browser-Testseite
 `tests/uno-rules-preview.html` verwendet eine eigene Datenbankattrappe, niemals
 Produktivdaten. Sie lädt die unveränderte UNO-Ergebniserfassung.
+
+## Eingebundene Originale
+
+Zehn PNG-Dateien aus `WRC_UNO_Flip_Kartenbilder.zip` sind bytegenau übernommen.
+Die mitgelieferte `Karten_und_Punkte.csv` liegt zur Nachvollziehbarkeit daneben.
+Ihre Werte gelten nur für diese fotografierten Karten im Regelwerk. Fehlende
+Gegenstücke und Classic behalten ihre bisherige Darstellung und Werte.
+
+Zwei Dateinamen sind nach dem tatsächlichen Motiv zugeordnet:
+- `uno-flip-dunkel-richtungswechsel-kreis.png` → **Alle aussetzen**, dunkle Seite (20 Punkte laut CSV).
+- `uno-flip-hell-flip.png` → **Flip**, dunkle Seite (50 Punkte laut CSV).
+
+Weitere abweichende WRC-Werte aus der CSV: hell +1 = 20, dunkel Farbwahl = 50,
+dunkel +5 = 70, dunkel Zieh bis Farbe = 70. Die Anzeige kennzeichnet die
+WRC-Kartenübersicht als Quelle. Es wird keine Spiel- oder Statistiklogik geändert.
+Das querliegende Zieh-bis-Farbe-Foto wird ausschließlich per CSS um 90° gedreht.
+Alle Fotos bleiben vollständig sichtbar (`contain`) im bestehenden 2:3-Fenster.

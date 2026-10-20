@@ -5,8 +5,23 @@
     classic: { name: 'UNO Classic', subtitle: 'Der Klassiker. Mit unseren eigenen Gesetzen.', swap: 0 },
     flip: { name: 'UNO Flip', subtitle: 'Zwei Seiten. Doppelt so viel Ärger.', swap: 1 }
   };
-  // Add local photo paths here, keyed by the stable card IDs below.
-  const images = {};
+  // Original ZIP photos and WRC display values from Karten_und_Punkte.csv.
+  // Two source filenames are misleading: the circular arrow is Skip Everyone;
+  // the photographed Flip card is dark-side, despite its "hell" filename.
+  const photoCatalog = {
+    'flip-light-wild2': { file: 'uno-flip-hell-plus2-farbwahl.png', points: 50 },
+    'flip-dark-skipall': { file: 'uno-flip-dunkel-richtungswechsel-kreis.png', points: 20 },
+    'flip-light-skip': { file: 'uno-flip-hell-aussetzen.png', points: 20 },
+    'flip-dark-1': { file: 'uno-flip-dunkel-eins-tauschkarte.png', points: 20 },
+    'flip-dark-reverse': { file: 'uno-flip-dunkel-richtungswechsel-pfeile.png', points: 20 },
+    'flip-dark-wild': { file: 'uno-flip-dunkel-farbwahl.png', points: 50 },
+    'flip-dark-wildcolor': { file: 'uno-flip-dunkel-ziehen-bis-farbe.png', points: 70, rotation: 90 },
+    'flip-dark-draw5': { file: 'uno-flip-dunkel-plus5.png', points: 70 },
+    'flip-light-draw1': { file: 'uno-flip-hell-plus1.png', points: 20 },
+    'flip-dark-flip': { file: 'uno-flip-hell-flip.png', points: 50 }
+  };
+  const images = Object.fromEntries(Object.entries(photoCatalog).map(([id, photo]) =>
+    [id, 'modules/uno/uno-rules-images/' + photo.file]));
   const cards = [];
   function add(variant, side, key, name, points, description, detail, keywords = []) {
     cards.push({ id: [variant, side, key].filter(Boolean).join('-'), variant, side,
@@ -40,6 +55,14 @@
   add('flip', 'dark', 'draw5', '+5 · Zieh fünf', 20, 'Fünf Karten. Es kann schlimmer kommen.', 'WRC: +5 darf mit +5 abgewehrt werden. Drei solcher Karten bedeuten 15 Karten für den ersten Spieler ohne weitere Abwehr.', ['+5', 'abwehren']);
   add('flip', 'dark', 'skipall', 'Alle aussetzen', 30, 'Alle pausieren. Du bist erneut dran.', 'Alle anderen Spieler werden übersprungen. Du spielst sofort noch einmal.');
   add('flip', 'dark', 'wildcolor', 'Farbwahl · Zieh bis Farbe', 60, 'Ziehen, bis die gewählte Farbe kommt.', 'Nach der Grundregel nur ohne passende aktuelle Farbe spielbar. WRC: Eine weitere solche Karte verlängert die Farbkette. Bei Orange → Lila wird erst bis Orange, dann bis Lila gezogen. Jede weitere Farbe kommt hinten dazu.', ['abwehren', 'orange', 'lila', 'farbkette']);
+
+  // Rulebook only: these values never feed the existing result/statistics code.
+  cards.forEach(card => {
+    if (photoCatalog[card.id]) {
+      card.points = photoCatalog[card.id].points;
+      card.pointSource = 'WRC-Kartenübersicht';
+    }
+  });
 
   const sharedRules = [
     { id: 'deal', icon: '♠', title: 'Der Gewinner gibt. Der Nachbar hebt.', keywords: ['kartengeber', 'austeilen', 'abheben', 'strafkarte'],
@@ -90,5 +113,5 @@
       return tokens.every(token => /^[+\d]/.test(token) ? words.includes(token) : content.includes(token));
     });
   }
-  root.WRCUnoRules = { variants, images, cards, getRules, getCards, search };
+  root.WRCUnoRules = { variants, images, photoCatalog, cards, getRules, getCards, search };
 })(typeof window !== 'undefined' ? window : globalThis);
