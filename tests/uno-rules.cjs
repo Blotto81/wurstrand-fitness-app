@@ -17,8 +17,8 @@ for (const side of ['light', 'dark']) {
   for (let n = 2; n <= 9; n++) assert.equal(card(`flip-${side}-${n}`).points, n);
 }
 const expected = { 'classic-draw2':20,'classic-reverse':20,'classic-skip':20,'classic-wild':50,'classic-wild4':50,
-  'flip-light-draw1':10,'flip-light-reverse':20,'flip-light-skip':20,'flip-light-flip':20,'flip-light-wild':40,'flip-light-wild2':50,
-  'flip-dark-draw5':20,'flip-dark-reverse':20,'flip-dark-skipall':30,'flip-dark-flip':20,'flip-dark-wild':40,'flip-dark-wildcolor':60 };
+  'flip-light-draw1':20,'flip-light-reverse':20,'flip-light-skip':20,'flip-light-flip':20,'flip-light-wild':40,'flip-light-wild2':50,
+  'flip-dark-draw5':70,'flip-dark-reverse':20,'flip-dark-skipall':20,'flip-dark-flip':50,'flip-dark-wild':50,'flip-dark-wildcolor':70 };
 for (const [id, points] of Object.entries(expected)) assert.equal(card(id).points, points, id);
 for (const v of ['classic', 'flip']) {
   for (const id of ['deal','jump','swap','penalty','stack','end']) assert.ok(d.getRules(v).some(r => r.id === id));
@@ -48,4 +48,22 @@ for (const filename of ['uno-rules-data.js','uno-rules.js','uno-rules.css']) {
 for (const filename of ['uno-rules-data.js', 'uno-rules.js']) new vm.Script(fs.readFileSync(path.join(root, 'modules/uno', filename), 'utf8'));
 new vm.Script(sw);
 for (const match of index.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) if (match[1].trim()) new vm.Script(match[1]);
-console.log('PASS: UNO variants, 45 unique cards, official values + house overrides, shared rules, search isolation, asset wiring and syntax.');
+const photoDir = path.join(root, 'modules/uno/uno-rules-images');
+const csv = fs.readFileSync(path.join(photoDir, 'Karten_und_Punkte.csv'), 'utf8').trim().split(/[\r\n]+/).slice(1);
+assert.equal(csv.length, 10);
+assert.equal(Object.keys(d.images).length, 10);
+assert.equal(new Set(Object.values(d.images)).size, 10, 'Each original has one actual card/side');
+for (const row of csv) {
+  const [filename, points] = row.split(',');
+  const id = Object.keys(d.photoCatalog).find(id => d.photoCatalog[id].file === filename);
+  assert.ok(id, filename);
+  assert.equal(card(id).points, Number(points), filename);
+  assert.equal(card(id).pointSource, 'WRC-Kartenübersicht');
+  assert.ok(fs.existsSync(path.join(root, d.images[id])));
+  assert.ok(sw.includes('./' + d.images[id]), 'Offline image: ' + id);
+}
+assert.ok(d.images['flip-dark-skipall'].endsWith('richtungswechsel-kreis.png'));
+assert.ok(d.images['flip-dark-flip'].endsWith('hell-flip.png'));
+assert.ok(!d.images['flip-light-flip'], 'Do not show a dark-side photo on the light side');
+assert.equal(d.photoCatalog['flip-dark-wildcolor'].rotation, 90);
+console.log('PASS: UNO variants, 45 unique cards, photo mapping and CSV values + house overrides, shared rules, search isolation, asset wiring and syntax.');
