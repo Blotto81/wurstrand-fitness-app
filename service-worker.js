@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v59";
+const CACHE_NAME = "wrc-app-v60";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -54,6 +54,16 @@ const APP_SHELL = [
   "./modules/uno/uno-rules-data.js",
   "./modules/uno/uno-rules.js",
   "./modules/uno/uno-rules.css",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-eins-tauschkarte.png",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-farbwahl.png",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-plus5.png",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-richtungswechsel-kreis.png",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-richtungswechsel-pfeile.png",
+  "./modules/uno/uno-rules-images/uno-flip-dunkel-ziehen-bis-farbe.png",
+  "./modules/uno/uno-rules-images/uno-flip-hell-aussetzen.png",
+  "./modules/uno/uno-rules-images/uno-flip-hell-flip.png",
+  "./modules/uno/uno-rules-images/uno-flip-hell-plus1.png",
+  "./modules/uno/uno-rules-images/uno-flip-hell-plus2-farbwahl.png",
   "./modules/table-tennis/table-tennis.css",
   "./modules/table-tennis/table-tennis.js",
   "./modules/game-collection/game-collection.css",
