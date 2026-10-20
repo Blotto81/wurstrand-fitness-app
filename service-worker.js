@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v58";
+const CACHE_NAME = "wrc-app-v59";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -51,6 +51,9 @@ const APP_SHELL = [
   "./modules/frisbee/frisbee.js",
   "./modules/uno/uno.css",
   "./modules/uno/uno.js",
+  "./modules/uno/uno-rules-data.js",
+  "./modules/uno/uno-rules.js",
+  "./modules/uno/uno-rules.css",
   "./modules/table-tennis/table-tennis.css",
   "./modules/table-tennis/table-tennis.js",
   "./modules/game-collection/game-collection.css",
