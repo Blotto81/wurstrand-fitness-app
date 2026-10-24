@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WRC Bonusstreaks · lokale Prüfung</title>
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../modules/clubs/clubs.css"><link rel="stylesheet" href="../modules/bonus-streaks/bonus-streaks.css">
+<style>body{max-width:1100px;margin:auto;padding:20px}h1{font-size:24px}.preview-tools{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.preview-tools>*{flex:1;min-width:140px}.preview-form{max-width:470px}.preview-form label{display:block;margin-top:10px}#proof{display:block;padding:10px;color:#b4d8c5;font-size:12px}.preview-profile-head{display:flex;align-items:center;gap:20px;padding:20px;border:1px solid #334155;border-radius:20px}.preview-profile-head h2{margin:0}.preview-profile-head .bs-patch-shelf{justify-content:flex-start}.preview-profile-head .player-patch-shelf{justify-content:flex-start}.preview-profile-head>div{min-width:0}select,input{max-width:100%}</style></head>
+<body><h1>🔥 Der Grill bleibt heiß.</h1><p>Lokale Funktionsprüfung · ausschließlich synthetische Aktivitäten.</p>
+<div class="preview-tools"><label>Spieler <select id="person"><option>Marian</option><option>Thorsten</option><option>Basti</option><option>Fabi</option></select></label><button id="long" type="button">Alle Meilensteine prüfen</button><button id="reset" type="button">63-Tage-Beispiel</button></div>
+<div class="preview-form"><div id="bonusStreakEntry"></div><details><summary>Aktivität lokal speichern</summary><label>Datum <input id="date" type="date" value="2026-10-24"></label><label>Schritte <input id="steps" type="number" value="3000"></label><label>Rad-km <input id="bike" type="number" value="3"></label><input id="squats" type="hidden" value="0"><input id="pushups" type="hidden" value="0"><label><input id="exercise" type="checkbox" checked> Übung gemacht</label><button id="save" type="button">Lokal speichern</button></details></div>
+<output id="proof">Bereit · keine Produktivdaten</output><div id="profile"></div>
+<script>
+  if(!['127.0.0.1','localhost'].includes(location.hostname))throw Error('Only local fixture');
+  const NativeDate=Date;let simulated='2026-10-24';
+  window.Date=class extends NativeDate{constructor(...args){super(...(args.length?args:[simulated+'T12:00:00']));}static now(){return +new NativeDate(simulated+'T12:00:00');}};
+  let allEntries=[],editingId=null;
+  const confirm=()=>true;
+  function toast(text){document.getElementById('proof').textContent=text;}
+  function cleanLoadedEntries(rows){return rows;}
+  function renderDashboard(){} function resetForm(){} function showTab(){} function menuLinkForPanel(){} function showSaveReward(){} function buildSaveReward(){} function formatDate(d){return d;}
+  const WRCBonusPoints={load:async()=>{}};const WRCMemberBirthdays={onEntriesLoaded(){}};const WRCHolidays={onEntriesLoaded(){}};
+  let stored=[];
+  const supabaseClient={from(table){if(table!=='entries')throw Error('Unexpected table');const q={select(){return q},order(){return q},async range(a,b){return{data:stored.slice(a,b+1),error:null}},async insert(rows){stored.push(...rows.map((r,i)=>({...r,id:stored.length+i+1})));toast('PASS · Aktivität lokal gespeichert');return{error:null}},update(row){return{async eq(key,id){stored=stored.map(r=>r[key]===id?{...r,...row}:r);toast('PASS · Aktivität lokal aktualisiert');return{error:null}}}}};return q;}};
+  function renderAll(){const p=document.getElementById('person').value;document.getElementById('profile').innerHTML='<div class="preview-profile-head"><div><span class="bs-eyebrow">WRC SPIELERPROFIL</span><h2>'+p+'</h2>'+WRCClubs.renderPlayerPatches(p,allEntries).replace("Noch keine Patches","Noch keine Sport-Patches")+WRCBonusStreaks.renderPatches(p)+'</div></div>'+WRCBonusStreaks.renderProfile(p);}
+</script>
+<script src="../scoring.js"></script><script src="../entries-utils.js"></script><script src="../modules/clubs/clubs.js"></script><script src="../modules/bonus-streaks/bonus-streaks-core.js"></script><script src="../modules/bonus-streaks/bonus-streaks.js"></script><script src="../entries-service.js"></script>
+<script>
+  function fixture(long=false){simulated=long?'2027-05-01':'2026-10-24';document.getElementById('date').value=simulated;stored=[];
+    for(let d='2026-05-01';d<=simulated;d=WRCBonusStreakCore.nextDay(d)){
+      for(const p of ['Marian','Thorsten','Basti','Fabi']){
+        const bonus=long?p==='Marian':(p==='Marian'&&d>='2026-08-21'&&!['2026-09-03','2026-10-06'].includes(d))||(p==='Thorsten'&&d>='2026-10-18'&&d<simulated)||(p==='Fabi'&&d>='2026-10-01'&&d<='2026-10-14');
+        if(bonus)stored.push({id:stored.length+1,person:p,date:d,steps:d==='2026-10-23'?21000:3000,bike:3,exercise:true});
+      }
+    }loadEntries();}
+  document.getElementById('person').addEventListener('change',renderAll);
+  document.getElementById('save').addEventListener('click',saveEntry);
+  document.getElementById('long').addEventListener('click',()=>fixture(true));
+  document.getElementById('reset').addEventListener('click',()=>fixture(false));fixture();
+</script></body></html>
