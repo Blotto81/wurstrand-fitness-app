@@ -16,8 +16,10 @@ for (const side of ['light', 'dark']) {
   assert.equal(card(`flip-${side}-1`).points, 20);
   for (let n = 2; n <= 9; n++) assert.equal(card(`flip-${side}-${n}`).points, n);
 }
+assert.equal(card('flip-light-wild').pointSource, 'WRC-Festlegung · 50 Punkte');
+assert.ok(d.cards.every(c => c.pointSource), 'Every point value has a source');
 const expected = { 'classic-draw2':20,'classic-reverse':20,'classic-skip':20,'classic-wild':50,'classic-wild4':50,
-  'flip-light-draw1':20,'flip-light-reverse':20,'flip-light-skip':20,'flip-light-flip':20,'flip-light-wild':40,'flip-light-wild2':50,
+  'flip-light-draw1':20,'flip-light-reverse':20,'flip-light-skip':20,'flip-light-flip':20,'flip-light-wild':50,'flip-light-wild2':50,
   'flip-dark-draw5':70,'flip-dark-reverse':20,'flip-dark-skipall':20,'flip-dark-flip':50,'flip-dark-wild':50,'flip-dark-wildcolor':70 };
 for (const [id, points] of Object.entries(expected)) assert.equal(card(id).points, points, id);
 for (const v of ['classic', 'flip']) {
@@ -39,6 +41,14 @@ assert.ok(d.getRules('flip').find(r => r.id === 'colors').note.includes('erst bi
 assert.ok(!JSON.stringify(d.getRules('classic')).includes('Flip'));
 assert.ok(d.getCards('flip', 'light').every(c => c.side === 'light'));
 assert.ok(d.getCards('flip', 'dark').every(c => c.side === 'dark'));
+// Gallery retains one model per number/action, never one per color.
+for (const [variant, side, specialCount] of [['classic', '', 6], ['flip', 'light', 7], ['flip', 'dark', 7]]) {
+  const visible = d.getCards(variant, side);
+  assert.equal(visible.length, 15);
+  assert.equal(new Set(visible.map(c => c.symbol)).size, 15);
+  assert.equal(visible.filter(c => !c.number || c.symbol === String(d.variants[variant].swap)).length, specialCount);
+}
+assert.equal(d.cards.filter(c => !d.images[c.id]).length, 35);
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
 for (const filename of ['uno-rules-data.js','uno-rules.js','uno-rules.css']) {
