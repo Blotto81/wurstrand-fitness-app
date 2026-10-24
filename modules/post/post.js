@@ -205,6 +205,7 @@
       !letter
       || document.body.classList.contains("wrc-member-birthday-active")
       || document.querySelector(".bigpop.show")
+      || document.querySelector(".wr-dialog[open], .wr-library[open]")
       || overlay?.classList.contains("is-visible")
     ) return false;
 
@@ -321,8 +322,11 @@
     safeStorageSet(eventKey, "checked");
     if (Math.random() >= chance) return false;
 
-    const letter = selectLetter(eventName, player);
+    let letter = selectLetter(eventName, player);
     if (!letter) return false;
+    if (typeof WRCOccasions !== "undefined" && typeof allEntries !== "undefined" && ["streak", "personal_record"].includes(eventName)) {
+      letter = { ...letter, text: [...letter.text, WRCOccasions.occasion(player, allEntries, todayKey())] };
+    }
 
     window.setTimeout(() => {
       showWithRetries(letter);
