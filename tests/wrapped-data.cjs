@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const source=fs.readFileSync('modules/year-review/wrapped-data.js','utf8');
 const snapshot={version:1,year:2026,through:'2026-12-23',players:['A'],entries:[]};
 const response=(mode='personal',more={})=>({year:2026,player:'A',mode,available:true,personal_available:true,team_available:false,snapshot,...more});
-function setup(rpc,host='app.example'){const store=new Map(),ctx={window:{},location:{hostname:host},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},supabaseClient:{rpc}};vm.createContext(ctx);vm.runInContext(source,ctx);return {api:ctx.window.WRCWrappedData,store,ctx};}
+function setup(rpc,host='app.example'){let now='2026-12-31T12:00:00Z';class Clock extends Date{constructor(...args){super(...(args.length?args:[now]));}}const store=new Map(),ctx={Date:Clock,window:{},location:{hostname:host},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},supabaseClient:{rpc}};vm.createContext(ctx);vm.runInContext(source,ctx);return {api:ctx.window.WRCWrappedData,store,ctx,setDate:v=>now=v};}
 (async()=>{
  let calls=0,resolve;const h=setup(()=>{calls++;return new Promise(r=>resolve=r)});const a=h.api.load(2026,'A'),b=h.api.load(2026,'A');resolve({data:response()});await Promise.all([a,b]);assert.equal(calls,1);console.log('PASS concurrent loads share one RPC');
  h.ctx.supabaseClient.rpc=async()=>{throw Error('offline')};assert.equal((await h.api.load(2026,'A')).offline,true);assert.equal((await h.api.load(2026,'A','team')).available,false);console.log('PASS only server-confirmed personal archive works offline');
@@ -13,4 +13,6 @@ function setup(rpc,host='app.example'){const store=new Map(),ctx={window:{},loca
  const prod=setup(async()=>({data:response('personal',{available:false,snapshot:null,personal_available:false})}));prod.ctx.window.WRC_WRAPPED_FIXTURE=response();assert.equal((await prod.api.load(2026,'A')).available,false);console.log('PASS preview cannot unlock production');
  const teamOnly=setup(async()=>{throw Error()});teamOnly.store.set('wrcWrapped_v1_2026_A_team',JSON.stringify(response('team',{team_available:true})));const t=await teamOnly.api.load(2026,'A');assert.equal(t.available,false);assert.equal(t.team_available,true);assert.equal(t.personal_available,false);console.log('PASS team-only offline library remains usable');
  const quota=setup(async()=>({data:response()}));quota.ctx.localStorage.setItem=()=>{throw Error('quota')};assert.equal((await quota.api.load(2026,'A')).available,true);console.log('PASS unavailable local storage does not block online archive');
+ h.setDate('2026-12-31T23:00:00Z');assert.equal(h.api.cached(2026,'A','personal'),null);await assert.rejects(h.api.load(2026,'A'));console.log('PASS January 1 Berlin blocks cached personal and team shows');
+ h.setDate('2027-12-31T12:00:00Z');await assert.rejects(h.api.load(2026,'A'));console.log('PASS previous-year cache never reopens in a new season');
 })().catch(e=>{console.error(e);process.exitCode=1});
