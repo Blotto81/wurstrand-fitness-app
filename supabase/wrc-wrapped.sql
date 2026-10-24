@@ -31,12 +31,12 @@ begin
   perform pg_advisory_xact_lock(8262026,p_year);
   select * into r from public.wrc_wrapped_years where year=p_year;
   if not found then
-    foreach name in array names loop days:=days||jsonb_build_object(name,24+floor(random()*8)::integer);end loop;
-    days:=days||jsonb_build_object('team',24+floor(random()*8)::integer);
+    foreach name in array names loop days:=days||jsonb_build_object(name,25+floor(random()*7)::integer);end loop;
+    days:=days||jsonb_build_object('team',25+floor(random()*7)::integer);
     insert into public.wrc_wrapped_years(year,release_days,cutoff) values(p_year,days,make_date(p_year,12,23)) returning * into r;
   end if;
-  personal_available:=today>=make_date(p_year,12,(r.release_days->>p_player)::integer);
-  team_available:=today>=make_date(p_year,12,(r.release_days->>'team')::integer);
+  personal_available:=today between make_date(p_year,12,greatest(25,(r.release_days->>p_player)::integer)) and make_date(p_year,12,31);
+  team_available:=today between make_date(p_year,12,greatest(25,(r.release_days->>'team')::integer)) and make_date(p_year,12,31);
   available:=case when p_mode='team' then team_available else personal_available end;
   if available and r.snapshot is null then
     -- One MVCC statement captures all inputs together; the year lock prevents device races.
