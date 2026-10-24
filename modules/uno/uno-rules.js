@@ -21,8 +21,8 @@
         <section class="ur-quick-section" aria-labelledby="urQuickTitle"><div class="ur-section-heading"><h3 id="urQuickTitle">Kurz nachschlagen. Weiterspielen.</h3><span>DER SCHNELLZUGRIFF</span></div><div class="ur-quick" id="urQuick"></div></section>
         <div class="ur-search"><label for="urSearch">Regel oder Karte finden</label><div class="ur-search-field"><span aria-hidden="true">⌕</span><input id="urSearch" type="search" placeholder="Welche Regel suchst du?" autocomplete="off"><button type="button" id="urClear" aria-label="Suche löschen" hidden>×</button></div><p id="urSearchStatus" role="status" aria-live="polite"></p><div id="urResults" class="ur-results" hidden></div></div>
         <section aria-labelledby="urRulesTitle"><div class="ur-section-heading"><h3 id="urRulesTitle">Das Hausrecht</h3><span>VERBINDLICH BEI UNS</span></div><div id="urRules" class="ur-rules"></div></section>
-        <section class="ur-gallery-section" aria-labelledby="urGalleryTitle"><div class="ur-section-heading"><div><h3 id="urGalleryTitle">Karten unter der Lupe</h3><p>Antippen für Funktion und Punktwert.</p></div><span id="urCardCount"></span></div><div class="ur-gallery-tools"><div id="urSides" class="ur-segment" aria-label="Flip-Kartenseite" hidden><button type="button" data-ur-side="light" aria-pressed="true">☀ Helle Seite</button><button type="button" data-ur-side="dark" aria-pressed="false">☾ Dunkle Seite</button></div><div class="ur-segment" aria-label="Kartentyp"><button type="button" data-ur-filter="special" aria-pressed="true">Besondere Karten</button><button type="button" data-ur-filter="all" aria-pressed="false">Alle Karten</button></div></div><div id="urGallery" class="ur-gallery"></div><p class="ur-photo-note">Originalfotos sind dort hinterlegt, wo sie bereits vorliegen. Weitere Karten behalten ihren reservierten Platz.</p></section>
-        <footer class="ur-footer"><strong>WRC-Hausregeln haben hier das letzte Wort.</strong><p>Unsere Abweichungen stehen oben. Für die fotografierten Flip-Karten gelten die Punkte aus unserer WRC-Kartenübersicht. Übrige Kartenfunktionen und Punktwerte basieren auf den Mattel-Anleitungen für <a href="https://service.mattel.com/instruction_sheets/UNO%20Basic%20IS.pdf" target="_blank" rel="noopener noreferrer">UNO Classic</a> und <a href="https://service.mattel.com/instruction_sheets/GDR44-English.pdf" target="_blank" rel="noopener noreferrer">UNO Flip</a>.</p></footer>
+        <section class="ur-gallery-section" aria-labelledby="urGalleryTitle"><div class="ur-section-heading"><div><h3 id="urGalleryTitle">Das Kartenlexikon</h3><p>Eine Karte. Alles, was du wissen musst.</p></div><span id="urCardCount"></span></div><div class="ur-gallery-tools"><div id="urSides" class="ur-segment" aria-label="Flip-Kartenseite" hidden><button type="button" data-ur-side="light" aria-pressed="true">☀ Helle Seite</button><button type="button" data-ur-side="dark" aria-pressed="false">☾ Dunkle Seite</button></div><div class="ur-segment" aria-label="Kartentyp"><button type="button" data-ur-filter="special" aria-pressed="true">Besondere Karten</button><button type="button" data-ur-filter="all" aria-pressed="false">Alle Karten</button></div></div><div id="urGallery" class="ur-gallery"></div><p class="ur-photo-note">Eure Originalfotos, vollständig abgebildet. Fehlende Motive sind als Platzhalter gekennzeichnet.</p></section>
+        <footer class="ur-footer"><strong>WRC-Hausregeln haben hier das letzte Wort.</strong><p>Unsere Abweichungen stehen oben. Für die fotografierten Flip-Karten gelten die Punkte aus unserer WRC-Kartenübersicht. Die helle Farbwahl zählt nach WRC-Festlegung ebenfalls 50 Punkte. Übrige Kartenfunktionen und Punktwerte basieren auf den Mattel-Anleitungen für <a href="https://service.mattel.com/instruction_sheets/UNO%20Basic%20IS.pdf" target="_blank" rel="noopener noreferrer">UNO Classic</a> und <a href="https://service.mattel.com/instruction_sheets/GDR44-English.pdf" target="_blank" rel="noopener noreferrer">UNO Flip</a>.</p></footer>
       </div>
     </div>`;
   document.body.append(book);
@@ -34,10 +34,18 @@
   function photo(card, large = false) {
     const src = data.images[card.id];
     const rotated = data.photoCatalog[card.id]?.rotation === 90;
-    return `<div class="ur-photo${src ? ' ur-photo-original' : ''}${large ? ' ur-photo-large' : ''}"><div class="ur-photo-placeholder"${src ? ' hidden' : ''}><span aria-hidden="true">▧</span><small>WRC · KARTENARCHIV</small><strong>Originalfoto<br>folgt</strong></div>${src ? `<span class="ur-photo-media${rotated ? ' ur-photo-rotated' : ''}"><img src="${esc(src)}" alt="Originalfoto: ${esc(card.name)}" loading="lazy" decoding="async"></span>` : ''}</div>`;
+    return `<div class="ur-photo${src ? ' ur-photo-original' : ''}${large ? ' ur-photo-large' : ''}"><div class="ur-photo-placeholder"${src ? ' hidden' : ''}><small>WRC · KARTENLEXIKON</small><span aria-hidden="true">${card.number ? esc(card.symbol) : '◇'}</span><strong>${esc(card.name)}</strong><small class="ur-placeholder-label">Platzhalter · kein Originalfoto</small></div>${src ? `<span class="ur-photo-media${rotated ? ' ur-photo-rotated' : ''}"><img src="${esc(src)}" alt="Originalfoto: ${esc(card.name)}${card.side ? ' · ' + (card.side === 'light' ? 'helle Seite' : 'dunkle Seite') : ''}" loading="${large ? 'eager' : 'lazy'}" decoding="async"></span>` : ''}</div>`;
   }
   function bindImageFallback(parent) {
-    parent.querySelectorAll('.ur-photo img').forEach(img => img.addEventListener('error', () => { img.parentElement.hidden = true; img.closest('.ur-photo').querySelector('.ur-photo-placeholder').hidden = false; }, { once: true }));
+    parent.querySelectorAll('.ur-photo img').forEach(img => {
+      const fallback = () => {
+        img.parentElement.hidden = true;
+        img.closest('.ur-photo').querySelector('.ur-photo-placeholder').hidden = false;
+      };
+      img.addEventListener('error', fallback, { once: true });
+      // Cached failures can complete before the listener is attached.
+      if (img.complete && !img.naturalWidth) fallback();
+    });
   }
   const chain = values => `<div class="ur-chain">${values.map((value, i) => `${i ? '<span class="ur-arrow" aria-hidden="true">→</span>' : ''}<span class="ur-chain-chip">${esc(value)}</span>`).join('')}</div>`;
   function renderRules() {
@@ -55,7 +63,7 @@
     $('#urSides').hidden = variant !== 'flip';
     const shown = data.getCards(variant, variant === 'flip' ? side : '').filter(c => filter === 'all' || !c.number || c.symbol === String(data.variants[variant].swap));
     $('#urCardCount').textContent = `${shown.length} KARTEN`;
-    $('#urGallery').innerHTML = shown.map(c => `<button type="button" class="ur-card" data-ur-card="${c.id}" aria-label="${esc(c.name)}, ${c.points} Punkte – Details">${photo(c)}<span class="ur-card-meta"><strong>${esc(c.name)}</strong><span class="ur-points">${c.points}<small>PKT</small></span></span><span class="ur-card-description">${esc(c.description)}</span><span class="ur-card-more">Karte ansehen <span aria-hidden="true">↗</span></span></button>`).join('');
+    $('#urGallery').innerHTML = shown.map(c => `<button type="button" class="ur-card" data-ur-card="${c.id}" aria-haspopup="dialog" aria-label="${esc(c.name)}, ${c.points} Punkte – Details">${photo(c)}<strong class="ur-card-name">${esc(c.name)}</strong></button>`).join('');
     book.dataset.variant = variant; book.dataset.side = variant === 'flip' ? side : 'classic';
     bindImageFallback($('#urGallery'));
   }
@@ -77,8 +85,15 @@
     const card = data.cards.find(c => c.id === id && c.variant === variant);
     if (!card) return;
     cardOpener = opener;
-    detail.innerHTML = `<div class="ur-topbar"><span>KARTENARCHIV</span><button type="button" data-ur-detail-close aria-label="Kartendetails schließen">Schließen ×</button></div><div class="ur-detail-body">${photo(card, true)}<div><span class="ur-eyebrow">${data.variants[variant].name}${card.side ? ' · ' + (card.side === 'light' ? 'Helle Seite' : 'Dunkle Seite') : ''}</span><h3 id="urDetailTitle">${esc(card.name)}</h3><span class="ur-detail-points">${card.points} <small>Punkte</small></span>${card.pointSource ? `<small class="ur-point-source">${esc(card.pointSource)}</small>` : ''}<p>${esc(card.detail)}</p>${card.symbol === String(data.variants[variant].swap) ? '<div class="ur-note">WRC-Hausregel · Pflichttausch</div>' : ''}</div></div>`;
+    const ruleId = card.symbol === String(data.variants[variant].swap) ? 'swap'
+      : card.number ? 'jump' : card.symbol === 'wildcolor' ? 'colors'
+      : ['draw1', 'draw2', 'draw5', 'wild2', 'wild4'].includes(card.symbol) ? 'stack' : '';
+    const rule = data.getRules(variant).find(r => r.id === ruleId);
+    detail.dataset.side = card.side || 'classic';
+    detail.innerHTML = `<div class="ur-topbar"><span>KARTENLEXIKON</span><button type="button" data-ur-detail-close aria-label="Kartendetails schließen">Schließen ×</button></div><div class="ur-detail-body"><div class="ur-detail-image">${photo(card, true)}<small>${data.images[card.id] ? 'Originalfoto aus eurem WRC-Archiv' : 'Für diese Karte fehlt noch ein Originalfoto.'}</small></div><div class="ur-detail-copy"><span class="ur-eyebrow">${data.variants[variant].name}${card.side ? ' · ' + (card.side === 'light' ? '☀ Helle Seite' : '☾ Dunkle Seite') : ''}</span><h3 id="urDetailTitle">${esc(card.name)}</h3><div class="ur-value"><span class="ur-detail-points">${card.points} <small>Punkte</small></span><small class="ur-point-source">${esc(card.pointSource)}</small></div><h4>Funktion</h4><p>${esc(card.description)}</p><h4>So wird gespielt</h4><p>${esc(card.detail)}</p>${rule ? `<div class="ur-detail-rule"><h4>Bei uns in der WRC</h4><p>${esc(rule.text)}</p><button type="button" data-ur-detail-rule="${rule.id}">Hausregel nachlesen <span aria-hidden="true">↗</span></button></div>` : ''}</div></div>`;
     bindImageFallback(detail); detail.showModal();
+    detail.scrollTop = 0;
+    detail.querySelector('[data-ur-detail-close]').focus({ preventScroll: true });
   }
   function openBook(push = true) {
     if (book.open) return;
@@ -87,7 +102,7 @@
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     book.showModal();
-    if (push) history.pushState({ ...history.state, unoRules: true }, '');
+    if (push && !history.state?.unoRules) history.pushState({ ...history.state, unoRules: true }, '');
     $('[data-ur-close]').focus();
   }
   function closeBook() { if (detail.open) detail.close(); if (book.open) book.close(); }
@@ -102,7 +117,14 @@
     if (history.state && history.state.unoRules) openBook(false); else closeBook();
   });
   detail.addEventListener('close', () => { if (cardOpener && cardOpener.isConnected && book.open) cardOpener.focus({ preventScroll: true }); });
-  detail.addEventListener('click', e => { if (e.target.closest('[data-ur-detail-close]') || e.target === detail) detail.close(); });
+  detail.addEventListener('click', e => {
+    const ruleButton = e.target.closest('[data-ur-detail-rule]');
+    if (ruleButton) {
+      cardOpener = null;
+      detail.close();
+      openRule(ruleButton.dataset.urDetailRule);
+    } else if (e.target.closest('[data-ur-detail-close]') || e.target === detail) detail.close();
+  });
   book.addEventListener('click', e => {
     const target = e.target.closest('button');
     if (!target) return;

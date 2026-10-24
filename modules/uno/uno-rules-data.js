@@ -47,7 +47,7 @@
     }
     add('flip', side, 'reverse', 'Richtungswechsel', 20, 'Ab jetzt geht es andersherum.', 'Die bisherige Spielrichtung wird umgedreht. Aktionskarten dürfen nicht zwischengeworfen werden.');
     add('flip', side, 'flip', 'Flip', 20, 'Alle Karten auf die andere Seite!', 'Ablagestapel, Nachziehstapel und alle Handkarten werden umgedreht. Die neue Seite bleibt aktiv, bis erneut eine Flip-Karte gespielt wird. Gestartet wird auf der hellen Seite.');
-    add('flip', side, 'wild', 'Farbwahl', 40, 'Wähle eine Farbe der aktiven Seite.', side === 'light' ? 'Wähle Rot, Gelb, Grün oder Blau. Mit dieser Farbe geht es weiter.' : 'Wähle Rosa, Türkis, Orange oder Lila. Mit dieser Farbe geht es weiter.');
+    add('flip', side, 'wild', 'Farbwahl', 50, 'Wähle eine Farbe der aktiven Seite.', side === 'light' ? 'Wähle Rot, Gelb, Grün oder Blau. Mit dieser Farbe geht es weiter.' : 'Wähle Rosa, Türkis, Orange oder Lila. Mit dieser Farbe geht es weiter.');
   }
   add('flip', 'light', 'draw1', '+1 · Zieh eins', 10, 'Eine Karte – oder die Kette verlängern.', 'WRC: +1 auf +1 ist erlaubt. Auch eine +2 darf die +1 erhöhen. Wer nicht mehr abwehren kann, zieht die angesammelten Karten.', ['+1', '+2', 'abwehren']);
   add('flip', 'light', 'skip', 'Aussetzen', 20, 'Der nächste Spieler pausiert.', 'Der nächste Spieler in Spielrichtung wird übersprungen.');
@@ -58,6 +58,12 @@
 
   // Rulebook only: these values never feed the existing result/statistics code.
   cards.forEach(card => {
+    card.pointSource = 'Mattel-Grundregel';
+    if (card.number && card.symbol === String(variants[card.variant].swap)) {
+      card.pointSource = 'WRC-Hausregel · Pflichttausch';
+    }
+    // Explicit WRC decision, 2026-10-24: both Flip wild cards count 50.
+    if (card.id === 'flip-light-wild') card.pointSource = 'WRC-Festlegung · 50 Punkte';
     if (photoCatalog[card.id]) {
       card.points = photoCatalog[card.id].points;
       card.pointSource = 'WRC-Kartenübersicht';
