@@ -8,6 +8,7 @@
         if (!Array.isArray(cached?.entries)) return false;
 
         allEntries = cleanLoadedEntries(cached.entries);
+        if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onEntriesLoaded(false);
         renderDashboard();
         return true;
       } catch (error) {
@@ -33,18 +34,27 @@
         renderDashboard();
       }
 
-      const { data, error } = await supabaseClient
-        .from("entries")
-        .select("*")
-        .order("date", { ascending: false });
-
-      if (error) {
+      // Replay needs the full history, including once the table exceeds Supabase's page limit.
+      const rows = [];
+      try {
+        for (let offset = 0; ; offset += 500) {
+          const { data, error } = await supabaseClient.from("entries").select("*")
+            .order("date", { ascending: false }).order("id", { ascending: false })
+            .range(offset, offset + 499);
+          if (error) throw error;
+          if (!Array.isArray(data)) throw new Error("Keine vollständigen Aktivitätsdaten erhalten");
+          rows.push(...data);
+          if (data.length < 500) break;
+        }
+      } catch (error) {
         console.log(error);
         toast("Fehler beim Laden: " + (error.message || "Supabase"));
-        return;
+        if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onLoadError();
+        return false;
       }
 
-      allEntries = cleanLoadedEntries(data || []);
+      allEntries = cleanLoadedEntries(rows);
+      if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onEntriesLoaded();
       rememberEntriesQuickstart(allEntries);
       await WRCBonusPoints.load();
       renderAll();
@@ -62,6 +72,7 @@
       if (typeof maybeShowMonthStart === "function") {
         setTimeout(maybeShowMonthStart, 350);
       }
+      return true;
     }
 
     function getNewPersonalRecords(entry) {
@@ -123,6 +134,7 @@
         return;
       }
 
+      const streakBefore = typeof WRCBonusStreaks !== "undefined" ? WRCBonusStreaks.state(entry.person) : null;
       const existing = allEntries.find(e =>
         e.date === entry.date &&
         e.person === entry.person &&
@@ -168,7 +180,8 @@
         WRCPost.rememberPlayer(savedEntry.person);
       }
       resetForm();
-      await loadEntries();
+      const entriesReloaded = await loadEntries();
+      if (entriesReloaded && streakBefore) WRCBonusStreaks.afterSave(streakBefore, savedEntry);
       showTab("dashboard", menuLinkForPanel("dashboard"));
       window.scrollTo({ top: 0, behavior: "smooth" });
       requestAnimationFrame(() => {
