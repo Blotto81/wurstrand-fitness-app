@@ -80,12 +80,14 @@
       body = `<div class="wh-tree" aria-hidden="true">🎄</div><span class="wh-eyebrow">24.–26. DEZEMBER · VON WURSTI</span><h2>Da liegt etwas für dich.</h2><p class="wh-gift-label">Von: Wursti 🌭<br>An: <strong>${p}</strong></p>`;
       if (saved) body += '<div class="wh-reveal"><h3>Frohe Weihnachten! ❤️</h3><p>Wursti hat heute ausnahmsweise nicht nur an sich selbst gedacht.</p><strong class="wh-five">+5 WRC-Punkte</strong><p class="wh-note">Dein Geschenk ist ausgepackt und dauerhaft gespeichert.</p></div>';
       else body += `<div class="wh-object wh-present" aria-hidden="true">🎁</div>${button("🎁 Wurstis Geschenk öffnen", "open", disabled)}<p class="wh-note">Bis zum 26. Dezember, 23:59 Uhr, wartet es auf dich.</p>`;
+      if (saved && typeof WRCOccasions !== "undefined" && typeof allEntries !== "undefined") body += `<p class="wh-note">${esc(WRCOccasions.occasion(p, allEntries, D.today(), 'christmas'))}</p>`;
     } else {
       body = `<span class="wh-eyebrow">31. DEZEMBER · WIR VIER</span><h2>Das war unser WRC-Jahr ${event.year}.</h2><div class="wh-team">${C.members.map(name => `<figure><img src="${esc(playerProfiles[name].image)}" alt="WRC-Playerkarte von ${name}"><figcaption>${name}</figcaption></figure>`).join("")}</div>${archive ? numbers(stats(event.year), true) + titles(event.year) : '<p class="wh-note">Das gemeinsame Jahresarchiv wird geladen …</p>'}`;
       body += saved ? `<div class="wh-year-ending"><p>Punkte gesammelt.<br>Grenzen verschoben.<br>Würste gerandet.</p><strong>Auf uns vier. Auf ${event.year + 1}. 🌭❤️</strong></div>` : button("🎆 Auf uns vier!", "open", disabled || !archive);
       body += '<p class="wh-note">Unser gemeinsamer Abschluss. Dein persönlicher Year Review bleibt separat in der WRC-Jahrespost.</p>';
     }
     host.innerHTML = body + `<div class="wh-status" role="status">${esc(notices.get(key) || (pending ? "Wursti kümmert sich …" : !D.ready ? "Verbindung wird geprüft. Geschenke erst nach Bestätigung verfügbar." : ""))}</div>${D.preview ? '<p class="wh-preview-label">Lokale Vorschau · keine echten Feiertags- oder Geburtstagspunkte</p>' : ""}`;
+    if (event.type === "newyear" && typeof WRCYearReview !== "undefined") { const show = document.createElement("button"); show.className = "wh-button"; show.textContent = "WRC Wrapped: Jahresarchiv öffnen"; show.addEventListener("click", WRCYearReview.openLibrary); host.append(show); }
     host.querySelectorAll("[data-wh-action]").forEach(node => node.addEventListener("click", () => act(event, p, node.dataset.whAction)));
   }
   function renderEggs(event, p) {
