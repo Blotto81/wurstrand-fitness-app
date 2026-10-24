@@ -45,6 +45,7 @@
     const byYear = new Map();
     gifts.forEach(g => byYear.set(g.birthday_year, (byYear.get(g.birthday_year) || 0) + g.points));
     return `<div class="mb-facts">${facts.map(([v, label]) => `<div><strong>${v}</strong><span>${label}</span></div>`).join("")}</div>
+      ${typeof WRCOccasions !== "undefined" ? `<p class="mb-source">${esc(WRCOccasions.occasion(person, lifetimeEntries, D.today(), 'birthday'))}</p>` : ""}
       <div class="mb-moments">${value.first ? `<p><span>DER ANFANG IM TAGESARCHIV</span>${stamp(value.first)} · erster detaillierter WRC-Eintrag</p>` : ""}
       ${value.best ? `<p><span>DER REKORDTAG</span>${stamp(value.best[0])} · ${num(value.best[1], 1)} Punkte aus echter Aktivität</p>` : ""}
       ${[...byYear].map(([year, points]) => `<p><span>VON DEN JUNGS · ${year}</span>${points} Geburtstagspunkte zum ${D.birthday(person, year).age}. Geburtstag</p>`).join("")}</div>
