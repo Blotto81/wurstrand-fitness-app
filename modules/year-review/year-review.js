@@ -1,469 +1,67 @@
-(function () {
-  const REVIEW_START_DAY = 24;
-  const REVIEW_END_DAY = 31;
-  const numberFormat = new Intl.NumberFormat("de-DE");
-  const decimalFormat = new Intl.NumberFormat("de-DE", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1
-  });
-
-  let overlay = null;
-  let cards = [];
-  let activeIndex = 0;
-  let currentPlayer = "";
-  let currentYear = 0;
-  let sourceEntries = [];
-  let touchStartX = null;
-  let hasCheckedThisLoad = false;
-
-  function storageGet(key, fallback = null) {
-    try {
-      return localStorage.getItem(key) ?? fallback;
-    } catch {
-      return fallback;
-    }
+(function(){
+  'use strict';
+  let dialog,library,scenes=[],index=0,revealed=false,sound=false,audio=null,nodes=[],frame=0,lastFocus,overflow='',token=0,loaded=false,noticeTimer;
+  let currentYear=new Date().getFullYear();
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const format=(v,d=0)=>Number(v||0).toLocaleString('de-DE',{maximumFractionDigits:d});
+  const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function selected(){try{const p=localStorage.getItem('wrcPostLastPlayer');if(people.includes(p))return p;}catch{}return document.getElementById('person')?.value||people[0];}
+  function stopSound(){for(const node of nodes){try{node.stop();}catch{}}nodes=[];}
+  function cue(kind){if(!sound||!audio)return;stopSound();const now=audio.currentTime;const tones=kind==='award'?[220,330,440,660]:kind==='finale'?[262,330,392,523]:[330,440];tones.forEach((frequency,i)=>{const oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type='triangle';oscillator.frequency.value=frequency;gain.gain.setValueAtTime(0,now+i*.085);gain.gain.linearRampToValueAtTime(.035,now+i*.085+.025);gain.gain.exponentialRampToValueAtTime(.001,now+i*.085+.25);oscillator.connect(gain).connect(audio.destination);oscillator.start(now+i*.085);oscillator.stop(now+i*.085+.26);nodes.push(oscillator);});}
+  async function toggleSound(){const requestToken=token;if(sound){sound=false;stopSound();}else{try{const Context=window.AudioContext||window.webkitAudioContext;if(!Context)throw Error();audio??=new Context();await audio.resume();if(!dialog?.open||requestToken!==token)return;sound=true;}catch{sound=false;dialog.querySelector('[data-wr-status]').textContent='Ton ist auf diesem Gerät nicht verfügbar. Die Show läuft vollständig ohne Ton.';}}const b=dialog.querySelector('[data-wr-sound]');b.textContent=sound?'Ton an':'Ton aus';b.setAttribute('aria-pressed',String(sound));}
+  function portrait(name){const src=typeof playerProfiles==='undefined'?null:playerProfiles[name]?.image;return src?`<img class="wr-portrait" src="${esc(src)}" alt="WRC-Spielerkarte von ${esc(name)}">`:`<span class="wr-initial" aria-hidden="true">${esc(name.slice(0,2))}</span>`;}
+  function confetti(){if(reduced())return;const stage=dialog.querySelector('.wr-stage');const burst=document.createElement('div');burst.className='wr-confetti';burst.setAttribute('aria-hidden','true');burst.innerHTML=Array.from({length:22},(_,i)=>`<i style="--x:${i*37%100}%;--delay:${i%6*40}ms;--spin:${i*39}deg"></i>`).join('');stage.append(burst);}
+  function render(){
+    cancelAnimationFrame(frame);stopSound();const s=scenes[index];revealed=!s.reveal;
+    dialog.dataset.theme=s.theme;dialog.dataset.kind=s.kind;
+    const tiles=s.tiles?`<div class="wr-tiles">${s.tiles.map(([v,label])=>`<div><strong>${esc(v)}</strong><span>${esc(label)}</span></div>`).join('')}</div>`:'';
+    const number=s.value!==undefined&&s.value!==null?`<div class="wr-number"><strong data-wr-value>${format(s.value,s.decimals||0)}</strong><span>${esc(s.unit)}</span></div>`:'';
+    const names=s.names?`<div class="wr-cast">${s.names.map(name=>`<figure>${portrait(name)}<figcaption>${esc(name)}</figcaption></figure>`).join('')}</div>`:'';
+    let content;
+    if(s.reveal){
+      const teaser=s.reveal==='stat'?`${number}<h2 id="wrSceneTitle" tabindex="-1">Wer steckt dahinter?</h2>`:s.reveal==='envelope'?`<div class="wr-envelope" aria-hidden="true">WRC<br><small>STRENG FEIERLICH</small></div><h2 id="wrSceneTitle" tabindex="-1">Eine Würdigung.<br>Nur für einen von euch.</h2>`:`<span class="wr-award-mark" aria-hidden="true">✦</span><h2 id="wrSceneTitle" tabindex="-1">${esc(s.title)}</h2>`;
+      content=`<div class="wr-teaser">${teaser}<button class="wr-reveal" type="button" data-wr-reveal>Jetzt enthüllen <span aria-hidden="true">↗</span></button></div><div class="wr-revealed" hidden>${portrait(s.name)}<h2 class="wr-winner">${esc(s.name)}</h2><h3>${esc(s.title)}</h3>${number}<p>${esc(s.text)}</p></div>`;
+    }else content=`${s.kind==='intro'?'<div class="wr-orbit" aria-hidden="true">WRC<span>WRAPPED</span></div>':''}<h2 id="wrSceneTitle" tabindex="-1">${esc(s.title).replaceAll('\n','<br>')}</h2>${number}${tiles}${s.patches?`<div class="wr-patches">${s.patches.map(p=>`<div><span aria-hidden="true">✦</span><strong>${esc(p.name)}</strong><small>${esc(p.date)}</small></div>`).join('')}</div>`:''}${names}<p>${esc(s.text)}</p>${s.signature?`<div class="wr-signature">${esc(s.signature)}</div>`:''}`;
+    const stage=dialog.querySelector('.wr-stage');stage.innerHTML=`<article class="wr-scene"><span class="wr-eyebrow">${esc(s.eyebrow)}</span>${content}</article>`;stage.scrollTop=0;
+    dialog.querySelector('[data-wr-count]').textContent=`${index+1} / ${scenes.length}`;
+    const progress=dialog.querySelector('progress');progress.max=scenes.length;progress.value=index+1;progress.setAttribute('aria-valuetext',`Szene ${index+1} von ${scenes.length}`);
+    dialog.querySelector('[data-wr-prev]').disabled=index===0;
+    dialog.querySelector('[data-wr-next]').textContent=index===scenes.length-1?'Zurück zur WRC ✓':s.reveal?'Enthüllen →':'Weiter →';
+    dialog.querySelector('[data-wr-restart]').hidden=index!==scenes.length-1;
+    stage.querySelector('#wrSceneTitle').focus({preventScroll:true});
+    if(!s.reveal)animateNumber(s);
+    if(s.kind==='finale'){confetti();cue('finale');}
   }
-
-  function storageSet(key, value) {
-    try {
-      localStorage.setItem(key, value);
-    } catch {
-      return;
-    }
+  function animateNumber(s){const el=dialog.querySelector('.wr-scene [data-wr-value]');if(!el||reduced())return;const began=performance.now(),target=s.value;function tick(now){if(!dialog?.open)return;const p=Math.min(1,(now-began)/650);el.textContent=format(target*(1-Math.pow(1-p,3)),s.decimals||0);if(p<1)frame=requestAnimationFrame(tick);}frame=requestAnimationFrame(tick);}
+  function reveal(){if(revealed)return;revealed=true;const stage=dialog.querySelector('.wr-stage');stage.querySelector('.wr-teaser').hidden=true;stage.querySelector('.wr-revealed').hidden=false;const winner=stage.querySelector('.wr-winner');winner.id='wrSceneTitle';stage.querySelector('.wr-teaser h2').removeAttribute('id');winner.tabIndex=-1;winner.focus({preventScroll:true});dialog.querySelector('[data-wr-next]').textContent='Weiter →';stage.scrollTop=0;confetti();cue('award');}
+  function next(){if(!revealed){reveal();return;}if(index===scenes.length-1){close();return;}index++;render();}
+  function prev(){if(index){index--;render();}}
+  function close(){token++;cancelAnimationFrame(frame);stopSound();sound=false;if(audio){audio.close().catch(()=>{});audio=null;}if(dialog?.open)dialog.close();document.body.style.overflow=overflow;if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});}
+  function ensure(){if(dialog)return;dialog=document.createElement('dialog');dialog.className='wr-dialog';dialog.setAttribute('aria-labelledby','wrShowTitle');dialog.innerHTML=`<header class="wr-top"><span id="wrShowTitle"></span><div><button type="button" data-wr-sound aria-pressed="false">Ton aus</button><button type="button" data-wr-close aria-label="Wrapped schließen">×</button></div></header><progress aria-label="Fortschritt der Show" max="1" value="0"></progress><div class="wr-stage"></div><footer class="wr-bottom"><div class="wr-nav"><button type="button" data-wr-prev aria-label="Vorherige Szene">←</button><span data-wr-count aria-live="polite"></span><button type="button" data-wr-next>Weiter →</button></div><button type="button" data-wr-restart hidden>Noch einmal erleben ↻</button><small class="wr-dateline"></small><span data-wr-status role="status"></span></footer>`;document.body.append(dialog);
+    dialog.querySelector('[data-wr-close]').addEventListener('click',close);dialog.querySelector('[data-wr-sound]').addEventListener('click',toggleSound);dialog.querySelector('[data-wr-prev]').addEventListener('click',prev);dialog.querySelector('[data-wr-next]').addEventListener('click',next);dialog.querySelector('[data-wr-restart]').addEventListener('click',()=>{stopSound();sound=false;dialog.querySelector('[data-wr-sound]').textContent='Ton aus';dialog.querySelector('[data-wr-sound]').setAttribute('aria-pressed','false');index=0;render();});dialog.addEventListener('cancel',e=>{e.preventDefault();close();});dialog.addEventListener('click',e=>{if(e.target.closest('[data-wr-reveal]'))reveal();});
+    dialog.addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea'))return;if(e.key==='ArrowRight'){e.preventDefault();next();}if(e.key==='ArrowLeft'){e.preventDefault();prev();}});
+    let touch=null;const stage=dialog.querySelector('.wr-stage');stage.addEventListener('touchstart',e=>{const t=e.touches[0];touch=e.touches.length===1&&!e.target.closest('button')?{x:t.clientX,y:t.clientY,time:Date.now()}:null;},{passive:true});stage.addEventListener('touchend',e=>{if(!touch)return;const t=e.changedTouches[0],dx=t.clientX-touch.x,dy=t.clientY-touch.y;if(Date.now()-touch.time<900&&Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6)dx<0?next():prev();touch=null;},{passive:true});stage.addEventListener('touchcancel',()=>{touch=null;},{passive:true});
   }
-
-  function playerKey(player) {
-    return String(player || "WRC-Team")
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\p{L}\p{N}-]/gu, "")
-      .toLowerCase() || "wrc-team";
+  async function open(player=selected(),year=currentYear,mode='personal'){
+    const attempt=++token;let data;const status=library?.querySelector('[data-wr-library-status]');if(status)status.textContent='Dein gemeinsames Jahresarchiv wird geladen …';
+    try{data=await WRCWrappedData.load(year,player,mode);}catch(error){if(attempt===token&&status)status.textContent=error.message;return false;}
+    if(attempt!==token)return false;if(!data.available){if(status)status.textContent='Diese Show wartet noch auf ihren Überraschungstag zwischen dem 24. und 31. Dezember.';return false;}
+    let facts;try{facts=WRCOccasions.archive(data.snapshot);scenes=mode==='team'?WRCWrappedStory.team(facts):WRCWrappedStory.personal(facts,player);}catch{if(status)status.textContent='Diese Ausgabe konnte nicht geladen werden. Bitte die WRC aktualisieren und erneut versuchen.';return false;}currentYear=year;
+    ensure();lastFocus=library?.open?document.getElementById('wrcWrappedLaunch'):document.activeElement;if(library?.open)library.close();overflow=document.body.style.overflow;document.body.style.overflow='hidden';sound=false;dialog.querySelector('[data-wr-sound]').textContent='Ton aus';dialog.querySelector('[data-wr-sound]').setAttribute('aria-pressed','false');dialog.querySelector('#wrShowTitle').textContent=`${mode==='team'?'UNSER':'MEIN'} WRC WRAPPED · ${year}`;
+    dialog.querySelector('.wr-dateline').textContent=`${data.preview?'LOKALE VORSCHAU · ':''}Aktivitäten bis ${year===2026?'23.12.2026':`23.12.${year}`} · ${data.offline?'gespeichertes Offline-Archiv':data.frozen_at?'archiviert '+new Date(data.frozen_at).toLocaleString('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}):'Vorschaudaten'}`;
+    dialog.showModal();index=0;render();return true;
   }
-
-  function selectedPlayer() {
-    const configuredPeople = typeof people !== "undefined" ? people : [];
-    return storageGet("wrcPostLastPlayer")
-      || document.getElementById("person")?.value
-      || configuredPeople[0]
-      || "WRC-Team";
+  async function refreshLibrary(){if(!library?.open)return;const year=Number(library.querySelector('[data-wr-year]').value),player=library.querySelector('[data-wr-player]').value;const attempt=++token;const status=library.querySelector('[data-wr-library-status]');status.textContent='Gemeinsamen Freischaltstatus laden …';library.querySelectorAll('[data-wr-open]').forEach(b=>b.disabled=true);
+    try{const data=await WRCWrappedData.load(year,player);if(attempt!==token)return;library.querySelector('[data-wr-open="personal"]').disabled=!data.personal_available;library.querySelector('[data-wr-open="team"]').disabled=!data.team_available;status.textContent=data.personal_available||data.team_available?'Freigeschaltete Shows kannst du jederzeit erneut ansehen.':'Eure Weihnachtsüberraschung wartet zwischen dem 24. und 31. Dezember. Noch wird nichts verraten.';}
+    catch(e){if(attempt===token)status.textContent=e.message;}
   }
-
-  function scheduleDay(year, player) {
-    const key = `wrcYearReviewSchedule_${year}_${playerKey(player)}`;
-    const saved = Number(storageGet(key));
-    if (saved >= REVIEW_START_DAY && saved <= REVIEW_END_DAY) return saved;
-
-    const day = REVIEW_START_DAY
-      + Math.floor(Math.random() * (REVIEW_END_DAY - REVIEW_START_DAY + 1));
-    storageSet(key, String(day));
-    return day;
+  function openLibrary(){
+    if(!library){library=document.createElement('dialog');library.className='wr-library';library.setAttribute('aria-labelledby','wrLibraryTitle');library.innerHTML=`<div class="wr-library-bar"><span>WURSTRAND · JAHRESARCHIV</span><button type="button" data-wr-library-close aria-label="Jahresarchiv schließen">×</button></div><span class="wr-eyebrow">ZWEI SHOWS. EIN GROSSARTIGES JAHR.</span><h2 id="wrLibraryTitle">WRC<br><em>WRAPPED.</em></h2><div class="wr-selectors"><label>Spieler<select data-wr-player>${people.map(p=>`<option>${esc(p)}</option>`).join('')}</select></label><label>Jahr<select data-wr-year>${Array.from({length:Math.max(1,new Date().getFullYear()-2025)},(_,i)=>2026+i).reverse().map(y=>`<option>${y}</option>`).join('')}</select></label></div><div class="wr-choices"><button type="button" data-wr-open="personal"><span>01 · DEINE GESCHICHTE</span><strong>Mein WRC Wrapped</strong><small>Deine Momente. Dein Titel. Dein Jahr. ↗</small></button><button type="button" data-wr-open="team"><span>02 · DIE GROSSE GALA</span><strong>Unser WRC Wrapped</strong><small>Eine Bühne. Alle Wurstrandler. ↗</small></button></div><p role="status" data-wr-library-status></p><button type="button" data-wr-retry>Verfügbarkeit erneut prüfen</button><p class="wr-library-note">Beide Shows starten stumm. Der Jahresstand bis 23. Dezember wird beim ersten Aufruf nach Freischaltung gemeinsam archiviert. Spätere Nachträge ändern diese Ausgabe nicht.</p>`;document.body.append(library);library.querySelector('[data-wr-library-close]').addEventListener('click',()=>{token++;library.close();});library.addEventListener('cancel',()=>{token++;});library.querySelectorAll('select').forEach(s=>s.addEventListener('change',refreshLibrary));library.querySelector('[data-wr-retry]').addEventListener('click',refreshLibrary);library.querySelectorAll('[data-wr-open]').forEach(b=>b.addEventListener('click',()=>open(library.querySelector('[data-wr-player]').value,Number(library.querySelector('[data-wr-year]').value),b.dataset.wrOpen)));}
+    library.querySelector('[data-wr-player]').value=selected();library.showModal();refreshLibrary();
   }
-
-  function shouldReveal(date, player, preview = false) {
-    if (preview) return true;
-    const year = date.getFullYear();
-    const shownKey = `wrcYearReviewShown_${year}_${playerKey(player)}`;
-    if (storageGet(shownKey)) return false;
-    if (date.getMonth() !== 11) return false;
-
-    const day = date.getDate();
-    if (day < REVIEW_START_DAY || day > REVIEW_END_DAY) return false;
-    return day >= scheduleDay(year, player);
-  }
-
-  function markShown(year, player, preview) {
-    if (!preview) {
-      storageSet(`wrcYearReviewShown_${year}_${playerKey(player)}`, new Date().toISOString());
-    }
-  }
-
-  function formatDate(dateString) {
-    if (!dateString) return "";
-    return new Intl.DateTimeFormat("de-DE", {
-      day: "numeric",
-      month: "long"
-    }).format(new Date(`${dateString}T12:00:00`));
-  }
-
-  function getYearEntries(entries, year, player) {
-    const prefix = `${year}-`;
-    return entries.filter(entry =>
-      entry.person === player && String(entry.date || "").startsWith(prefix)
-    );
-  }
-
-  function calculateStreak(entries) {
-    const dates = [...new Set(entries.map(entry => entry.date).filter(Boolean))].sort();
-    let longest = 0;
-    let current = 0;
-    let previous = null;
-
-    dates.forEach(date => {
-      const value = new Date(`${date}T12:00:00`);
-      if (!previous) {
-        current = 1;
-      } else {
-        const difference = Math.round((value - previous) / 86400000);
-        current = difference === 1 ? current + 1 : 1;
-      }
-      longest = Math.max(longest, current);
-      previous = value;
-    });
-
-    return longest;
-  }
-
-  async function countDailys(year, player) {
-    const start = `${year}-01-01`;
-    const end = `${year}-12-31`;
-
-    try {
-      if (typeof supabaseClient !== "undefined") {
-        const { data, error } = await supabaseClient
-          .from("daily_history")
-          .select("completed_date")
-          .eq("player", player)
-          .gte("completed_date", start)
-          .lte("completed_date", end);
-
-        if (!error) return (data || []).length;
-      }
-    } catch {
-      // Der lokale Fallback wird direkt darunter verwendet.
-    }
-
-    try {
-      const history = typeof WRCDailyStorage !== "undefined"
-        ? WRCDailyStorage.getLocalHistory()
-        : JSON.parse(storageGet("wrc_daily_history", "[]"));
-
-      return history.filter(item =>
-        item.player === player
-        && String(item.date || item.completed_date || "").startsWith(`${year}-`)
-      ).length;
-    } catch {
-      return 0;
-    }
-  }
-
-  function buildCards(entries, dailyCount, player, year) {
-    const steps = entries.reduce((sum, entry) => sum + (+entry.steps || 0), 0);
-    const bike = entries.reduce((sum, entry) => sum + (+entry.bike || 0), 0);
-    const activeDays = new Set(entries.map(entry => entry.date).filter(Boolean)).size;
-    const longestStreak = calculateStreak(entries);
-    const bestDay = entries.reduce((best, entry) => {
-      const points = typeof calcPoints === "function" ? calcPoints(entry).total : 0;
-      return points > best.points ? { points, date: entry.date } : best;
-    }, { points: 0, date: "" });
-
-    return [
-      {
-        id: "steps",
-        icon: "🏃",
-        eyebrow: `${year} in Bewegung`,
-        value: steps,
-        display: numberFormat.format(steps),
-        unit: "Schritte",
-        text: "haben deinen Weg durch das WRC-Jahr begleitet.",
-        accent: "mint"
-      },
-      {
-        id: "bike",
-        icon: "🚴",
-        eyebrow: "Auf zwei Rädern",
-        value: bike,
-        decimals: 1,
-        display: decimalFormat.format(bike),
-        unit: "Kilometer",
-        text: "bist du mit dem Fahrrad gefahren.",
-        accent: "sky"
-      },
-      {
-        id: "active-days",
-        icon: "📅",
-        eyebrow: "Immer wieder da",
-        value: activeDays,
-        display: numberFormat.format(activeDays),
-        unit: activeDays === 1 ? "aktiver Tag" : "aktive Tage",
-        text: "Jeder davon hat dieses Jahr ein kleines Stück mitgeschrieben.",
-        accent: "violet"
-      },
-      {
-        id: "dailys",
-        icon: "🎯",
-        eyebrow: "Kleine Missionen",
-        value: dailyCount,
-        display: numberFormat.format(dailyCount),
-        unit: dailyCount === 1 ? "Daily" : "Dailys",
-        text: "hast du gemeistert.",
-        accent: "gold"
-      },
-      {
-        id: "best-day",
-        icon: "🏆",
-        eyebrow: "Dein stärkster Tag",
-        value: bestDay.points,
-        decimals: 1,
-        display: decimalFormat.format(bestDay.points),
-        unit: "Punkte",
-        text: bestDay.date
-          ? `${formatDate(bestDay.date)} – dieser Tag darf ruhig glänzen.`
-          : "Die erste Bestmarke wartet bereits auf ihren Auftritt.",
-        accent: "orange"
-      },
-      {
-        id: "streak",
-        icon: "🔥",
-        eyebrow: "Deine längste Serie",
-        value: longestStreak,
-        display: numberFormat.format(longestStreak),
-        unit: longestStreak === 1 ? "Tag am Stück" : "Tage am Stück",
-        text: "Viele einzelne Tage, die einander die Hand gereicht haben.",
-        accent: "red"
-      },
-      {
-        id: "thanks",
-        icon: "❤️",
-        eyebrow: `Für dich, ${player}`,
-        title: "Danke, dass du Teil der Wurstrand Challenge bist.",
-        text: "Wir freuen uns auf das nächste Jahr.",
-        signature: "– Wursti & Bertha",
-        accent: "heart"
-      }
-    ];
-  }
-
-  function ensureOverlay() {
-    if (overlay) return overlay;
-
-    overlay = document.createElement("div");
-    overlay.className = "wrc-year-review";
-    overlay.setAttribute("aria-hidden", "true");
-    overlay.innerHTML = `
-      <div class="wrc-year-review-shell" role="dialog" aria-modal="true" aria-labelledby="wrcYearReviewTitle">
-        <div class="wrc-year-review-topbar">
-          <div>
-            <span class="wrc-year-review-gift">🎁</span>
-            <span id="wrcYearReviewTitle">Dein WRC-Jahr</span>
-          </div>
-          <button class="wrc-year-review-close" type="button" aria-label="Jahresrückblick schließen">×</button>
-        </div>
-
-        <div class="wrc-year-review-progress" aria-hidden="true">
-          <span></span>
-        </div>
-
-        <div class="wrc-year-review-stage"></div>
-
-        <div class="wrc-year-review-footer">
-          <button class="wrc-year-review-prev" type="button" aria-label="Vorherige Karte">←</button>
-          <div class="wrc-year-review-count" aria-live="polite"></div>
-          <button class="wrc-year-review-next" type="button">Weiter <span aria-hidden="true">→</span></button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-    overlay.querySelector(".wrc-year-review-close").addEventListener("click", close);
-    overlay.querySelector(".wrc-year-review-prev").addEventListener("click", previous);
-    overlay.querySelector(".wrc-year-review-next").addEventListener("click", next);
-    overlay.querySelector(".wrc-year-review-stage").addEventListener("click", event => {
-      if (event.target.closest("button")) return;
-      const rect = event.currentTarget.getBoundingClientRect();
-      event.clientX < rect.left + rect.width * 0.35 ? previous() : next();
-    });
-    overlay.addEventListener("touchstart", event => {
-      touchStartX = event.changedTouches[0]?.clientX ?? null;
-    }, { passive: true });
-    overlay.addEventListener("touchend", event => {
-      if (touchStartX === null) return;
-      const difference = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
-      if (Math.abs(difference) > 45) difference < 0 ? next() : previous();
-      touchStartX = null;
-    }, { passive: true });
-    document.addEventListener("keydown", event => {
-      if (!overlay.classList.contains("is-visible")) return;
-      if (event.key === "ArrowRight") next();
-      if (event.key === "ArrowLeft") previous();
-      if (event.key === "Escape") close();
-    });
-
-    return overlay;
-  }
-
-  function renderCard(card, index) {
-    const article = document.createElement("article");
-    article.className = `wrc-year-card accent-${card.accent}`;
-    article.dataset.index = String(index);
-    article.setAttribute("aria-hidden", "true");
-
-    const valueMarkup = card.title
-      ? `<h2>${card.title}</h2>`
-      : `
-        <div class="wrc-year-card-number" data-value="${card.value}" data-decimals="${card.decimals || 0}">0</div>
-        <div class="wrc-year-card-unit">${card.unit}</div>
-      `;
-
-    article.innerHTML = `
-      <div class="wrc-year-card-glow" aria-hidden="true"></div>
-      <div class="wrc-year-card-icon" aria-hidden="true">${card.icon}</div>
-      <div class="wrc-year-card-eyebrow">${card.eyebrow}</div>
-      ${valueMarkup}
-      <p>${card.text}</p>
-      ${card.signature ? `<div class="wrc-year-card-signature">${card.signature}</div>` : ""}
-    `;
-
-    return article;
-  }
-
-  function animateNumber(element, card) {
-    if (!element) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reducedMotion ? 0 : 850;
-    const target = Number(card.value) || 0;
-    const decimals = card.decimals || 0;
-    const start = performance.now();
-
-    const frame = now => {
-      const progress = duration ? Math.min(1, (now - start) / duration) : 1;
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const value = target * eased;
-      element.textContent = decimals
-        ? new Intl.NumberFormat("de-DE", {
-          minimumFractionDigits: progress === 1 ? 0 : decimals,
-          maximumFractionDigits: decimals
-        }).format(value)
-        : numberFormat.format(Math.round(value));
-
-      if (progress < 1) requestAnimationFrame(frame);
-      else element.textContent = card.display;
-    };
-
-    requestAnimationFrame(frame);
-  }
-
-  function showCard(index) {
-    if (!overlay || !cards.length) return;
-    activeIndex = Math.max(0, Math.min(index, cards.length - 1));
-    const elements = [...overlay.querySelectorAll(".wrc-year-card")];
-
-    elements.forEach((element, cardIndex) => {
-      const active = cardIndex === activeIndex;
-      element.classList.toggle("is-active", active);
-      element.classList.toggle("is-before", cardIndex < activeIndex);
-      element.setAttribute("aria-hidden", active ? "false" : "true");
-    });
-
-    const progress = ((activeIndex + 1) / cards.length) * 100;
-    overlay.querySelector(".wrc-year-review-progress span").style.width = `${progress}%`;
-    overlay.querySelector(".wrc-year-review-count").textContent =
-      `${activeIndex + 1} / ${cards.length}`;
-    overlay.querySelector(".wrc-year-review-prev").disabled = activeIndex === 0;
-    const nextButton = overlay.querySelector(".wrc-year-review-next");
-    nextButton.innerHTML = activeIndex === cards.length - 1
-      ? `Zurück zur WRC <span aria-hidden="true">✓</span>`
-      : `Weiter <span aria-hidden="true">→</span>`;
-
-    animateNumber(
-      elements[activeIndex]?.querySelector(".wrc-year-card-number"),
-      cards[activeIndex]
-    );
-  }
-
-  async function open(player = currentPlayer, year = currentYear, entries = sourceEntries) {
-    const root = ensureOverlay();
-    const yearEntries = getYearEntries(entries, year, player);
-    const dailyCount = await countDailys(year, player);
-    cards = buildCards(yearEntries, dailyCount, player, year);
-    activeIndex = 0;
-
-    const stage = root.querySelector(".wrc-year-review-stage");
-    stage.replaceChildren(...cards.map(renderCard));
-    root.querySelector("#wrcYearReviewTitle").textContent = `Dein WRC-Jahr ${year}`;
-    root.setAttribute("aria-hidden", "false");
-    document.body.classList.add("wrc-year-review-active");
-
-    requestAnimationFrame(() => {
-      root.classList.add("is-visible");
-      showCard(0);
-      root.querySelector(".wrc-year-review-close").focus();
-    });
-  }
-
-  function close() {
-    if (!overlay) return;
-    overlay.classList.remove("is-visible");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("wrc-year-review-active");
-  }
-
-  function next() {
-    if (activeIndex >= cards.length - 1) {
-      close();
-      return;
-    }
-    showCard(activeIndex + 1);
-  }
-
-  function previous() {
-    if (activeIndex > 0) showCard(activeIndex - 1);
-  }
-
-  function showGiftLetter(player, year, entries, preview) {
-    if (typeof WRCPost === "undefined") return false;
-
-    const gift = {
-      sender: "Wursti & Bertha",
-      rarity: "legendär",
-      text: [
-        "Wir haben dein WRC-Jahr",
-        "einmal für dich zusammengefasst."
-      ]
-    };
-
-    const shown = WRCPost.show(gift, {
-      heading: "Ein kleines Weihnachtsgeschenk",
-      badge: "Jahrespost",
-      signature: "– Wursti & Bertha 🌭🫘",
-      actionLabel: "🎁 Rückblick öffnen",
-      onAction: () => open(player, year, entries)
-    });
-
-    if (shown) markShown(year, player, preview);
-    return shown;
-  }
-
-  function onEntriesLoaded(entries) {
-    if (hasCheckedThisLoad || !Array.isArray(entries)) return;
-    hasCheckedThisLoad = true;
-
-    const now = new Date();
-    const preview = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-      && new URLSearchParams(window.location.search).get("year-review") === "1";
-    const player = selectedPlayer();
-    const year = preview
-      ? Number(new URLSearchParams(window.location.search).get("review-year")) || now.getFullYear()
-      : now.getFullYear();
-
-    scheduleDay(year, player);
-    if (!shouldReveal(now, player, preview)) return;
-
-    currentPlayer = player;
-    currentYear = year;
-    sourceEntries = entries;
-
-    window.setTimeout(() => {
-      if (!showGiftLetter(player, year, entries, preview)) {
-        window.setTimeout(() => showGiftLetter(player, year, entries, preview), 3200);
-      }
-    }, preview ? 500 : 1700);
-  }
-
-  window.WRCYearReview = Object.freeze({
-    buildCards,
-    close,
-    onEntriesLoaded,
-    open,
-    shouldReveal
-  });
+  function mount(){const parent=document.getElementById('dashboard');if(!parent||document.getElementById('wrcWrappedLaunch'))return;const button=document.createElement('button');button.id='wrcWrappedLaunch';button.className='wr-launch';button.innerHTML='<span>WRC WRAPPED<span class="wr-launch-year"> · JAHRESARCHIV</span></span><strong>Dein Jahr. Unsere Geschichte. <b aria-hidden="true">↗</b></strong>';button.addEventListener('click',openLibrary);parent.append(button);}
+  async function maybeGift(){if(!loaded||document.hidden||dialog?.open||library?.open)return;const player=selected(),year=new Date().getFullYear();if(new Date().getMonth()<11)return;try{const d=await WRCWrappedData.load(year,player);const modes=[d.personal_available?'personal':null,d.team_available?'team':null].filter(Boolean);for(const mode of modes){const key=`wrcWrappedNotice_${year}_${player}_${mode}`;try{if(localStorage.getItem(key))continue;}catch{}if(document.querySelector('dialog[open]'))return;const shown=typeof WRCPost!=='undefined'&&WRCPost.show({sender:'Wursti & Bertha',rarity:'legendär',text:[`${player}, wir haben ein Weihnachtsgeschenk für dich.`,mode==='team'?'Die WRC-Gala ist eröffnet. Jeder von euch hat seinen eigenen Auftritt.':'Deine Geschichte wartet. Deine Leistungen. Dein persönlicher WRC-Titel.','Kein Stress: Dein Wrapped bleibt im Jahresarchiv und kann jederzeit wieder geöffnet werden.']},{heading:mode==='team'?'Vorhang auf für uns alle!':'Dein WRC-Jahr ist ausgepackt.',badge:'WRAPPED '+year,signature:'Wursti & Bertha 🌭❤️',actionLabel:'Wrapped öffnen',onAction:()=>open(player,year,mode)});if(shown){try{localStorage.setItem(key,'1');}catch{}break;}}}catch{/* Library offers an explicit retry; no local unlock is invented. */}}
+  function onEntriesLoaded(){loaded=true;mount();clearTimeout(noticeTimer);noticeTimer=setTimeout(maybeGift,2800);}
+  document.addEventListener('DOMContentLoaded',()=>{mount();document.getElementById('person')?.addEventListener('change',()=>{clearTimeout(noticeTimer);noticeTimer=setTimeout(maybeGift,1500);});window.addEventListener('online',()=>{if(library?.open)refreshLibrary();maybeGift();});document.addEventListener('visibilitychange',()=>{if(document.hidden){sound=false;stopSound();if(dialog){dialog.querySelector('[data-wr-sound]').textContent='Ton aus';dialog.querySelector('[data-wr-sound]').setAttribute('aria-pressed','false');}}else maybeGift();});});
+  window.WRCYearReview=Object.freeze({open,close,openLibrary,onEntriesLoaded});
 })();

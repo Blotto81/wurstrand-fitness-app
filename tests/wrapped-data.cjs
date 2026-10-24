@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const source=fs.readFileSync('modules/year-review/wrapped-data.js','utf8');
+const snapshot={version:1,year:2026,through:'2026-12-23',players:['A'],entries:[]};
+const response=(mode='personal',more={})=>({year:2026,player:'A',mode,available:true,personal_available:true,team_available:false,snapshot,...more});
+function setup(rpc,host='app.example'){const store=new Map(),ctx={window:{},location:{hostname:host},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},supabaseClient:{rpc}};vm.createContext(ctx);vm.runInContext(source,ctx);return {api:ctx.window.WRCWrappedData,store,ctx};}
+(async()=>{
+ let calls=0,resolve;const h=setup(()=>{calls++;return new Promise(r=>resolve=r)});const a=h.api.load(2026,'A'),b=h.api.load(2026,'A');resolve({data:response()});await Promise.all([a,b]);assert.equal(calls,1);console.log('PASS concurrent loads share one RPC');
+ h.ctx.supabaseClient.rpc=async()=>{throw Error('offline')};assert.equal((await h.api.load(2026,'A')).offline,true);assert.equal((await h.api.load(2026,'A','team')).available,false);console.log('PASS only server-confirmed personal archive works offline');
+ h.store.set('wrcWrapped_v1_2026_A_team',JSON.stringify(response('team',{team_available:true})));const both=await h.api.load(2026,'A');assert.equal(both.personal_available,true);assert.equal(both.team_available,true);console.log('PASS cached modes merge without losing later team release');
+ await assert.rejects(h.api.load(2027,'A'));await assert.rejects(h.api.load(2026,'B'));console.log('PASS caches never leak between years or players');
+ const locked=setup(async()=>({data:response('personal',{available:false,snapshot:null,personal_available:false})}));assert.equal((await locked.api.load(2026,'A')).available,false);assert.equal(locked.store.size,0);locked.ctx.supabaseClient.rpc=async()=>{throw Error()};await assert.rejects(locked.api.load(2026,'A'));console.log('PASS locked state cannot become an offline unlock');
+ const bad=setup(async()=>({data:response('personal',{snapshot:{...snapshot,year:2027}})}));await assert.rejects(bad.api.load(2026,'A'));assert.equal(bad.store.size,0);console.log('PASS mismatched snapshots rejected');
+ const prod=setup(async()=>({data:response('personal',{available:false,snapshot:null,personal_available:false})}));prod.ctx.window.WRC_WRAPPED_FIXTURE=response();assert.equal((await prod.api.load(2026,'A')).available,false);console.log('PASS preview cannot unlock production');
+ const teamOnly=setup(async()=>{throw Error()});teamOnly.store.set('wrcWrapped_v1_2026_A_team',JSON.stringify(response('team',{team_available:true})));const t=await teamOnly.api.load(2026,'A');assert.equal(t.available,false);assert.equal(t.team_available,true);assert.equal(t.personal_available,false);console.log('PASS team-only offline library remains usable');
+ const quota=setup(async()=>({data:response()}));quota.ctx.localStorage.setItem=()=>{throw Error('quota')};assert.equal((await quota.api.load(2026,'A')).available,true);console.log('PASS unavailable local storage does not block online archive');
+})().catch(e=>{console.error(e);process.exitCode=1});
