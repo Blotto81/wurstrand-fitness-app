@@ -5,7 +5,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const format=(v,d=0)=>Number(v||0).toLocaleString('de-DE',{maximumFractionDigits:d});
   const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function season(){if(['localhost','127.0.0.1'].includes(location.hostname)&&window.WRC_WRAPPED_FIXTURE)return {year:window.WRC_WRAPPED_FIXTURE.year,active:true};const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const value=t=>Number(parts.find(p=>p.type===t).value);return {year:value('year'),active:value('month')===12&&value('day')>=25};}
+  function season(){if(['localhost','127.0.0.1'].includes(location.hostname)&&window.WRC_WRAPPED_FIXTURE)return {year:window.WRC_WRAPPED_FIXTURE.snapshot.year,active:true};const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const value=t=>Number(parts.find(p=>p.type===t).value);return {year:value('year'),active:value('month')===12&&value('day')>=25};}
   function expire(){accessEpoch++;releasedYears=[];mount(false);if(library?.open)library.close();if(dialog?.open)close();}
   function selected(){try{const p=localStorage.getItem('wrcPostLastPlayer');if(people.includes(p))return p;}catch{}return document.getElementById('person')?.value||people[0];}
   function stopSound(){for(const node of nodes){try{node.stop();}catch{}}nodes=[];}
