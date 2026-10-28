@@ -747,10 +747,10 @@
             </div>
           </button>
 
-          <article id="dashboardHighlight" class="dashboard-focus-card dashboard-highlight-card" aria-live="polite">
-            <span id="dashboardHighlightKicker">✨ Heute bei der WRC</span>
-            <strong id="dashboardHighlightTitle">Gemeinsam in Bewegung</strong>
-            <small id="dashboardHighlightText">Der nächste Eintrag schreibt die Geschichte weiter.</small>
+          <article id="dashboardHighlight" class="dashboard-focus-card dashboard-highlight-card" aria-live="polite" hidden>
+            <span id="dashboardHighlightKicker"></span>
+            <strong id="dashboardHighlightTitle"></strong>
+            <small id="dashboardHighlightText"></small>
           </article>
         </div>
 
@@ -1385,6 +1385,8 @@ background:#0f172a
   <script src="modules/holidays/halloween-data.js"></script>
   <script src="modules/holidays/halloween.js"></script>
   <script src="modules/holidays/holidays.js"></script>
+  <script src="modules/dashboard/stories-core.js"></script>
+  <script src="modules/dashboard/stories.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
   <script src="modules/mascots/mascots.js"></script>
@@ -2908,7 +2910,7 @@ background:#0f172a
       }
 
       renderRecordLadder(key, total);
-      renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder });
+      renderDashboardHighlight();
       renderMonthTransition();
     }
 
@@ -2973,55 +2975,8 @@ background:#0f172a
       );
     }
 
-    function renderDashboardHighlight({ key, entries, total, baseGoal, rest, restDays, forecast, ladder }) {
-      const card = document.getElementById("dashboardHighlight");
-      if (!card) return;
-
-      const activeDays = new Set(entries.map(entry => entry.date).filter(Boolean)).size;
-      const lastDate = getLastEntryDate(entries);
-      const latestPeople = lastDate
-        ? [...new Set(entries.filter(entry => entry.date === lastDate).map(entry => entry.person))]
-        : [];
-
-      const highlights = [];
-
-      if (lastDate && latestPeople.length) {
-        highlights.push({
-          kicker: "🤝 Letzter Team-Moment",
-          title: `${latestPeople.length} ${latestPeople.length === 1 ? "Wurstrandler war" : "Wurstrandler waren"} aktiv`,
-          text: `${formatDate(lastDate)} · ${latestPeople.join(", ")}`
-        });
-      }
-
-      if (activeDays > 0) {
-        highlights.push({
-          kicker: "📅 Euer Rhythmus",
-          title: `${activeDays} aktive ${activeDays === 1 ? "Tag" : "Tage"} im ${getMonthTitle(key)}`,
-          text: "Jeder Eintrag macht den gemeinsamen Monat vollständiger."
-        });
-      }
-
-      if (total >= baseGoal) {
-        highlights.push({
-          kicker: "✨ Zugabe",
-          title: ladder.next ? `${ladder.next.stars} ${ladder.next.title} wartet` : "Bestmarke im Blick",
-          text: ladder.next
-            ? `Das Hauptziel ist sicher. Noch ${fmt(Math.max(ladder.next.value - total, 0), 1)} Punkte bis zum Bonus.`
-            : "Das Monatsziel ist geschafft. Alles Weitere schreibt Teamgeschichte."
-        });
-      } else {
-        highlights.push({
-          kicker: forecast >= baseGoal ? "🧭 Auf Zielkurs" : "🌱 Nächster Schritt",
-          title: forecast >= baseGoal ? "Euer aktueller Kurs reicht fürs Monatsziel" : `${fmt(rest / restDays, 1)} Punkte pro Resttag`,
-          text: "Eine Orientierung, kein Druck – jeder Beitrag zählt."
-        });
-      }
-
-      const selected = highlights[new Date().getDate() % highlights.length];
-      setText("dashboardHighlightKicker", selected.kicker);
-      setText("dashboardHighlightTitle", selected.title);
-      setText("dashboardHighlightText", selected.text);
-      card.style.display = "";
+    function renderDashboardHighlight() {
+      WRCDashboardStories.render();
     }
 
     function checkGoalEffects() {
@@ -3033,18 +2988,14 @@ background:#0f172a
 
       const goalBanner = document.getElementById("goalBanner");
       const missBanner = document.getElementById("missBanner");
-      const dashboardHighlight = document.getElementById("dashboardHighlight");
 
       if (goalBanner) goalBanner.style.display = "none";
       if (missBanner) missBanner.style.display = "none";
-      if (dashboardHighlight) dashboardHighlight.style.display = "";
-
       const reachedMilestones = ladder.milestones.filter(m => total >= m.value);
 
       if (reachedMilestones.length) {
         if (goalBanner) {
           goalBanner.style.display = "block";
-          if (dashboardHighlight) dashboardHighlight.style.display = "none";
           goalBanner.innerHTML = `
             <div class="goal-banner-content">
               <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
@@ -3149,8 +3100,6 @@ background:#0f172a
 
       if (selectedMonth() === currentMonthKey() && missBanner) {
         missBanner.style.display = "flex";
-        const dashboardHighlight = document.getElementById("dashboardHighlight");
-        if (dashboardHighlight) dashboardHighlight.style.display = "none";
         missBanner.innerHTML = `
           <span class="miss-banner-icon">🌱</span>
           <div>

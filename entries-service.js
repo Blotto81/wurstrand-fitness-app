@@ -50,10 +50,12 @@
         console.log(error);
         toast("Fehler beim Laden: " + (error.message || "Supabase"));
         if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onLoadError();
+        if (typeof WRCDashboardStories !== "undefined") WRCDashboardStories.onLoadError();
         return false;
       }
 
       allEntries = cleanLoadedEntries(rows);
+      if (typeof WRCDashboardStories !== "undefined") WRCDashboardStories.onEntriesLoaded();
       if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onEntriesLoaded();
       rememberEntriesQuickstart(allEntries);
       await WRCBonusPoints.load();
