@@ -80,6 +80,9 @@
     const unique=new Map(rows.filter(r=>r.status==='complete'&&Number.isSafeInteger(r.doors)&&r.doors>0&&['scare','gold','curse'].includes(r.outcome)&&r.completed_date===r.event_year+'-10-31'&&inYear(r.completed_date)).map(r=>[r.player+':'+r.event_year,r]));
     return [...unique.values()].map(r=>({id:'halloween',player:r.player,value:r.doors,unit:'geöffnete Halloween-Türen',label:'Vier Türen. Ein Schicksal.',text:r.player+' öffnete an Halloween '+r.doors+' '+(r.doors===1?'Tür':'Türen')+(r.outcome==='gold'?' und fand die legendäre Goldwurst. Genau ein Feiertagspunkt.':r.outcome==='scare'?', bevor Wursti zuschlug. Bertha bestreitet jede Verantwortung.':' und nahm einen absurden Fluch mit nach Hause.'),date:r.completed_date,from:result.year+'-01-01',through:result.through,occasions:['personal-wrapped','team-wrapped','message']}));
   });
+  // Presentation-only facts: existing occasions and frozen archives stay unchanged.
+  register('dashboard', context => context.options.dashboard && root.WRCDashboardStoryCore
+    ? root.WRCDashboardStoryCore.facts(context) : []);
   function highlight(player,entries,through,context={}){
     const year=Number(through.slice(0,4));const r=build({...context,year,through,entries,players:[player]});const p=r.players[0];
     const extra=r.facts.find(f=>f.player===player&&f.provider&&f.occasions?.includes(context.occasion||'message'));

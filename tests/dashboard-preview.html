@@ -1,0 +1,143 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="../"><title>WRC Dashboard · Testdaten</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="modules/dashboard/dashboard.css"><style>body{padding:16px}main{max-width:1000px;margin:auto}.preview-controls{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 20px}.preview-controls button{padding:10px}.preview-note{color:#cbd5e1;font-size:13px}</style></head><body><main><p class="preview-note">LOKALE VORSCHAU · synthetische Testdaten, keine Datenbank</p><div class="preview-controls"><button data-mode="story">Geschichte</button><button data-mode="record">Rekord</button><button data-mode="empty">Keine Daten</button><button data-mode="special">Besonderer Tag</button></div>      <div class="wrc-dashboard-hero">
+
+        <div class="wrc-dashboard-heading">
+
+          <div>
+            <div class="wrc-dashboard-brand">
+              🏆 Wurstrand Challenge
+            </div>
+
+            <h2 id="monthTitle">Mutiger Mai</h2>
+          </div>
+
+          <div class="wrc-dashboard-month">
+            <label for="monthSelect">Monat / Archiv</label>
+            <select id="monthSelect"></select>
+          </div>
+
+        </div>
+
+
+        <div id="monthTransition" class="month-transition" aria-live="polite"></div>
+
+        <button type="button" class="wrc-dashboard-entry-button" >
+          <span class="wrc-dashboard-entry-icon">➕</span>
+
+          <span>
+            <strong>Aktivität eintragen</strong>
+            <small>Schritte, Rad und Übungen hinzufügen</small>
+          </span>
+
+          <span class="wrc-dashboard-entry-arrow">›</span>
+        </button>
+
+
+        <div id="goalBanner" class="goal-banner">
+          <div class="goal-banner-content">
+            <img class="goal-banner-mascot" src="wursti-monatsziel.png" alt="" aria-hidden="true">
+            <strong>🔥 Monatsziel geschafft – Dicke Bohnen offiziell freigeschaltet.</strong>
+          </div>
+        </div>
+
+        <div id="missBanner" class="miss-banner"></div>
+
+
+        <div class="wrc-progress-card">
+
+          <div class="wrc-progress-top">
+
+            <div>
+              <span class="wrc-progress-label">Monatsfortschritt</span>
+
+              <strong id="barText">
+                0 / 1700 Punkte
+              </strong>
+            </div>
+
+            <div class="barpercent wrc-progress-percent" id="barPercentTop">
+              0 %
+            </div>
+
+          </div>
+
+          <div class="bar">
+            <div class="fill" id="barFill"></div>
+          </div>
+
+          <div class="wrc-progress-outlook" aria-label="Monatsausblick">
+            <button type="button" >
+              <small>Team pro Resttag</small>
+              <strong id="goalPaceTeam">0 Punkte</strong>
+            </button>
+            <button type="button" >
+              <small>Pro Spieler &amp; Resttag</small>
+              <strong id="goalPacePlayer">0 Punkte</strong>
+            </button>
+            <button type="button" >
+              <small id="goalForecastLabel">Prognose Monatsende</small>
+              <strong id="goalForecast">0 Punkte</strong>
+              <span id="goalForecastBasis" class="dashboard-forecast-basis"></span>
+            </button>
+          </div>
+
+        </div>
+
+
+        <div id="recordLadder" class="record-ladder"></div>
+
+
+        <div class="wrc-dashboard-focus-grid">
+          <button type="button" id="dashboardAchievementCard" class="dashboard-focus-card dashboard-achievement-card"
+            >
+            <span>🏆 Nächstes Achievement</span>
+            <strong id="dashboardAchievementTitle">Wird geladen …</strong>
+            <small id="dashboardAchievementProgress"></small>
+            <div class="dashboard-achievement-track" aria-hidden="true">
+              <div id="dashboardAchievementFill"></div>
+            </div>
+          </button>
+
+          <article id="dashboardHighlight" class="dashboard-focus-card dashboard-highlight-card" aria-live="polite" hidden>
+            <span id="dashboardHighlightKicker"></span>
+            <strong id="dashboardHighlightTitle"></strong>
+            <small id="dashboardHighlightText"></small>
+          </article>
+        </div>
+
+      </div>
+
+
+    </div>
+</main><script src="config.js"></script><script src="scoring.js"></script><script src="modules/insights/insights.js"></script><script src="modules/dashboard/stories-core.js"></script><script>
+    function cleanLoadedEntries(rawEntries) {
+      const mergedMap = {};
+
+      rawEntries.forEach(e => {
+        const key = `${e.date}_${e.person}`;
+
+        if (!mergedMap[key]) {
+          mergedMap[key] = { ...e };
+          return;
+        }
+
+        const existing = mergedMap[key];
+
+        existing.steps = Math.max(+existing.steps || 0, +e.steps || 0);
+        existing.bike = Math.max(+existing.bike || 0, +e.bike || 0);
+        existing.squats = Math.max(+existing.squats || 0, +e.squats || 0);
+        existing.pushups = Math.max(+existing.pushups || 0, +e.pushups || 0);
+        existing.exercise = existing.exercise || e.exercise;
+      });
+
+      return Object.values(mergedMap);
+    }
+
+
+const core=WRCDashboardStoryCore,day='2026-10-28',through=core.shift(day,-1);
+function render(mode='story'){
+const entries=mode==='empty'?[]:people.flatMap(person=>Array.from({length:27},(_,i)=>({person,date:core.shift('2026-10-01',i),steps:6000,bike:mode==='record'&&i===26?80:3,squats:15})));
+const fact=core.build({day,entries,players:people,score:calcPoints,clean:cleanLoadedEntries,special:mode==='special'}),card=document.getElementById('dashboardHighlight');card.hidden=!fact;card.classList.toggle('is-record',fact?.kind==='record');if(fact){document.getElementById('dashboardHighlightKicker').textContent=fact.kicker;document.getElementById('dashboardHighlightTitle').textContent=fact.label;document.getElementById('dashboardHighlightText').textContent=fact.text;}
+for(const [id,text] of Object.entries({monthTitle:'Oktober 2026 · Gemeinsam unterwegs',goalTarget:'1.700',barPercentTop:'76 %',barText:'1.292 / 1.700 Punkte',goalPaceTeam:'102 Punkte',goalPacePlayer:'25,5 Punkte',goalForecast:'1.780 Punkte',goalForecastBasis:'Vollständig bis 27.10.2026',dashboardAchievementTitle:'Der nächste gemeinsame Meilenstein',dashboardAchievementProgress:'Euer Fortschritt bleibt hier unverändert.'})) {const el=document.getElementById(id);if(el)el.textContent=text;}document.getElementById('barFill').style.width='76%';
+}
+if(['localhost','127.0.0.1'].includes(location.hostname)){document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>render(b.dataset.mode)));render();}else{document.querySelector('main').textContent='Nur lokal verfügbar.';}
+</script></body></html>
