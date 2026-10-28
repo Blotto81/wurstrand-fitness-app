@@ -22,5 +22,18 @@
     return {mime,size:file.size};
   }
   function sorted(rows,sort){return [...rows].sort((a,b)=>sort==='oldest'?a.exhibit_number-b.exhibit_number:sort==='date'?(a.photo_date&&b.photo_date?b.photo_date.localeCompare(a.photo_date):a.photo_date?-1:b.photo_date?1:0)||b.exhibit_number-a.exhibit_number:b.exhibit_number-a.exhibit_number);}
-  root.WRCBobCore=Object.freeze({MAX_BYTES,PLAYERS,uuid,validate,inspect,sorted});
+
+  const FRAMES=Object.freeze({baroque:'Königlicher Barock',rococo:'Verspieltes Rokoko',renaissance:'Dunkle Renaissance',antique:'Antikes Museumsgold'});
+  const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+  function presentation(row={}) {
+    const fallback=Object.keys(FRAMES)[Math.max(0,(Number(row.exhibit_number)||1)-1)%4];
+    const finite=(n,d)=>Number.isFinite(Number(n))&&n!==null&&n!==''?Number(n):d;
+    return {frame_style:FRAMES[row.frame_style]?row.frame_style:fallback,crop_x:clamp(finite(row.crop_x,.5),0,1),crop_y:clamp(finite(row.crop_y,.5),0,1),crop_zoom:clamp(finite(row.crop_zoom,1),1,3)};
+  }
+  // Cover geometry: normalized offsets use only the overflow, so no gesture can expose blank margins.
+  function geometry(width,height,naturalWidth,naturalHeight,zoom=1) {
+    const scale=Math.max(width/naturalWidth,height/naturalHeight)*zoom;
+    return {width:naturalWidth*scale,height:naturalHeight*scale,overflowX:Math.max(0,naturalWidth*scale-width),overflowY:Math.max(0,naturalHeight*scale-height)};
+  }
+  root.WRCBobCore=Object.freeze({MAX_BYTES,PLAYERS,uuid,validate,inspect,sorted,FRAMES,presentation,geometry,clamp});
 })(typeof window==='undefined'?globalThis:window);

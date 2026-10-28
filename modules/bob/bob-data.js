@@ -21,7 +21,8 @@
       if(file&&!draft.uploaded)await upload(draft,file,info);
       const path=draft.path||draft.existing?.photo_path;
       if(!path)throw Error('Bitte wähle ein Foto aus.');
-      return rpc('save',{p_request:draft.request,p_id:draft.id,p_revision:draft.existing?.revision||0,p_photo_path:path,p_player:v.player,p_title:v.title,p_photo_date:v.photo_date,p_comment:v.comment,p_dedication:v.dedication});
+      const display=WRCBobCore.presentation(values);
+      return rpc('save_display',{p_frame_style:display.frame_style,p_crop_x:display.crop_x,p_crop_y:display.crop_y,p_crop_zoom:display.crop_zoom,p_request:draft.request,p_id:draft.id,p_revision:draft.existing?.revision||0,p_photo_path:path,p_player:v.player,p_title:v.title,p_photo_date:v.photo_date,p_comment:v.comment,p_dedication:v.dedication});
     }
     return Object.freeze({list,save,cleanup,url:path=>store.getPublicUrl(path).data.publicUrl,
       async remove(row){
