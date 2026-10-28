@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v68";
+const CACHE_NAME = "wrc-app-v69";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -99,6 +99,11 @@ const APP_SHELL = [
   "./modules/bob/bob-core.js",
   "./modules/bob/bob-data.js",
   "./modules/bob/bob.js",
+  "./modules/bob/bob-crop.js",
+  "./modules/bob/frames/baroque.svg",
+  "./modules/bob/frames/rococo.svg",
+  "./modules/bob/frames/renaissance.svg",
+  "./modules/bob/frames/antique.svg",
   "./modules/dashboard/dashboard.css",
   "./modules/dashboard/stories-core.js",
   "./modules/dashboard/stories.js",
