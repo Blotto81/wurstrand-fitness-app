@@ -2,10 +2,8 @@
   "use strict";
   const C = window.WRCBonusStreakCore;
   const titles = { 7: "Angefeuert", 14: "Wurstwender", 30: "Glutmeister", 60: "Feuerhüter", 100: "Grilllegende", 180: "Flammenkrone", 365: "Ewige Glut" };
-  const statusNames = { bonus: "Bonus erreicht", protected: "Durch Joker geschützt · kein Bonustag", miss: "Bonus nicht erreicht", open: "Heute noch offen" };
-  const months = new Map();
   const celebratedSnapshots = new WeakSet();
-  let reference, dayKey, states = new Map(), ready = false, synced = false, rewardTimer;
+  let reference, dayKey, states = new Map(), ready = false, rewardTimer, pendingReward, deliveryTimer;
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const stamp = date => new Date(date + "T12:00:00").toLocaleDateString("de-DE");
   function entries() { return typeof allEntries === "undefined" ? [] : allEntries; }
@@ -14,12 +12,6 @@
     if (source !== reference || date !== dayKey) { reference = source; dayKey = date; states = new Map(); }
     if (!states.has(player)) states.set(player, C.calculate(source, player, date));
     return states.get(player);
-  }
-  function shield(filled) {
-    return `<svg viewBox="0 0 24 28" class="bs-shield${filled ? " is-filled" : ""}" aria-hidden="true"><path d="M12 2 22 6v8c0 6-6 10-10 12C8 24 2 20 2 14V6Z"/><path d="m7 13 3 3 7-7"/></svg>`;
-  }
-  function grill() {
-    return `<svg class="bs-grill" viewBox="0 0 96 96" aria-hidden="true"><path class="bs-smoke" d="M34 34c-10-9 9-12 0-23m15 23c-10-9 9-12 0-23m15 23c-10-9 9-12 0-23"/><path d="M18 43h60c-2 21-13 30-30 30S20 64 18 43Z"/><path d="m33 71-8 17m38-17 8 17M29 80h38M14 43h68"/><path class="bs-grill-glow" d="M30 52h36"/></svg>`;
   }
   function art(level) {
     // Only invoked for earned patches. Each milestone has its own illustrated motif.
@@ -34,116 +26,81 @@
     };
     return `<svg viewBox="0 0 100 112" class="bs-patch-art bs-level-${level}" aria-hidden="true"><path class="bs-badge" d="m50 3 43 19v46c0 22-25 34-43 41C32 102 7 90 7 68V22Z"/><path class="bs-stitches" d="m50 9 37 17v42c0 17-21 29-37 35C34 97 13 85 13 68V26Z"/><g transform="translate(9 10) scale(.82)">${motifs[level]}</g></svg>`;
   }
-  function summary(s, compact = false) {
-    return `<div class="bs-summary${compact ? " bs-compact" : ""}${s.current >= 30 ? " bs-hot" : ""}">
-      <div class="bs-summary-main"><span class="bs-eyebrow">BONUSSTREAK · ${esc(s.player)}</span><div class="bs-count"><strong>${s.current}</strong><span>${s.current === 1 ? "Bonustag" : "Bonustage"}<small>in deiner Serie</small></span></div>
-      <p class="bs-motto">${s.current ? "Der Grill bleibt heiß." : "Der Grill ist aus. Zeit, ihn anzuheizen!"}</p></div>${grill()}
-      <div class="bs-summary-footer"><div class="bs-jokers"><span class="bs-shields" aria-hidden="true">${Array.from({ length: 4 }, (_, i) => shield(i < s.jokers)).join("")}</span><span><b>${s.jokers}</b> Joker verfügbar</span></div><span class="bs-record">Rekord <b>${s.record}</b></span></div></div>`;
-  }
-  function note() { return !synced ? '<p class="bs-sync" role="status">Gespeicherter Stand · Abgleich mit der WRC steht noch aus.</p>' : ""; }
-  function renderEntry() {
-    const box = document.getElementById("bonusStreakEntry");
-    const player = document.getElementById("person")?.value;
-    if (!box || !player) return;
-    box.innerHTML = ready ? `${summary(state(player), true)}${note()}<p class="bs-caption">Gespeicherte Bonustage seit 01.05.2026 · Joker schützen, zählen aber nicht mit.</p>` : '<p class="bs-caption">Deine Bonusserie wird geladen …</p>';
-  }
   function renderPatches(player) {
     if (!ready) return "";
     const s = state(player);
     if (!s.patches.length) return "";
-    return `<div class="bs-patch-shelf" aria-label="Verdiente Streak-Patches von ${esc(player)}">${s.patches.map(p => `<button type="button" class="bs-mini-patch" data-bs-patch="${p.milestone}" data-bs-player="${esc(player)}" title="${titles[p.milestone]} · ${p.milestone} Bonustage" aria-label="Streak-Patch ${titles[p.milestone]}, ${p.milestone} Bonustage öffnen">${art(p.milestone)}<span>${p.milestone}</span></button>`).join("")}</div>`;
-  }
-  function calendar(s) {
-    const maxMonth = s.asOf.slice(0, 7);
-    let month = months.get(s.player) || maxMonth;
-    if (month < C.START.slice(0, 7) || month > maxMonth) month = maxMonth;
-    months.set(s.player, month);
-    const first = new Date(month + "-01T12:00:00Z"), offset = (first.getUTCDay() + 6) % 7;
-    const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
-    const lookup = new Map(s.days.map(d => [d.date, d]));
-    const title = first.toLocaleDateString("de-DE", { month: "long", year: "numeric", timeZone: "UTC" });
-    return `<div class="bs-calendar" data-bs-player="${esc(s.player)}"><div class="bs-calendar-head"><button type="button" data-bs-month="-1" aria-label="Vorheriger Bonusmonat" ${month <= C.START.slice(0, 7) ? "disabled" : ""}>‹</button><h4 aria-live="polite">${title}</h4><button type="button" data-bs-month="1" aria-label="Nächster Bonusmonat" ${month >= maxMonth ? "disabled" : ""}>›</button></div>
-      <div class="bs-calendar-grid" aria-label="Bonuskalender ${title}">${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map(d => `<span class="bs-weekday" aria-hidden="true">${d}</span>`).join("")}${'<span aria-hidden="true"></span>'.repeat(offset)}${Array.from({ length: last }, (_, i) => {
-        const date = `${month}-${String(i + 1).padStart(2, "0")}`, d = lookup.get(date);
-        const label = d ? `${stamp(date)}: ${statusNames[d.status]}${d.broke ? ". Serie beendet" : ""}` : `${stamp(date)}: noch nicht abgeschlossen`;
-        return `<button type="button" class="bs-day bs-${d?.status || "future"}${date === s.asOf ? " bs-today" : ""}" data-bs-day="${date}" ${d ? "" : "disabled"} ${date === s.asOf ? 'aria-current="date"' : ""} title="${label}" aria-label="${label}"><span>${i + 1}</span><small aria-hidden="true">${({ bonus: "✓", protected: "◇", miss: "·", open: "○" })[d?.status] || ""}</small></button>`;
-      }).join("")}</div><div class="bs-legend"><span><i class="bs-key-bonus">✓</i> Bonus</span><span><i class="bs-key-protected">◇</i> Joker</span><span><i>·</i> Ohne Bonus</span><span><i>○</i> Heute offen</span></div><p class="bs-day-detail" aria-live="polite">Tippe auf einen Tag für den damaligen Serien- und Jokerstand.</p></div>`;
+    return `<div class="bs-patch-shelf" aria-label="Verdiente Bonusserien-Patches von ${esc(player)}">${s.patches.map(p => `<button type="button" class="bs-mini-patch" data-bs-patch="${p.milestone}" data-bs-player="${esc(player)}" title="${titles[p.milestone]} · ${p.milestone} Bonustage" aria-label="Bonusserien-Patch ${titles[p.milestone]}, ${p.milestone} Bonustage öffnen">${art(p.milestone)}<span>${p.milestone}</span></button>`).join("")}</div>`;
   }
   function renderProfile(player) {
-    if (!ready) return '<section id="bonusStreakProfile" class="bs-profile"><p>Bonusserie wird geladen …</p></section>';
+    if (!ready) return "";
     const s = state(player);
-    return `<section id="bonusStreakProfile" class="bs-profile" data-bs-player="${esc(player)}" aria-label="Bonusserie von ${esc(player)}"><div class="bs-section-heading"><div><span class="bs-eyebrow">DER GRILL BLEIBT HEISS</span><h3>Deine Bonusserie</h3></div><span class="bs-since">Seit 01.05.2026</span></div><div class="bs-profile-grid"><div>${summary(s)}${note()}<div class="bs-record-story"><span>🏆</span><div><strong>Dein längstes Feuer: ${s.record} ${s.record === 1 ? "Bonustag" : "Bonustage"}</strong><p>${s.recordDate ? `Erreicht am ${stamp(s.recordDate)}. Ein neuer Anlauf setzt deinen Rekord nicht zurück.` : "Jeder Grillabend beginnt mit dem ersten Funken."}</p></div></div><details class="bs-rules"><summary>So bleibt dein Grill heiß</summary><p>Der bestehende Tagesbonus verlängert deine Serie um einen Bonustag. Pro Monat gibt es 2 Joker, höchstens 4 auf Vorrat. Ein Joker schützt eine laufende Serie an einem abgeschlossenen Tag ohne Bonus, zählt aber nicht mit.</p><p>Ohne Joker endet die Serie. Dein nächster Anlauf hat 2 Joker; solange keine Serie läuft, wird keiner verbraucht. Heute bleibt offen, bis der Tag vorbei ist.</p><p>Nachträge und Korrekturen berechnen die gesamte Historie ab 01.05.2026 neu. Rekorde und Patches aus früheren Serien bleiben berücksichtigt.</p></details><p class="bs-earned-note">${s.patches.length ? `${s.patches.length} ${s.patches.length === 1 ? "Streak-Patch" : "Streak-Patches"} verdient · bei deinen Sportauszeichnungen.` : "Deine erste Streak-Auszeichnung wartet auf ihren großen Moment."}</p></div>${calendar(s)}</div></section>`;
+    if (s.current < 3) return "";
+    return `<div id="bonusStreakProfile" class="bs-profile" data-bs-player="${esc(player)}" aria-label="Bonusserie von ${esc(player)}"><strong>🔥 ${s.current} erfolgreiche Bonustage in Serie</strong><small>Persönlicher Rekord: ${s.record}</small></div>`;
   }
   function refresh() {
-    renderEntry();
     const box = document.getElementById("bonusStreakProfile");
-    const player = box?.dataset.bsPlayer || document.getElementById("playerSelect")?.value;
-    if (box && player) box.outerHTML = renderProfile(player);
+    if (box) box.outerHTML = renderProfile(box.dataset.bsPlayer);
   }
-  function onEntriesLoaded(isSynced = true) { ready = true; synced = isSynced; reference = null; renderEntry(); }
-  function onLoadError() { synced = false; refresh(); }
+  function onEntriesLoaded() { ready = true; reference = null; refresh(); }
+  function onLoadError() { refresh(); }
   function showPatch(player, milestone, opener) {
     const patch = state(player).patches.find(p => p.milestone === milestone);
     if (!patch) return;
     const dialog = document.createElement("dialog");
     dialog.className = "bs-patch-dialog";
     dialog.setAttribute("aria-labelledby", "bonusPatchTitle");
-    dialog.innerHTML = `<button type="button" class="bs-close" aria-label="Patch schließen">×</button><span class="bs-eyebrow">WRC · VERDIENTE AUSZEICHNUNG</span>${art(milestone)}<h2 id="bonusPatchTitle">${titles[milestone]}</h2><p class="bs-patch-number">${milestone} Bonustage in einer Serie</p><p>${esc(player)} hat diesen Patch am <strong>${stamp(patch.date)}</strong> erreicht.</p><p class="bs-caption">Serie ab ${stamp(patch.seriesStart)} · Joker-Tage zählen nicht mit.</p>`;
+    dialog.innerHTML = `<button type="button" class="bs-close" aria-label="Patch schließen">×</button><span class="bs-eyebrow">WRC · VERDIENTE AUSZEICHNUNG</span>${art(milestone)}<h2 id="bonusPatchTitle">${titles[milestone]}</h2><p class="bs-patch-number">${milestone} Bonustage in einer Serie</p><p>${esc(player)} hat diesen Patch am <strong>${stamp(patch.date)}</strong> erreicht.</p><p class="bs-caption">Serie ab ${stamp(patch.seriesStart)} · Pausentage zählen nicht mit.</p>`;
     const close = () => dialog.close();
     dialog.querySelector("button").addEventListener("click", close);
     dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
     dialog.addEventListener("close", () => { dialog.remove(); if (opener?.isConnected) opener.focus(); }, { once: true });
     document.body.append(dialog); dialog.showModal();
   }
-  function showAchievement(success) {
-    if (!success) return;
-    clearTimeout(rewardTimer);
-    document.getElementById("bonusStreakReward")?.remove();
+  const seen = new Set();
+  const noticeKey = (player, milestone) => `wrcBonusSeriesNotice_${player}_${milestone}`;
+  function wasSeen(player, milestone) {
+    const key = noticeKey(player, milestone);
+    try { return seen.has(key) || localStorage.getItem(key) === "1"; } catch { return seen.has(key); }
+  }
+  function showAchievement(success, patch) {
     const box = document.createElement("aside");
-    box.id = "bonusStreakReward"; box.className = `bs-reward${success.patches.length ? " bs-reveal" : ""}`;
-    box.setAttribute("aria-label", "Bonusserie erreicht");
-    box.innerHTML = `<button type="button" class="bs-close" aria-label="Streak-Meldung schließen">×</button><div role="status"><span class="bs-eyebrow">${esc(success.player)}${success.backdated ? ` · NACHTRAG ${stamp(success.date)}` : " · BONUS ERREICHT"}</span><strong>🔥 ${success.count} ${success.count === 1 ? "Bonustag" : "Bonustage"}!</strong><p>Der Grill bleibt heiß! 🌭${success.backdated ? " Deine Historie ist neu berechnet." : ""}</p>${success.patches.length ? `<div class="bs-reward-patches">${success.patches.map(p => `<div>${art(p.milestone)}<b>${titles[p.milestone]}</b><small>${p.milestone} Bonustage · neu verdient</small></div>`).join("")}</div>` : ""}</div>`;
-    box.querySelector("button").addEventListener("click", () => box.remove());
+    box.id = "bonusStreakReward"; box.className = "bs-reward"; box.setAttribute("role", "status");
+    box.innerHTML = `${art(patch.milestone)}<div><strong>${patch.milestone} Bonustage – ${titles[patch.milestone]}!</strong><span>Glückwunsch, ${esc(success.player)}.</span></div>`;
     document.body.append(box);
-    rewardTimer = setTimeout(() => box.remove(), success.patches.length ? 8500 : 5500);
+    const key = noticeKey(success.player, patch.milestone); seen.add(key);
+    try { localStorage.setItem(key, "1"); } catch { /* Recognition works without storage. */ }
+    clearTimeout(rewardTimer); rewardTimer = setTimeout(() => box.remove(), 4000);
+  }
+  function deliverReward() {
+    if (!pendingReward) return;
+    // Never cover an existing reward or force a modal. There is at most one pending notice.
+    if (document.hidden || document.querySelector(".club-unlock.show, dialog[open], .wrc-post-overlay.is-visible, .save-reward.show, #bonusStreakReward")) {
+      deliveryTimer = setTimeout(deliverReward, 1000); return;
+    }
+    const success = pendingReward; pendingReward = null;
+    const patch = success.patches.at(-1);
+    if (!wasSeen(success.player, patch.milestone) && state(success.player).patches.some(p => p.milestone === patch.milestone)) showAchievement(success, patch);
   }
   function afterSave(before, savedEntry) {
     if (celebratedSnapshots.has(before)) return;
     const result = C.achievement(before, state(savedEntry.person), savedEntry.date);
     if (!result) return;
     celebratedSnapshots.add(before);
-    // Follow the existing save reward; wait for any sport-patch modal to close.
-    const deliver = () => {
-      if (document.querySelector(".club-unlock.show, dialog[open], .wrc-post-overlay.is-visible")) { setTimeout(deliver, 1000); return; }
-      showAchievement(result);
-    };
-    setTimeout(deliver, 5400);
+    // Backfills update every earned patch silently; ordinary bonus days have no notice.
+    if (result.backdated) return;
+    result.patches = result.patches.filter(p => !wasSeen(result.player, p.milestone));
+    if (!result.patches.length) return;
+    pendingReward = result;
+    clearTimeout(deliveryTimer); deliveryTimer = setTimeout(deliverReward, 5400);
   }
   document.addEventListener("click", event => {
-    const target = event.target.closest?.("[data-bs-month], [data-bs-day], [data-bs-patch]");
-    if (!target || target.disabled) return;
-    if (target.hasAttribute("data-bs-patch")) { showPatch(target.dataset.bsPlayer, Number(target.dataset.bsPatch), target); return; }
-    const host = target.closest(".bs-calendar"), player = host?.dataset.bsPlayer;
-    if (!player) return;
-    const s = state(player);
-    if (target.hasAttribute("data-bs-month")) {
-      const date = new Date((months.get(player) || s.asOf.slice(0, 7)) + "-01T12:00:00Z");
-      date.setUTCMonth(date.getUTCMonth() + Number(target.dataset.bsMonth));
-      months.set(player, date.toISOString().slice(0, 7));
-      const direction = target.dataset.bsMonth;
-      host.outerHTML = calendar(s);
-      const calendarBox = document.querySelector("#bonusStreakProfile .bs-calendar");
-      const same = calendarBox.querySelector(`[data-bs-month="${direction}"]`);
-      (same.disabled ? calendarBox.querySelector("[data-bs-month]:not([disabled])") : same)?.focus();
-    } else {
-      const d = s.days.find(item => item.date === target.dataset.bsDay);
-      if (d) host.querySelector(".bs-day-detail").textContent = `${stamp(d.date)} · ${statusNames[d.status]}. ${d.broke ? "Serie beendet, 2 Joker für den Neustart." : `${d.current} Bonustage in der Serie · ${d.jokers} Joker übrig.`}${d.credit ? ` Monatsgutschrift: +${d.credit} Joker.` : ""}`;
-    }
+    const target = event.target.closest?.("[data-bs-patch]");
+    if (target && !target.disabled) showPatch(target.dataset.bsPlayer, Number(target.dataset.bsPatch), target);
   });
-  document.addEventListener("change", event => { if (event.target.id === "person") renderEntry(); });
-  // An app left open overnight must not keep yesterday's day protected as "today".
+  // An app left open overnight must not keep yesterday's day open as "today".
   function checkDate() { if (ready && dayKey !== C.today()) refresh(); }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) checkDate(); });
   setInterval(checkDate, 60000);
-  window.WRCBonusStreaks = Object.freeze({ state, renderEntry, renderPatches, renderProfile, onEntriesLoaded, onLoadError, afterSave });
+  window.WRCBonusStreaks = Object.freeze({ state, renderPatches, renderProfile, onEntriesLoaded, onLoadError, afterSave });
 })();

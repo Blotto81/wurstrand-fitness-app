@@ -25,17 +25,15 @@
     for (const entry of entries || []) {
       if (entry.person === player && validDate(entry.date) && entry.date >= START && entry.date <= asOf && score(entry).bonus > 0) bonuses.add(entry.date);
     }
-    let current = 0, record = 0, jokers = 0, seriesStart = null, recordDate = null;
+    let current = 0, record = 0, misses = 0, seriesStart = null, recordDate = null;
     const days = [], patches = [];
     const earned = new Set();
     for (let date = START; date <= asOf; date = nextDay(date)) {
-      // Credit once, BEFORE resolving that day's bonus/miss. A restart never rewinds time.
-      const credit = date.endsWith("-01") ? Math.min(2, 4 - jokers) : 0;
-      jokers += credit;
       let status, broke = false;
       if (bonuses.has(date)) {
         if (!current) seriesStart = date;
         current++;
+        misses = 0;
         status = "bonus";
         if (current > record) { record = current; recordDate = date; }
         if (MILESTONES.includes(current) && !earned.has(current)) {
@@ -44,28 +42,28 @@
         }
       } else if (date === asOf) {
         status = "open";
-      } else if (current > 0 && jokers > 0) {
-        jokers--;
-        status = "protected";
       } else {
         status = "miss";
         if (current > 0) {
-          current = 0; jokers = 2; seriesStart = null; broke = true;
+          misses++;
+          if (misses === 1) status = "pause";
+          else { current = 0; seriesStart = null; broke = true; }
         }
-        // Without an active series there is nothing to protect. Keep restart credit.
       }
-      days.push({ date, status, current, jokers, credit, broke, seriesStart });
+      days.push({ date, status, current, broke, seriesStart });
     }
-    return { player, start: START, asOf, current, record, recordDate, jokers, seriesStart, days, patches };
+    return { player, start: START, asOf, current, record, recordDate, seriesStart, days, patches };
   }
   function achievement(before, after, activityDate) {
     const oldDay = before.days.find(day => day.date === activityDate);
     const day = after.days.find(item => item.date === activityDate);
     if (!day || day.status !== "bonus" || oldDay?.status === "bonus") return null;
+    const patches = after.patches.filter(p => !before.patches.some(old => old.milestone === p.milestone));
+    if (!patches.length) return null;
     return {
       player: after.player, date: activityDate, count: day.current,
       backdated: activityDate < after.asOf,
-      patches: after.patches.filter(p => !before.patches.some(old => old.milestone === p.milestone))
+      patches
     };
   }
   root.WRCBonusStreakCore = Object.freeze({ START, MILESTONES, today, nextDay, calculate, achievement });
