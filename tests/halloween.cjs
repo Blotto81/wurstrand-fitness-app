@@ -1,0 +1,23 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),path=require('path');
+const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const c={console};vm.createContext(c);vm.runInContext(read('modules/holidays/halloween-core.js'),c);const C=c.WRCHalloweenCore;
+assert.deepEqual(Array.from(C.weights),[45,25,20,10]);assert.equal(C.curses.length,15);
+for(const [v,e] of [[0,'continue'],[.44999,'continue'],[.45,'scare'],[.69999,'scare'],[.7,'gold'],[.89999,'gold'],[.9,'curse'],[.999,'curse']])assert.equal(C.draw(()=>v),e);
+for(const owner of C.owners)assert.equal(C.step(null,'Thorsten',2026,0,owner,null,()=>.75).outcome,'gold');
+let run;for(let i=0;i<10000;i++)run=C.step(run,'Marian',2026,i,C.owners[i%4],'continue');assert.equal(run.doors,10000);assert.ok(C.valid(run));
+assert.equal(C.step(run,'Marian',2026,0,'Fabi','gold'),run);run=C.step(run,'Marian',2026,10000,'Basti','gold');assert.equal(run.status,'complete');assert.equal(C.step(run,'Marian',2026,10001,'Thorsten','continue'),run);
+assert.equal(C.step(null,'Marian',2027,0,'Marian','curse').doors,1);
+assert.notDeepEqual(Array.from(C.shuffle(()=>0)),Array.from(C.shuffle(()=>.99)));assert.equal(new Set(C.shuffle()).size,4);
+(async()=>{
+const store=new Map();let dbCalls=0;const create=()=>{const x={console,WRCHalloweenCore:C,WRCHolidayData:{preview:true,today:()=> '2026-10-31'},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},supabaseClient:{from(){dbCalls++;throw Error('No backend')},rpc(){dbCalls++;throw Error('No backend')}},WRC_HALLOWEEN_FIXTURE:{next:'continue'}};x.window=x;vm.createContext(x);vm.runInContext(read('modules/holidays/halloween-data.js'),x);return x;};
+let a=create();await a.WRCHalloweenData.load();await a.WRCHalloweenData.open('Thorsten',2026,0,'Basti');a=create();await a.WRCHalloweenData.load();assert.equal(a.WRCHalloweenData.get('Thorsten',2026).doors,1);a.WRC_HALLOWEEN_FIXTURE.next='gold';await a.WRCHalloweenData.open('Thorsten',2026,1,'Fabi');await a.WRCHalloweenData.open('Thorsten',2026,1,'Marian');assert.equal(a.WRCHalloweenData.records().length,1);assert.equal(a.WRCHalloweenData.records()[0].doors,2);assert.equal(dbCalls,0);
+// Production rejects local fixture odds and sends only expected state and selected door.
+let calls=0;const saved=C.step(null,'Basti',2026,0,'Fabi','scare');const prod={console,WRCHalloweenCore:C,WRCHolidayData:{preview:false,today:()=> '2026-10-31',load:async()=>true},WRC_HALLOWEEN_FIXTURE:{next:'gold'},supabaseClient:{from(){return{select(){return this},order(){return this},range:async()=>({data:[],error:null})}},rpc:async(name,args)=>{calls++;assert.equal(name,'open_wrc_halloween');assert.deepEqual(JSON.parse(JSON.stringify(args)),{p_player:'Basti',p_expected:0,p_door:'Fabi'});return{data:[saved]};}}};prod.window=prod;vm.createContext(prod);vm.runInContext(read('modules/holidays/halloween-data.js'),prod);await prod.WRCHalloweenData.load();assert.equal((await prod.WRCHalloweenData.open('Basti',2026,0,'Fabi')).outcome,'scare');assert.equal(calls,1);
+for(const p of ['halloween-core.js','halloween-data.js','halloween.js'])new vm.Script(read('modules/holidays/'+p));
+const ui=read('modules/holidays/halloween.js');assert.ok(ui.includes('prefers-reduced-motion'));assert.ok(ui.includes('Animation überspringen'));assert.ok(ui.includes('if(busy||!D.ready)return'));assert.ok(ui.includes('visibilitychange'));assert.ok(!read('modules/holidays/halloween.css').includes('strobe'));
+// Execute the real animation function: reduced motion and background tabs must not create a scene.
+const animation=ui.slice(ui.indexOf('  function animate('),ui.indexOf('  async function open('));
+let created=0;const motion={matchMedia:()=>({matches:true}),document:{hidden:false,createElement(){created++;throw Error('Animation should be absent')}},Promise};vm.createContext(motion);vm.runInContext(animation,motion);await motion.animate({},{});assert.equal(created,0);motion.matchMedia=()=>({matches:false});motion.document.hidden=true;await motion.animate({},{});assert.equal(created,0);
+const sql=read('supabase/halloween-labyrinth.sql');assert.ok(sql.includes('pg_advisory_xact_lock'));assert.ok(sql.includes("r.status='complete' or r.doors<>p_expected"));assert.ok(sql.includes('revoke all on public.wrc_halloween_runs'));assert.ok(sql.includes("'Europe/Berlin'"));
+console.log('PASS Halloween: exact boundaries, owner-independent draw, 10,000 rooms, shuffle, terminal/retry, preview reload and zero backend writes, production ignores forced events, animation/sound controls, SQL invariants and syntax.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
