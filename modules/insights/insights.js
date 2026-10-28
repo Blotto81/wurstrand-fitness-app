@@ -20,7 +20,7 @@
       const all=archive.filter(e=>e.person===name),own=all.filter(e=>inYear(e.date));
       const h=history.players?.[name]||{};
       const activity=own.filter(e=>score(e).total>0);
-      const p={name,year,through:end,steps:+h.steps||0,bike:+h.bike||0,squats:+h.squats||0,pushups:+h.pushups||0,exercises:+h.exercises||0,trainingPoints:+h.points||0,bonusDays:+h.bonusCount||0,bonusPoints:+h.bonusPoints||0,activeDays:activity.length,activityStreak:0,streakEarned:0,jokersUsed:0,bonusStreak:0,carriedIn:0,patches:[],records:[],months:[],dailyCount:null,bestDay:null,comeback:null,historical:!!h.points};
+      const p={name,year,through:end,steps:+h.steps||0,bike:+h.bike||0,squats:+h.squats||0,pushups:+h.pushups||0,exercises:+h.exercises||0,trainingPoints:+h.points||0,bonusDays:+h.bonusCount||0,bonusPoints:+h.bonusPoints||0,activeDays:activity.length,activityStreak:0,streakEarned:0,bonusStreak:0,carriedIn:0,patches:[],records:[],months:[],dailyCount:null,bestDay:null,comeback:null,historical:!!h.points};
       let run=0,previous=null;const monthMap=new Map();
       for(const e of own){const scored=score(e);for(const key of ['steps','bike','squats','pushups'])p[key]+=Number(e[key])||0;p.exercises+=e.exercise?1:0;p.trainingPoints+=scored.total;p.bonusDays+=scored.bonus>0?1:0;p.bonusPoints+=scored.bonus;
         if(scored.total>0){run=previous&&distance(previous,e.date)===1?run+1:1;p.activityStreak=Math.max(p.activityStreak,run);if(previous&&distance(previous,e.date)>=15&&(!p.comeback||distance(previous,e.date)-1>p.comeback.pause))p.comeback={date:e.date,pause:distance(previous,e.date)-1};previous=e.date;}
@@ -36,7 +36,7 @@
         // Replay all prior history once, then project only this year's earned days.
         const state=streakCore.calculate(archive,name,end,score),days=state.days.filter(d=>inYear(d.date));
         let earned=0,series=null;
-        for(const d of days){if(d.seriesStart!==series){earned=0;series=d.seriesStart;}if(d.status==='bonus'){earned++;p.streakEarned++;p.bonusStreak=Math.max(p.bonusStreak,earned);}if(d.status==='protected')p.jokersUsed++;}
+        for(const d of days){if(d.seriesStart!==series){earned=0;series=d.seriesStart;}if(d.status==='bonus'){earned++;p.streakEarned++;p.bonusStreak=Math.max(p.bonusStreak,earned);}}
         p.carriedIn=state.days.filter(d=>d.date<start).at(-1)?.current||0;
         p.patches=state.patches.filter(x=>inYear(x.date)).map(x=>({kind:'bonus',name:x.milestone+' Bonustage',date:x.date,value:x.milestone,seriesStart:x.seriesStart}));
         const priorRecord=Math.max(0,...state.days.filter(d=>d.date<start).map(d=>d.current));
@@ -51,13 +51,13 @@
       const months=p.months.filter(m=>m.days>=7);if(months.length>=2){const first=months[0],last=months.at(-1),a=first.points/first.days,b=last.points/last.days;if(b>a*1.1)p.improvement={from:first.month,to:last.month,percent:Math.round((b/a-1)*100),basis:'Punkte je aktivem Tag; mindestens 7 aktive Tage je Monat'};}
       result.players.push(p);
     }
-    const t=result.team;for(const key of ['steps','bike','squats','pushups','exercises','points','trainingPoints','giftPoints','activeDays','bonusDays','bonusPoints','streakEarned','jokersUsed'])t[key]=round(result.players.reduce((sum,p)=>sum+p[key],0));
+    const t=result.team;for(const key of ['steps','bike','squats','pushups','exercises','points','trainingPoints','giftPoints','activeDays','bonusDays','bonusPoints','streakEarned'])t[key]=round(result.players.reduce((sum,p)=>sum+p[key],0));
     // Existing legacy team totals are authoritative where individual legacy sums differ.
     for(const key of ['steps','bike','squats','pushups','exercises'])if(history.team&&Number.isFinite(history.team[key]))t[key]=round(t[key]-result.players.reduce((s,p)=>s+(+history.players?.[p.name]?.[key]||0),0)+history.team[key]);
     if(history.team?.points){const correction=history.team.points-result.players.reduce((s,p)=>s+(+history.players?.[p.name]?.points||0),0);t.points=round(t.points+correction);t.trainingPoints=round(t.trainingPoints+correction);}
     t.calendarDays=new Set(archive.filter(e=>members.includes(e.person)&&inYear(e.date)&&score(e).total>0).map(e=>e.date)).size;
     t.dailyCount=Array.isArray(options.dailys)?result.players.reduce((s,p)=>s+p.dailyCount,0):null;t.patches=result.players.reduce((s,p)=>s+p.patches.length,0);t.records=result.players.reduce((s,p)=>s+p.records.length,0);
-    for(const p of result.players){for(const [id,value,unit] of [['steps',p.steps,'Schritte'],['bike',p.bike,'km auf dem Rad'],['bonus-series',p.bonusStreak,'verdiente Bonustage in einer Serie'],['jokers',p.jokersUsed,'geschützte Tage'],['patches',p.patches.length,'neue Patches']])if(value>0)result.facts.push({id,player:p.name,from:start,through:end,value,unit,occasions:['birthday','christmas','personal-wrapped','team-wrapped','honor','message']});}
+    for(const p of result.players){for(const [id,value,unit] of [['steps',p.steps,'Schritte'],['bike',p.bike,'km auf dem Rad'],['bonus-series',p.bonusStreak,'verdiente Bonustage in einer Serie'],['patches',p.patches.length,'neue Patches']])if(value>0)result.facts.push({id,player:p.name,from:start,through:end,value,unit,occasions:['birthday','christmas','personal-wrapped','team-wrapped','honor','message']});}
     for(const [id,provider] of providers){const facts=provider({result,archive,inYear,options});for(const f of facts||[])if(members.includes(f.player)&&Number.isFinite(f.value)&&f.value>0&&(!f.date||inYear(f.date)))result.facts.push({...f,provider:id});}
     result.awards=awards(result);return result;
   }
