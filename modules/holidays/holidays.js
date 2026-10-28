@@ -58,7 +58,9 @@
     host.hidden = !event || !C.members.includes(p);
     renderEggs(event, p);
     renderLedger();
+    WRCHalloween.archive();
     if (host.hidden) { host.replaceChildren(); return; }
+    if (event.type === "halloween" && (!D.receipt("halloween", p, event.year) || D.receipt("halloween", p, event.year).halloween_version === 2)) { WRCHalloween.render(host, p, event.year); return; }
     const saved = D.receipt(event.type, p, event.year), key = actionKey(event, p);
     const pending = busy.has(key), disabled = pending || !D.ready;
     host.className = `wh-card wh-${event.type}`;
@@ -71,7 +73,7 @@
       if (saved) {
         const result = outcomes[saved.result];
         body += `<div class="wh-reveal"><h3>${result[0]}</h3><p>${result[1]}</p><small>${result[2]}</small><p class="wh-note">Deine Tür ${event.year}: ${saved.choice === 0 ? "WURST" : "SAURES"}. Ergebnis gespeichert. Keine Punkte, nur Schicksal.</p></div>`;
-      } else body += `<div class="wh-doors">${button('<span aria-hidden="true">🚪</span><strong>WURST</strong>', "door-0", disabled, "wh-door")}${button('<span aria-hidden="true">🚪</span><strong>SAURES</strong>', "door-1", disabled, "wh-door")}</div><p class="wh-note">Einmal wählen. Für dieses Jahr. Bertha führt Buch.</p>`;
+      }
     } else if (event.type === "nikolaus") {
       body = `<span class="wh-eyebrow">6. DEZEMBER · WRC-STIEFELKONTROLLE</span><h2>Der Nikolaus war da.</h2><p>Und er hat in deinen WRC-Stiefel geschaut.<br>Das Ergebnis ist leider aktenkundig.</p>`;
       if (saved) body += `<article class="wh-certificate"><span class="wh-stamp">GEPRÜFT<br>WRC ${event.year}</span><span class="wh-eyebrow">PERSÖNLICHE WRC-BESCHEINIGUNG</span><h3>Für ${p}.</h3>${numbers(stats(event.year, p))}<p>${stats(event.year, p)?.available ? "Davon waren erstaunlich viele Punkte sogar regelkonform." : "Die Akte enthält keine erfundenen Leistungen."}</p><ul><li>☑ Einträge geprüft</li><li>☑ Keine Nikolaus-Extrapunkte vergeben</li><li>☑ Weitere Beobachtung erforderlich</li></ul><footer>Gezeichnet: Wursti, amtierender WRC-Nikolaus 🌭</footer></article>`;
@@ -110,14 +112,14 @@
     const ledger = make("wrcHolidayLedger", document.getElementById("entriesList")?.parentElement);
     if (!ledger) return;
     const rows = D.matching({ key: selectedMonth() }); ledger.hidden = !rows.length; ledger.className = "wh-ledger";
-    ledger.innerHTML = rows.length ? `<strong>🎁 Feiertagsboni · getrennt vom Training</strong>${rows.map(row => `<p>${esc(row.gift_date)} · ${row.recipient}: ${row.label} · +5 Punkte</p>`).join("")}` : "";
+    ledger.innerHTML = rows.length ? `<strong>🎁 Feiertagsboni · getrennt vom Training</strong>${rows.map(row => `<p>${esc(row.gift_date)} · ${row.recipient}: ${row.label} · +${row.points} Punkte</p>`).join("")}` : "";
   }
   async function act(event, p, action, slot) {
     const key = actionKey(event, p); if (busy.has(key)) return;
     busy.add(key); notices.delete(key); render();
     const host = document.getElementById("wrcHolidayEvent"); host?.classList.add("wh-opening");
     try {
-      const [saved] = await Promise.all([D.claim(event.type, p, { slot, choice: action.startsWith("door-") ? Number(action.slice(-1)) : undefined }), new Promise(resolve => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 850))]);
+      const [saved] = await Promise.all([D.claim(event.type, p, { slot, choice: undefined }), new Promise(resolve => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 850))]);
       if (event.type === "easter") notices.set(`${key}:egg:${slot}`, `🥚 GEFUNDEN! Das ist tatsächlich dein Ei, ${p}! +5 Punkte sind gespeichert. Wursti gratuliert. Bertha behauptet, sie hätte es besser versteckt.`);
       busy.delete(key); renderAll(); render();
       if (saved.points && player() === p && C.resolve(D.today())?.type === event.type) burst(event.type);
@@ -149,12 +151,12 @@
     })();
     return archiveTask;
   }
-  async function onEntriesLoaded() { initialized = true; render(); await loadArchive(C.resolve(D.today())); }
+  async function onEntriesLoaded() { initialized = true; render(); await WRCHalloweenData.load(); render(); await loadArchive(C.resolve(D.today())); }
   async function refresh() {
     if (document.hidden) return;
     if (lastDate !== D.today()) { lastDate = D.today(); archive = null; archiveYear = null; render(); }
     if (!initialized || syncTask) return;
-    syncTask = (async () => { await D.load(); await loadArchive(C.resolve(D.today())); renderAll(); })();
+    syncTask = (async () => { await D.load(); await WRCHalloweenData.load(); await loadArchive(C.resolve(D.today())); renderAll(); })();
     try { await syncTask; } finally { syncTask = null; }
   }
   document.addEventListener("DOMContentLoaded", () => {

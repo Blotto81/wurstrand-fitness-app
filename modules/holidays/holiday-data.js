@@ -11,8 +11,10 @@
     (Array.isArray(data) ? data : []).forEach(r => {
       const event = C.resolve(r.event_date);
       if (!C.members.includes(r.player) || !event || event.type !== r.event_type || event.year !== r.event_year) return;
-      if (r.points !== (["easter", "christmas"].includes(r.event_type) ? 5 : 0)) return;
-      if (r.event_type === "halloween" && (!Number.isInteger(r.result) || r.result < 0 || r.result > 5 || ![0, 1].includes(r.choice) || Math.floor(r.result / 3) !== r.choice)) return;
+      const modern = r.event_type === "halloween" && r.halloween_version === 2;
+      if (r.points !== (["easter", "christmas"].includes(r.event_type) ? 5 : modern && r.result === 2 ? 1 : 0)) return;
+      if (modern && (!Number.isInteger(r.choice) || r.choice < 0 || r.choice > 3 || ![1,2,3].includes(r.result))) return;
+      if (r.event_type === "halloween" && !modern && (!Number.isInteger(r.result) || r.result < 0 || r.result > 5 || ![0, 1].includes(r.choice) || Math.floor(r.result / 3) !== r.choice)) return;
       unique.set(`${r.event_type}:${r.event_year}:${r.player}`, r);
     });
     return [...unique.values()];
@@ -21,7 +23,7 @@
   function receipt(type, player, year) { return rows.find(r => r.event_type === type && r.player === player && r.event_year === year) || null; }
   function matching(scope = {}) {
     return rows.filter(r => r.points && (!scope.person || r.player === scope.person) && (!scope.key || r.event_date.startsWith(scope.key)) && (!scope.date || r.event_date === scope.date) && (!scope.from || r.event_date >= scope.from) && (!scope.through || r.event_date <= scope.through))
-      .map(r => ({ recipient: r.player, gift_date: r.event_date, points: r.points, event_type: r.event_type, label: r.event_type === "easter" ? "WRC-Osterei gefunden" : "Weihnachtsgeschenk von Wursti" }));
+      .map(r => ({ recipient: r.player, gift_date: r.event_date, points: r.points, event_type: r.event_type, label: r.event_type === "easter" ? "WRC-Osterei gefunden" : r.event_type === "halloween" ? "Legendäre Halloween-Goldwurst" : "Weihnachtsgeschenk von Wursti" }));
   }
   async function load() {
     if (preview) { rows = clean(read()); ready = true; return true; }
@@ -30,7 +32,7 @@
       try {
         const all = [];
         for (let offset = 0; ; offset += 1000) {
-          const { data, error } = await supabaseClient.from("wrc_holiday_events").select("event_type,event_year,player,event_date,points,choice,result").order("event_year").order("event_type").order("player").range(offset, offset + 999);
+          const { data, error } = await supabaseClient.from("wrc_holiday_events").select("*").order("event_year").order("event_type").order("player").range(offset, offset + 999);
           if (error) throw error;
           all.push(...data); if (data.length < 1000) break;
         }
@@ -44,14 +46,14 @@
     const event = C.resolve(today());
     if (!event || event.type !== type || !C.members.includes(player)) throw new Error("Dieser Feiertagsmoment ist jetzt nicht verfügbar.");
     if (type === "easter" && C.eggOwner(event.year, options.slot) !== player) throw new Error("Dieses Ei gehört einem anderen Wurstrandler.");
-    if (type === "halloween" && ![0, 1].includes(options.choice)) throw new Error("Bitte wähle eine der beiden Türen.");
+    if (type === "halloween") throw new Error("Bitte das Halloween-Labyrinth verwenden.");
     if (!ready) throw new Error("Noch keine Verbindung bestätigt. Bitte erneut laden.");
     if (preview) rows = clean(read());
     const existing = receipt(type, player, event.year);
     if (existing) return existing;
     let saved;
     if (preview) {
-      saved = { event_type: type, event_year: event.year, player, event_date: event.date, points: ["easter", "christmas"].includes(type) ? 5 : 0, choice: type === "halloween" ? options.choice : null, result: type === "halloween" ? options.choice * 3 + Math.floor(Math.random() * 3) : null };
+      saved = { event_type: type, event_year: event.year, player, event_date: event.date, points: ["easter", "christmas"].includes(type) ? 5 : 0, choice: null, result: null };
     } else {
       const { data, error } = await supabaseClient.rpc("claim_wrc_holiday", { p_event: type, p_player: player, p_choice: options.choice ?? null, p_egg_slot: options.slot ?? null });
       if (error) { await load(); throw new Error("Nicht bestätigt. Bitte Verbindung prüfen und erneut versuchen. Bereits gespeicherte Geschenke gehen nicht verloren."); }
