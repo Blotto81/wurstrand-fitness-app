@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="modules/bonus-streaks/bonus-streaks.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modules/dashboard/dashboard.css">
+  <link rel="stylesheet" href="modules/bob/bob.css">
   <link rel="stylesheet" href="modules/month-archive/month-archive.css">
 	  <link rel="stylesheet" href="modules/analysis/analysis.css">
 	  <link rel="stylesheet" href="modules/wursti-walk/wursti-walk.css">
@@ -1013,7 +1014,9 @@ background:#0f172a
     </div>
 
   </div>
+  <div id="bobPanel" class="panel"></div>
   <div id="funfactsPanel" class="panel">
+    <button type="button" class="bob-entry" onclick="showTab('bobPanel', menuLinkForPanel('funfactsPanel')); window.scrollTo(0,0)"><span class="bob-entry-icon" aria-hidden="true">🥸</span><span><strong>B.o.B. – Best of Bärte</strong><small>Das Museum der fragwürdigen Gesichtskunst</small></span><span class="bob-entry-arrow" aria-hidden="true">→</span></button>
 
     <div class="card">
       <h3>😂 Fun Facts seit Februar</h3>
@@ -1387,6 +1390,9 @@ background:#0f172a
   <script src="modules/holidays/holidays.js"></script>
   <script src="modules/dashboard/stories-core.js"></script>
   <script src="modules/dashboard/stories.js"></script>
+  <script src="modules/bob/bob-core.js"></script>
+  <script src="modules/bob/bob-data.js"></script>
+  <script src="modules/bob/bob.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>
   <script src="modules/mascots/mascots.js"></script>
@@ -2110,6 +2116,9 @@ background:#0f172a
       if (id === "eintragen" && !editingId) {
         prepareSuggestedEntryDate();
       }
+
+      if (id === "bobPanel") WRCBob.open();
+      else if (typeof WRCBob !== "undefined") WRCBob.close();
 
       if (id === "quotesPanel") {
         renderQuotes();
