@@ -2,7 +2,7 @@
   'use strict';
   const flights=new Map();
   const key=(year,player,mode)=>`wrcWrapped_v1_${year}_${player}_${mode}`;
-  function valid(data,year,player,mode){return data&&data.year===year&&data.player===player&&data.mode===mode&&typeof data.available==='boolean'&&(!data.available||(data.snapshot?.version===1&&data.snapshot.year===year&&data.snapshot.through===`${year}-12-23`&&Array.isArray(data.snapshot.entries)&&Array.isArray(data.snapshot.players)));}
+  function valid(data,year,player,mode){return data&&data.year===year&&data.player===player&&data.mode===mode&&typeof data.available==='boolean'&&(!data.available||([1,2].includes(data.snapshot?.version)&&data.snapshot.year===year&&data.snapshot.through===`${year}-12-23`&&Array.isArray(data.snapshot.entries)&&Array.isArray(data.snapshot.players)));}
   function inSeason(year,date=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const get=t=>Number(parts.find(p=>p.type===t).value);return get('year')===year&&get('month')===12&&get('day')>=25;}
   function cached(year,player,mode){try{if(!inSeason(year))return null;const v=JSON.parse(localStorage.getItem(key(year,player,mode)));return valid(v,year,player,mode)&&v.available?{...v,offline:true}:null;}catch{return null;}}
   async function load(year,player,mode='personal'){

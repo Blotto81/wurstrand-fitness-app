@@ -50,3 +50,7 @@ Bereits auf diesem Gerät geladene, freigegebene Ausgaben bleiben innerhalb ders
 - Vorhandene `tests/*.cjs` sowie `tests/test-runner.html` ausführen; kein separater Build vorhanden.
 - `tests/wrapped-database.sql` ausschließlich nach dem Migrationskörper **in einer Transaktion ohne COMMIT** ausführen. Test verändert die Uhr nur in der Rollback-Transaktion und endet immer mit ROLLBACK. Niemals diese Testdefinition als produktive RPC veröffentlichen.
 - Browser: beide Shows, alle Spieler, drei Enthüllungsarten, stummer Start, Ton-Schalter, Schließen/Neustart, Keyboard, schmale/breite Viewports, sichtbarer Datenstand.
+
+## Halloween-Archiv v2
+
+`supabase/halloween-wrapped-v2.sql` erweitert ausschließlich neu erzeugte Jahresquellen um bestätigte Halloween-Akten. V1-Archive bleiben unverändert und werden ohne nachgeladene Halloween-Fakten gerendert. Version 2 ergänzt persönliche/teambezogene Erinnerungen über den gemeinsamen Insight-Provider, keine sportlichen Titel oder Bonusserien. Siehe Feiertagsdokumentation für Migration und lokale PostgreSQL-Tests.
