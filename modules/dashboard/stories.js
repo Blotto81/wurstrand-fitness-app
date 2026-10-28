@@ -24,9 +24,10 @@
     card.hidden=!story;
     card.classList.toggle('is-record',story?.kind==='record');
     if(story) {
-      document.getElementById('dashboardHighlightKicker').textContent=story.kicker;
-      document.getElementById('dashboardHighlightTitle').textContent=story.label;
-      document.getElementById('dashboardHighlightText').textContent=story.text;
+      for(const [id,text] of [['dashboardHighlightKicker',story.kicker],['dashboardHighlightTitle',story.label],['dashboardHighlightText',story.text]]) {
+        const element=document.getElementById(id);
+        if(element.textContent!==text) element.textContent=text;
+      }
     }
   }
   async function refresh() {
