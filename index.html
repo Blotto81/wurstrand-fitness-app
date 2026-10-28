@@ -76,6 +76,7 @@
     <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
       Rekorde</button>
     <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
+    <button class="drawer-link tab" onclick="showTab('bobPanel',this); toggleMainMenu(false)">🥸 B.o.B. – Best of Bärte</button>
 
     <div class="drawer-divider"></div>
     <button class="drawer-group-title drawer-toggle" type="button"
@@ -1016,7 +1017,6 @@ background:#0f172a
   </div>
   <div id="bobPanel" class="panel"></div>
   <div id="funfactsPanel" class="panel">
-    <button type="button" class="bob-entry" onclick="showTab('bobPanel', menuLinkForPanel('funfactsPanel')); window.scrollTo(0,0)"><span class="bob-entry-icon" aria-hidden="true">🥸</span><span><strong>B.o.B. – Best of Bärte</strong><small>Das Museum der fragwürdigen Gesichtskunst</small></span><span class="bob-entry-arrow" aria-hidden="true">→</span></button>
 
     <div class="card">
       <h3>😂 Fun Facts seit Februar</h3>
@@ -1392,6 +1392,7 @@ background:#0f172a
   <script src="modules/dashboard/stories.js"></script>
   <script src="modules/bob/bob-core.js"></script>
   <script src="modules/bob/bob-data.js"></script>
+  <script src="modules/bob/bob-crop.js"></script>
   <script src="modules/bob/bob.js"></script>
   <script src="entries-service.js"></script>
   <script src="insights-rendering.js"></script>

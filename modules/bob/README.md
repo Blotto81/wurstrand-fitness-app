@@ -1,6 +1,6 @@
 # B.o.B. – Best of Bärte
 
-Eigenständiges Museum unter **Fun Facts → B.o.B.**. Keine neue Hauptnavigation, Punkte, Ranglisten oder Verknüpfung zu Erfolgen. Die Produktion startet ohne Exponate.
+Eigenständiges Museum im Hauptmenü zwischen **Fun Facts** und **Game Lounge**. Keine Punkte, Ranglisten oder Verknüpfung zu Erfolgen. Vorhandene Exponate werden erhalten.
 
 ## Bewusst gewähltes Zugriffsmodell
 
@@ -13,13 +13,13 @@ RLS bleibt aktiv. Direkte Änderungen an den Museumstabellen sind gesperrt. Vali
 1. Im vorhandenen WRC-Projekt `ythcpltiujpnxedtgjmr` die Datei `supabase/bob-museum.sql` vollständig im SQL-Editor ausführen. Die Migration ist wiederholbar und verändert keine bisherigen WRC-Datentabellen.
 2. Sie erstellt `wrc_bob_exhibits`, die interne Asset-/Vorgangsverwaltung, die RPCs und den Bucket `wrc-bob-originals` inklusive RLS, 15-MB-Limit und MIME-Freigabe für JPEG, PNG und WebP.
 3. Frontend veröffentlichen. Es nutzt den vorhandenen Supabase-Client und veröffentlichbaren Schlüssel. Keine weitere Einrichtung und kein neuer Account erforderlich.
-4. Unter Fun Facts das Museum öffnen. Die erste echte Aufnahme selbst hochladen. Auf einem zweiten Gerät ist sie beim Öffnen, über Aktualisieren oder spätestens nach dem nächsten 30-Sekunden-Abgleich der sichtbaren Galerie zu sehen.
+4. Im Hauptmenü B.o.B. öffnen. Die erste echte Aufnahme selbst hochladen. Auf einem zweiten Gerät ist sie beim Öffnen, über Aktualisieren oder spätestens nach dem nächsten 30-Sekunden-Abgleich der sichtbaren Galerie zu sehen.
 
 Die Migration wurde im Rahmen der Umsetzung im vorhandenen Projekt ausgeführt. **Es wurden keine Beispiel-Exponate oder Testfotos in der Produktion angelegt.**
 
 ## Dateien und Lebenszyklus
 
-- Originale werden als unverändertes File-Objekt hochgeladen. Kein Canvas, keine Kompression, keine Retusche, keine Filter und kein Beschnitt. `object-fit: contain`, Bilderrahmen ausschließlich in CSS. EXIF-/Orientierungsinformationen bleiben unverändert in der Originaldatei.
+- Originale werden als unverändertes File-Objekt hochgeladen. Kein Canvas, keine Kompression, keine Retusche und keine Filter. Die gerahmte Ansicht verwendet einen reinen Darstellungszuschnitt; das vollständige Original ist in der Detailansicht aufklappbar. EXIF-/Orientierungsinformationen bleiben unverändert in der Originaldatei.
 - JPEG, PNG und WebP bis 15 MB. Browser prüft Dateisignatur und Decodierbarkeit; Storage prüft MIME und Größe. HEIC/HEIF wird mit einer klaren Bitte um ein unterstütztes Format abgewiesen, ohne automatische Umwandlung.
 - Zufällige UUID-Pfade und `upsert:false`. Upload-Reservierung und gespeicherte MIME/Bytegröße werden beim Speichern serverseitig geprüft.
 - PostgreSQL-Identity vergibt eindeutige Exponatnummern. Kein Neuordnen oder Wiederverwenden nach Löschung. Fehlgeschlagene Transaktionen können Nummernlücken hinterlassen.
@@ -38,7 +38,16 @@ Geburtstage, Weihnachten, persönliche/Team-Wrapped, Ehrungen und Nachrichten: b
 - `node tests/bob.cjs`: Formular, optionale Daten, Dateisignaturen/Limit, HEIC-Fehler, Sortierung, identische Originalbytes, Wiederholungen, Navigation und Syntax.
 - `node tests/bob-db-test.js <Pfad zu @electric-sql/pglite>`: echte temporäre PostgreSQL-Datenbank, wiederholbare Migration, anonyme RPC-Nutzung, RLS auch bei alten allgemeinen Policies, gleichzeitige eindeutige Nummern, Versionskonflikte, zweistufiges Löschen, Fotoaustausch und Bereinigung.
 - `node tests/bob-preview-server.js <Pfad zu @electric-sql/pglite>` startet auf 127.0.0.1:8784 eine **isolierte** leere Datenbank mit lokaler Storage-Nachbildung. `tests/bob-preview.html` enthält keine Verbindung zu Supabase und keine Beispielbilder. Nur selbst gewählte lokale Prüfbilder werden benutzt. Fehler-Schalter simulieren Upload-Ausfall, verlorene Speicherantwort und abgebrochene Bildlöschung.
-- Browserprüfung: Smartphonebreite 390 px, Originalvorschau, Hoch-/Querformat, unbekanntes Datum, optionale Texte, Austausch, Speichern nach verlorener Antwort, zweiter Tab, Detail/Escape, Abbrechen/Bestätigen/Wiederholen der Löschung und Rückweg zu Fun Facts. Eine physische Android-Kamera wurde nicht bedient; `accept` und separater `capture=environment`-Eingang bieten Galerieauswahl und Kamera an.
+- Browserprüfung: Smartphonebreite 390 px, Originalvorschau, Hoch-/Querformat, unbekanntes Datum, optionale Texte, Austausch, Speichern nach verlorener Antwort, zweiter Tab, Detail/Escape, Abbrechen/Bestätigen/Wiederholen der Löschung und Rückweg zum Dashboard. Eine physische Android-Kamera wurde nicht bedient; `accept` und separater `capture=environment`-Eingang bieten Galerieauswahl und Kamera an.
 - Vorhandene CJS-Regressionstests bleiben grün. Punkte, Dart, UNO, Bonusserie, Feiertage, Geburtstage, Dashboard und Wrapped unverändert.
 
 Storage-Grundlagen: [Supabase Access Control](https://supabase.com/docs/guides/storage/security/access-control), [Bucket-Konfiguration](https://supabase.com/docs/guides/storage/buckets/fundamentals).
+
+## Museums-Makeover
+- Neuer Hauptmenüpunkt direkt zwischen Fun Facts und Game Lounge, alte Einstiegskachel entfernt. Dieselbe Galerie, dieselben Exponatnummern und Originalpfade.
+- Vier selbst gezeichnete lokale SVG-Rahmen: Barock mit Akanthusblättern, Rokoko mit Voluten, Renaissance mit dunklem Holzprofil und Rosetten, patiniertes Museumsgold. Maskierte Innenöffnung, mehrschichtige Profile, Metallverläufe und feine Gravuren; keine externen Assets oder zusätzliche Bibliothek.
+- Bestehende Werke erhalten stabil nach Exponatnummer eine Variante. Bei Upload und Bearbeitung lässt sich die Variante wählen.
+- bob-crop.js: Pointer Events für Verschieben und Zwei-Finger-Zoom, zusätzlicher Zoomregler, Pfeiltasten und Positionsregler. Cover-Geometrie bewahrt Seitenverhältnisse und begrenzt Positionen ohne freie Ränder. Eine neue Bilddatei setzt den Ausschnitt zurück; Metadatenbearbeitung erhält ihn.
+- supabase/bob-museum-display.sql nach der Basismigration ausführen. Addiert ausschließlich frame_style, crop_x, crop_y, crop_zoom und die neue Save-RPC. Keine Datensatz- oder Storage-Umschreibung. Alte Clients können weiter speichern und behalten die Darstellungsfelder. Neue Clients speichern Foto/Plakette/Ausschnitt atomar mit bisherigen Revisions- und Wiederholungsregeln.
+- node tests/bob-display.cjs: stabile Varianten, Menüposition, Cover-Geometrie, Pointer-Drag/Pinch, Grenzen, Tastatur und Speichersperre. PostgreSQL-Tests prüfen Migration mit vorhandenen Daten, Metadatenerhalt, alte Clients, Wertevalidierung und verlorene Antworten.
+- Keine Anlässe oder Insights ergänzt: rein visuelle Museumspflege, kein sportlicher Erfolg. Physische Android-Hardware wurde nicht bedient; Smartphoneansicht und Pointer-Logik werden getrennt geprüft.
