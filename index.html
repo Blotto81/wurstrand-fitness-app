@@ -943,7 +943,6 @@ background:#0f172a
       </label>
 
       <div id="bonusPreview" class="bonus-preview"></div>
-      <div id="bonusStreakEntry"></div>
 
 
       <button class="primary" onclick="saveEntry()" id="saveButton" style="width:100%;margin-top:18px">
@@ -4998,7 +4997,6 @@ background:#0f172a
       localStorage.setItem("randomFactLastShown", String(now));
     }
     function updateBonusPreview() {
-      WRCBonusStreaks.renderEntry();
       const box = document.getElementById("bonusPreview");
       if (!box) return;
 

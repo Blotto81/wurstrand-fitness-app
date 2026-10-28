@@ -28,7 +28,7 @@ Aktueller gemeinsamer Kader: Thorsten, Basti, Marian, Fabi, entsprechend `config
 - Originale Tageseinträge ab Mai 2026, identisch bereinigt wie in der App. Schritte, Rad, Kraft, Übungen, Punkte und Bonus werden aus `calcPoints` abgeleitet.
 - Bestehende Sammelwerte Februar–April 2026 werden unverändert addiert. Bei Abweichungen zwischen Spieler-Sammelwerten und Team-Sammelwerten bleiben die bestehenden Teamwerte maßgeblich. Keine Datenkorrektur durch Wrapped.
 - Aktive Tage, stärkster Tag/Monat, Comebacks und Tagesrekorde sind nur im detaillierten Tagesarchiv belegbar; Sammelwerte erfinden keine Tage. Rekorde benötigen einen früheren niedrigeren Wert. Steigerung vergleicht Monate mit mindestens sieben aktiven Tagen. Vorjahresvergleich verwendet detaillierte Einträge bis zum gleichen Kalenderdatum und weist auf Erfassungslücken hin.
-- Die Bonus-Streak wird pro Spieler einmal mit sämtlicher relevanter Vorgeschichte zentral nachgerechnet. Jahreswert = in diesem Jahr selbst verdiente Tage je Serie, Joker separat. Übernommene Vorjahrestage und ein neuer serienübergreifender persönlicher Rekord werden zusätzlich erläutert. Patches zählen nur beim ersten belegten Erreichungsdatum im Jahr.
+- Die Bonusserie wird pro Spieler einmal mit sämtlicher relevanter Vorgeschichte zentral nachgerechnet. Jahreswert = in diesem Jahr selbst verdiente Tage je Serie. Einzelne Pausentage zählen nicht mit; zwei abgeschlossene Tage ohne Bonus beenden die Serie. Übernommene Vorjahrestage und ein neuer serienübergreifender persönlicher Rekord werden zusätzlich erläutert. Patches zählen nur beim ersten belegten Erreichungsdatum im Jahr.
 - Sport-Club-Patches verwenden vorhandene Clubschwellen und den ersten passenden archivierten Tag. Frühere Sammelwerte belegen kein individuelles Tagesdatum.
 - Erfolgreiche Dailys: eindeutig nach Spieler/Tag/Daily-ID. Geburtstags-/Feiertagspunkte getrennt von Aktivitätspunkten; finale WRC-Summe enthält beide.
 - Gespeicherte Dart-/UNO-Partien und Platzierungen sind optionale Fakten. Keine Änderung an Spielmodulen oder Ergebnissen.
@@ -45,7 +45,7 @@ Bereits auf diesem Gerät geladene, freigegebene Ausgaben bleiben innerhalb ders
 `tests/wrapped-preview.html` funktioniert mit `tests/wrapped-fixture.js` nur auf localhost/127.0.0.1. Sie verwendet ausdrücklich synthetische Daten ohne DB-Schreibzugriffe; kein Produktions-Unlock. Lokal per HTTP-Server starten. Nicht als echte Jahresausgabe ausgeben.
 
 ## Prüfungen
-- `node tests/wrapped.cjs`: Daten, Zeiträume, zentrale Streaks, Joker, Patches, Titel, alle Spieler, Dramaturgie, Syntax.
+- `node tests/wrapped.cjs`: Daten, Zeiträume, zentrale Bonusserien, Pausentage, Patches, Titel, alle Spieler, Dramaturgie, Syntax.
 - `node tests/wrapped-data.cjs`: RPC/Cache, Parallelität, Offline-Freigaben, Jahres-/Spielertrennung, Vorschaugrenze.
 - Vorhandene `tests/*.cjs` sowie `tests/test-runner.html` ausführen; kein separater Build vorhanden.
 - `tests/wrapped-database.sql` ausschließlich nach dem Migrationskörper **in einer Transaktion ohne COMMIT** ausführen. Test verändert die Uhr nur in der Rollback-Transaktion und endet immer mit ROLLBACK. Niemals diese Testdefinition als produktive RPC veröffentlichen.

@@ -14,99 +14,53 @@ const range = (from, to, player) => { const result=[]; for(let d=from;d<=to;d=C.
 const plain = value => JSON.parse(JSON.stringify(value));
 let checks = 0;
 function test(name, fn) { fn(); checks++; console.log('PASS ' + name); }
-test('7 real bonus days unlock exactly the first patch', () => {
-  const s = run(range('2026-05-01','2026-05-07'), '2026-05-07');
-  assert.equal(s.current,7); assert.equal(s.record,7); assert.equal(s.jokers,2);
-  assert.deepEqual(plain(s.patches),[{milestone:7,date:'2026-05-07',seriesStart:'2026-05-01'}]);
+
+test('one bonus starts; pause is neutral; today stays open',()=>{
+ const rows=[entry('2026-05-01')];assert.equal(run(rows,'2026-05-01').current,1);
+ assert.equal(run(rows,'2026-05-02').days.at(-1).status,'open');
+ const pause=run(rows,'2026-05-03');assert.equal(pause.current,1);assert.equal(pause.days.at(-2).status,'pause');
+ assert.equal(run([...rows,entry('2026-05-03')],'2026-05-03').current,2);
 });
-test('joker +0, running today neither breaks nor consumes', () => {
-  const data=range('2026-05-01','2026-05-07');
-  const today=run(data,'2026-05-08'); assert.equal(today.current,7); assert.equal(today.jokers,2); assert.equal(today.days.at(-1).status,'open');
-  const next=run(data,'2026-05-09'); assert.equal(next.current,7); assert.equal(next.jokers,1); assert.equal(next.days.at(-2).status,'protected');
+test('alternating bonus and single pause days work indefinitely',()=>{
+ const rows=range('2026-05-01','2027-06-04').filter((_,i)=>i%2===0),s=run(rows,'2027-06-04');assert.equal(s.current,rows.length);assert.equal(s.record,rows.length);assert.equal(s.patches.find(p=>p.milestone===7).date,'2026-05-13');
 });
-test('monthly credit +2 before resolving the day; bank cap 4', () => {
-  const s=run(range('2026-05-01','2026-07-01'),'2026-07-01');
-  assert.equal(s.days.find(d=>d.date==='2026-06-01').credit,2);
-  assert.equal(s.days.at(-1).credit,0); assert.equal(s.jokers,4);
-  const missed=run(range('2026-05-01','2026-05-31'),'2026-06-02');
-  assert.equal(missed.days.find(d=>d.date==='2026-06-01').jokers,3);
+test('second completed miss ends a series; next bonus starts at one',()=>{
+ const rows=range('2026-05-01','2026-05-07');assert.equal(run(rows,'2026-05-09').current,7);
+ const end=run(rows,'2026-05-10');assert.equal(end.current,0);assert.equal(end.record,7);assert.equal(end.days.find(d=>d.date==='2026-05-09').broke,true);assert.equal(end.patches.length,1);
+ assert.equal(run([...rows,entry('2026-05-10')],'2026-05-10').current,1);
 });
-test('third miss breaks, restart 2; idle days do not spend protection', () => {
-  const data=range('2026-05-01','2026-05-07');
-  const s=run(data,'2026-05-12'); assert.equal(s.current,0); assert.equal(s.jokers,2);
-  assert.equal(s.days.find(d=>d.date==='2026-05-10').broke,true);
-  assert.equal(s.record,7); assert.equal(s.patches.length,1);
-  const restart=run([...data,entry('2026-05-12')],'2026-05-12'); assert.equal(restart.current,1); assert.equal(restart.jokers,2); assert.equal(restart.record,7);
+test('patches require a single series and persist when that series ends',()=>{
+ assert.equal(run([...range('2026-05-01','2026-05-06'),...range('2026-05-09','2026-05-14')],'2026-05-14').patches.length,0);
+ const s=run(range('2026-05-01','2026-05-14'),'2026-05-20');assert.equal(s.current,0);assert.equal(s.record,14);assert.deepEqual(plain(s.patches.map(p=>p.milestone)),[7,14]);
 });
-test('no sum of separate series; prior patches survive subsequent series', () => {
-  const data=[...range('2026-05-01','2026-05-06'),...range('2026-05-11','2026-05-16')];
-  assert.equal(run(data,'2026-05-16').patches.length,0);
-  const s=run([...range('2026-05-01','2026-05-14'),...range('2026-05-20','2026-05-26')],'2026-05-26');
-  assert.equal(s.current,7); assert.equal(s.record,14); assert.deepEqual(plain(s.patches.map(p=>p.milestone)),[7,14]);
+test('backfill reconnects history; deletion and correction revoke unsupported patches',()=>{
+ const rows=range('2026-05-01','2026-05-14'),snapshot=JSON.stringify(rows);
+ const gap=rows.filter(e=>!['2026-05-06','2026-05-07'].includes(e.date));assert.equal(run(gap,'2026-05-14').current,7);
+ const restored=run([...gap,entry('2026-05-06')],'2026-05-14');assert.equal(restored.current,13);assert.equal(restored.patches.length,1);
+ const corrected=rows.map(e=>e.date==='2026-05-05'?{...e,bike:0}:e);assert.equal(run(corrected,'2026-05-14').current,13);assert.equal(run(corrected,'2026-05-14').patches.length,1);assert.equal(JSON.stringify(rows),snapshot);
 });
-test('backfill refunds protection and repairs downstream break and record', () => {
-  const rows=[...range('2026-05-01','2026-05-07'),entry('2026-05-12')];
-  const before=run(rows,'2026-05-12'); assert.equal(before.current,1);
-  const after=run([...rows,entry('2026-05-09'),entry('2026-05-10')],'2026-05-12');
-  assert.equal(after.current,10); assert.equal(after.jokers,0); assert.equal(after.record,10);
-  const noBreak=run([...range('2026-05-01','2026-05-07'),entry('2026-05-08')],'2026-05-09');
-  assert.equal(noBreak.jokers,2);
+test('all seven patches, month/year boundaries and leap day',()=>{
+ const s=run(range('2026-05-01','2027-05-02'),'2027-05-02');assert.equal(s.current,367);assert.deepEqual(plain(s.patches.map(p=>p.milestone)),[7,14,30,60,100,180,365]);
+ const rows=[entry('2026-12-31'),entry('2027-01-02')];assert.equal(run(rows,'2027-01-03').current,2);assert.equal(run(rows,'2027-01-05').current,0);
+ assert.equal(C.nextDay('2028-02-28'),'2028-02-29');assert.equal(C.nextDay('2028-02-29'),'2028-03-01');assert.equal(C.nextDay('2026-10-25'),'2026-10-26');
 });
-test('delete/correct historic bonus replays later balances without mutating data', () => {
-  const data=range('2026-05-01','2026-05-14'), snapshot=JSON.stringify(data);
-  const corrected=data.map(e=>e.date==='2026-05-05'?{...e,bike:0}:e);
-  assert.equal(run(corrected,'2026-05-14').current,13); assert.equal(run(corrected,'2026-05-14').jokers,1);
-  const deleted=data.filter(e=>!['2026-05-05','2026-05-06','2026-05-07'].includes(e.date));
-  assert.equal(run(deleted,'2026-05-14').current,7); assert.equal(run(deleted,'2026-05-14').jokers,2);
-  assert.equal(JSON.stringify(data),snapshot);
+test('players independent; future, pre-start and invalid entries excluded',()=>{
+ const rows=[...range('2026-05-01','2026-05-07','Thorsten'),entry('2026-05-07'),entry('2026-04-30'),entry('2026-05-09'),entry('2026-02-30')];
+ assert.equal(run(rows,'2026-05-07','Thorsten').current,7);assert.equal(run(rows,'2026-05-07').current,1);assert.equal(run(rows,'2026-05-07','Basti').current,0);
+ assert.deepEqual(plain(run(rows,'2026-05-07')),plain(run([...rows].reverse(),'2026-05-07')));assert.equal(run(rows,'2026-04-30').days.length,0);assert.throws(()=>run(rows,'invalid'));
 });
-test('many month/year boundaries, leap day and all 7 milestones', () => {
-  const data=range('2026-05-01','2027-05-02'), s=run(data,'2027-05-02');
-  assert.equal(s.current,367); assert.equal(s.jokers,4);
-  assert.deepEqual(plain(s.patches.map(p=>p.milestone)),[7,14,30,60,100,180,365]);
-  assert.equal(C.nextDay('2028-02-28'),'2028-02-29'); assert.equal(C.nextDay('2028-02-29'),'2028-03-01');
-  assert.equal(C.nextDay('2026-10-25'),'2026-10-26');
+test('historical bonus rules stay authoritative; duplicate dates count once',()=>{
+ const old={person:'Marian',date:'2026-05-01',steps:1000,bike:1,exercise:true};assert.equal(run([old],'2026-05-01').current,1);assert.equal(run([{...old,date:'2026-07-01'}],'2026-07-01').current,0);
+ assert.equal(C.calculate([{date:'2026-05-01',person:'Marian'}],'Marian','2026-05-01',()=>({bonus:4})).current,1);assert.equal(run([entry('2026-05-01'),entry('2026-05-01')],'2026-05-01').current,1);
 });
-test('restart near month end cannot re-credit a past month', () => {
-  const rows=[...range('2026-05-01','2026-05-26'),entry('2026-05-31')];
-  const may=run(rows,'2026-05-31'); assert.equal(may.jokers,2); assert.equal(may.current,1);
-  const june=run([...rows,entry('2026-06-01')],'2026-06-01'); assert.equal(june.jokers,4); assert.equal(june.current,2);
-  assert.equal(june.days.filter(d=>d.credit>0).length,2);
+test('only a newly earned milestone creates an achievement',()=>{
+ const rows=range('2026-05-01','2026-05-06'),before=run(rows,'2026-05-07'),after=run([...rows,entry('2026-05-07')],'2026-05-07');assert.equal(C.achievement(before,after,'2026-05-07').patches[0].milestone,7);assert.equal(C.achievement(after,after,'2026-05-07'),null);
+ assert.equal(C.achievement(run([],'2026-05-01'),run([entry('2026-05-01')],'2026-05-01'),'2026-05-01'),null);
 });
-test('all players independent, arbitrary additional players supported', () => {
-  const rows=[...range('2026-05-01','2026-05-07','Thorsten'),entry('2026-05-07','Basti'),...range('2026-05-01','2026-05-04','Fabi'),entry('2026-05-02','Marian'),entry('2026-05-07','Neuer Spieler')];
-  assert.equal(run(rows,'2026-05-07','Thorsten').current,7); assert.equal(run(rows,'2026-05-07','Basti').current,1);
-  assert.equal(run(rows,'2026-05-07','Fabi').current,4); assert.equal(run(rows,'2026-05-07','Marian').current,0); assert.equal(run(rows,'2026-05-07','Neuer Spieler').current,1);
-});
-test('backdated unlock and success event; unchanged saves/reload produce none', () => {
-  const rows=range('2026-05-01','2026-05-14').filter(e=>e.date!=='2026-05-06');
-  const before=run(rows,'2026-05-15'), after=run([...rows,entry('2026-05-06')],'2026-05-15');
-  const result=C.achievement(before,after,'2026-05-06'); assert.equal(result.backdated,true); assert.equal(result.count,6); assert.equal(result.patches[0].milestone,14);
-  assert.equal(C.achievement(after,after,'2026-05-06'),null);
-  assert.deepEqual(plain(run([...rows,entry('2026-05-06')],'2026-05-15')),plain(after));
-  assert.equal(C.achievement(before,after,'2026-05-16'),null);
-});
-test('ignore future, pre-May and invalid dates; order-independent', () => {
-  const rows=[entry('2026-04-30'),entry('2026-05-20'),entry('2026-02-30'),...range('2026-05-01','2026-05-07')];
-  assert.equal(run(rows,'2026-05-07').current,7);
-  assert.deepEqual(plain(run(rows,'2026-05-07')),plain(run([...rows].reverse(),'2026-05-07')));
-  assert.equal(run(rows,'2026-04-30').days.length,0); assert.throws(()=>run(rows,'invalid'));
-});
-test('real existing pre-July/July bonus rules, not copied thresholds', () => {
-  const old={person:'Marian',date:'2026-05-01',steps:1000,bike:1,exercise:true};
-  assert.equal(run([old],'2026-05-01').current,1);
-  assert.equal(run([{...old,date:'2026-07-01'}],'2026-07-01').current,0);
-  const unusual=C.calculate([{date:'2026-05-01',person:'Marian'}],'Marian','2026-05-01',()=>({bonus:4})); assert.equal(unusual.current,1);
-});
-test('duplicate bonus entries cannot increment a day twice', () => {
-  assert.equal(run([entry('2026-05-01'),entry('2026-05-01')],'2026-05-01').current,1);
-});
-test('every daily balance stays 0..4 through random backfills and corrections', () => {
-  let seed=73; const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  const rows=range('2026-05-01','2028-03-01').filter(()=>random()>.18), s=run(rows,'2028-03-01');
-  for(const d of s.days) { assert.ok(d.jokers>=0&&d.jokers<=4); assert.ok(d.current>=0); }
-  assert.equal(new Set(s.patches.map(p=>p.milestone)).size,s.patches.length);
-  assert.deepEqual(plain(run(rows,'2028-03-01')),plain(s));
+test('no bonus-series joker state or UI remains',()=>{
+ for(const name of ['bonus-streaks-core.js','bonus-streaks.js','bonus-streaks.css'])assert.doesNotMatch(read('modules/bonus-streaks/'+name),/joker|shield|bs-calendar|renderEntry/i);
+ const state=run(range('2026-05-01','2026-05-10'),'2026-05-13');assert.ok(!('jokers' in state));assert.ok(state.days.every(d=>!('credit' in d)&&!('jokers' in d)));
+ assert.doesNotMatch(read('index.html'),/bonusStreakEntry|WRCBonusStreaks\.renderEntry/);
 });
 
 async function testLoading() {
@@ -153,22 +107,20 @@ function integration() {
   console.log('PASS main integration, offline assets and JavaScript syntax');
 }
 function testController() {
-  const scheduled=[];
-  const c={console,Date:class extends Date{constructor(...args){super(...(args.length?args:['2026-05-08T12:00:00']));}},
-    allEntries:range('2026-05-01','2026-05-06'),setInterval(){},setTimeout:(fn,delay)=>scheduled.push({fn,delay}),clearTimeout(){},
-    document:{getElementById:()=>null,addEventListener(){}}};
-  c.window=c;vm.createContext(c);
-  vm.runInContext(read('scoring.js')+read('modules/bonus-streaks/bonus-streaks-core.js')+read('modules/bonus-streaks/bonus-streaks.js'),c);
-  const ui=c.WRCBonusStreaks;ui.onEntriesLoaded();
-  assert.equal(ui.renderPatches('Marian'),'');assert.equal(scheduled.length,0);
-  const before=ui.state('Marian');c.allEntries=[...c.allEntries,entry('2026-05-07')];ui.onEntriesLoaded();
-  const patches=ui.renderPatches('Marian');assert.match(patches,/Angefeuert/);assert.doesNotMatch(patches,/Wurstwender|Glutmeister|Feuerhüter|Grilllegende|Flammenkrone|Ewige Glut/);
-  assert.equal((patches.match(/data-bs-patch=/g)||[]).length,1);
-  assert.equal(scheduled.length,0,'load and retroactive discovery do not celebrate');
-  ui.afterSave(before,entry('2026-05-07'));ui.afterSave(before,entry('2026-05-07'));
-  assert.equal(scheduled.length,1,'concurrent saves of the same snapshot only celebrate once');
-  const markup=ui.renderProfile('Marian');assert.match(markup,/8.5.2026: Heute noch offen/);assert.match(markup,/data-bs-month="-1"[^>]*disabled/);
-  assert.doesNotMatch(ui.renderProfile('Basti'),/data-bs-patch=/);
-  console.log('PASS UI controller: hidden unearned motifs, read-only reload, duplicate-save suppression, calendar lower bound');
+ let now='2026-05-07T12:00:00',blocked=false;const scheduled=[],store=new Map(),notices=[];
+ const c={console,Date:class extends Date{constructor(...args){super(...(args.length?args:[now]));}},allEntries:range('2026-05-01','2026-05-06'),setInterval(){},setTimeout:(fn,delay)=>(scheduled.push({fn,delay}),scheduled.length),clearTimeout(){},localStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v)},document:{getElementById:()=>null,addEventListener(){},querySelector:()=>blocked?{}:null,createElement:()=>({setAttribute(){},remove(){}}),body:{append:b=>notices.push(b)}}};
+ c.window=c;vm.createContext(c);vm.runInContext(read('scoring.js')+read('modules/bonus-streaks/bonus-streaks-core.js')+read('modules/bonus-streaks/bonus-streaks.js'),c);const ui=c.WRCBonusStreaks;ui.onEntriesLoaded();
+ assert.equal(ui.renderProfile('Basti'),'');assert.match(ui.renderProfile('Marian'),/6 erfolgreiche Bonustage/);assert.equal(ui.renderPatches('Marian'),'');assert.equal(scheduled.length,0);
+ const before=ui.state('Marian');c.allEntries=[...c.allEntries,entry('2026-05-07')];ui.onEntriesLoaded();assert.match(ui.renderPatches('Marian'),/Angefeuert/);assert.doesNotMatch(ui.renderPatches('Marian'),/Wurstwender/);ui.afterSave(before,entry('2026-05-07'));ui.afterSave(before,entry('2026-05-07'));assert.equal(scheduled.length,1);
+ blocked=true;scheduled.shift().fn();assert.equal(notices.length,0);blocked=false;scheduled.shift().fn();assert.equal(notices.length,1);assert.match(notices[0].innerHTML,/7 Bonustage – Angefeuert/);assert.doesNotMatch(notices[0].innerHTML,/button|dialog/);
+ now='2026-05-10T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');assert.match(ui.renderPatches('Marian'),/Angefeuert/);
+ c.allEntries=[entry('2026-05-08'),entry('2026-05-09')];ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');c.allEntries=[...c.allEntries,entry('2026-05-10')];ui.onEntriesLoaded();assert.match(ui.renderProfile('Marian'),/3 erfolgreiche Bonustage/);
+ now='2026-05-12T12:00:00';ui.onEntriesLoaded();assert.match(ui.renderProfile('Marian'),/3 erfolgreiche Bonustage/);now='2026-05-13T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');
+ const count=scheduled.length;c.allEntries=range('2026-05-01','2026-05-13').filter(e=>e.date!=='2026-05-06');ui.onEntriesLoaded();const past=ui.state('Marian');c.allEntries=[...c.allEntries,entry('2026-05-06')];ui.onEntriesLoaded();ui.afterSave(past,entry('2026-05-06'));assert.equal(scheduled.length,count,'backfill stays silent');
+ console.log('PASS profile 3-day threshold, pause, disappearance, preserved patches, one small deferred notice and silent backfills');
 }
-(async()=>{await testLoading();await testSaveHook();testController();integration();console.log(`${checks} replay scenarios plus load/save/UI integration passed.`);})().catch(e=>{console.error(e);process.exitCode=1;});
+function testDaily(){
+ const store=new Map();const c={DailyUI:{jokerKey:'daily-jokers',maxJokersPerMonth:3,getMonthKey:()=> '2026-10'},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)}};vm.createContext(c);vm.runInContext(read('modules/daily/daily-storage.js')+';Object.assign(DailyUI,WRCDailyStorage);',c);
+ const api=c.DailyUI;assert.equal(api.getJokersUsed('Marian'),0);assert.equal(api.useJoker('Marian'),true);assert.equal(api.useJoker('Marian'),true);assert.equal(api.useJoker('Marian'),true);assert.equal(api.useJoker('Marian'),false);assert.equal(api.getJokersUsed('Basti'),0);api.getMonthKey=()=> '2026-11';assert.equal(api.getJokersUsed('Marian'),0);console.log('PASS separate Daily joker usage, monthly limit, player isolation and monthly renewal');
+}
+(async()=>{await testLoading();await testSaveHook();testController();testDaily();integration();console.log(checks+' replay scenarios plus load/save/UI/Daily integration passed.');})().catch(e=>{console.error(e);process.exitCode=1;});
