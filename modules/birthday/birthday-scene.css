@@ -1,0 +1,23 @@
+.wrc-birthday-intro-active{overflow:hidden}
+.wb-dialog{box-sizing:border-box;width:min(540px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:24px;border:1px solid #806b86;border-radius:26px;color:#f8eadb;background:radial-gradient(ellipse at 50% 48%,#70504a66,transparent 60%),linear-gradient(145deg,#30233d,#182637);box-shadow:0 24px 90px #0009;font-family:inherit}
+.wb-dialog::backdrop{background:#08101aca;backdrop-filter:blur(5px)}
+.wb-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.wb-top span{font-size:10px;letter-spacing:.12em;color:#d8bdce}.wb-dialog button,.wb-greeting{font:inherit;cursor:pointer;min-height:44px;border-radius:12px;padding:10px 16px}.wb-top button{background:#ffffff12;color:#f8eadb;border:1px solid #ffffff38}
+.wb-eyebrow{text-align:center;font-size:11px;letter-spacing:.15em;color:#edcc86;margin:25px 0 10px}.wb-dialog h2{text-align:center;font-size:clamp(21px,5.5vw,30px);margin:0}.wb-stage{margin:4px -8px}.wb-stage svg{display:block;width:100%;height:auto;overflow:visible}
+.wb-lines{min-height:76px;text-align:center;font-size:16px;line-height:1.6}.wb-lines p{margin:8px 0}.wb-next{width:100%;background:#edcf90;color:#253044;border:0;font-weight:800!important;margin-top:12px}
+.wb-dialog button:focus-visible,.wb-greeting:focus-visible{outline:3px solid #86e6d1;outline-offset:4px}
+.wb-greeting{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:4500;background:#edcf90;color:#253044;border:1px solid #fff6;box-shadow:0 8px 30px #0006;max-width:calc(100vw - 32px)}
+.wb-pout,.wb-brows,.wb-smoke,.wb-wind{opacity:0}.wb-wursti,.wb-bertha{transform-box:fill-box;transform-origin:center bottom;transition:transform .7s ease}.wb-flame{transform-box:fill-box;transform-origin:center bottom;filter:drop-shadow(0 0 4px #ffd27a)}
+[data-phase=arrival] .wb-stage{animation:wb-arrive .8s ease-out}
+[data-phase=inhale] .wb-wursti{transform:scaleX(1.12) rotate(-6deg)}
+[data-phase=gust] .wb-wursti{transform:rotate(10deg)}[data-phase=gust] .wb-wursti .wb-pout{opacity:1}[data-phase=gust] .wb-wursti .wb-smile{opacity:0}
+[data-phase=gust] .wb-bertha{transform:translate(-65px,-65px) rotate(-18deg)}[data-phase=gust] .wb-brows{opacity:1}[data-phase=gust] .wb-wind{opacity:.8}
+[data-phase=gust] .wb-flame{animation:wb-flicker .28s ease-in-out infinite alternate}
+[data-phase=puff] .wb-bertha{transform:translate(-14px,0) rotate(-12deg)}
+[data-phase=out] .wb-flame,[data-phase=reply] .wb-flame,[data-phase=static] .wb-flame{opacity:0}
+[data-phase=out] .wb-smoke{opacity:.6;animation:wb-smoke 1.3s ease-out forwards}
+[data-phase=reply] .wb-wursti .wb-smile{transform:translateY(9px) scaleY(-1);transform-origin:50% 166px}
+@keyframes wb-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes wb-flicker{to{transform:skewX(22deg) scaleY(.75)}}
+@keyframes wb-smoke{to{opacity:0;transform:translateY(-8px)}}
+@media(max-width:380px){.wb-dialog{padding:18px}.wb-top{gap:6px}.wb-top span{font-size:9px}.wb-top button{padding:8px 10px}.wb-lines{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.wb-dialog *{animation:none!important;transition:none!important}}
