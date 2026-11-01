@@ -11,6 +11,22 @@
     const month = Math.floor((h + l - 7 * m + 114) / 31), day = (h + l - 7 * m + 114) % 31 + 1;
     return dateKey(new Date(year, month - 1, day, 12));
   }
+  // Fourth Advent is the Sunday strictly before Christmas (including Dec 24).
+  function adventSundays(year) {
+    if (!Number.isInteger(year) || year < 2026 || year > 9999) return [];
+    const fourth = new Date(year, 11, 25, 12);
+    fourth.setDate(25 - (fourth.getDay() || 7));
+    return Array.from({ length: 4 }, (_, i) => {
+      const day = new Date(fourth); day.setDate(day.getDate() - (3 - i) * 7);
+      return dateKey(day);
+    });
+  }
+  function advent(date = dateKey()) {
+    if (!validDate(date)) return null;
+    const year = Number(date.slice(0, 4)), sundays = adventSundays(year);
+    if (!sundays.length || date < sundays[0] || date >= year + "-12-24") return null;
+    return { year, date, lit: sundays.filter(day => day <= date).length, ignition: sundays.includes(date) };
+  }
   function resolve(date = dateKey()) {
     if (!validDate(date)) return null;
     const year = Number(date.slice(0, 4)), md = date.slice(5), sunday = easter(year);
@@ -32,9 +48,9 @@
     url.searchParams.set("member-birthday", previewDate);
     if (members.includes(params.get("holiday-player"))) url.searchParams.set("birthday-player", params.get("holiday-player"));
     const event = resolve(previewDate);
-    const season = { easter: "easter", halloween: "halloween", nikolaus: "christmas", christmas: "christmas", newyear: "newyear" }[event?.type];
+    const season = { easter: "easter", halloween: "halloween", nikolaus: "christmas", christmas: "christmas", newyear: "newyear" }[event?.type] || (advent(previewDate) ? "christmas" : null);
     if (season && !url.searchParams.has("season")) url.searchParams.set("season", season);
     history.replaceState(history.state, "", url);
   }
-  window.WRCHolidayCalendar = Object.freeze({ members, dateKey, validDate, easter, resolve, eggOwner, preview, previewDate, previewPlayer: preview ? params.get("holiday-player") : null });
+  window.WRCHolidayCalendar = Object.freeze({ members, dateKey, validDate, easter, adventSundays, advent, resolve, eggOwner, preview, previewDate, previewPlayer: preview ? params.get("holiday-player") : null });
 })();

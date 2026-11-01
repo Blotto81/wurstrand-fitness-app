@@ -1,7 +1,7 @@
 (function () {
   "use strict";
   const C = WRCHolidayCalendar, D = WRCHolidayData;
-  const labels = { easter: "Die große Eiersuche", halloween: "Wurst oder Saures", nikolaus: "Die amtliche Stiefelkontrolle", christmas: "Post vom WRC-Weihnachtsmann", newyear: "Unser WRC-Jahr" };
+  const labels = { easter: "Die große Eiersuche", halloween: "Wurst oder Saures", nikolaus: "Der Nikolaus war da!", christmas: "Post vom WRC-Weihnachtsmann", newyear: "Unser WRC-Jahr" };
   const outcomes = Object.freeze([
     ["🌭 WURST!", "Herzlichen Glückwunsch. Du hast eine virtuelle Wurst gewonnen.", "Warenwert: erschütternd gering."],
     ["👑 DIE EHRENWURST", "Bertha hat deine Wurst zur Ehrenwurst ernannt.", "Sie hat weder zusätzliche Rechte noch einen höheren Fleischanteil."],
@@ -10,7 +10,7 @@
     ["👻 BERTHA HAT DICH GESEHEN", "Weitere Einzelheiten wurden aus Gründen des Persönlichkeitsschutzes geschwärzt.", "Bertha erinnert sich trotzdem."],
     ["🕯️ DIE GEISTERPRÜFUNG", "Ein Geist hat deine Ausreden kontrolliert. Er möchte sie in seine Sammlung aufnehmen.", "Selten so lebendige Fantasie bei lebenden Menschen gesehen."]
   ]);
-  const busy = new Set(), notices = new Map();
+  const busy = new Set(), notices = new Map(), eating = new Map();
   let previewPlayer = C.previewPlayer, archive = null, archiveYear = null, archiveTask = null;
   let lastDate = D.today(), syncTask = null, initialized = false;
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -50,6 +50,7 @@
   }
   function button(text, action, disabled = false, extra = "") { return `<button type="button" class="wh-button ${extra}" data-wh-action="${action}" ${disabled ? "disabled" : ""}>${text}</button>`; }
   function render() {
+    WRCChristmasSeason.renderAdvent();
     const dashboard = document.getElementById("dashboard"); if (!dashboard) return;
     const event = C.resolve(D.today()), p = player();
     const host = make("wrcHolidayEvent", dashboard, "section");
@@ -75,13 +76,19 @@
         body += `<div class="wh-reveal"><h3>${result[0]}</h3><p>${result[1]}</p><small>${result[2]}</small><p class="wh-note">Deine Tür ${event.year}: ${saved.choice === 0 ? "WURST" : "SAURES"}. Ergebnis gespeichert. Keine Punkte, nur Schicksal.</p></div>`;
       }
     } else if (event.type === "nikolaus") {
-      body = `<span class="wh-eyebrow">6. DEZEMBER · WRC-STIEFELKONTROLLE</span><h2>Der Nikolaus war da.</h2><p>Und er hat in deinen WRC-Stiefel geschaut.<br>Das Ergebnis ist leider aktenkundig.</p>`;
-      if (saved) body += `<article class="wh-certificate"><span class="wh-stamp">GEPRÜFT<br>WRC ${event.year}</span><span class="wh-eyebrow">PERSÖNLICHE WRC-BESCHEINIGUNG</span><h3>Für ${p}.</h3>${numbers(stats(event.year, p))}<p>${stats(event.year, p)?.available ? "Davon waren erstaunlich viele Punkte sogar regelkonform." : "Die Akte enthält keine erfundenen Leistungen."}</p><ul><li>☑ Einträge geprüft</li><li>☑ Keine Nikolaus-Extrapunkte vergeben</li><li>☑ Weitere Beobachtung erforderlich</li></ul><footer>Gezeichnet: Wursti, amtierender WRC-Nikolaus 🌭</footer></article>`;
-      else body += `<div class="wh-object" aria-hidden="true">🥾</div>${button("🥾 Stiefel öffnen", "open", disabled || !archive)}`;
+      body = '<span class="wh-eyebrow">6. DEZEMBER · DER SCHUH DER VERSUCHUNG</span><h2>Der Nikolaus war da!</h2>';
+      if (saved?.nikolaus_version === 2) {
+        const cookie = saved.choice === 0;
+        body += '<div class="wh-reveal"><h3>' + (cookie ? '🍪 −1 WRC-Punkt' : '🍊 +1 WRC-Punkt') + '</h3><p>' + (cookie ? 'Sehr lecker. Leider hat der Nikolaus die Kalorienabrechnung bereits eingereicht.' : 'Der Nikolaus ist begeistert. Wursti wollte eigentlich den Keks.') + '</p><small>Deine Entscheidung für ' + event.year + ' ist gespeichert.</small></div>';
+      } else if (saved) {
+        body += '<p class="wh-note">Deine frühere Nikolaus-Bescheinigung für ' + event.year + ' bleibt gespeichert. Damals wurden keine Punkte vergeben.</p>';
+      } else {
+        body += '<p>In deinem Schuh liegen ein Keks und eine Mandarine. Aber du darfst nur eines davon essen.</p>' + WRCChristmasSeason.shoe() + '<div class="wh-shoe-choices">' + button('🍪 Keks essen', 'cookie', disabled) + button('🍊 Mandarine essen', 'mandarin', disabled) + '</div>';
+      }
     } else if (event.type === "christmas") {
       body = `<div class="wh-tree" aria-hidden="true">🎄</div><span class="wh-eyebrow">24.–26. DEZEMBER · VON WURSTI</span><h2>Da liegt etwas für dich.</h2><p class="wh-gift-label">Von: Wursti 🌭<br>An: <strong>${p}</strong></p>`;
-      if (saved) body += '<div class="wh-reveal"><h3>Frohe Weihnachten! ❤️</h3><p>Wursti hat heute ausnahmsweise nicht nur an sich selbst gedacht.</p><strong class="wh-five">+5 WRC-Punkte</strong><p class="wh-note">Dein Geschenk ist ausgepackt und dauerhaft gespeichert.</p></div>';
-      else body += `<div class="wh-object wh-present" aria-hidden="true">🎁</div>${button("🎁 Wurstis Geschenk öffnen", "open", disabled)}<p class="wh-note">Bis zum 26. Dezember, 23:59 Uhr, wartet es auf dich.</p>`;
+      if (saved) body += '<div class="wh-reveal"><h3>🎄 Frohe Weihnachten!</h3><p>Wursti hat heute ausnahmsweise nicht nur an sich selbst gedacht.</p><strong class="wh-five">+5 WRC-Punkte</strong><p class="wh-note">Dein Geschenk ist ausgepackt und dauerhaft gespeichert.</p></div>';
+      else body += `${WRCChristmasSeason.gift()}${button("🎁 Wurstis Geschenk öffnen", "open", disabled)}<p class="wh-note">Bis zum 26. Dezember, 23:59 Uhr, wartet es auf dich.</p>`;
       if (saved && typeof WRCOccasions !== "undefined" && typeof allEntries !== "undefined") body += `<p class="wh-note">${esc(WRCOccasions.occasion(p, allEntries, D.today(), 'christmas'))}</p>`;
     } else {
       body = `<span class="wh-eyebrow">31. DEZEMBER · WIR VIER</span><h2>Das war unser WRC-Jahr ${event.year}.</h2><div class="wh-team">${C.members.map(name => `<figure><img src="${esc(playerProfiles[name].image)}" alt="WRC-Playerkarte von ${name}"><figcaption>${name}</figcaption></figure>`).join("")}</div>${archive ? numbers(stats(event.year), true) + titles(event.year) : '<p class="wh-note">Das gemeinsame Jahresarchiv wird geladen …</p>'}`;
@@ -89,6 +96,7 @@
       body += '<p class="wh-note">Unser gemeinsamer Abschluss. Dein persönlicher Year Review bleibt separat in der WRC-Jahrespost.</p>';
     }
     host.innerHTML = body + `<div class="wh-status" role="status">${esc(notices.get(key) || (pending ? "Wursti kümmert sich …" : !D.ready ? "Verbindung wird geprüft. Geschenke erst nach Bestätigung verfügbar." : ""))}</div>${D.preview ? '<p class="wh-preview-label">Lokale Vorschau · keine echten Feiertags- oder Geburtstagspunkte</p>' : ""}`;
+    if (pending) { host.classList.add("wh-opening"); if (eating.has(key)) host.classList.add("wh-eating-" + eating.get(key)); }
     if (event.type === "newyear" && typeof WRCYearReview !== "undefined") { const show = document.createElement("button"); show.className = "wh-button"; show.textContent = "WRC Wrapped: Jahresarchiv öffnen"; show.addEventListener("click", WRCYearReview.openLibrary); host.append(show); }
     host.querySelectorAll("[data-wh-action]").forEach(node => node.addEventListener("click", () => act(event, p, node.dataset.whAction)));
   }
@@ -112,19 +120,21 @@
     const ledger = make("wrcHolidayLedger", document.getElementById("entriesList")?.parentElement);
     if (!ledger) return;
     const rows = D.matching({ key: selectedMonth() }); ledger.hidden = !rows.length; ledger.className = "wh-ledger";
-    ledger.innerHTML = rows.length ? `<strong>🎁 Feiertagsboni · getrennt vom Training</strong>${rows.map(row => `<p>${esc(row.gift_date)} · ${row.recipient}: ${row.label} · +${row.points} Punkte</p>`).join("")}` : "";
+    ledger.innerHTML = rows.length ? `<strong>🎁 Feiertagspunkte · getrennt vom Training</strong>${rows.map(row => `<p>${esc(row.gift_date)} · ${row.recipient}: ${row.label} · ${row.points > 0 ? "+" : "−"}${Math.abs(row.points)} Punkte</p>`).join("")}` : "";
   }
   async function act(event, p, action, slot) {
     const key = actionKey(event, p); if (busy.has(key)) return;
-    busy.add(key); notices.delete(key); render();
+    busy.add(key); notices.delete(key);
+    if (event.type === "nikolaus") eating.set(key, action);
+    render();
     const host = document.getElementById("wrcHolidayEvent"); host?.classList.add("wh-opening");
     try {
-      const [saved] = await Promise.all([D.claim(event.type, p, { slot, choice: undefined }), new Promise(resolve => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 850))]);
+      const [saved] = await Promise.all([D.claim(event.type, p, { slot, choice: event.type === "nikolaus" ? (action === "cookie" ? 0 : action === "mandarin" ? 1 : undefined) : undefined }), new Promise(resolve => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : event.type === "christmas" ? 2400 : 850))]);
       if (event.type === "easter") notices.set(`${key}:egg:${slot}`, `🥚 GEFUNDEN! Das ist tatsächlich dein Ei, ${p}! +5 Punkte sind gespeichert. Wursti gratuliert. Bertha behauptet, sie hätte es besser versteckt.`);
-      busy.delete(key); renderAll(); render();
-      if (saved.points && player() === p && C.resolve(D.today())?.type === event.type) burst(event.type);
+      busy.delete(key); eating.delete(key); renderAll(); render();
+      if (saved.points && event.type !== "nikolaus" && player() === p && C.resolve(D.today())?.type === event.type) burst(event.type);
       if (event.type === "newyear" && player() === p) burst("newyear");
-    } catch (error) { busy.delete(key); notices.set(key, error.message); if (slot !== undefined) notices.set(`${key}:egg:${slot}`, error.message); render(); }
+    } catch (error) { busy.delete(key); eating.delete(key); notices.set(key, error.message); if (slot !== undefined) notices.set(`${key}:egg:${slot}`, error.message); render(); }
   }
   function burst(type) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches || document.body.classList.contains("wrc-member-birthday-active")) return;
@@ -134,7 +144,7 @@
     host.append(layer); setTimeout(() => layer.remove(), 1600);
   }
   async function loadArchive(event) {
-    if (!["nikolaus", "newyear"].includes(event?.type)) return;
+    if (event?.type !== "newyear") return;
     if (archiveTask) return archiveTask;
     const requestedYear = event.year;
     archiveTask = (async () => {
