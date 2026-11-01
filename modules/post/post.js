@@ -203,6 +203,7 @@
   function show(letter, options = {}) {
     if (
       !letter
+      || document.body.classList.contains("wrc-birthday-intro-active")
       || document.body.classList.contains("wrc-member-birthday-active")
       || document.querySelector(".bigpop.show")
       || document.querySelector(".wr-dialog[open], .wr-library[open]")
@@ -294,6 +295,8 @@
   }
 
   function maybeRandomOnOpen() {
+    if (document.body.classList.contains("wrc-birthday-intro-active")
+      || (["localhost","127.0.0.1"].includes(location.hostname) && new URLSearchParams(location.search).get("birthday") === "1")) return false;
     const player = currentPlayer();
     const playerKey = normalizePlayer(player);
     const dailyKey = `wrcPostRandom_${todayKey()}_${playerKey}`;

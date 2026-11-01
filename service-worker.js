@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v70";
+const CACHE_NAME = "wrc-app-v72";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -83,6 +83,8 @@ const APP_SHELL = [
   "./modules/year-review/wrapped-data.js",
   "./modules/year-review/wrapped-story.js",
   "./modules/birthday/birthday.js",
+  "./modules/birthday/birthday-scene.js",
+  "./modules/birthday/birthday-scene.css",
   "./modules/birthday/member-birthday-data.js",
   "./modules/birthday/member-birthday.js",
   "./modules/birthday/member-birthday.css",
@@ -90,6 +92,13 @@ const APP_SHELL = [
   "./modules/holidays/holiday-calendar.js",
   "./modules/holidays/holiday-data.js",
   "./modules/holidays/holidays.js",
+  "./modules/holidays/spring-core.js",
+  "./modules/holidays/spring-data.js",
+  "./modules/holidays/spring-insights.js",
+  "./modules/holidays/spring-art.js",
+  "./modules/holidays/spring-locations.js",
+  "./modules/holidays/spring-ui.js",
+  "./modules/holidays/spring.css",
   "./modules/holidays/christmas-season.js",
   "./modules/holidays/holidays.css",
   "./modules/holidays/halloween-core.js",

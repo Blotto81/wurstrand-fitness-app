@@ -27,11 +27,19 @@
     if (!sundays.length || date < sundays[0] || date >= year + "-12-24") return null;
     return { year, date, lit: sundays.filter(day => day <= date).length, ignition: sundays.includes(date) };
   }
+  function rosenmontag(year) {
+    const date = new Date(easter(year) + "T12:00:00"); date.setDate(date.getDate() - 48); return dateKey(date);
+  }
+  function berlinDate(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {timeZone:"Europe/Berlin",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(date);
+    const get = type => parts.find(p => p.type === type).value;
+    return get("year") + "-" + get("month") + "-" + get("day");
+  }
   function resolve(date = dateKey()) {
     if (!validDate(date)) return null;
     const year = Number(date.slice(0, 4)), md = date.slice(5), sunday = easter(year);
     const monday = new Date(sunday + "T12:00:00"); monday.setDate(monday.getDate() + 1);
-    const type = date >= sunday && date <= dateKey(monday) ? "easter"
+    const type = year >= 2027 && date === rosenmontag(year) ? "carnival" : date >= sunday && date <= dateKey(monday) ? "easter"
       : md === "10-31" ? "halloween" : md === "12-06" ? "nikolaus"
       : md >= "12-24" && md <= "12-26" ? "christmas" : md === "12-31" ? "newyear" : null;
     return type ? { type, year, date } : null;
@@ -48,9 +56,9 @@
     url.searchParams.set("member-birthday", previewDate);
     if (members.includes(params.get("holiday-player"))) url.searchParams.set("birthday-player", params.get("holiday-player"));
     const event = resolve(previewDate);
-    const season = { easter: "easter", halloween: "halloween", nikolaus: "christmas", christmas: "christmas", newyear: "newyear" }[event?.type] || (advent(previewDate) ? "christmas" : null);
+    const season = { carnival: "carnival", easter: "easter", halloween: "halloween", nikolaus: "christmas", christmas: "christmas", newyear: "newyear" }[event?.type] || (advent(previewDate) ? "christmas" : null);
     if (season && !url.searchParams.has("season")) url.searchParams.set("season", season);
     history.replaceState(history.state, "", url);
   }
-  window.WRCHolidayCalendar = Object.freeze({ members, dateKey, validDate, easter, adventSundays, advent, resolve, eggOwner, preview, previewDate, previewPlayer: preview ? params.get("holiday-player") : null });
+  window.WRCHolidayCalendar = Object.freeze({ members, dateKey, validDate, easter, rosenmontag, berlinDate, adventSundays, advent, resolve, eggOwner, preview, previewDate, previewPlayer: preview ? params.get("holiday-player") : null });
 })();

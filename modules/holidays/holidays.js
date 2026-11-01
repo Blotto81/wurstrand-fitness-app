@@ -57,10 +57,12 @@
     const birthday = document.getElementById("memberBirthdayHero");
     if (birthday && birthday.nextElementSibling !== host) birthday.after(host);
     host.hidden = !event || !C.members.includes(p);
+    if (typeof WRCSpringUI !== "undefined") WRCSpringUI.sync(event, p);
     renderEggs(event, p);
     renderLedger();
     WRCHalloween.archive();
     if (host.hidden) { host.replaceChildren(); return; }
+    if (typeof WRCSpringUI !== "undefined" && WRCSpringUI.render(host, event, p)) return;
     if (event.type === "halloween" && (!D.receipt("halloween", p, event.year) || D.receipt("halloween", p, event.year).halloween_version === 2)) { WRCHalloween.render(host, p, event.year); return; }
     const saved = D.receipt(event.type, p, event.year), key = actionKey(event, p);
     const pending = busy.has(key), disabled = pending || !D.ready;
@@ -104,7 +106,7 @@
     const targets = [document.getElementById("dashboardHighlight")?.parentElement, document.querySelector("#eintragen > .card"), document.querySelector("#analyse .analysis-header"), document.querySelector("#spieler > .card")];
     targets.forEach((target, slot) => {
       const mount = make(`wrcHolidayEgg${slot}`, target); if (!mount) return;
-      mount.className = "wh-egg-wrap"; mount.hidden = event?.type !== "easter";
+      mount.className = "wh-egg-wrap"; mount.hidden = event?.type !== "easter" || event.year >= 2027;
       if (mount.hidden) { mount.replaceChildren(); return; }
       const key = actionKey(event, p), note = notices.get(`${key}:egg:${slot}`);
       mount.innerHTML = `<button type="button" class="wh-egg" aria-label="Verstecktes Osterei öffnen" ${busy.has(key) || !D.ready ? "disabled" : ""}><span aria-hidden="true">🥚</span></button><span class="wh-egg-answer" role="status">${esc(note || "")}</span>`;
@@ -166,7 +168,7 @@
     if (document.hidden) return;
     if (lastDate !== D.today()) { lastDate = D.today(); archive = null; archiveYear = null; render(); }
     if (!initialized || syncTask) return;
-    syncTask = (async () => { await D.load(); await WRCHalloweenData.load(); await loadArchive(C.resolve(D.today())); renderAll(); })();
+    syncTask = (async () => { await D.load(); if (typeof WRCSpringData !== "undefined") await WRCSpringData.load(); await WRCHalloweenData.load(); await loadArchive(C.resolve(D.today())); renderAll(); })();
     try { await syncTask; } finally { syncTask = null; }
   }
   document.addEventListener("DOMContentLoaded", () => {
@@ -177,5 +179,5 @@
     setInterval(() => { if (D.today() !== lastDate) refresh(); }, 1000);
     setInterval(() => { if (C.resolve(D.today())) refresh(); }, 60000);
   });
-  window.WRCHolidays = Object.freeze({ render, onEntriesLoaded });
+  window.WRCHolidays = Object.freeze({ render, onEntriesLoaded, player });
 })();

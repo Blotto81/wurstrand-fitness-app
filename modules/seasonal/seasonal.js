@@ -37,6 +37,7 @@
   };
 
   const THEMES = Object.freeze([
+    {id:"carnival",priority:96,label:"Vier Narren, null Würde",icon:"🎭",accent:"#d9addc",accentSoft:"rgba(217,173,220,.16)",glow:"rgba(217,173,220,.22)",header:"rgba(67,36,76,.42)",accessory:"🎩",sidekick:"✦",particles:["✦","·","◆"],motion:"float",garland:["#d9addc","#e7c37c","#9dcfc4"],matches:date=>{const day=easterSunday(date.getFullYear());day.setDate(day.getDate()-48);return date.getFullYear()>=2027&&date.getMonth()===day.getMonth()&&date.getDate()===day.getDate();}},
     {
       id: "birthday",
       priority: 110,
