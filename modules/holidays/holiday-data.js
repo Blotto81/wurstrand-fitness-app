@@ -5,7 +5,7 @@
   const key = preview ? "wrcHolidayPreview_v1" : "wrcHolidayReceipts_v1";
   const read = () => { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } };
   const persist = () => { try { localStorage.setItem(key, JSON.stringify(rows)); } catch { /* Database receipt is authoritative. */ } };
-  function today() { return C.previewDate || (WRCBirthdayData.preview ? WRCBirthdayData.today() : C.dateKey()); }
+  function today() { return C.previewDate || (WRCBirthdayData.preview ? WRCBirthdayData.today() : C.berlinDate()); }
   function clean(data) {
     const unique = new Map();
     (Array.isArray(data) ? data : []).forEach(r => {
@@ -26,8 +26,9 @@
   let rows = clean(read()), ready = preview, loading = null;
   function receipt(type, player, year) { return rows.find(r => r.event_type === type && r.player === player && r.event_year === year) || null; }
   function matching(scope = {}) {
-    return rows.filter(r => r.points && (!scope.person || r.player === scope.person) && (!scope.key || r.event_date.startsWith(scope.key)) && (!scope.date || r.event_date === scope.date) && (!scope.from || r.event_date >= scope.from) && (!scope.through || r.event_date <= scope.through))
+    const legacy = rows.filter(r => r.points && (!scope.person || r.player === scope.person) && (!scope.key || r.event_date.startsWith(scope.key)) && (!scope.date || r.event_date === scope.date) && (!scope.from || r.event_date >= scope.from) && (!scope.through || r.event_date <= scope.through))
       .map(r => ({ recipient: r.player, gift_date: r.event_date, points: r.points, event_type: r.event_type, label: r.event_type === "easter" ? "WRC-Osterei gefunden" : r.event_type === "halloween" ? "Legendäre Halloween-Goldwurst" : r.event_type === "nikolaus" ? (r.choice === 0 ? "Nikolausschuh · Keks" : "Nikolausschuh · Mandarine") : "Weihnachtsgeschenk von Wursti" }));
+    return [...legacy, ...(typeof WRCSpringData === "undefined" ? [] : WRCSpringData.matching(scope))];
   }
   async function load() {
     if (preview) { rows = clean(read()); ready = true; return true; }
@@ -49,6 +50,7 @@
   async function claim(type, player, options = {}) {
     const event = C.resolve(today());
     if (!event || event.type !== type || !C.members.includes(player)) throw new Error("Dieser Feiertagsmoment ist jetzt nicht verfügbar.");
+    if (type === "carnival" || (type === "easter" && event.year >= 2027)) throw new Error("Bitte das aktuelle Frühlingsereignis verwenden.");
     if (type === "easter" && C.eggOwner(event.year, options.slot) !== player) throw new Error("Dieses Ei gehört einem anderen Wurstrandler.");
     if (type === "halloween") throw new Error("Bitte das Halloween-Labyrinth verwenden.");
     if (!ready) throw new Error("Noch keine Verbindung bestätigt. Bitte erneut laden.");
@@ -83,6 +85,6 @@
   window.WRCBonusPoints = Object.freeze({
     points: scope => WRCBirthdayGifts.points(scope) + matching(scope).reduce((sum, row) => sum + row.points, 0),
     matching: scope => [...WRCBirthdayGifts.matching(scope), ...matching(scope)],
-    load: () => Promise.all([WRCBirthdayGifts.load(), load()])
+    load: () => Promise.all([WRCBirthdayGifts.load(), load(), ...(typeof WRCSpringData === "undefined" ? [] : [WRCSpringData.load()])])
   });
 })();
