@@ -4,7 +4,9 @@
 
 WRCBonusStreakCore.calculate berechnet ab 01.05.2026 alle abgeschlossenen Kalendertage aus der bereinigten Historie. Nur calcPoints(entry).bonus > 0 liefert einen erfolgreichen Bonustag. Punkte, Trainingseinträge und die separate Daily-Challenge einschließlich ihrer drei monatlichen Joker bleiben unverändert.
 
-Regelversion 2 ist der Standard für aktuelle Auswertungen:
+Regelversion 2 ist der Standard für aktuelle Auswertungen. Bestandsschutz gilt einheitlich für alle Spieler: Bis einschließlich 31.10.2026 wird die bisherige Regel verwendet, ab 01.11.2026 die neue Monatsregel. So bleiben ältere Serien, Rekorde und Patchdaten erhalten; die zwei Schutztage des laufenden Novembers können auch den 6./7. November abdecken. Es gibt keinen zusätzlichen Übergangsbonus und keine Namensausnahmen.
+
+Ab November:
 - Genau zwei interne Schutztage pro Spieler und Kalendermonat.
 - Ein abgeschlossener Tag ohne Bonus verbraucht nur bei laufender Serie ein noch verfügbares Kontingent. Die Serienlänge steigt nicht.
 - Aufeinanderfolgende oder getrennte Fehltage verwenden dasselbe Monatskontingent. Es gibt keine zusätzliche kostenlose Pause.
@@ -13,7 +15,7 @@ Regelversion 2 ist der Standard für aktuelle Auswertungen:
 - Heute bleibt ohne Bonus offen. Die bestehende lokale Kalendergrenze der Erfassung bleibt maßgeblich; die Iteration verwendet UTC-Mittag für stabile Datumswechsel.
 - Keine Speicherung eines Kontos, keine neuen Datenbanktabellen oder Schreibzugriffe.
 
-Die vollständige Historie aller vier Spieler wird bei jedem Datenstand gleich behandelt. Bei Nachträgen oder Korrekturen werden aktuelle Serien, Rekorde und abgeleitete Patches neu berechnet. Historische Serien können dadurch länger oder kürzer als unter der früheren Regel sein.
+Die vollständige Historie aller vier Spieler wird bei jedem Datenstand gleich behandelt. Bei Nachträgen oder Korrekturen werden aktuelle Serien, Rekorde und abgeleitete Patches neu berechnet. Historische Serien bis Ende Oktober bleiben regelgleich. Ab November zählen die neuen Monatsregeln.
 
 ## Ausschließlich Serie und Rekord sichtbar
 
@@ -25,7 +27,7 @@ Schutzdetails werden nicht in Anlass-Fakten, Post, persönliche Nachrichten, Aus
 
 Die Schwellen 7, 14, 30, 60, 100, 180 und 365 bleiben unverändert. Nur Bonus-Tage erhöhen die Serienlänge. Jeder Meilenstein wird im Replay höchstens einmal vergeben. Auf Reload und historische Neuberechnung erfolgen keine Gratulationen; Nachträge bleiben ebenfalls still. Bestehende lokale wrcBonusSeriesNotice-Schlüssel werden unverändert gegen erneute Benachrichtigungen verwendet.
 
-Die sichtbaren Bonuspatches sind abgeleitete Auswertungen der Trainingseinträge, keine dauerhaft gespeicherten Award-Datensätze. Deshalb können sie sich mit der rückwirkend geltenden Regel ändern. Bereits eingefrorene Jahresausgaben mit ihren historischen Titeln werden dagegen nicht neu interpretiert.
+Die sichtbaren Bonuspatches sind abgeleitete Auswertungen der Trainingseinträge, keine dauerhaft gespeicherten Award-Datensätze. Vor November bleibt ihre Berechnung unverändert; ab November folgt sie der neuen Regel. Bereits eingefrorene Jahresausgaben mit ihren historischen Titeln werden dagegen nicht neu interpretiert.
 
 ## Archivkompatibilität ohne Migration
 

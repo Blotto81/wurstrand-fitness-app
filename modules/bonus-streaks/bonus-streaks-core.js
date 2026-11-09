@@ -2,6 +2,7 @@
 (function (root) {
   "use strict";
   const START = "2026-05-01";
+  const MONTHLY_FROM = "2026-11-01";
   const MILESTONES = Object.freeze([7, 14, 30, 60, 100, 180, 365]);
   function today(now = new Date()) {
     // Same local calendar day as the WRC entry form and birthday modules.
@@ -50,8 +51,9 @@
       } else {
         status = "miss";
         if (current > 0) {
-          const keep = rulesVersion === 1 ? ++misses === 1 : used < 2;
-          if (keep) { if (rulesVersion === 2) used++; status = "pause"; }
+          const monthly = rulesVersion === 2 && date >= MONTHLY_FROM;
+          const keep = monthly ? used < 2 : ++misses === 1;
+          if (keep) { if (monthly) used++; status = "pause"; }
           else { current = 0; seriesStart = null; broke = true; }
         }
       }
@@ -71,5 +73,5 @@
       patches
     };
   }
-  root.WRCBonusStreakCore = Object.freeze({ START, MILESTONES, today, nextDay, calculate, achievement });
+  root.WRCBonusStreakCore = Object.freeze({ START, MONTHLY_FROM, MILESTONES, today, nextDay, calculate, achievement });
 })(typeof window === "undefined" ? globalThis : window);

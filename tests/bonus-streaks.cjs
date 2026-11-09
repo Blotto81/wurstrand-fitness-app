@@ -17,59 +17,59 @@ function test(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
 
 test('exactly two consecutive completed misses, open today, third miss breaks',()=>{
- const rows=range('2026-05-01','2026-05-07');
- assert.equal(run(rows,'2026-05-09').current,7);
- assert.equal(run(rows,'2026-05-10').current,7);
- const end=run(rows,'2026-05-11');assert.equal(end.current,0);assert.equal(end.record,7);
- assert.equal(end.days.find(d=>d.date==='2026-05-10').broke,true);
- assert.equal(run([...rows,entry('2026-05-11')],'2026-05-11').current,1);
+ const rows=range('2027-05-01','2027-05-07');
+ assert.equal(run(rows,'2027-05-09').current,7);
+ assert.equal(run(rows,'2027-05-10').current,7);
+ const end=run(rows,'2027-05-11');assert.equal(end.current,0);assert.equal(end.record,7);
+ assert.equal(end.days.find(d=>d.date==='2027-05-10').broke,true);
+ assert.equal(run([...rows,entry('2027-05-11')],'2027-05-11').current,1);
 });
 test('separate misses use the same monthly budget; no free pause',()=>{
- const rows=['01','03','05','07','09'].map(d=>entry('2026-05-'+d));
- assert.equal(run(rows,'2026-05-05').current,3);
- assert.equal(run(rows,'2026-05-07').current,1);
- assert.equal(run(rows,'2026-05-09').current,1);
+ const rows=['01','03','05','07','09'].map(d=>entry('2027-05-'+d));
+ assert.equal(run(rows,'2027-05-05').current,3);
+ assert.equal(run(rows,'2027-05-07').current,1);
+ assert.equal(run(rows,'2027-05-09').current,1);
 });
 test('no starting a series, no consumption before first bonus, no points or synthetic rows',()=>{
- const rows=[entry('2026-05-20')],copy=JSON.stringify(rows);let calls=0;
- const s=C.calculate(rows,'Marian','2026-05-23',e=>{calls++;return context.calcPoints(e)});
+ const rows=[entry('2027-05-20')],copy=JSON.stringify(rows);let calls=0;
+ const s=C.calculate(rows,'Marian','2027-05-23',e=>{calls++;return context.calcPoints(e)});
  assert.equal(s.current,1);assert.equal(s.days.filter(d=>d.status==='bonus').length,1);assert.equal(calls,1);assert.equal(JSON.stringify(rows),copy);
- assert.equal(run([],'2026-05-31').record,0);
- assert.equal(run(rows,'2026-05-24').current,0);
+ assert.equal(run([],'2027-05-31').record,0);
+ assert.equal(run(rows,'2027-05-24').current,0);
 });
 test('month renews, unused allowance does not carry over, calendar boundaries',()=>{
- const rows=[entry('2026-05-29'),entry('2026-06-03')];
- assert.equal(run(rows,'2026-06-03').current,2);
- assert.equal(run(rows,'2026-06-05').current,0);
- const unused=[entry('2026-05-31')];
- assert.equal(run(unused,'2026-06-03').current,1);assert.equal(run(unused,'2026-06-04').current,0);
+ const rows=[entry('2027-05-29'),entry('2027-06-03')];
+ assert.equal(run(rows,'2027-06-03').current,2);
+ assert.equal(run(rows,'2027-06-05').current,0);
+ const unused=[entry('2027-05-31')];
+ assert.equal(run(unused,'2027-06-03').current,1);assert.equal(run(unused,'2027-06-04').current,0);
 });
 test('series break never resets monthly allowance',()=>{
- const rows=[entry('2026-05-01'),entry('2026-05-05')];
- assert.equal(run(rows,'2026-05-05').current,1);
- assert.equal(run(rows,'2026-05-07').current,0);
- assert.equal(run([...rows,entry('2026-05-07')],'2026-05-09').current,0);
+ const rows=[entry('2027-05-01'),entry('2027-05-05')];
+ assert.equal(run(rows,'2027-05-05').current,1);
+ assert.equal(run(rows,'2027-05-07').current,0);
+ assert.equal(run([...rows,entry('2027-05-07')],'2027-05-09').current,0);
 });
 test('year, leap day and many consecutive monthly renewals',()=>{
  const rows=[entry('2026-12-29'),entry('2027-01-03')];assert.equal(run(rows,'2027-01-03').current,2);
  assert.equal(run(rows,'2027-01-05').current,0);
  const leap=[entry('2028-02-27'),entry('2028-03-03')];assert.equal(run(leap,'2028-03-03').current,2);
- const long=range('2026-05-01','2028-03-04').filter(e=>!['10','11'].includes(e.date.slice(-2)));
+ const long=range('2027-05-01','2028-03-04').filter(e=>!['10','11'].includes(e.date.slice(-2)));
  const s=run(long,'2028-03-04');assert.equal(s.current,long.length);assert.equal(s.record,long.length);
  assert.equal(C.nextDay('2028-02-28'),'2028-02-29');assert.equal(C.nextDay('2028-02-29'),'2028-03-01');
 });
 test('only earned days advance milestones, once each, unchanged thresholds',()=>{
- const rows=range('2026-05-01','2026-05-09').filter(e=>!['2026-05-03','2026-05-04'].includes(e.date));
- const s=run(rows,'2026-05-09');assert.equal(s.current,7);assert.equal(s.patches[0].date,'2026-05-09');
- const long=run(range('2026-05-01','2027-05-02'),'2027-05-02');assert.equal(long.current,367);assert.deepEqual(plain(long.patches.map(p=>p.milestone)),[7,14,30,60,100,180,365]);
- const after=run([...rows,...range('2026-05-15','2026-05-21')],'2026-05-21');assert.equal(after.patches.filter(p=>p.milestone===7).length,1);
- assert.equal(C.achievement(s,s,'2026-05-09'),null);
+ const rows=range('2027-05-01','2027-05-09').filter(e=>!['2027-05-03','2027-05-04'].includes(e.date));
+ const s=run(rows,'2027-05-09');assert.equal(s.current,7);assert.equal(s.patches[0].date,'2027-05-09');
+ const long=run(range('2027-05-01','2028-05-01'),'2028-05-01');assert.equal(long.current,367);assert.deepEqual(plain(long.patches.map(p=>p.milestone)),[7,14,30,60,100,180,365]);
+ const after=run([...rows,...range('2027-05-15','2027-05-21')],'2027-05-21');assert.equal(after.patches.filter(p=>p.milestone===7).length,1);
+ assert.equal(C.achievement(s,s,'2027-05-09'),null);
 });
 test('backfill, correction and deletion replay real history without mutation',()=>{
- const rows=range('2026-05-01','2026-05-14'),copy=JSON.stringify(rows);
- const gap=rows.filter(e=>!['2026-05-05','2026-05-06','2026-05-07'].includes(e.date));assert.equal(run(gap,'2026-05-14').current,7);
- assert.equal(run([...gap,entry('2026-05-06')],'2026-05-14').current,12);
- const corrected=rows.map(e=>e.date==='2026-05-05'?{...e,bike:0}:e);assert.equal(run(corrected,'2026-05-14').current,13);assert.equal(JSON.stringify(rows),copy);
+ const rows=range('2027-05-01','2027-05-14'),copy=JSON.stringify(rows);
+ const gap=rows.filter(e=>!['2027-05-05','2027-05-06','2027-05-07'].includes(e.date));assert.equal(run(gap,'2027-05-14').current,7);
+ assert.equal(run([...gap,entry('2027-05-06')],'2027-05-14').current,12);
+ const corrected=rows.map(e=>e.date==='2027-05-05'?{...e,bike:0}:e);assert.equal(run(corrected,'2027-05-14').current,13);assert.equal(JSON.stringify(rows),copy);
 });
 test('players independent, May start, future and invalid dates excluded, order and duplicates stable',()=>{
  const rows=[...range('2026-05-01','2026-05-07','Thorsten'),entry('2026-05-07'),entry('2026-04-30'),entry('2026-05-09'),entry('2026-02-30')];
@@ -83,16 +83,28 @@ test('central historical scoring stays authoritative',()=>{
  assert.equal(C.calculate([{date:'2026-05-01',person:'Marian'}],'Marian','2026-05-01',()=>({bonus:4})).current,1);
 });
 test('legacy version remains selectable for immutable historical archives',()=>{
- const rows=range('2026-05-01','2026-05-13').filter((_,i)=>i%2===0);
- assert.equal(C.calculate(rows,'Marian','2026-05-13',context.calcPoints,1).record,7);
- assert.equal(run(rows,'2026-05-13').record,3);
- assert.throws(()=>C.calculate(rows,'Marian','2026-05-13',context.calcPoints,99));
+ const rows=range('2026-11-01','2026-11-13').filter((_,i)=>i%2===0);
+ assert.equal(C.calculate(rows,'Marian','2026-11-13',context.calcPoints,1).record,7);
+ assert.equal(run(rows,'2026-11-13').record,3);
+ assert.throws(()=>C.calculate(rows,'Marian','2026-11-13',context.calcPoints,99));
 });
 test('no UI hints, counters, buttons or internal allowance fields',()=>{
  assert.doesNotMatch(read('modules/bonus-streaks/bonus-streaks.js'),/joker|schutz|pause|gerettet|shield|bs-calendar|renderEntry/i);
  assert.doesNotMatch(read('modules/bonus-streaks/bonus-streaks.css'),/joker|shield|bs-calendar/i);
  const s=run(range('2026-05-01','2026-05-10'),'2026-05-13');assert.ok(!('jokers' in s));assert.ok(s.days.every(d=>!('credit' in d)&&!('jokers' in d)));
  assert.doesNotMatch(read('index.html'),/bonusStreakEntry|WRCBonusStreaks\.renderEntry/);
+});
+
+test('grandfathered history for every player; November bridge has no extra free days',()=>{
+ for(const player of ['Thorsten','Basti','Fabi','Marian']){
+  const rows=range('2026-10-01','2026-11-05',player).filter(e=>!['2026-10-04','2026-10-08','2026-10-12','2026-10-16'].includes(e.date));
+  const legacy=C.calculate(rows,player,'2026-10-31',context.calcPoints,1);
+  assert.deepEqual(plain(run(rows,'2026-10-31',player)),plain(legacy));
+  const previous=run(rows,'2026-11-05',player);const next=run([...rows,entry('2026-11-08',player)],'2026-11-09',player);
+  assert.equal(next.current,previous.current+1);assert.equal(next.seriesStart,previous.seriesStart);
+  assert.deepEqual(plain(next.patches.filter(p=>p.date<='2026-11-05')),plain(previous.patches));
+  assert.equal(run([...rows,entry('2026-11-08',player)],'2026-11-10',player).current,0);
+ }
 });
 
 async function testLoading() {
@@ -145,9 +157,9 @@ function testController() {
  assert.equal(ui.renderProfile('Basti'),'');assert.match(ui.renderProfile('Marian'),/6 erfolgreiche Bonustage/);assert.equal(ui.renderPatches('Marian'),'');assert.equal(scheduled.length,0);
  const before=ui.state('Marian');c.allEntries=[...c.allEntries,entry('2026-05-07')];ui.onEntriesLoaded();assert.match(ui.renderPatches('Marian'),/Angefeuert/);assert.doesNotMatch(ui.renderPatches('Marian'),/Wurstwender/);ui.afterSave(before,entry('2026-05-07'));ui.afterSave(before,entry('2026-05-07'));assert.equal(scheduled.length,1);
  blocked=true;scheduled.shift().fn();assert.equal(notices.length,0);blocked=false;scheduled.shift().fn();assert.equal(notices.length,1);assert.match(notices[0].innerHTML,/7 Bonustage – Angefeuert/);assert.doesNotMatch(notices[0].innerHTML,/button|dialog/);
- now='2026-05-11T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');assert.match(ui.renderPatches('Marian'),/Angefeuert/);
+ now='2026-05-10T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');assert.match(ui.renderPatches('Marian'),/Angefeuert/);
  c.allEntries=[entry('2026-05-08'),entry('2026-05-09')];ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');c.allEntries=[...c.allEntries,entry('2026-05-10')];ui.onEntriesLoaded();assert.match(ui.renderProfile('Marian'),/3 erfolgreiche Bonustage/);
- now='2026-05-12T12:00:00';ui.onEntriesLoaded();assert.match(ui.renderProfile('Marian'),/3 erfolgreiche Bonustage/);now='2026-05-14T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');
+ now='2026-05-12T12:00:00';ui.onEntriesLoaded();assert.match(ui.renderProfile('Marian'),/3 erfolgreiche Bonustage/);now='2026-05-13T12:00:00';ui.onEntriesLoaded();assert.equal(ui.renderProfile('Marian'),'');
  const count=scheduled.length;c.allEntries=range('2026-05-01','2026-05-13').filter(e=>e.date!=='2026-05-06');ui.onEntriesLoaded();const past=ui.state('Marian');c.allEntries=[...c.allEntries,entry('2026-05-06')];ui.onEntriesLoaded();ui.afterSave(past,entry('2026-05-06'));assert.equal(scheduled.length,count,'backfill stays silent');
  console.log('PASS profile 3-day threshold, pause, disappearance, preserved patches, one small deferred notice and silent backfills');
 }

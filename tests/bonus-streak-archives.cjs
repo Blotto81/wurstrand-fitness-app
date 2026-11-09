@@ -5,7 +5,7 @@ for(const p of ['scoring.js','modules/bonus-streaks/bonus-streaks-core.js','modu
 const index=read('index.html');vm.runInContext(index.slice(index.indexOf('    function cleanLoadedEntries('),index.indexOf('    function editEntry(')),c);
 c.WRCClubs={definitions:[]};c.HISTORIC_PLAYER_TOTALS={};c.HISTORIC_TOTALS={};
 vm.runInContext(read('modules/insights/occasions.js'),c);
-const entries=Array.from({length:13},(_,i)=>({date:'2026-07-'+String(i+1).padStart(2,'0'),person:'Marian',steps:3000,bike:3,exercise:true})).filter((_,i)=>i%2===0);
+const entries=Array.from({length:13},(_,i)=>({date:'2026-11-'+String(i+1).padStart(2,'0'),person:'Marian',steps:3000,bike:3,exercise:true})).filter((_,i)=>i%2===0);
 const base={year:2026,through:'2026-12-23',players:['Marian','Thorsten','Basti','Fabi'],entries,history:{},dailys:[],bonuses:[],games:[],halloween:[],easter:[]};
 const copy=JSON.stringify(base),ctx=c.WRCOccasions.context();
 const legacy=c.WRCInsights.build({...ctx,...base,streakRulesVersion:1});
