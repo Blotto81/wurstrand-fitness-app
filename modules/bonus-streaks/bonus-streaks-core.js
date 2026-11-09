@@ -17,7 +17,8 @@
     const value = new Date(date + "T12:00:00Z");
     return !Number.isNaN(+value) && value.toISOString().slice(0, 10) === date;
   }
-  function calculate(entries, player, asOf = today(), score = root.calcPoints) {
+  function calculate(entries, player, asOf = today(), score = root.calcPoints, rulesVersion = 2) {
+    if (![1, 2].includes(rulesVersion)) throw new Error("Unknown streak rules version");
     if (!validDate(asOf)) throw new Error("Invalid streak date");
     if (typeof score !== "function") throw new Error("WRC calcPoints is required");
     const bonuses = new Set();
@@ -26,9 +27,13 @@
       if (entry.person === player && validDate(entry.date) && entry.date >= START && entry.date <= asOf && score(entry).bonus > 0) bonuses.add(entry.date);
     }
     let current = 0, record = 0, misses = 0, seriesStart = null, recordDate = null;
+    let month = "", used = 0;
     const days = [], patches = [];
     const earned = new Set();
     for (let date = START; date <= asOf; date = nextDay(date)) {
+      // Version 1 remains immutable for previously frozen annual stories.
+      // Version 2 replays two internal allowances per player/calendar month.
+      if (date.slice(0, 7) !== month) { month = date.slice(0, 7); used = 0; }
       let status, broke = false;
       if (bonuses.has(date)) {
         if (!current) seriesStart = date;
@@ -45,8 +50,8 @@
       } else {
         status = "miss";
         if (current > 0) {
-          misses++;
-          if (misses === 1) status = "pause";
+          const keep = rulesVersion === 1 ? ++misses === 1 : used < 2;
+          if (keep) { if (rulesVersion === 2) used++; status = "pause"; }
           else { current = 0; seriesStart = null; broke = true; }
         }
       }

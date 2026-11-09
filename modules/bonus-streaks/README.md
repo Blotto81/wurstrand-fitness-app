@@ -1,31 +1,53 @@
 # WRC Bonusserie
 
-## Eine zentrale Berechnung
-Ab **01.05.2026** wird für jeden Spieler die bereinigte Historie chronologisch nachgerechnet. Ausschließlich `calcPoints(entry).bonus > 0` entscheidet über einen erfolgreichen Bonustag. Historische Bonusbedingungen, Punkte und Aktivitäten bleiben unverändert. Zukünftige Daten werden ignoriert.
+## Zentrale deterministische Berechnung
 
-- Ein tatsächlicher Bonustag erhöht die Serie um 1 und beendet eine vorherige Pause.
-- Ein einzelner abgeschlossener Tag ohne Bonus erhält die Serie, erhöht sie aber nicht.
-- Zwei aufeinanderfolgende abgeschlossene Tage ohne Bonus beenden die Serie. Der nächste Bonus startet bei 1.
-- Heute bleibt ohne Bonus offen. Die Datumsgrenze entspricht der bestehenden WRC-Erfassung; die Tagesiteration mit UTC-Mittag berücksichtigt Monats-, Jahres- und Sommerzeitwechsel.
+WRCBonusStreakCore.calculate berechnet ab 01.05.2026 alle abgeschlossenen Kalendertage aus der bereinigten Historie. Nur calcPoints(entry).bonus > 0 liefert einen erfolgreichen Bonustag. Punkte, Trainingseinträge und die separate Daily-Challenge einschließlich ihrer drei monatlichen Joker bleiben unverändert.
 
-Es gibt keine Konten, Monatsgutschriften oder Schutzmechanik in der Bonusserie. Das separate Daily-System einschließlich seiner Joker bleibt unverändert.
+Regelversion 2 ist der Standard für aktuelle Auswertungen:
+- Genau zwei interne Schutztage pro Spieler und Kalendermonat.
+- Ein abgeschlossener Tag ohne Bonus verbraucht nur bei laufender Serie ein noch verfügbares Kontingent. Die Serienlänge steigt nicht.
+- Aufeinanderfolgende oder getrennte Fehltage verwenden dasselbe Monatskontingent. Es gibt keine zusätzliche kostenlose Pause.
+- Nach Verbrauch endet die Serie am nächsten abgeschlossenen Fehltag. Ein Abbruch oder neuer Bonustag setzt das Monatskontingent nicht zurück.
+- Der Monatserste erneuert das Kontingent ohne Übertrag. Monats-/Jahreswechsel unterbrechen keine Serie.
+- Heute bleibt ohne Bonus offen. Die bestehende lokale Kalendergrenze der Erfassung bleibt maßgeblich; die Iteration verwendet UTC-Mittag für stabile Datumswechsel.
+- Keine Speicherung eines Kontos, keine neuen Datenbanktabellen oder Schreibzugriffe.
 
-## Zurückhaltende Oberfläche
-Keine Bonusserien-Karte in der Erfassung, kein Kalender und keine Regelansicht. Das Profil zeigt nur bei laufender Serie ab drei erfolgreichen Bonustagen eine kleine Zeile mit dem persönlichen Rekord. Ein Pausentag wird nicht hervorgehoben. Nach dem Ende verschwindet die Zeile ohne Warnung.
+Die vollständige Historie aller vier Spieler wird bei jedem Datenstand gleich behandelt. Bei Nachträgen oder Korrekturen werden aktuelle Serien, Rekorde und abgeleitete Patches neu berechnet. Historische Serien können dadurch länger oder kürzer als unter der früheren Regel sein.
 
-Die sieben vorhandenen Patchmotive und Namen für 7, 14, 30, 60, 100, 180 und 365 erfolgreiche Bonustage bleiben unter den persönlichen Auszeichnungen. Ein angeklickter Patch zeigt sein belegtes Datum. Ein Serienende entfernt verdiente Patches nicht. Korrekturen und Löschungen führen dagegen bewusst zur vollständigen Neuberechnung und entfernen nicht mehr belegte Erfolge.
+## Ausschließlich Serie und Rekord sichtbar
 
-## Kleine Gratulationen
-Nur ein erstmals neu erreichter Meilenstein am aktuellen Tag kann einen kurzen, nicht blockierenden Hinweis mit Patchmotiv auslösen. Er wartet auf vorhandene Erfolgsmeldungen und Dialoge, bleibt vier Sekunden und benötigt keine Bestätigung. Es gibt höchstens einen wartenden Hinweis. Bereits gezeigte Meilensteine werden lokal gegen Wiederholung gespeichert; dies speichert keine Leistungen oder Punkte. Die Auszeichnungen selbst stammen immer aus der gemeinsamen Aktivitätshistorie.
+Das Profil zeigt ab drei tatsächlich erfolgreichen Bonustagen eine kompakte, warme, gerahmte Karte mit Flammensymbol, aktueller Serie und persönlichem Rekord. Keine Bedienelemente oder Hinweise auf die interne Regel; auch der Patchdialog enthält keine Erklärung. Bei kürzerer oder beendeter Serie bleibt die Karte wie bisher ausgeblendet.
 
-Gewöhnliche Bonustage, Reloads, Profilwechsel und rückwirkende Berechnung bleiben still. Nachträge aktualisieren sämtliche Patches ohne Gratulationen. Ein erfolgloser Schreibzugriff oder unvollständiges Neuladen löst nichts aus.
+Schutzdetails werden nicht in Anlass-Fakten, Post, persönliche Nachrichten, Auszeichnungen, Regeln oder Wrapped-Texte übernommen. Die eigenen Aktivitätsserien für Rad/Kraft/Übung und die Daily-Challenge sind getrennte vorhandene Funktionen und bleiben unverändert.
 
-## Anlässe und Daten
-Geburtstage, Weihnachten, persönliche Ehrungen und beide Wrapped-Shows verwenden dieselbe neue Berechnung über WRCInsights/WRCOccasions. Besondere Bonusserien werden ab sieben erfolgreichen Tagen hervorgehoben. Keine neue Kennzahl oder Punkteberechnung. Auf ausdrücklichen Nutzerwunsch gilt die neue Serienregel rückwirkend auch für diese Auswertungen; Quellarchive und gespeicherte Aktivitäten bleiben unberührt.
+## Meilensteine und gespeicherte Historie
 
-Keine Datenbankmigration, keine neue Tabelle und keine zusätzlichen Datenbank-Schreibzugriffe. Vollständiges paginiertes Laden der Aktivitäten bleibt bestehen. Die übergreifende Entwicklerregel für neue relevante Anlass-Fakten gilt weiter.
+Die Schwellen 7, 14, 30, 60, 100, 180 und 365 bleiben unverändert. Nur Bonus-Tage erhöhen die Serienlänge. Jeder Meilenstein wird im Replay höchstens einmal vergeben. Auf Reload und historische Neuberechnung erfolgen keine Gratulationen; Nachträge bleiben ebenfalls still. Bestehende lokale wrcBonusSeriesNotice-Schlüssel werden unverändert gegen erneute Benachrichtigungen verwendet.
 
-## Prüfungen
-`node tests/bonus-streaks.cjs`: Serienregel, Pausen, offener Tag, Monats-/Jahreswechsel, Schaltjahr, alle Meilensteine, Änderungen/Löschungen, zentrale historische Bonusregeln, Profilgrenze, stille Nachträge, reduzierte Gratulation und echtes separates Daily-Jokerkonto. Echte Lade-/Speicherpfade mit lokalen Mocks.
-`node tests/wrapped.cjs`: gemeinsame Jahresfakten, Bonusserien und beide Shows. Bestehende Regressionstests für Geburtstage, Feiertage, Navigation/PWA, UNO und Dart bleiben bestehen.
-`tests/bonus-streaks-preview.html`: ausschließlich lokale synthetische Daten und echter Speicherpfad ohne Supabase-Schreibzugriff; Smartphone, Tablet, Desktop und Patchdialog prüfen.
+Die sichtbaren Bonuspatches sind abgeleitete Auswertungen der Trainingseinträge, keine dauerhaft gespeicherten Award-Datensätze. Deshalb können sie sich mit der rückwirkend geltenden Regel ändern. Bereits eingefrorene Jahresausgaben mit ihren historischen Titeln werden dagegen nicht neu interpretiert.
+
+## Archivkompatibilität ohne Migration
+
+Der fünfte optionale Parameter von calculate ist die Regelversion (1 oder 2); alle normalen Aufrufer verwenden standardmäßig 2. Version 1 behält die vorherige Regel unverändert. Es gibt nur einen zentralen Replay-Algorithmus, keine UI-Nebenberechnung.
+
+Quellarchiv-Version und Auswertungsregel sind getrennt:
+- Archivquellen v1/v2 bleiben auf Regelversion 1.
+- v3 mit unveränderlichem serverseitigem frozen_at vor 2026-11-09T19:23:17Z bleibt auf Regelversion 1.
+- v3 ab diesem Zeitpunkt verwendet Regelversion 2.
+- Fehlender/ungültiger Archivzeitpunkt fällt auf die bisherige Regel zurück.
+
+WRCOccasions.archive erhält frozen_at aus der vorhandenen Serverantwort beziehungsweise deren bestätigtem Offline-Cache. Die Geräteuhr entscheidet nicht über historische Semantik. Keine Änderung an gespeicherten Snapshots oder dem SQL-Schema. Spätere Regeländerungen müssen diese Zuordnung erhalten und eine weitere Regelversion verwenden.
+
+## Anlassprüfung nach AGENTS.md
+
+Geburtstage, Weihnachten, persönliche Nachrichten/Ehrungen sowie persönliches und gemeinsames Wrapped nutzen die vorhandenen zentralen Bonusserien-Fakten über WRCInsights. Aktuelle Auswertungen verwenden Version 2; historische Archive die oben festgelegte Version. Keine neue Kennzahl, kein neuer Provider und keine sichtbaren Schutz-Fakten. Die Analyse der Fitnesspunkte und Zielkurs-Serien bleibt unverändert; Bonusserien-Fakten stammen ausschließlich aus dem zentralen Replay.
+
+## Prüfungen und Vorschau
+
+- node tests/bonus-streaks.cjs: Monatsbudget, aufeinanderfolgende/getrennte Fehltage, offener Tag, kein Übertrag/Reset bei Abbruch, mehrere Monats-/Jahreswechsel, Schaltjahr, Historie, zentrale Punkteautorität, Meilensteine, Lade-/Speicherpfade, stille Nachträge und unveränderte Daily-Joker.
+- node tests/bonus-streak-archives.cjs: unveränderte alte Archive/Shows, neue v3-Auswertung, gleiche Punkte, keine Quellenmutation, identische zentrale Werte und unsichtbare Regel.
+- node tests/wrapped.cjs sowie wrapped-data.cjs, wrapped-surprise.cjs, member-birthdays.cjs und dashboard-stories.cjs: Regressionen.
+- node tests/bonus-streak-browser.cjs <Playwright-Modulpfad>: 320/390/768/1280 px, Profilgrenze, Patchdialog, Tastatur, reduzierte Bewegung und stilles Neuladen.
+
+Lokale Vorschau ohne produktive Daten: Im Repository python -m http.server 8765 --bind 127.0.0.1 starten und http://127.0.0.1:8765/tests/bonus-streaks-preview.html öffnen.

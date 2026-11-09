@@ -34,7 +34,7 @@
       if(Array.isArray(options.dailys))p.dailyCount=new Set(options.dailys.filter(d=>d.player===name&&inYear(d.completed_date)).map(d=>d.completed_date+':'+d.daily_id)).size;
       if(streakCore&&end>=streakCore.START){
         // Replay all prior history once, then project only this year's earned days.
-        const state=streakCore.calculate(archive,name,end,score),days=state.days.filter(d=>inYear(d.date));
+        const state=streakCore.calculate(archive,name,end,score,options.streakRulesVersion ?? 2),days=state.days.filter(d=>inYear(d.date));
         let earned=0,series=null;
         for(const d of days){if(d.seriesStart!==series){earned=0;series=d.seriesStart;}if(d.status==='bonus'){earned++;p.streakEarned++;p.bonusStreak=Math.max(p.bonusStreak,earned);}}
         p.carriedIn=state.days.filter(d=>d.date<start).at(-1)?.current||0;
