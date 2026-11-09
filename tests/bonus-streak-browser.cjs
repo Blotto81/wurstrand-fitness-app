@@ -1,0 +1,16 @@
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
+const {chromium}=require(process.argv[2]||'playwright'),root=path.resolve(__dirname,'..');
+(async()=>{const server=http.createServer((req,res)=>{try{const f=path.resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!f.startsWith(root+path.sep))throw Error('path');res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'})[path.extname(f)]||'application/octet-stream');res.end(fs.readFileSync(f));}catch{res.writeHead(404);res.end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const base='http://127.0.0.1:'+server.address().port,browser=await chromium.launch({executablePath:process.env.WRC_TEST_CHROME||'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
+try{const context=await browser.newContext({viewport:{width:390,height:844}});await context.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(base+'/tests/bonus-streaks-preview.html');await page.waitForSelector('.bs-profile');const card=page.locator('.bs-profile');
+assert.match(await card.textContent(),/BONUS-SERIE/);assert.match(await card.textContent(),/63 erfolgreiche Bonustage/);assert.equal(await card.locator('button').count(),0);
+assert.doesNotMatch(await page.locator('#profile').innerText(),/joker|schutz|pausentag|gerettete serie/i);
+for(const width of [320,390,768,1280]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.ok(await card.evaluate(n=>n.scrollWidth<=n.clientWidth));assert.equal(await card.evaluate(n=>getComputedStyle(n).borderTopStyle),'solid');}
+await page.setViewportSize({width:390,height:844});if(process.env.WRC_TEST_OUTPUT){fs.mkdirSync(process.env.WRC_TEST_OUTPUT,{recursive:true});await page.locator('#profile').screenshot({path:path.join(process.env.WRC_TEST_OUTPUT,'bonusserie-mobile.png')});}
+await page.locator('[data-bs-patch="7"]').click();await page.waitForSelector('.bs-patch-dialog[open]');assert.doesNotMatch(await page.locator('.bs-patch-dialog').innerText(),/joker|schutz|pause|gerettete serie/i);await page.keyboard.press('Escape');
+await page.selectOption('#person','Basti');assert.equal(await card.count(),0);await page.selectOption('#person','Thorsten');assert.match(await card.textContent(),/6 erfolgreiche Bonustage/);
+await page.emulateMedia({reducedMotion:'reduce'});await page.selectOption('#person','Marian');assert.equal(await page.locator('.bs-mini-patch').first().evaluate(n=>getComputedStyle(n).transitionDuration),'0s');
+await page.reload();await page.waitForSelector('.bs-profile');assert.equal(await page.locator('#bonusStreakReward').count(),0);
+assert.deepEqual(errors,[]);console.log('PASS profile card 320/390/768/1280px, real central values, 3-day threshold, patch dialog without hidden-rule hints, keyboard, reduced motion, silent reload and no external requests.');
+}finally{await browser.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -36,7 +36,7 @@
     if (!ready) return "";
     const s = state(player);
     if (s.current < 3) return "";
-    return `<div id="bonusStreakProfile" class="bs-profile" data-bs-player="${esc(player)}" aria-label="Bonusserie von ${esc(player)}"><strong>🔥 ${s.current} erfolgreiche Bonustage in Serie</strong><small>Persönlicher Rekord: ${s.record}</small></div>`;
+    return `<div id="bonusStreakProfile" class="bs-profile" data-bs-player="${esc(player)}" aria-label="Bonusserie von ${esc(player)}"><span class="bs-profile-heading"><span class="bs-profile-flame" aria-hidden="true">🔥</span> BONUS-SERIE</span><strong>${s.current} erfolgreiche Bonustage</strong><small>Persönlicher Rekord: ${s.record} Tage</small></div>`;
   }
   function refresh() {
     const box = document.getElementById("bonusStreakProfile");
@@ -50,7 +50,7 @@
     const dialog = document.createElement("dialog");
     dialog.className = "bs-patch-dialog";
     dialog.setAttribute("aria-labelledby", "bonusPatchTitle");
-    dialog.innerHTML = `<button type="button" class="bs-close" aria-label="Patch schließen">×</button><span class="bs-eyebrow">WRC · VERDIENTE AUSZEICHNUNG</span>${art(milestone)}<h2 id="bonusPatchTitle">${titles[milestone]}</h2><p class="bs-patch-number">${milestone} Bonustage in einer Serie</p><p>${esc(player)} hat diesen Patch am <strong>${stamp(patch.date)}</strong> erreicht.</p><p class="bs-caption">Serie ab ${stamp(patch.seriesStart)} · Pausentage zählen nicht mit.</p>`;
+    dialog.innerHTML = `<button type="button" class="bs-close" aria-label="Patch schließen">×</button><span class="bs-eyebrow">WRC · VERDIENTE AUSZEICHNUNG</span>${art(milestone)}<h2 id="bonusPatchTitle">${titles[milestone]}</h2><p class="bs-patch-number">${milestone} Bonustage in einer Serie</p><p>${esc(player)} hat diesen Patch am <strong>${stamp(patch.date)}</strong> erreicht.</p><p class="bs-caption">Serie ab ${stamp(patch.seriesStart)}</p>`;
     const close = () => dialog.close();
     dialog.querySelector("button").addEventListener("click", close);
     dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
