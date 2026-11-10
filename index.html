@@ -4668,6 +4668,35 @@ background:#0f172a
       </section>
 
       ${WRCBonusStreaks.renderProfile(player)}
+      <div class="card" style="margin:16px 0;padding:16px;border:1px solid #b99858;border-radius:16px">
+        <button type="button" style="width:100%;padding:13px;border-radius:12px;font-weight:800;cursor:pointer;background:#493820;color:#fff0ca" aria-expanded="false" onclick="const x=this.nextElementSibling;x.hidden=!x.hidden;this.setAttribute('aria-expanded',String(!x.hidden))">📊 WRC – All Time ▾</button>
+        <div hidden style="padding-top:15px">
+          <h3>Gesamtleistungen seit WRC-Beginn</h3>
+          <div class="player-metric-grid">
+            ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong style="font-size:1.3rem">'+fmt(value,dec)+'</strong></div>').join('')}
+          </div>
+          <h3>Meine Bestmarken</h3>
+          ${(() => {
+            const days = new Map(), months = new Map();
+            allPlayerEntries.forEach(e => {
+              if (!e.date) return;
+              const v=days.get(e.date)||{points:0,steps:0,bike:0,squats:0,pushups:0};
+              v.points+=calcPoints(e).total;
+              for(const k of ['steps','bike','squats','pushups'])v[k]+=Number(e[k])||0;
+              days.set(e.date,v);
+              const m=e.date.slice(0,7);months.set(m,(months.get(m)||0)+calcPoints(e).total);
+            });
+            for(const [date,v] of days)v.points+=WRCBonusPoints.points({person:player,date});
+            for(const [month,v] of months)months.set(month,v+WRCBonusPoints.points({person:player,key:month}));
+            const best=(map,key)=>[...map].reduce((b,[date,v])=>v[key]>0&&(!b||v[key]>b.value)?{date,value:v[key]}:b,null);
+            const monthBest=[...months].reduce((b,[date,value])=>value>0&&(!b||value>b.value)?{date,value}:b,null);
+            const records=[['⭐','Punktreichster Tag',best(days,'points'),1],['👣','Meiste Schritte',best(days,'steps'),0],['🚴','Längste Radstrecke',best(days,'bike'),1],['🦵','Meiste Kniebeugen',best(days,'squats'),0],['💪','Meiste Liegestütze',best(days,'pushups'),0],['📆','Punktestärkster Monat',monthBest,1]];
+            const streak=typeof WRCBonusStreaks!=='undefined'?WRCBonusStreaks.state(player):null;
+            return '<div class="player-metric-grid">'+records.map(([icon,label,r,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong>'+(r?fmt(r.value,dec):'—')+'</strong><div class="sub">'+(r?r.date:'Keine Einzelaufzeichnung')+'</div></div>').join('')+'<div class="card" style="padding:12px"><div>🔥 Längste Bonusserie</div><strong>'+(streak?fmt(streak.best||0):'—')+' Tage</strong></div></div>';
+          })()}
+          <p class="sub" style="margin-top:12px">Gesamtwerte einschließlich Februar–April 2026. Bestmarken nur aus belegbaren Einzelaufzeichnungen.</p>
+        </div>
+      </div>
       <div class="player-metric-grid">
         ${card("⭐", "Punkte", monthPlayer.points, monthTeam.points, allPlayer.points, allTeam.points, 1)}
         ${card("👣", "Schritte", monthPlayer.steps, monthTeam.steps, allPlayer.steps, allTeam.steps, 0)}
