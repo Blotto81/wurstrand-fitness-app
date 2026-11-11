@@ -3,6 +3,7 @@
   "use strict";
   const START = "2026-05-01";
   const MONTHLY_FROM = "2026-11-01";
+  const NO_ALLOWANCES_FROM = "2026-11-12";
   const MILESTONES = Object.freeze([7, 14, 30, 60, 100, 180, 365]);
   function today(now = new Date()) {
     // Same local calendar day as the WRC entry form and birthday modules.
@@ -18,8 +19,8 @@
     const value = new Date(date + "T12:00:00Z");
     return !Number.isNaN(+value) && value.toISOString().slice(0, 10) === date;
   }
-  function calculate(entries, player, asOf = today(), score = root.calcPoints, rulesVersion = 2) {
-    if (![1, 2].includes(rulesVersion)) throw new Error("Unknown streak rules version");
+  function calculate(entries, player, asOf = today(), score = root.calcPoints, rulesVersion = 3) {
+    if (![1, 2, 3].includes(rulesVersion)) throw new Error("Unknown streak rules version");
     if (!validDate(asOf)) throw new Error("Invalid streak date");
     if (typeof score !== "function") throw new Error("WRC calcPoints is required");
     const bonuses = new Set();
@@ -51,8 +52,9 @@
       } else {
         status = "miss";
         if (current > 0) {
-          const monthly = rulesVersion === 2 && date >= MONTHLY_FROM;
-          const keep = monthly ? used < 2 : ++misses === 1;
+          const noAllowance = rulesVersion === 3 && date >= NO_ALLOWANCES_FROM;
+          const monthly = rulesVersion >= 2 && date >= MONTHLY_FROM;
+          const keep = !noAllowance && (monthly ? used < 2 : ++misses === 1);
           if (keep) { if (monthly) used++; status = "pause"; }
           else { current = 0; seriesStart = null; broke = true; }
         }
@@ -73,5 +75,5 @@
       patches
     };
   }
-  root.WRCBonusStreakCore = Object.freeze({ START, MONTHLY_FROM, MILESTONES, today, nextDay, calculate, achievement });
+  root.WRCBonusStreakCore = Object.freeze({ START, MONTHLY_FROM, NO_ALLOWANCES_FROM, MILESTONES, today, nextDay, calculate, achievement });
 })(typeof window === "undefined" ? globalThis : window);
