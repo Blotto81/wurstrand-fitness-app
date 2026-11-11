@@ -9,7 +9,7 @@ vm.createContext(context);
 vm.runInContext(read('scoring.js') + '\n' + read('modules/bonus-streaks/bonus-streaks-core.js'), context);
 const C = context.WRCBonusStreakCore;
 const entry = (date, person = 'Marian') => ({ date, person, steps: 3000, bike: 3, exercise: true });
-const run = (data, date, player = 'Marian') => C.calculate(data, player, date);
+const run = (data, date, player = 'Marian') => C.calculate(data, player, date, context.calcPoints, 2); // Historical v2 scenarios
 const range = (from, to, player) => { const result=[]; for(let d=from;d<=to;d=C.nextDay(d)) result.push(entry(d, player)); return result; };
 const plain = value => JSON.parse(JSON.stringify(value));
 let checks = 0;
@@ -87,6 +87,28 @@ test('legacy version remains selectable for immutable historical archives',()=>{
  assert.equal(C.calculate(rows,'Marian','2026-11-13',context.calcPoints,1).record,7);
  assert.equal(run(rows,'2026-11-13').record,3);
  assert.throws(()=>C.calculate(rows,'Marian','2026-11-13',context.calcPoints,99));
+});
+test('from 12 November 2026 every completed missed bonus day breaks the live series',()=>{
+ const before=range('2026-11-08','2026-11-11');
+ const live=(rows,asOf,player='Marian')=>C.calculate(rows,player,asOf);
+ for(const player of ['Thorsten','Basti','Fabi','Marian']){
+  const rows=before.map(e=>({...e,person:player}));
+  assert.equal(live(rows,'2026-11-12',player).current,4,'today remains open');
+  assert.equal(live(rows,'2026-11-13',player).current,0,'12 Nov miss breaks immediately');
+  assert.equal(C.calculate(rows,player,'2026-11-13',context.calcPoints,2).current,4,'archived v2 remains unchanged');
+  const resumed=[...rows,entry('2026-11-13',player)];
+  assert.equal(live(resumed,'2026-11-13',player).current,1,'new bonus starts a new series');
+ }
+ assert.equal(C.NO_ALLOWANCES_FROM,'2026-11-12');
+});
+test('pre-cutoff pauses remain grandfathered, cutoff does not reset old patches',()=>{
+ const rows=range('2026-11-01','2026-11-11').filter(e=>e.date!=='2026-11-06');
+ const old=C.calculate(rows,'Marian','2026-11-11',context.calcPoints,2);
+ const live=C.calculate(rows,'Marian','2026-11-11');
+ assert.deepEqual(plain(live),plain(old));
+ const after=C.calculate([...rows,entry('2026-11-13')],'Marian','2026-11-13');
+ assert.equal(after.current,1);
+ assert.deepEqual(plain(after.patches.filter(p=>p.date<='2026-11-11')),plain(old.patches));
 });
 test('no UI hints, counters, buttons or internal allowance fields',()=>{
  assert.doesNotMatch(read('modules/bonus-streaks/bonus-streaks.js'),/joker|schutz|pause|gerettet|shield|bs-calendar|renderEntry/i);

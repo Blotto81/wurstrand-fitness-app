@@ -4,7 +4,9 @@
 
 WRCBonusStreakCore.calculate berechnet ab 01.05.2026 alle abgeschlossenen Kalendertage aus der bereinigten Historie. Nur calcPoints(entry).bonus > 0 liefert einen erfolgreichen Bonustag. Punkte, Trainingseinträge und die separate Daily-Challenge einschließlich ihrer drei monatlichen Joker bleiben unverändert.
 
-Regelversion 2 ist der Standard für aktuelle Auswertungen. Bestandsschutz gilt einheitlich für alle Spieler: Bis einschließlich 31.10.2026 wird die bisherige Regel verwendet, ab 01.11.2026 die neue Monatsregel. So bleiben ältere Serien, Rekorde und Patchdaten erhalten; die zwei Schutztage des laufenden Novembers können auch den 6./7. November abdecken. Es gibt keinen zusätzlichen Übergangsbonus und keine Namensausnahmen.
+Regelversion 3 ist der Standard für aktuelle Auswertungen. Ab 12.11.2026 gibt es in der Bonusserie keine Schutztage mehr: Jeder abgeschlossene Tag ohne Bonus beendet eine laufende Serie unmittelbar. Der aktuelle Kalendertag bleibt bis Tagesende offen. Für die Zeit davor bleiben die bisherigen Regeln unverändert; Regelversion 2 bleibt für bereits archivierte Auswertungen verfügbar.
+
+Regelversion 2 war zuvor der Standard für aktuelle Auswertungen. Bestandsschutz gilt einheitlich für alle Spieler: Bis einschließlich 31.10.2026 wird die bisherige Regel verwendet, ab 01.11.2026 die neue Monatsregel. So bleiben ältere Serien, Rekorde und Patchdaten erhalten; die zwei Schutztage des laufenden Novembers können auch den 6./7. November abdecken. Es gibt keinen zusätzlichen Übergangsbonus und keine Namensausnahmen.
 
 Ab November:
 - Genau zwei interne Schutztage pro Spieler und Kalendermonat.
@@ -36,7 +38,7 @@ Der fünfte optionale Parameter von calculate ist die Regelversion (1 oder 2); a
 Quellarchiv-Version und Auswertungsregel sind getrennt:
 - Archivquellen v1/v2 bleiben auf Regelversion 1.
 - v3 mit unveränderlichem serverseitigem frozen_at vor 2026-11-09T19:23:17Z bleibt auf Regelversion 1.
-- v3 ab diesem Zeitpunkt verwendet Regelversion 2.
+- v3 ab diesem Zeitpunkt verwendet weiterhin Regelversion 2 (historische Archivkompatibilität).
 - Fehlender/ungültiger Archivzeitpunkt fällt auf die bisherige Regel zurück.
 
 WRCOccasions.archive erhält frozen_at aus der vorhandenen Serverantwort beziehungsweise deren bestätigtem Offline-Cache. Die Geräteuhr entscheidet nicht über historische Semantik. Keine Änderung an gespeicherten Snapshots oder dem SQL-Schema. Spätere Regeländerungen müssen diese Zuordnung erhalten und eine weitere Regelversion verwenden.
@@ -53,3 +55,7 @@ Geburtstage, Weihnachten, persönliche Nachrichten/Ehrungen sowie persönliches 
 - node tests/bonus-streak-browser.cjs <Playwright-Modulpfad>: 320/390/768/1280 px, Profilgrenze, Patchdialog, Tastatur, reduzierte Bewegung und stilles Neuladen.
 
 Lokale Vorschau ohne produktive Daten: Im Repository python -m http.server 8765 --bind 127.0.0.1 starten und http://127.0.0.1:8765/tests/bonus-streaks-preview.html öffnen.
+
+## Änderung ab 12.11.2026
+
+Für die aktuelle Bonusserie gilt ab 12.11.2026: kein Schutztag mehr. Ein fehlender Bonus an einem abgeschlossenen Tag unterbricht die Serie sofort. Das ist eine ausschließlich vorwärts geltende Regeländerung; historische Regelversionen 1 und 2 bleiben auswählbar und die bereits archivierten Ausgaben unverändert. Die getrennten Daily-Challenge-Joker bleiben bestehen. Die UI zeigt weiterhin keine internen Schutzdetails.
