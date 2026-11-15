@@ -4308,6 +4308,20 @@ background:#0f172a
     }
 
 
+    function showPlayerAllTimeSection(button, mode) {
+      const panel = button.closest(".card");
+      if (!panel) return;
+      panel.querySelectorAll("[data-player-alltime-section]").forEach(section => {
+        section.hidden = section.dataset.playerAlltimeSection !== mode;
+      });
+      panel.querySelectorAll(".player-record-main-tabs button").forEach(tab => {
+        const active = tab === button;
+        tab.setAttribute("aria-pressed", String(active));
+        tab.style.background = active ? "#493820" : "";
+        tab.style.color = active ? "#fff0ca" : "";
+      });
+    }
+
     function showPlayerRecordMode(button, mode) {
       const card = button.closest(".card");
       card.querySelectorAll("[data-player-record-mode]").forEach(el => { el.hidden = el.dataset.playerRecordMode !== mode; });
@@ -4678,10 +4692,11 @@ background:#0f172a
       <div class="card" style="margin:16px 0;padding:16px;border:1px solid #b99858;border-radius:16px">
         <button type="button" style="width:100%;padding:13px;border-radius:12px;font-weight:800;cursor:pointer;background:#493820;color:#fff0ca" aria-expanded="false" onclick="const x=this.nextElementSibling;x.hidden=!x.hidden;this.setAttribute('aria-expanded',String(!x.hidden))">📊 WRC – All Time ▾</button>
         <div hidden style="padding-top:15px">
-          <h3>Gesamtleistungen seit WRC-Beginn</h3>
-          <div class="player-metric-grid">
-            ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong style="font-size:1.3rem">'+fmt(value,dec)+'</strong></div>').join('')}
+          <div class="player-record-main-tabs" role="group" aria-label="WRC All Time Bereich" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <button type="button" aria-pressed="true" onclick="showPlayerAllTimeSection(this,'records')" style="padding:11px 7px;border-radius:10px;background:#493820;color:#fff0ca;font-weight:700">🏆 Rekordjagd</button>
+            <button type="button" aria-pressed="false" onclick="showPlayerAllTimeSection(this,'totals')" style="padding:11px 7px;border-radius:10px;font-weight:700">📊 Gesamtleistungen</button>
           </div>
+          <section data-player-alltime-section="records">
           <h3>🏆 Meine persönliche Rekordjagd</h3>
           <div class="player-record-tabs" role="group" aria-label="Persönliche Rekorde auswählen" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0">
             <button type="button" class="player-record-tab" aria-pressed="true" onclick="showPlayerRecordMode(this,'month')" style="padding:9px;border-radius:10px;background:#493820;color:#fff0ca">📅 Dieser Monat</button>
@@ -4689,6 +4704,13 @@ background:#0f172a
             <button type="button" class="player-record-tab" aria-pressed="false" onclick="showPlayerRecordMode(this,'bestmonths')" style="padding:9px;border-radius:10px">🏅 Monatsbesten</button>
           </div>
           ${renderPersonalRecordModes(allPlayerEntries, player, month)}
+          </section>
+          <section data-player-alltime-section="totals" hidden>
+          <h3>Gesamtleistungen seit WRC-Beginn</h3>
+          <div class="player-metric-grid">
+            ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong style="font-size:1.3rem">'+fmt(value,dec)+'</strong></div>').join('')}
+          </div>
+          </section>
           <p class="sub" style="margin-top:12px">Gesamtwerte einschließlich Februar–April 2026. Bestmarken nur aus belegbaren Einzelaufzeichnungen.</p>
         </div>
       </div>
