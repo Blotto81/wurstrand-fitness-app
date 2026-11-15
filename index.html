@@ -4675,25 +4675,13 @@ background:#0f172a
           <div class="player-metric-grid">
             ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong style="font-size:1.3rem">'+fmt(value,dec)+'</strong></div>').join('')}
           </div>
-          <h3>Meine Bestmarken</h3>
-          ${(() => {
-            const days = new Map(), months = new Map();
-            allPlayerEntries.forEach(e => {
-              if (!e.date) return;
-              const v=days.get(e.date)||{points:0,steps:0,bike:0,squats:0,pushups:0};
-              v.points+=calcPoints(e).total;
-              for(const k of ['steps','bike','squats','pushups'])v[k]+=Number(e[k])||0;
-              days.set(e.date,v);
-              const m=e.date.slice(0,7);months.set(m,(months.get(m)||0)+calcPoints(e).total);
-            });
-            for(const [date,v] of days)v.points+=WRCBonusPoints.points({person:player,date});
-            for(const [month,v] of months)months.set(month,v+WRCBonusPoints.points({person:player,key:month}));
-            const best=(map,key)=>[...map].reduce((b,[date,v])=>v[key]>0&&(!b||v[key]>b.value)?{date,value:v[key]}:b,null);
-            const monthBest=[...months].reduce((b,[date,value])=>value>0&&(!b||value>b.value)?{date,value}:b,null);
-            const records=[['⭐','Punktreichster Tag',best(days,'points'),1],['👣','Meiste Schritte',best(days,'steps'),0],['🚴','Längste Radstrecke',best(days,'bike'),1],['🦵','Meiste Kniebeugen',best(days,'squats'),0],['💪','Meiste Liegestütze',best(days,'pushups'),0],['📆','Punktestärkster Monat',monthBest,1]];
-            const streak=typeof WRCBonusStreaks!=='undefined'?WRCBonusStreaks.state(player):null;
-            return '<div class="player-metric-grid">'+records.map(([icon,label,r,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong>'+(r?fmt(r.value,dec):'—')+'</strong><div class="sub">'+(r?r.date:'Keine Einzelaufzeichnung')+'</div></div>').join('')+'<div class="card" style="padding:12px"><div>🔥 Längste Bonusserie</div><strong>'+(streak?fmt(streak.best||0):'—')+' Tage</strong></div></div>';
-          })()}
+          <h3>🏆 Meine persönliche Rekordjagd</h3>
+          <div class="player-record-tabs" role="group" aria-label="Persönliche Rekorde auswählen" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0">
+            <button type="button" class="player-record-tab" aria-pressed="true" onclick="showPlayerRecordMode(this,'month')" style="padding:9px;border-radius:10px;background:#493820;color:#fff0ca">📅 Dieser Monat</button>
+            <button type="button" class="player-record-tab" aria-pressed="false" onclick="showPlayerRecordMode(this,'all')" style="padding:9px;border-radius:10px">🌍 All Time</button>
+            <button type="button" class="player-record-tab" aria-pressed="false" onclick="showPlayerRecordMode(this,'bestmonths')" style="padding:9px;border-radius:10px">🏅 Monatsbesten</button>
+          </div>
+          ${renderPersonalRecordModes(allPlayerEntries, player, month)}
           <p class="sub" style="margin-top:12px">Gesamtwerte einschließlich Februar–April 2026. Bestmarken nur aus belegbaren Einzelaufzeichnungen.</p>
         </div>
       </div>
