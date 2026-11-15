@@ -4307,6 +4307,55 @@ background:#0f172a
       `;
     }
 
+
+    function showPlayerRecordMode(button, mode) {
+      const card = button.closest(".card");
+      card.querySelectorAll("[data-player-record-mode]").forEach(el => { el.hidden = el.dataset.playerRecordMode !== mode; });
+      card.querySelectorAll(".player-record-tab").forEach(el => {
+        const active = el === button;
+        el.setAttribute("aria-pressed", String(active));
+        el.style.background = active ? "#493820" : "";
+        el.style.color = active ? "#fff0ca" : "";
+      });
+    }
+
+    function renderPersonalRecordModes(entries, player, selectedMonth) {
+      const metrics = [["⭐","Punkte","points",1,""],["👣","Schritte","steps",0,""],["🚴","Radkilometer","bike",1," km"],["🦵","Kniebeugen","squats",0,""],["💪","Liegestütze","pushups",0,""]];
+      const days = new Map(), months = new Map();
+      const empty = () => ({points:0,steps:0,bike:0,squats:0,pushups:0});
+      entries.forEach(e => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(e.date || "")) return;
+        const day = days.get(e.date) || empty();
+        const key = e.date.slice(0,7);
+        const month = months.get(key) || empty();
+        const points = calcPoints(e).total;
+        day.points += points; month.points += points;
+        ["steps","bike","squats","pushups"].forEach(k => {
+          day[k] += Number(e[k]) || 0;
+          month[k] += Number(e[k]) || 0;
+        });
+        days.set(e.date, day); months.set(key, month);
+      });
+      days.forEach((v,date) => { v.points += WRCBonusPoints.points({person:player,date}); });
+      months.forEach((v,key) => { v.points += WRCBonusPoints.points({person:player,key}); });
+      const best = (map,k) => [...map].reduce((b,[date,v]) => v[k] > 0 && (!b || v[k] > b.value) ? {date,value:v[k]} : b,null);
+      const selectedDays = new Map([...days].filter(([date]) => date.startsWith(selectedMonth)));
+      const pastMonths = new Map([...months].filter(([date]) => date < selectedMonth));
+      const nowMonth = new Map([[selectedMonth, months.get(selectedMonth) || empty()]]);
+      const currentMonth = new Date().toISOString().slice(0,7);
+      const completedMonths = new Map([...months].filter(([date]) => date < currentMonth));
+      const cards = (map,monthly,challenge) => '<div class="player-metric-grid">' + metrics.map(([icon,label,k,dec,suffix]) => {
+        const record = best(map,k);
+        const old = challenge ? best(pastMonths,k) : null;
+        const diff = old ? old.value - (months.get(selectedMonth)?.[k] || 0) : 0;
+        const hint = challenge ? (!old ? "Erster dokumentierter Monatswert" : diff > 0 ? "🎯 Noch " + fmt(diff,dec) + suffix + " bis " + old.date : "🏆 Bisherige Bestmarke erreicht!") : "";
+        return '<div class="card" style="padding:12px"><div>' + icon + ' ' + label + (monthly ? ' im Monat' : ' am Tag') + '</div><strong>' + (record ? fmt(record.value,dec) + suffix : '—') + '</strong><div class="sub">' + (record ? record.date : 'Noch keine Einzelaufzeichnung') + '</div>' + (hint ? '<div class="sub">' + hint + '</div>' : '') + '</div>';
+      }).join("") + '</div>';
+      return '<section data-player-record-mode="month"><p class="sub">Beste Einzeltage im gewählten Monat</p>' + cards(selectedDays,false,false) + '<h4>🎯 Schlag deinen Monatsrekord!</h4>' + cards(nowMonth,true,true) + '</section>' +
+        '<section data-player-record-mode="all" hidden><p class="sub">Persönliche Tagesbestmarken</p>' + cards(days,false,false) + '</section>' +
+        '<section data-player-record-mode="bestmonths" hidden><p class="sub">Beste abgeschlossene Monate je Disziplin</p>' + cards(completedMonths,true,false) + '</section>';
+    }
+
     async function renderPlayerOverview() {
 
       const player = document.getElementById("playerSelect").value;
