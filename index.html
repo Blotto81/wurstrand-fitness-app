@@ -44,6 +44,24 @@
   <link rel="stylesheet" href="modules/holidays/spring.css">
   <link rel="stylesheet" href="modules/holidays/halloween.css">
   <link rel="stylesheet" href="modules/uno/uno-rules.css">
+<style>
+  /* Kompakte persönliche Rekorde: keine verschachtelten Kachelwände */
+  .wrc-record-list { border:1px solid rgba(160,175,200,.25); border-radius:13px; overflow:hidden; margin:8px 0 12px; }
+  .wrc-record-row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 12px; }
+  .wrc-record-row + .wrc-record-row { border-top:1px solid rgba(160,175,200,.17); }
+  .wrc-record-name { font-size:.94rem; line-height:1.3; }
+  .wrc-record-result { text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:2px; min-width:92px; }
+  .wrc-record-result strong { font-size:1.04rem; line-height:1.2; }
+  .wrc-record-result small { font-size:.75rem; opacity:.7; line-height:1.25; }
+  .wrc-record-caption { font-size:.82rem; opacity:.76; margin:6px 0 9px; }
+  .wrc-record-challenge { border-top:1px solid rgba(160,175,200,.25); margin-top:13px; padding-top:12px; }
+  .wrc-record-challenge summary { cursor:pointer; font-weight:700; padding:6px 0; }
+  .player-record-tabs { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px !important; }
+  .player-record-tabs button { min-width:0; padding:9px 3px !important; font-size:.76rem; line-height:1.25; white-space:normal; }
+  .player-record-main-tabs button { font-size:.85rem; line-height:1.3; }
+  [data-player-alltime-section="records"] > h3 { display:none; }
+  @media(max-width:380px) { .player-record-tabs button { font-size:.69rem; } .wrc-record-row { padding:10px 8px; } }
+</style>
 </head>
 
 <body>
@@ -4358,16 +4376,18 @@ background:#0f172a
       const nowMonth = new Map([[selectedMonth, months.get(selectedMonth) || empty()]]);
       const currentMonth = new Date().toISOString().slice(0,7);
       const completedMonths = new Map([...months].filter(([date]) => date < currentMonth));
-      const cards = (map,monthly,challenge) => '<div class="player-metric-grid">' + metrics.map(([icon,label,k,dec,suffix]) => {
+      const prettyDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value) ? value.slice(8) + "." + value.slice(5,7) + "." + value.slice(0,4) : /^\d{4}-\d{2}$/.test(value) ? value.slice(5,7) + "/" + value.slice(0,4) : value;
+      const cards = (map,monthly,challenge) => '<div class="wrc-record-list">' + metrics.map(([icon,label,k,dec,suffix]) => {
         const record = best(map,k);
         const old = challenge ? best(pastMonths,k) : null;
         const diff = old ? old.value - (months.get(selectedMonth)?.[k] || 0) : 0;
-        const hint = challenge ? (!old ? "Erster dokumentierter Monatswert" : diff > 0 ? "🎯 Noch " + fmt(diff,dec) + suffix + " bis " + old.date : "🏆 Bisherige Bestmarke erreicht!") : "";
-        return '<div class="card" style="padding:12px"><div>' + icon + ' ' + label + (monthly ? ' im Monat' : ' am Tag') + '</div><strong>' + (record ? fmt(record.value,dec) + suffix : '—') + '</strong><div class="sub">' + (record ? record.date : 'Noch keine Einzelaufzeichnung') + '</div>' + (hint ? '<div class="sub">' + hint + '</div>' : '') + '</div>';
+        const hint = challenge ? (!old ? "Erster Monatswert" : diff > 0 ? "Noch " + fmt(diff,dec) + suffix + " zum Rekord" : "Bestmarke erreicht! 🏆") : "";
+        return '<div class="wrc-record-row"><span class="wrc-record-name">' + icon + ' ' + label + '</span><span class="wrc-record-result"><strong>' + (record ? fmt(record.value,dec) + suffix : '—') + '</strong><small>' + (hint || (record ? prettyDate(record.date) : 'Noch kein Wert')) + '</small></span></div>';
       }).join("") + '</div>';
-      return '<section data-player-record-mode="month"><p class="sub">Beste Einzeltage im gewählten Monat</p>' + cards(selectedDays,false,false) + '<h4>🎯 Schlag deinen Monatsrekord!</h4>' + cards(nowMonth,true,true) + '</section>' +
-        '<section data-player-record-mode="all" hidden><p class="sub">Persönliche Tagesbestmarken</p>' + cards(days,false,false) + '</section>' +
-        '<section data-player-record-mode="bestmonths" hidden><p class="sub">Beste abgeschlossene Monate je Disziplin</p>' + cards(completedMonths,true,false) + '</section>';
+      return '<section data-player-record-mode="month"><p class="wrc-record-caption">Beste Einzeltage im ausgewählten Monat</p>' + cards(selectedDays,false,false) +
+        '<details class="wrc-record-challenge"><summary>🎯 Monatsrekord herausfordern</summary><p class="wrc-record-caption">Dein Monatsstand im Vergleich zu früheren Monaten</p>' + cards(nowMonth,true,true) + '</details></section>' +
+        '<section data-player-record-mode="all" hidden><p class="wrc-record-caption">Deine besten Einzeltage</p>' + cards(days,false,false) + '</section>' +
+        '<section data-player-record-mode="bestmonths" hidden><p class="wrc-record-caption">Beste abgeschlossene Monate je Disziplin</p>' + cards(completedMonths,true,false) + '</section>';
     }
 
     async function renderPlayerOverview() {
@@ -4707,8 +4727,8 @@ background:#0f172a
           </section>
           <section data-player-alltime-section="totals" hidden>
           <h3>Gesamtleistungen seit WRC-Beginn</h3>
-          <div class="player-metric-grid">
-            ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="card" style="padding:12px"><div>'+icon+' '+label+'</div><strong style="font-size:1.3rem">'+fmt(value,dec)+'</strong></div>').join('')}
+          <div class="wrc-record-list">
+            ${[['⭐','Gesamtpunkte',allPlayer.points,1],['👣','Schritte',allPlayer.steps,0],['🚴','Radkilometer',allPlayer.bike,1],['🦵','Kniebeugen',allPlayer.squats,0],['💪','Liegestütze',allPlayer.pushups,0],['🏋️','Übungen',allPlayer.exercises,0],['🔥','Tagesboni',allPlayer.bonusCount,0],['📅','Trainingstage',new Set(allPlayerEntries.map(e=>e.date).filter(Boolean)).size,0]].map(([icon,label,value,dec])=>'<div class="wrc-record-row"><span class="wrc-record-name">'+icon+' '+label+'</span><span class="wrc-record-result"><strong>'+fmt(value,dec)+'</strong></span></div>').join('')}
           </div>
           </section>
           <p class="sub" style="margin-top:12px">Gesamtwerte einschließlich Februar–April 2026. Bestmarken nur aus belegbaren Einzelaufzeichnungen.</p>
