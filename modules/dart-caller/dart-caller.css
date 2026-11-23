@@ -209,3 +209,9 @@
 }
 
 .dart-caller-stats-link { width: 100%; margin: 22px 0 10px; }
+
+/* Stable touch targets: no resizing or shifting while entering three darts. */
+.dart-caller-numbers button,.dart-caller-numbers button:active,.dart-caller-numbers button.dart-caller-hit { transform:none!important; animation:none!important; transition:background-color .12s ease,border-color .12s ease,color .12s ease!important; touch-action:manipulation; }
+.dart-caller-numbers button.dart-caller-hit { z-index:auto!important; box-shadow:inset 0 0 0 2px rgba(125,211,252,.6)!important; }
+.dart-caller-multipliers button,.dart-caller-actions button { touch-action:manipulation; }
+@media (max-width:640px) { .dart-caller-numbers button { min-height:52px; } }
