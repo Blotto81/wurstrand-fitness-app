@@ -22,6 +22,8 @@
   };
   const images = Object.fromEntries(Object.entries(photoCatalog).map(([id, photo]) =>
     [id, 'modules/uno/uno-rules-images/' + photo.file]));
+  // The same Aussetzen card image is valid for Classic and Flip (light side).
+  images['classic-skip'] = images['flip-light-skip'];
   const cards = [];
   function add(variant, side, key, name, points, description, detail, keywords = []) {
     cards.push({ id: [variant, side, key].filter(Boolean).join('-'), variant, side,
@@ -37,7 +39,7 @@
   add('classic', '', 'reverse', 'Richtungswechsel', 20, 'Die Spielrichtung dreht sich um.', 'Im Uhrzeigersinn wird gegen den Uhrzeigersinn – und umgekehrt. Kein Zwischenwerfen: Das ist eine Aktionskarte.');
   add('classic', '', 'skip', 'Aussetzen', 20, 'Der nächste Spieler pausiert.', 'Der nächste Spieler in Spielrichtung wird übersprungen. Kein Zwischenwerfen.');
   add('classic', '', 'wild', 'Farbwahl', 50, 'Du bestimmst die nächste Farbe.', 'Wähle die Farbe, mit der weitergespielt wird. Diese Karte darf auch bei passender Farbe auf der Hand gespielt werden.');
-  add('classic', '', 'wild4', '+4 · Farbwahl', 50, 'Farbe wählen. Vier Karten für den Nächsten.', 'Nach der Grundregel nur spielbar, wenn du keine Karte in der aktuellen Farbe hast. Der nächste Spieler zieht vier und setzt aus. Weitere Abwehrkombinationen sind bei uns noch offen.', ['+4', 'abwehren']);
+  add('classic', '', 'wild4', '+4 · Farbwahl', 70, 'Farbe wählen. Vier Karten für den Nächsten.', 'Nach der Grundregel nur spielbar, wenn du keine Karte in der aktuellen Farbe hast. Der nächste Spieler zieht vier und setzt aus. Weitere Abwehrkombinationen sind bei uns noch offen.', ['+4', 'abwehren']);
   for (const side of ['light', 'dark']) {
     for (let n = 1; n <= 9; n++) {
       add('flip', side, String(n), n === 1 ? '1 · Pflichttausch' : String(n), n === 1 ? 20 : n,
