@@ -110,6 +110,19 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 .wrc-player-motivation-item{padding:12px 14px;border:1px solid rgba(160,175,200,.25);border-radius:12px;background:rgba(110,145,195,.08)}
 .wrc-player-motivation-item strong{display:block;font-size:1.02rem;margin:3px 0}
 .wrc-player-motivation-item small{display:block;opacity:.8;line-height:1.4}
+
+/* Dart cockpit: one clear view at a time, with readable mobile controls. */
+.dart-cockpit-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:14px 0 18px;position:sticky;top:0;z-index:4;background:#101827;padding:9px 0}
+.dart-cockpit-tabs button{min-height:48px;border:1px solid #53647d;border-radius:12px;background:#24334c;color:#fff;font-size:clamp(14px,3.5vw,17px);font-weight:700;padding:9px 3px}
+.dart-cockpit-tabs button[aria-pressed="true"]{background:#f5b28c;color:#172033;border-color:#f5b28c}
+[data-dart-cockpit-panel][hidden]{display:none!important}
+.dart-win-chart{display:grid;gap:12px;margin:16px 0}
+.dart-win-row{display:grid;grid-template-columns:minmax(70px,1fr) minmax(75px,2fr) 45px;align-items:center;gap:8px;font-size:15px}
+.dart-win-row>small{grid-column:2/4;color:#b9c8dc;font-size:12px;margin-top:-6px}
+.dart-win-track{height:13px;border-radius:20px;background:#344158;overflow:hidden}
+.dart-win-track>div{height:100%;background:linear-gradient(90deg,#f4b65f,#f07864);border-radius:20px}
+.dart-player-placements summary,.dart-recent-details summary{cursor:pointer;padding:12px 4px;font-weight:700;min-height:44px}
+.dart-player-placements .dart-player-medals{margin:8px 0 12px}
 </style>
 </head>
 
@@ -262,7 +275,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
         </div>
 
 
-        <div id="dartStatsSummary" class="dart-stats-summary">
+        <nav class="dart-cockpit-tabs" aria-label="Dart-Statistikbereiche"><button type="button" data-dart-cockpit="overview" aria-pressed="true">Übersicht</button><button type="button" data-dart-cockpit="players" aria-pressed="false">Spieler</button><button type="button" data-dart-cockpit="throws" aria-pressed="false">Würfe</button></nav>
+        <div data-dart-cockpit-panel="overview"><div id="dartStatsSummary" class="dart-stats-summary">
           <div class="dart-stats-summary-card">
             <span>🎯 Partien</span>
             <strong>–</strong>
@@ -281,7 +295,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
 
         <div class="dart-stats-section">
-          <h3>🏆 Gesamtrangliste</h3>
+          <h3>🏆 Siege & Rangliste</h3>
+          <div id="dartWinChart" class="dart-win-chart" aria-label="Siegquoten der Spieler"></div>
 
           <div id="dartStatsRanking" class="dart-stats-ranking">
             <p class="dart-stats-loading">Statistiken werden geladen …</p>
@@ -289,7 +304,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
         </div>
 
 
-        <div class="dart-stats-section">
+        </div><div data-dart-cockpit-panel="players" hidden><div class="dart-stats-section">
           <h3>👤 Spielerübersicht</h3>
 
           <div id="dartStatsPlayers" class="dart-stats-player-grid">
@@ -298,15 +313,14 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
         </div>
 
 
-        <div class="dart-stats-section">
-          <h3>🔥 Letzte fünf Spiele</h3>
+        <details class="dart-stats-section dart-recent-details"><summary>🔥 Letzte fünf Spiele anzeigen</summary>
 
           <div id="dartStatsRecent" class="dart-stats-recent">
             <p class="dart-stats-loading">Statistiken werden geladen …</p>
           </div>
-        </div>
+        </details>
 
-        <div id="dartThrowStats"></div>
+        </div><div data-dart-cockpit-panel="throws" hidden><div id="dartThrowStats"></div></div>
 
       </div>
 
@@ -316,6 +330,14 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
       <script>
 
+        function selectDartCockpit(tab) {
+          document.querySelectorAll("[data-dart-cockpit]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.dartCockpit === tab)));
+          document.querySelectorAll("[data-dart-cockpit-panel]").forEach(panel => { panel.hidden = panel.dataset.dartCockpitPanel !== tab; });
+        }
+        document.addEventListener("click", event => {
+          const button = event.target.closest("[data-dart-cockpit]");
+          if (button) selectDartCockpit(button.dataset.dartCockpit);
+        });
         async function loadDartStatistics() {
 
           const summaryElement =
@@ -528,6 +550,11 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
           }
 
 
+          document.getElementById("dartWinChart").innerHTML = rankedPlayers.map(p => {
+            const rate = Math.round(100 * p.places[1] / p.games);
+            return `<div class="dart-win-row"><span>${escapeHtml(p.player)}</span><div class="dart-win-track"><div style="width:${rate}%"></div></div><strong>${rate}%</strong><small>${p.places[1]}/${p.games} Siege</small></div>`;
+          }).join("");
+
           rankingElement.innerHTML = rankedPlayers
             .map((player, index) => `
 
@@ -583,7 +610,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
                             <h4>👤 ${escapeHtml(player.player)}</h4>
 
-                            <div class="dart-player-medals">
+                            <details class="dart-player-placements"><summary>Platzierungen anzeigen</summary><div class="dart-player-medals">
 
                                 <div class="dart-player-medal">
                                     🥇 ${player.places[1]}
@@ -605,7 +632,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
                             </div>
 
-                            <div class="dart-player-details">
+                            </div></details><div class="dart-player-details">
 
                                 <div class="dart-player-detail">
                                     <span>🎯 Partien</span>
