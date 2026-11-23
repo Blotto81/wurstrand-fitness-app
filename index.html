@@ -105,6 +105,11 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 .analysis-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
 .analysis-nav-button{flex:1 0 auto;min-width:0;white-space:nowrap}
 @media(max-width:440px){.analysis-nav-button{font-size:.82rem;padding:10px 9px}}
+
+.wrc-player-motivation{display:grid;gap:8px;margin:0 0 12px}
+.wrc-player-motivation-item{padding:12px 14px;border:1px solid rgba(160,175,200,.25);border-radius:12px;background:rgba(110,145,195,.08)}
+.wrc-player-motivation-item strong{display:block;font-size:1.02rem;margin:3px 0}
+.wrc-player-motivation-item small{display:block;opacity:.8;line-height:1.4}
 </style>
 </head>
 
@@ -4952,6 +4957,47 @@ background:#0f172a
       heading.append(avatar, headingCopy);
       overview.append(heading,list);
       box.prepend(overview);
+      const playerEntries = allEntries.filter(entry => entry.person === player);
+      const activeDays = calculateActivityStreak(playerEntries, entry =>
+        (+entry.steps || 0) > 0 || (+entry.bike || 0) > 0 ||
+        (+entry.squats || 0) > 0 || (+entry.pushups || 0) > 0 || !!entry.exercise
+      );
+      const motivation = document.createElement("div");
+      motivation.className = "wrc-player-motivation";
+      const streakItem = document.createElement("div");
+      streakItem.className = "wrc-player-motivation-item";
+      const streakLabel = document.createElement("strong");
+      streakLabel.textContent = activeDays.current > 0
+        ? "🔥 " + activeDays.current + (activeDays.current === 1 ? " aktiver Tag" : " aktive Tage") + " in Folge"
+        : "🔥 Deine Trainingsserie";
+      const streakInfo = document.createElement("small");
+      streakInfo.textContent = activeDays.current > 0
+        ? "Persönlicher Bestwert: " + activeDays.best + " Tage. Ein fehlender Eintrag heute beendet die Serie nicht."
+        : "Noch keine aktuell laufende Serie. Bisheriger Bestwert: " + activeDays.best + " Tage.";
+      streakItem.append(streakLabel, streakInfo);
+      motivation.appendChild(streakItem);
+      const levels = [10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
+      const candidates = [
+        {label:"Schritte",value:totals.steps,unit:" Schritte"},
+        {label:"Rad",value:totals.bike,unit:" km"},
+        {label:"Kniebeugen",value:totals.squats,unit:" Kniebeugen"},
+        {label:"Liegestütze",value:totals.pushups,unit:" Liegestütze"}
+      ].map(item => {
+        const target = levels.find(level => level > item.value);
+        return target ? {...item,target,progress:item.value / target} : null;
+      }).filter(Boolean).sort((a,b) => b.progress - a.progress);
+      if (candidates.length) {
+        const next = candidates[0];
+        const milestone = document.createElement("div");
+        milestone.className = "wrc-player-motivation-item";
+        const milestoneTitle = document.createElement("strong");
+        milestoneTitle.textContent = "🎯 Nächste Marke: " + fmt(next.target,0) + next.unit;
+        const milestoneInfo = document.createElement("small");
+        milestoneInfo.textContent = "Noch " + fmt(next.target - next.value, next.label === "Rad" ? 1 : 0) + next.unit + " im gewählten Monat.";
+        milestone.append(milestoneTitle,milestoneInfo);
+        motivation.appendChild(milestone);
+      }
+      box.insertBefore(motivation, overview.nextSibling);
       // Die bestehenden Serienanzeigen bleiben sichtbar, ohne neue Serienregeln zu erfinden.
       if (streak && streak !== metrics && streak !== games && streak !== record) {
         box.insertBefore(streak, overview.nextSibling);
