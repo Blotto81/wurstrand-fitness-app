@@ -159,6 +159,7 @@
       if (player !== "all" && dart.player !== player) return;
       const id = String(dart.game_id);
       if (!gameById.has(id)) return;
+      if (String(gameById.get(id).mode || "").toLowerCase().includes("cricket")) return;
       const key = player === "all" ? id + ":" + dart.player : id;
       const group = grouped.get(key) || { game: gameById.get(id), player: dart.player, darts: [] };
       group.darts.push(dart);
@@ -230,7 +231,7 @@
     const max = Math.max(1,...datasets.flatMap(s=>s.values.map(v=>v.value)));
     const ceiling = averageView==="distribution" ? Math.ceil(max) : Math.ceil(max/10)*10;
     const W=640,H=300,L=52,R=16,T=24,B=49;
-    const x=i=>L+(labels.length===1?.5:i/Math.max(1,labels.length-1))*(W-L-R);
+    const x=i=>L+(labels.length === 1 ? 0.5 : i/Math.max(1,labels.length-1))*(W-L-R);
     const y=v=>T+(ceiling-v)/ceiling*(H-T-B);
     const grid=[0,.25,.5,.75,1].map(f=>'<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(ceiling*f)+'" y2="'+y(ceiling*f)+'" stroke="#64748b" stroke-opacity=".3"/><text x="'+(L-8)+'" y="'+(y(ceiling*f)+5)+'" text-anchor="end" fill="#cbd5e1" font-size="15">'+format(ceiling*f)+'</text>').join("");
     const plot=datasets.map(s=>{
