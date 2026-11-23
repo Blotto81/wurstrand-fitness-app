@@ -2279,6 +2279,9 @@ background:#0f172a
       if (id === "spieler") {
         renderPlayerOverview();
       }
+      if (id === "dartStatsPanel" && typeof window.WRCLoadDartThrowStats === "function") {
+        window.WRCLoadDartThrowStats();
+      }
 
       if (id === "eintragen" && !editingId) {
         prepareSuggestedEntryDate();
