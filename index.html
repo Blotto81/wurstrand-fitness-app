@@ -90,6 +90,16 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 .wrc-player-heading-copy{min-width:0;flex:1}
 .wrc-player-heading-copy h3{font-size:1.06rem;margin:0 0 3px}
 .wrc-player-heading-copy .wrc-player-points{font-size:1.55rem}
+
+/* Monatsziel: ein gemeinsamer Balken mit Forecast-Markierung, auch über 100 %. */
+.wrc-progress-track-button{display:block;width:100%;padding:14px 0 9px;background:transparent;border:0;color:inherit;text-align:left;cursor:pointer}
+.wrc-progress-track{position:relative;height:18px;border-radius:999px;background:rgba(151,170,196,.23);overflow:visible}
+.wrc-progress-track .wrc-progress-actual{position:absolute;inset:0 auto 0 0;border-radius:999px;background:#42b97b;transition:width .35s ease}
+.wrc-progress-target{position:absolute;top:-5px;height:28px;width:2px;background:rgba(255,255,255,.8);transform:translateX(-50%);pointer-events:none}
+.wrc-progress-forecast{position:absolute;top:-8px;width:4px;height:34px;border-radius:3px;background:#f4c56d;transform:translateX(-50%);box-shadow:0 0 0 2px #18243a;pointer-events:none}
+.wrc-progress-track-labels{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:.75rem;opacity:.85}
+.wrc-progress-track-labels span:last-child{color:#f4c56d}
+.wrc-progress-rest{margin-top:3px;font-size:.85rem;opacity:.88}
 </style>
 </head>
 
@@ -767,9 +777,15 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
           </div>
 
-          <div class="bar">
-            <div class="fill" id="barFill"></div>
-          </div>
+          <button type="button" class="wrc-progress-track-button" onclick="openAnalysisDetails('targetCourseChart')" aria-label="Monatsziel und Prognose in der Analyse ansehen">
+            <div class="wrc-progress-track" id="wrcProgressTrack">
+              <div class="wrc-progress-actual" id="wrcProgressActual"></div>
+              <span class="wrc-progress-target" id="wrcProgressTarget" aria-hidden="true"></span>
+              <span class="wrc-progress-forecast" id="wrcProgressForecast" aria-hidden="true" hidden></span>
+            </div>
+            <div class="wrc-progress-track-labels"><span id="wrcProgressScale">Ziel: 100 %</span><span id="wrcProgressForecastText">Prognose noch offen</span></div>
+            <div class="wrc-progress-rest" id="wrcProgressRest"></div>
+          </button>
 
           <div class="wrc-progress-outlook" aria-label="Monatsausblick">
             <button type="button" onclick="openAnalysisDetails('monthlyOverview')">
@@ -2991,12 +3007,20 @@ background:#0f172a
           : ""
       );
 
-      const fill = document.getElementById("barFill");
-      if (fill) {
-        requestAnimationFrame(() => {
-          fill.style.width = Math.min(rawPercent, 100) + "%";
-        });
+      const forecastPercent = forecastData.available && goal > 0 ? (forecast / goal) * 100 : null;
+      const scale = Math.max(100, rawPercent, forecastPercent || 0);
+      const actualFill = document.getElementById("wrcProgressActual");
+      const targetMark = document.getElementById("wrcProgressTarget");
+      const forecastMark = document.getElementById("wrcProgressForecast");
+      if (actualFill) actualFill.style.width = (100 * rawPercent / scale) + "%";
+      if (targetMark) targetMark.style.left = (10000 / scale) + "%";
+      if (forecastMark) {
+        forecastMark.hidden = forecastPercent === null;
+        if (forecastPercent !== null) forecastMark.style.left = (100 * forecastPercent / scale) + "%";
       }
+      setText("wrcProgressScale", scale > 100 ? "Zielmarke: 100 %" : "Monatsziel: 100 %");
+      setText("wrcProgressForecastText", forecastPercent === null ? "Prognose noch offen" : (forecastData.finalized ? "Endstand" : "Prognose") + ": " + fmt(forecastPercent, 0) + " %");
+      setText("wrcProgressRest", rest > 0 ? "Noch " + fmt(rest, 1) + " Punkte bis zum Ziel" : "Monatsziel erreicht!");
 
       renderRecordLadder(key, total);
       renderDashboardHighlight();
