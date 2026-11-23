@@ -18,18 +18,18 @@
       <header class="ur-hero"><span class="ur-eyebrow">UNSERE RUNDE. UNSERE REGELN.</span><h2 id="urTitle">🃏 Die heiligen UNO-Gesetze der WRC</h2><p>Amtlich beschlossen. Heiß diskutiert.<br>Mit Strafkarten durchgesetzt.</p><span class="ur-seal" aria-hidden="true">WRC<br><small>HAUSRECHT</small></span></header>
       <div class="ur-body">
         <div class="ur-variants" aria-label="UNO-Variante">${Object.entries(data.variants).map(([id, v]) => `<button type="button" class="ur-variant" data-ur-variant="${id}" aria-pressed="${id === 'classic'}"><span class="ur-variant-icon" aria-hidden="true">${id === 'classic' ? '♠' : '◐'}</span><span><strong>${v.name}</strong><small>${v.subtitle}</small></span><span class="ur-selected" aria-hidden="true">✓</span></button>`).join('')}</div>
-        <section class="ur-quick-section" aria-labelledby="urQuickTitle"><div class="ur-section-heading"><h3 id="urQuickTitle">Kurz nachschlagen. Weiterspielen.</h3><span>DER SCHNELLZUGRIFF</span></div><div class="ur-quick" id="urQuick"></div></section>
+        <nav class="ur-main-tabs" aria-label="Bereich auswählen"><button type="button" data-ur-tab="rules" aria-pressed="true">Hausregeln</button><button type="button" data-ur-tab="cards" aria-pressed="false">Karten</button><button type="button" data-ur-tab="points" aria-pressed="false">Punkte</button></nav><section class="ur-quick-section" hidden aria-labelledby="urQuickTitle"><div class="ur-section-heading"><h3 id="urQuickTitle">Kurz nachschlagen. Weiterspielen.</h3><span>DER SCHNELLZUGRIFF</span></div><div class="ur-quick" id="urQuick"></div></section>
         <div class="ur-search"><label for="urSearch">Regel oder Karte finden</label><div class="ur-search-field"><span aria-hidden="true">⌕</span><input id="urSearch" type="search" placeholder="Welche Regel suchst du?" autocomplete="off"><button type="button" id="urClear" aria-label="Suche löschen" hidden>×</button></div><p id="urSearchStatus" role="status" aria-live="polite"></p><div id="urResults" class="ur-results" hidden></div></div>
-        <section aria-labelledby="urRulesTitle"><div class="ur-section-heading"><h3 id="urRulesTitle">Das Hausrecht</h3><span>VERBINDLICH BEI UNS</span></div><div id="urRules" class="ur-rules"></div></section>
-        <section class="ur-gallery-section" aria-labelledby="urGalleryTitle"><div class="ur-section-heading"><div><h3 id="urGalleryTitle">Das Kartenlexikon</h3><p>Eine Karte. Alles, was du wissen musst.</p></div><span id="urCardCount"></span></div><div class="ur-gallery-tools"><div id="urSides" class="ur-segment" aria-label="Flip-Kartenseite" hidden><button type="button" data-ur-side="light" aria-pressed="true">☀ Helle Seite</button><button type="button" data-ur-side="dark" aria-pressed="false">☾ Dunkle Seite</button></div><div class="ur-segment" aria-label="Kartentyp"><button type="button" data-ur-filter="special" aria-pressed="true">Besondere Karten</button><button type="button" data-ur-filter="all" aria-pressed="false">Alle Karten</button></div></div><div id="urGallery" class="ur-gallery"></div><p class="ur-photo-note">Eure Originalfotos, vollständig abgebildet. Es werden nur Karten mit vorhandenem Foto gezeigt.</p></section>
-        <footer class="ur-footer"><strong>WRC-Hausregeln haben hier das letzte Wort.</strong><p>Unsere Abweichungen stehen oben. Für die fotografierten Flip-Karten gelten die Punkte aus unserer WRC-Kartenübersicht. Die helle Farbwahl zählt nach WRC-Festlegung ebenfalls 50 Punkte. Übrige Kartenfunktionen und Punktwerte basieren auf den Mattel-Anleitungen für <a href="https://service.mattel.com/instruction_sheets/UNO%20Basic%20IS.pdf" target="_blank" rel="noopener noreferrer">UNO Classic</a> und <a href="https://service.mattel.com/instruction_sheets/GDR44-English.pdf" target="_blank" rel="noopener noreferrer">UNO Flip</a>.</p></footer>
+        <section data-ur-panel="rules" aria-labelledby="urRulesTitle"><div class="ur-section-heading"><h3 id="urRulesTitle">Das Hausrecht</h3><span>VERBINDLICH BEI UNS</span></div><div id="urRules" class="ur-rules"></div></section>
+        <section data-ur-panel="cards" class="ur-gallery-section" hidden aria-labelledby="urGalleryTitle"><div class="ur-section-heading"><div><h3 id="urGalleryTitle">Das Kartenlexikon</h3><p>Eine Karte. Alles, was du wissen musst.</p></div><span id="urCardCount"></span></div><div class="ur-gallery-tools"><div id="urSides" class="ur-segment" aria-label="Flip-Kartenseite" hidden><button type="button" data-ur-side="light" aria-pressed="true">☀ Helle Seite</button><button type="button" data-ur-side="dark" aria-pressed="false">☾ Dunkle Seite</button></div><div class="ur-segment" aria-label="Kartentyp"><button type="button" data-ur-filter="special" aria-pressed="true">Besondere Karten</button><button type="button" data-ur-filter="all" aria-pressed="false">Alle Karten</button></div></div><div id="urGallery" class="ur-gallery"></div><p class="ur-photo-note">Eure Originalfotos, vollständig abgebildet. Es werden nur Karten mit vorhandenem Foto gezeigt.</p></section>
+        <section data-ur-panel="points" class="ur-points-section" hidden><div class="ur-section-heading"><h3>Punkteübersicht</h3></div><div id="urPoints" class="ur-points-list"></div></section><footer class="ur-footer"><strong>WRC-Hausregeln haben hier das letzte Wort.</strong><p>Unsere Abweichungen stehen oben. Für die fotografierten Flip-Karten gelten die Punkte aus unserer WRC-Kartenübersicht. Die helle Farbwahl zählt nach WRC-Festlegung ebenfalls 50 Punkte. Übrige Kartenfunktionen und Punktwerte basieren auf den Mattel-Anleitungen für <a href="https://service.mattel.com/instruction_sheets/UNO%20Basic%20IS.pdf" target="_blank" rel="noopener noreferrer">UNO Classic</a> und <a href="https://service.mattel.com/instruction_sheets/GDR44-English.pdf" target="_blank" rel="noopener noreferrer">UNO Flip</a>.</p></footer>
       </div>
     </div>`;
   document.body.append(book);
   const detail = document.createElement('dialog');
   detail.className = 'ur-dialog ur-card-dialog'; detail.setAttribute('aria-labelledby', 'urDetailTitle');
   document.body.append(detail);
-  let variant = 'classic', side = 'light', filter = 'special', previousOverflow = '', previousRootOverflow = '', cardOpener;
+  let variant = 'classic', side = 'light', filter = 'special', activeTab = 'rules', previousOverflow = '', previousRootOverflow = '', cardOpener;
   const $ = selector => book.querySelector(selector);
   function photo(card, large = false) {
     const src = data.images[card.id];
@@ -68,6 +68,18 @@
     book.dataset.variant = variant; book.dataset.side = variant === 'flip' ? side : 'classic';
     bindImageFallback($('#urGallery'));
   }
+  function setTab(tab) {
+    activeTab = tab;
+    book.querySelectorAll('[data-ur-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.urTab === tab)));
+    book.querySelectorAll('[data-ur-panel]').forEach(panel => { panel.hidden = panel.dataset.urPanel !== tab; });
+    const quick = book.querySelector('.ur-quick-section');
+    quick.hidden = tab !== 'rules';
+    book.querySelector('.ur-scroll').scrollTop = 0;
+  }
+  function renderPoints() {
+    const cards = data.getCards(variant, variant === 'flip' ? side : '');
+    $('#urPoints').innerHTML = cards.map(c => `<div class="ur-points-row"><span>${esc(c.name)}</span><strong>${c.points} Punkte</strong></div>`).join('');
+  }
   function renderSearch() {
     const q = $('#urSearch').value.trim();
     $('#urClear').hidden = !q; $('#urResults').hidden = !q;
@@ -78,6 +90,7 @@
   function openRule(id) {
     const rule = document.getElementById(`ur-rule-${id}`);
     if (!rule) return;
+    setTab('rules');
     rule.open = true;
     rule.querySelector('summary').focus({ preventScroll: true });
     rule.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -133,18 +146,19 @@
     if (target.dataset.urVariant && target.dataset.urVariant !== variant) {
       variant = target.dataset.urVariant;
       book.querySelectorAll('[data-ur-variant]').forEach(b => b.setAttribute('aria-pressed', String(b === target)));
-      renderRules(); renderGallery(); renderSearch();
+      renderRules(); renderGallery(); renderPoints(); setTab('rules'); renderPoints(); renderSearch();
     }
     if (target.dataset.urSide) {
       side = target.dataset.urSide;
-      book.querySelectorAll('[data-ur-side]').forEach(b => b.setAttribute('aria-pressed', String(b === target))); renderGallery();
+      book.querySelectorAll('[data-ur-side]').forEach(b => b.setAttribute('aria-pressed', String(b === target))); renderGallery(); renderPoints();
     }
     if (target.dataset.urFilter) {
       filter = target.dataset.urFilter;
       book.querySelectorAll('[data-ur-filter]').forEach(b => b.setAttribute('aria-pressed', String(b === target))); renderGallery();
     }
+    if (target.dataset.urTab) setTab(target.dataset.urTab);
     if (target.dataset.urRule) openRule(target.dataset.urRule);
-    if (target.dataset.urCard) openCard(target.dataset.urCard, target);
+    if (target.dataset.urCard) { setTab('cards'); openCard(target.dataset.urCard, target); }
   });
   $('#urSearch').addEventListener('input', renderSearch);
   $('#urClear').addEventListener('click', () => { $('#urSearch').value = ''; renderSearch(); $('#urSearch').focus(); });

@@ -999,3 +999,12 @@ existing UNO forms are untouched. */
 
 /* Landscape photos: display the full card with its logo upright. */
 .ur-photo-counterclockwise img { transform:translate(-50%,-50%) rotate(270deg); }
+
+/* Clear, large-touch navigation for the rulebook. */
+.ur-main-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 22px;position:sticky;top:0;z-index:3;background:var(--ur-bg);padding:10px 0}
+.ur-main-tabs button{border:1px solid #64748b;background:#24344d;border-radius:12px;padding:12px 5px;font-size:clamp(14px,2.8vw,18px);font-weight:700;min-height:52px}
+.ur-main-tabs button[aria-pressed="true"]{background:#f5b199;color:#182438;border-color:#f5b199}
+.ur-points-list{display:grid;gap:8px}
+.ur-points-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:13px 16px;border:1px solid var(--ur-line);border-radius:12px;background:var(--ur-panel);font-size:16px}
+.ur-points-row strong{white-space:nowrap;color:#ffcfad}
+@media(max-width:520px){.ur-main-tabs{gap:5px}.ur-main-tabs button{padding:9px 3px}.ur-points-row{font-size:15px;padding:12px}}
