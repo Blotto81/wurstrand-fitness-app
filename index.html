@@ -645,14 +645,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
                                 </div>
 
                                 <div class="dart-player-detail">
-                                    <span>🔥 Aktuelle Serie</span>
-                                    <strong>
-                                        ${player.currentNoFourthStreak}
-                                        ${player.currentNoFourthStreak === 1
-                  ? "Spiel"
-                  : "Spiele"}
-                                        auf dem Podium
-                                    </strong>
+                                    <span>🔥 Letzte ${player.recent.length} Partien</span>
+                                    <strong>${player.recent.filter(place => place === 1).length} ${player.recent.filter(place => place === 1).length === 1 ? "Sieg" : "Siege"}</strong>
                                 </div>
 
                             </div>
