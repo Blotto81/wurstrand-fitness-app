@@ -187,6 +187,7 @@
           <span class="dart-caller-target" aria-hidden="true">🎯</span>
           <div><h2>WRC Caller</h2><p class="sub">Das Board hängt. Die WRC zählt.</p></div>
         </header>
+        <button type="button" class="dart-caller-secondary dart-caller-stats-link" data-caller-stats>📊 Dart-Statistiken ansehen</button>
 
         ${savedGame ? `
           <section class="dart-caller-resume">
@@ -236,7 +237,6 @@
           </form>
         </section>
 
-        <button type="button" class="dart-caller-secondary dart-caller-stats-link" data-caller-stats>📊 Dart-Statistiken ansehen</button>
         <button type="button" class="dart-caller-primary" data-start-game ${state.selectedPlayers.length ? "" : "disabled"}>Spiel starten</button>
       </div>`;
   }
