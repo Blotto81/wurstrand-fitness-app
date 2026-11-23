@@ -5060,24 +5060,16 @@ background:#0f172a
       overview.append(heading,list);
       box.prepend(overview);
       const playerEntries = allEntries.filter(entry => entry.person === player);
-      const activeDays = calculateActivityStreak(playerEntries, entry =>
-        (+entry.steps || 0) > 0 || (+entry.bike || 0) > 0 ||
-        (+entry.squats || 0) > 0 || (+entry.pushups || 0) > 0 || !!entry.exercise
-      );
       const motivation = document.createElement("div");
       motivation.className = "wrc-player-motivation";
-      const streakItem = document.createElement("div");
-      streakItem.className = "wrc-player-motivation-item";
-      const streakLabel = document.createElement("strong");
-      streakLabel.textContent = activeDays.current > 0
-        ? "🔥 " + activeDays.current + (activeDays.current === 1 ? " aktiver Tag" : " aktive Tage") + " in Folge"
-        : "🔥 Deine Trainingsserie";
-      const streakInfo = document.createElement("small");
-      streakInfo.textContent = activeDays.current > 0
-        ? "Persönlicher Bestwert: " + activeDays.best + " Tage. Ein fehlender Eintrag heute beendet die Serie nicht."
-        : "Noch keine aktuell laufende Serie. Bisheriger Bestwert: " + activeDays.best + " Tage.";
-      streakItem.append(streakLabel, streakInfo);
-      motivation.appendChild(streakItem);
+      // Only meaningful exercise streaks; walking steps never count.
+      const exerciseStreak = renderPlayerFireStreak(playerEntries);
+      if (exerciseStreak) {
+        const streakItem = document.createElement("div");
+        streakItem.className = "wrc-player-motivation-item";
+        streakItem.innerHTML = exerciseStreak;
+        motivation.appendChild(streakItem);
+      }
       const levels = [10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
       const candidates = [
         {label:"Schritte",value:totals.steps,unit:" Schritte"},
@@ -5100,6 +5092,44 @@ background:#0f172a
         motivation.appendChild(milestone);
       }
       box.insertBefore(motivation, overview.nextSibling);
+      // Show the all-time dart average on the main WRC player page as well.
+      const dartAverageCard = document.createElement("div");
+      dartAverageCard.className = "wrc-player-motivation-item";
+      dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average</strong><small>Wird geladen …</small>';
+      motivation.prepend(dartAverageCard);
+      (async () => {
+        try {
+          const { data: games, error: gamesError } = await supabaseClient.from("dart_games").select("id,mode");
+          if (gamesError) throw gamesError;
+          const eligible = new Set((games || []).filter(g => /301|501/i.test(String(g.mode || ""))).map(g => String(g.id)));
+          const visits = new Map();
+          for (let from = 0; ; from += 1000) {
+            const { data, error } = await supabaseClient.from("dart_throws")
+              .select("game_id,turn_number,scored_value,is_bust")
+              .eq("player", player).order("id", { ascending: true }).range(from, from + 999);
+            if (error) throw error;
+            (data || []).forEach(d => {
+              if (!eligible.has(String(d.game_id))) return;
+              const key = String(d.game_id) + ":" + String(d.turn_number);
+              const visit = visits.get(key) || { darts: 0, points: 0, bust: false };
+              visit.darts++;
+              visit.points += Number(d.scored_value || 0);
+              visit.bust ||= Boolean(d.is_bust);
+              visits.set(key, visit);
+            });
+            if (!data || data.length < 1000) break;
+          }
+          let darts = 0, points = 0;
+          visits.forEach(v => { darts += v.darts; points += v.bust ? 0 : v.points; });
+          if (!dartAverageCard.isConnected) return;
+          dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average: ' +
+            (darts ? (points * 3 / darts).toLocaleString("de-DE", {minimumFractionDigits:1,maximumFractionDigits:1}) : "–") +
+            '</strong><small>All Time · 3-Dart-Average aus ' + darts.toLocaleString("de-DE") + ' Caller-Darts (301/501)</small>';
+        } catch (error) {
+          console.warn("Player dart average unavailable", error);
+          if (dartAverageCard.isConnected) dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average</strong><small>Momentan nicht verfügbar</small>';
+        }
+      })();
       // Die bestehenden Serienanzeigen bleiben sichtbar, ohne neue Serienregeln zu erfinden.
       if (streak && streak !== metrics && streak !== games && streak !== record) {
         box.insertBefore(streak, overview.nextSibling);
