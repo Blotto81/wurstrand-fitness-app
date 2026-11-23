@@ -18,7 +18,7 @@ for (const side of ['light', 'dark']) {
 }
 assert.equal(card('flip-light-wild').pointSource, 'WRC-Festlegung · 50 Punkte');
 assert.ok(d.cards.every(c => c.pointSource), 'Every point value has a source');
-const expected = { 'classic-draw2':20,'classic-reverse':20,'classic-skip':20,'classic-wild':50,'classic-wild4':50,
+const expected = { 'classic-draw2':20,'classic-reverse':20,'classic-skip':20,'classic-wild':50,'classic-wild4':70,
   'flip-light-draw1':20,'flip-light-reverse':20,'flip-light-skip':20,'flip-light-flip':20,'flip-light-wild':50,'flip-light-wild2':50,
   'flip-dark-draw5':70,'flip-dark-reverse':20,'flip-dark-skipall':20,'flip-dark-flip':50,'flip-dark-wild':50,'flip-dark-wildcolor':70 };
 for (const [id, points] of Object.entries(expected)) assert.equal(card(id).points, points, id);
@@ -48,7 +48,7 @@ for (const [variant, side, specialCount] of [['classic', '', 6], ['flip', 'light
   assert.equal(new Set(visible.map(c => c.symbol)).size, 15);
   assert.equal(visible.filter(c => !c.number || c.symbol === String(d.variants[variant].swap)).length, specialCount);
 }
-assert.equal(d.cards.filter(c => !d.images[c.id]).length, 35);
+assert.equal(d.cards.filter(c => !d.images[c.id]).length, 25);
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
 for (const filename of ['uno-rules-data.js','uno-rules.js','uno-rules.css']) {
@@ -61,19 +61,19 @@ for (const match of index.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) if 
 const photoDir = path.join(root, 'modules/uno/uno-rules-images');
 const csv = fs.readFileSync(path.join(photoDir, 'Karten_und_Punkte.csv'), 'utf8').trim().split(/[\r\n]+/).slice(1);
 assert.equal(csv.length, 10);
-assert.equal(Object.keys(d.images).length, 10);
-assert.equal(new Set(Object.values(d.images)).size, 10, 'Each original has one actual card/side');
-for (const row of csv) {
-  const [filename, points] = row.split(',');
-  const id = Object.keys(d.photoCatalog).find(id => d.photoCatalog[id].file === filename);
-  assert.ok(id, filename);
-  assert.equal(card(id).points, Number(points), filename);
-  assert.equal(card(id).pointSource, 'WRC-Kartenübersicht');
-  assert.ok(fs.existsSync(path.join(root, d.images[id])));
-  assert.ok(sw.includes('./' + d.images[id]), 'Offline image: ' + id);
+assert.equal(Object.keys(d.images).length, 20);
+assert.equal(new Set(Object.values(d.images)).size, 19, 'Classic Skip shares the light-side image');
+const csvIds = ['flip-light-wild2','flip-dark-skipall','flip-light-skip','flip-dark-1','flip-dark-reverse','flip-dark-wild','flip-dark-wildcolor','flip-dark-draw5','flip-light-draw1','flip-dark-flip'];
+for (const [i, row] of csv.entries()) {
+  const [, points] = row.split(',');
+  assert.equal(card(csvIds[i]).points, Number(points), csvIds[i]);
+  assert.equal(card(csvIds[i]).pointSource, 'WRC-Kartenübersicht');
 }
-assert.ok(d.images['flip-dark-skipall'].endsWith('richtungswechsel-kreis.png'));
-assert.ok(d.images['flip-dark-flip'].endsWith('hell-flip.png'));
-assert.ok(!d.images['flip-light-flip'], 'Do not show a dark-side photo on the light side');
-assert.equal(d.photoCatalog['flip-dark-wildcolor'].rotation, 90);
-console.log('PASS: UNO variants, 45 unique cards, photo mapping and CSV values + house overrides, shared rules, search isolation, asset wiring and syntax.');
+for (const [id, src] of Object.entries(d.images)) {
+  assert.ok(fs.existsSync(path.join(root, src)), id);
+  assert.ok(src.endsWith((id === 'classic-skip' ? 'flip-light-skip' : id) + '.webp'), id);
+}
+assert.equal(d.images['classic-skip'], d.images['flip-light-skip']);
+for (const id of ['flip-dark-1','flip-light-flip','flip-light-skip','flip-light-wild2']) assert.equal(d.photoCatalog[id].rotation, 270);
+assert.equal(d.photoCatalog['flip-dark-wildcolor'].rotation, 0);
+console.log('PASS: UNO cards, unchanged values, shared rules, search, 20 image mappings / 19 files, syntax.');

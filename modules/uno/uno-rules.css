@@ -996,3 +996,6 @@ existing UNO forms are untouched. */
   color:var(--ur-muted);
   margin-top:4px;
 }
+
+/* Landscape photos: display the full card with its logo upright. */
+.ur-photo-counterclockwise img { transform:translate(-50%,-50%) rotate(270deg); }

@@ -112,3 +112,36 @@ Platzhalter nennen den Kartentyp und ausdrücklich „kein Originalfoto“.
 Sie ersetzen auch nicht ladbare Originalbilder ohne kaputtes Bildsymbol.
 Galerie-Bilder laden verzögert; das ausgewählte Detailbild lädt sofort.
 Service-Worker v62 aktualisiert die bereits im Offline-Cache geführten Dateien.
+
+## Ergänzung 23.11.2026: vorbereitete Kartenbilder
+
+19 WebP-Dateien aus `WRC_UNO_Kartenbilder.zip` sind bytegleich übernommen.
+`preparedPhotos` ordnet sie anhand der Karten-ID zu, unabhängig von Punktwerten.
+Alle Regeln und Punktequellen bleiben unverändert: Classic +4 = 70, Classic 0 = 20.
+Diese Bestandsliste ersetzt die ältere Liste fehlender Bilder oben:
+
+- Classic: 0, +2, +4 (3 Dateien).
+- Flip hell: 1, 7, +1, Aussetzen, Richtungswechsel, Flip, Farbwahl, +2-Farbwahl (8).
+- Flip dunkel: 1, 2, +5, Alle aussetzen, Richtungswechsel, Flip, Farbwahl, Zieh bis Farbe (8).
+- Classic Aussetzen nutzt weiterhin das gleiche Bild wie Flip hell Aussetzen.
+  Keine zusätzliche Kopie; insgesamt 20 von 45 Einträgen bebildert.
+
+Vier Querbilder (dunkle 1, helle Flip/Aussetzen/+2-Farbwahl) werden ausschließlich
+in der Anzeige um 270 Grad gedreht. Zieh bis Farbe steht bereits aufrecht.
+Alle gelieferten Bildpixel bleiben erhalten, auch Anschnitte/Browserreste, die
+bereits in den Vorlagen enthalten sind. Keine zusätzliche Beschneidung oder
+Rekonstruktion von Kartenmotiven. Einheitliche Fenster verwenden `contain`.
+
+### Noch fehlende Vorlagen: 25 neutrale Platzhalter
+
+- Classic: Zahlen 1–9, Richtungswechsel, Farbwahl (11).
+- Flip hell: Zahlen 2–6, 8–9 (7).
+- Flip dunkel: Zahlen 3–9 (7).
+
+Keine Ersatzbilder mit falschen Zahlen oder falscher Flip-Seite. Historische PNGs
+und CSV bleiben erhalten, da der bestehende Service-Worker sie referenziert und
+sie die bisherigen Punktequellen dokumentieren. Die neuen WebPs werden regulär
+geladen; eine garantierte Vorab-Offline-Speicherung ist nicht Teil dieser auf
+UNO beschränkten Änderung.
+Keine neue Aktivität oder Kennzahl für Geburtstag, Weihnachten, Wrapped oder
+Ehrungen: Diese Module benötigen daher keine Änderungen.
