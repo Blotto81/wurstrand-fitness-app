@@ -758,7 +758,7 @@
   }
 
   function addDart(base, multiplier, customLabel) {
-    if (state.completed || state.darts.length >= 3) return;
+    if (state.completed || state.transition || state.awaitingPlacementDecision || state.turnBusted || state.darts.length >= 3 || turnTimer !== null) return;
     showInputFeedback(base, multiplier);
     const player = state.players[state.currentPlayer];
     const score = base * multiplier;
@@ -872,7 +872,7 @@
   }
 
   function finishTurn() {
-    if (state.completed || !state.players.length) return;
+    if (state.completed || !state.players.length || state.turnBusted || state.transition || state.awaitingPlacementDecision) return;
     window.clearTimeout(turnTimer);
     turnTimer = null;
     const turnTotal = state.darts.reduce((sum, dart) => sum + dart.score, 0);
