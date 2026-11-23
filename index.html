@@ -61,10 +61,23 @@
   .player-record-main-tabs button { font-size:.85rem; line-height:1.3; }
   [data-player-alltime-section="records"] > h3 { display:none; }
   @media(max-width:380px) { .player-record-tabs button { font-size:.69rem; } .wrc-record-row { padding:10px 8px; } }
+
+.wrc-bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:80;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:#111c2f;border-top:1px solid rgba(185,200,225,.24);box-shadow:0 -5px 24px rgba(0,0,0,.2)}
+.wrc-bottom-nav button{min-width:0;border:0;border-radius:11px;padding:7px 2px 6px;background:transparent;color:#c5d1e2;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;cursor:pointer}
+.wrc-bottom-nav button[aria-current="page"]{background:rgba(113,159,217,.18);color:#fff}
+.wrc-bottom-icon{font-size:1.22rem;line-height:1.25}.wrc-bottom-label{font-size:.72rem;font-weight:650;line-height:1.2;white-space:nowrap}
+body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
+@media(min-width:850px){.wrc-bottom-nav{max-width:560px;margin:0 auto;border:1px solid rgba(185,200,225,.24);border-bottom:0;border-radius:16px 16px 0 0}}
 </style>
 </head>
 
 <body>
+<nav class="wrc-bottom-nav" aria-label="Schnellnavigation">
+<button type="button" data-wrc-nav="dashboard" aria-current="page" onclick="wrcQuickNavigate('dashboard')"><span class="wrc-bottom-icon" aria-hidden="true">🏠</span><span class="wrc-bottom-label">Start</span></button>
+<button type="button" data-wrc-nav="spieler" onclick="wrcQuickNavigate('spieler')"><span class="wrc-bottom-icon" aria-hidden="true">👤</span><span class="wrc-bottom-label">Mein WRC</span></button>
+<button type="button" data-wrc-nav="eintragen" onclick="wrcQuickNavigate('eintragen')"><span class="wrc-bottom-icon" aria-hidden="true">➕</span><span class="wrc-bottom-label">Eintragen</span></button>
+<button type="button" data-wrc-nav="menu" onclick="wrcQuickNavigate('menu')"><span class="wrc-bottom-icon" aria-hidden="true">☰</span><span class="wrc-bottom-label">Menü</span></button>
+</nav>
 
   <div id="menuBackdrop" class="menu-backdrop" onclick="toggleMainMenu(false)"></div>
   
@@ -1017,7 +1030,7 @@ background:#0f172a
       <div class="grid grid2">
         <div>
           <label>Spieler</label>
-          <select id="playerSelect" onchange="renderPlayerOverview()"></select>
+          <select id="playerSelect" onchange="localStorage.setItem('wrcPreferredPlayer', this.value); renderPlayerOverview()"></select>
         </div>
 
         <div>
@@ -2105,6 +2118,23 @@ background:#0f172a
       window.scrollTo(0, 0);
     }
 
+    function wrcQuickNavigate(destination) {
+      if (destination === "menu") { toggleMainMenu(); return; }
+      if (destination === "spieler") {
+        const select = document.getElementById("playerSelect");
+        const preferred = localStorage.getItem("wrcPreferredPlayer");
+        if (select && preferred && [...select.options].some(option => option.value === preferred)) select.value = preferred;
+      }
+      showTab(destination, menuLinkForPanel(destination));
+      toggleMainMenu(false);
+      window.scrollTo(0, 0);
+    }
+    function wrcUpdateQuickNavigation(panelId) {
+      document.querySelectorAll("[data-wrc-nav]").forEach(button => {
+        if (button.dataset.wrcNav === panelId) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+    }
     function showTab(id, btn, options = {}) {
       document.querySelectorAll(".panel").forEach(p => {
         p.classList.remove("active");
@@ -2126,9 +2156,10 @@ background:#0f172a
         btn.classList.add("active");
       }
 
+      wrcUpdateQuickNavigation(id);
       if (id === "analyse") {
         setTimeout(() => {
-          setAnalysisSection(options.analysisSection || activeAnalysisSection, null, { history: false });
+          setAnalysisSection(options.analysisSection || "overview", null, { history: false });
           renderAnalysisExtras();
           renderStepsChart();
         }, 80);
@@ -2292,6 +2323,8 @@ background:#0f172a
         playerSelect.innerHTML = people.map(p =>
           `<option value="${p}">${p}</option>`
         ).join("");
+        const preferred = localStorage.getItem("wrcPreferredPlayer");
+        if (preferred && people.includes(preferred)) playerSelect.value = preferred;
       }
 
       if (playerMonthSelect) {
