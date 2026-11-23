@@ -7,7 +7,7 @@
     Fabi: "#a78bfa"
   };
   const BOARD_ORDER = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
-  let selectedPlayer = "all";
+  let selectedPlayers = null; // null means all players
   let selectedPeriod = "all";
   let averageWindow = "all";
   let averageView = "trend";
@@ -49,7 +49,7 @@
 
   function filteredThrows() {
     let rows = cachedThrows;
-    if (selectedPlayer !== "all") rows = rows.filter(dart => dart.player === selectedPlayer);
+    if (selectedPlayers !== null) rows = rows.filter(dart => selectedPlayers.has(dart.player));
     const gameDates = new Map(cachedGames.map(game => [String(game.id), game.game_date]));
     if (selectedPeriod === "month") {
       const now = new Date();
@@ -182,7 +182,7 @@
 
   function averageChart() {
     const available = [...new Set(cachedThrows.map(d => d.player))];
-    const players = selectedPlayer === "all" ? available : [selectedPlayer];
+    const players = selectedPlayers === null ? available : available.filter(player => selectedPlayers.has(player));
     const raw = players.map(player => ({ player, games: averageSeries(player) })).filter(s => s.games.length);
     if (!raw.length) return '<div class="dart-throw-empty">Noch keine Caller-Wurfdaten für die Average-Analyse.</div>';
     const allGames = raw.flatMap(s => s.games);
@@ -239,11 +239,21 @@
       const pts=s.values.map(v=>({x:x(labels.indexOf(v.label)),y:y(v.value),v}));
       const line=pts.map((p,i)=>(i?"L":"M")+p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
       const marks=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="5" fill="'+color+'" stroke="#0f172a" stroke-width="2"><title>'+escapeHtml(s.player)+" · "+escapeHtml(p.v.label)+" · "+format(p.v.value)+'</title></circle>').join("");
-      return '<path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round"/>'+marks;
+      let trend = "";
+      if (averageView === "trend" && s.values.length >= 3) {
+        const moving = s.values.map((point,i) => {
+          if (i < 2) return null;
+          const window = s.values.slice(Math.max(0,i-4),i+1);
+          return {x:x(labels.indexOf(point.label)),y:y(window.reduce((sum,p)=>sum+p.value,0)/window.length)};
+        }).filter(Boolean);
+        const trendPath = moving.map((p,i)=>(i?"L":"M")+p.x.toFixed(1)+","+p.y.toFixed(1)).join(" ");
+        trend = '<path d="'+trendPath+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-dasharray="9 7" opacity=".8"/>';
+      }
+      return '<path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round"/>'+marks+trend;
     }).join("");
     const step=Math.max(1,Math.ceil(labels.length/7));
     const axis=labels.map((label,i)=>i%step===0||i===labels.length-1?'<text x="'+x(i)+'" y="'+(H-15)+'" text-anchor="middle" fill="#e2e8f0" font-size="14">'+escapeHtml(label)+'</text>':"").join("");
-    const legend=datasets.map(s=>'<span><i style="background:'+(COLORS[s.player]||"#facc15")+'"></i>'+escapeHtml(s.player)+' · '+s.values.length+' Werte</span>').join("");
+    const legend=datasets.map(s=>'<span><i style="background:'+(COLORS[s.player]||"#facc15")+'"></i>'+escapeHtml(s.player)+' · '+s.values.length+' Werte</span>').join("") + (averageView === "trend" ? '<span>Durchgezogen: Spielwerte · gestrichelt: Formtrend (bis 5 Abschnitte)</span>' : "");
     const note=averageView==="trend" && averageWindow==="all" ? "All Time zeigt sämtliche Caller-Partien; bei langen Reihen werden aufeinanderfolgende Partien zu Abschnitten zusammengefasst." :
       averageView==="months" ? "Monatswerte sind nach tatsächlich geworfenen Darts gewichtet." :
       averageView==="distribution" ? "Anzahl der Partien je Average-Bereich." : "Jeder Punkt steht für eine Partie.";
@@ -321,7 +331,9 @@
       <section class="dart-throw-stats">
         <div class="dart-throw-heading"><div><span>WRC Caller</span><h3>🎯 Wurfprofil</h3><p>Jeder Pfeil erzählt ein kleines Stück Wahrheit.</p></div></div>
         <div class="dart-throw-filters" aria-label="Statistik filtern">
-          <div>${["all", ...players].map(player => `<button type="button" class="${selectedPlayer === player ? "selected" : ""}" data-dart-player="${escapeHtml(player)}"><i style="--dot:${COLORS[player] || "#facc15"}"></i>${player === "all" ? "Alle" : escapeHtml(player)}</button>`).join("")}</div>
+          <p class="dart-filter-hint">Spieler (Mehrfachauswahl) – gilt für Average, Fun Facts und Trefferbild</p>
+          <div>${["all", ...players].map(player => `<button type="button" aria-pressed="${player === "all" ? selectedPlayers === null : selectedPlayers === null || selectedPlayers.has(player)}" class="${player === "all" ? selectedPlayers === null ? "selected" : "" : selectedPlayers === null || selectedPlayers.has(player) ? "selected" : ""}" data-dart-player="${escapeHtml(player)}"><i style="--dot:${COLORS[player] || "#facc15"}"></i>${player === "all" ? "Alle" : escapeHtml(player)}</button>`).join("")}</div>
+          <p class="dart-filter-hint">Trefferbild-Zeitraum (unabhängig vom Average-Zeitfenster)</p>
           <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
         </div>
         ${averageChart()}
@@ -362,7 +374,14 @@
     mount.querySelectorAll("[data-average-window]").forEach(button => button.addEventListener("click", () => { averageWindow = button.dataset.averageWindow; render(); }));
     mount.querySelectorAll("[data-average-view]").forEach(button => button.addEventListener("click", () => { averageView = button.dataset.averageView; render(); }));
     mount.querySelectorAll("[data-dart-player]").forEach(button => button.addEventListener("click", () => {
-      selectedPlayer = button.dataset.dartPlayer;
+      const player = button.dataset.dartPlayer;
+      if (player === "all") selectedPlayers = null;
+      else {
+        const all = [...new Set(cachedThrows.map(d => d.player))];
+        const next = selectedPlayers === null ? new Set(all) : new Set(selectedPlayers);
+        if (next.has(player)) next.delete(player); else next.add(player);
+        selectedPlayers = next.size === all.length ? null : next;
+      }
       render();
     }));
     mount.querySelectorAll("[data-dart-period]").forEach(button => button.addEventListener("click", () => {
