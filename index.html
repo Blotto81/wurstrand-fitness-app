@@ -4998,24 +4998,36 @@ background:#0f172a
       overview.append(heading,list);
       box.prepend(overview);
       const playerEntries = allEntries.filter(entry => entry.person === player);
-      const activeDays = calculateActivityStreak(playerEntries, entry =>
-        (+entry.steps || 0) > 0 || (+entry.bike || 0) > 0 ||
-        (+entry.squats || 0) > 0 || (+entry.pushups || 0) > 0 || !!entry.exercise
-      );
       const motivation = document.createElement("div");
       motivation.className = "wrc-player-motivation";
-      const streakItem = document.createElement("div");
-      streakItem.className = "wrc-player-motivation-item";
-      const streakLabel = document.createElement("strong");
-      streakLabel.textContent = activeDays.current > 0
-        ? "🔥 " + activeDays.current + (activeDays.current === 1 ? " aktiver Tag" : " aktive Tage") + " in Folge"
-        : "🔥 Deine Trainingsserie";
-      const streakInfo = document.createElement("small");
-      streakInfo.textContent = activeDays.current > 0
-        ? "Persönlicher Bestwert: " + activeDays.best + " Tage. Ein fehlender Eintrag heute beendet die Serie nicht."
-        : "Noch keine aktuell laufende Serie. Bisheriger Bestwert: " + activeDays.best + " Tage.";
-      streakItem.append(streakLabel, streakInfo);
-      motivation.appendChild(streakItem);
+      // Ordinary walking is nearly automatic for the team. Highlight meaningful streaks.
+      const bonus = window.WRCBonusStreaks?.state(player);
+      const streakCandidates = [
+        { icon: "🚴", label: "Radfahren", predicate: entry => (+entry.bike || 0) > 0 },
+        { icon: "🦵", label: "Kniebeugen", predicate: entry => (+entry.squats || 0) > 0 },
+        { icon: "💪", label: "Liegestütze", predicate: entry => (+entry.pushups || 0) > 0 },
+        { icon: "🏋️", label: "Übungen", predicate: entry => !!entry.exercise }
+      ].map(item => ({ ...item, streak: calculateActivityStreak(playerEntries, item.predicate) }))
+        .filter(item => item.streak.current >= 2)
+        .sort((a, b) => b.streak.current - a.streak.current || b.streak.best - a.streak.best);
+      const bonusCurrent = Number(bonus?.current) || 0;
+      const bonusRecord = Number(bonus?.record) || 0;
+      if (bonusCurrent >= 3 || streakCandidates.length) {
+        const streakItem = document.createElement("div");
+        streakItem.className = "wrc-player-motivation-item";
+        const streakLabel = document.createElement("strong");
+        const streakInfo = document.createElement("small");
+        if (bonusCurrent >= 3) {
+          streakLabel.textContent = "🔥 Bonus-Serie: " + bonusCurrent + " erfolgreiche Bonustage";
+          streakInfo.textContent = "Persönlicher Bonus-Rekord: " + bonusRecord + " Tage.";
+        } else {
+          const selected = streakCandidates[0];
+          streakLabel.textContent = selected.icon + " " + selected.label + ": " + selected.streak.current + " Tage in Folge";
+          streakInfo.textContent = "Persönlicher Bestwert: " + selected.streak.best + " Tage. Heute darf noch ein Eintrag folgen.";
+        }
+        streakItem.append(streakLabel, streakInfo);
+        motivation.appendChild(streakItem);
+      }
       const levels = [10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
       const candidates = [
         {label:"Schritte",value:totals.steps,unit:" Schritte"},
