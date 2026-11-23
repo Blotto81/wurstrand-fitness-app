@@ -219,8 +219,8 @@
       const triples = darts.filter(d => Number(d.multiplier) === 3 && !d.is_miss).length;
       const gameAverages = averageSeries(player).slice(-10);
       const spread = gameAverages.length >= 3 ? Math.sqrt(gameAverages.reduce((sum,g) => sum + Math.pow(g.average - gameAverages.reduce((s,v)=>s+v.average,0)/gameAverages.length,2),0)/gameAverages.length) : Infinity;
-      const first = gameAverages.slice(0,5), last = gameAverages.slice(-5);
-      const gain = gameAverages.length >= 6 ? last.reduce((s,g)=>s+g.average,0)/last.length - first.reduce((s,g)=>s+g.average,0)/first.length : -Infinity;
+      const first = gameAverages.slice(-10,-5), last = gameAverages.slice(-5);
+      const gain = first.length && last.length === 5 ? last.reduce((s,g)=>s+g.average,0)/last.length - first.reduce((s,g)=>s+g.average,0)/first.length : -Infinity;
       return {player, darts:darts.length, tripleRate:darts.length ? triples/darts.length : 0, spread, gain, games:gameAverages.length};
     });
     const eligible = stats.filter(s => s.darts >= 30);
@@ -281,7 +281,9 @@
           <div>${["all", ...players].map(player => `<button type="button" class="${selectedPlayer === player ? "selected" : ""}" data-dart-player="${escapeHtml(player)}"><i style="--dot:${COLORS[player] || "#facc15"}"></i>${player === "all" ? "Alle" : escapeHtml(player)}</button>`).join("")}</div>
           <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
         </div>
-        ${averageChart()}\n        ${funAwards(rows)}\n        ${rows.length ? `
+        ${averageChart()}
+        ${funAwards(rows)}
+        ${rows.length ? `
           ${` `}
           <div class="dart-board-layout">
             <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort – auch bei Miss.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail" aria-live="polite">Kreis antippen für Details</div></div>
