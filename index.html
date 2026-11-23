@@ -5095,8 +5095,20 @@ background:#0f172a
       // Show the all-time dart average on the main WRC player page as well.
       const dartAverageCard = document.createElement("div");
       dartAverageCard.className = "wrc-player-motivation-item";
-      dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average</strong><small>Wird geladen …</small>';
+      dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average ↗</strong><small>Wird geladen … · Antippen für Dart-Statistiken</small>';
       motivation.prepend(dartAverageCard);
+      dartAverageCard.classList.add("wrc-player-dart-average-link");
+      dartAverageCard.setAttribute("role", "button");
+      dartAverageCard.setAttribute("tabindex", "0");
+      dartAverageCard.setAttribute("aria-label", "Dart-Statistiken und Wurfprofil öffnen");
+      dartAverageCard.style.cursor = "pointer";
+      dartAverageCard.onclick = () => openPanelDetails("dartStatsPanel");
+      dartAverageCard.onkeydown = event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openPanelDetails("dartStatsPanel");
+        }
+      };
       (async () => {
         try {
           const { data: games, error: gamesError } = await supabaseClient.from("dart_games").select("id,mode");
@@ -5122,9 +5134,9 @@ background:#0f172a
           let darts = 0, points = 0;
           visits.forEach(v => { darts += v.darts; points += v.bust ? 0 : v.points; });
           if (!dartAverageCard.isConnected) return;
-          dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average: ' +
+          dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average ↗: ' +
             (darts ? (points * 3 / darts).toLocaleString("de-DE", {minimumFractionDigits:1,maximumFractionDigits:1}) : "–") +
-            '</strong><small>All Time · 3-Dart-Average aus ' + darts.toLocaleString("de-DE") + ' Caller-Darts (301/501)</small>';
+            '</strong><small>All Time · 3-Dart-Average aus ' + darts.toLocaleString("de-DE") + ' Caller-Darts (301/501) · Antippen für Statistiken</small>';
         } catch (error) {
           console.warn("Player dart average unavailable", error);
           if (dartAverageCard.isConnected) dartAverageCard.innerHTML = '<strong>🎯 Dart-Karriere-Average</strong><small>Momentan nicht verfügbar</small>';
