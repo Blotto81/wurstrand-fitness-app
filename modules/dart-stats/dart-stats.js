@@ -173,6 +173,25 @@
     const cricketHits = cricketRows.filter(dart => [15, 16, 17, 18, 19, 20, 25].includes(Number(dart.base_value)));
     const cricketFavorite = mostCommon(cricketHits.map(fieldLabel));
     const cricketMarks = cricketHits.reduce((sum, dart) => sum + Number(dart.multiplier), 0);
+    const typeCounts = [
+      ["Single", rows.filter(d => Number(d.multiplier) === 1 && !d.is_miss && Number(d.base_value) > 0).length],
+      ["Double", rows.filter(d => Number(d.multiplier) === 2 && !d.is_miss).length],
+      ["Triple", rows.filter(d => Number(d.multiplier) === 3 && !d.is_miss).length],
+      ["Miss", misses]
+    ];
+    const visits = new Map();
+    rows.forEach(d => {
+      const key = `${d.game_id}:${d.player}:${d.turn_number}`;
+      const visit = visits.get(key) || { score: 0, bust: false };
+      visit.score += Number(d.scored_value);
+      visit.bust ||= Boolean(d.is_bust);
+      visits.set(key, visit);
+    });
+    const bestTurn = Math.max(0, ...[...visits.values()].filter(v => !v.bust).map(v => v.score));
+    const tripleCount = typeCounts[2][1];
+    const funFact = tripleCount ? `${tripleCount} Triple-Treffer – ${(tripleCount / rows.length * 100).toFixed(1).replace(".", ",")}% aller Pfeile.`
+      : misses === 0 ? "Kein einziger Miss in dieser Auswahl!" : `${rows.length - misses} von ${rows.length} Pfeilen trafen ein Feld.`;
+
 
     mount.innerHTML = `
       <section class="dart-throw-stats">
@@ -182,11 +201,22 @@
           <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
         </div>
         ${rows.length ? `
+          ${` `}
+          <div class="dart-board-layout">
+            <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort – auch bei Miss.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail" aria-live="polite">Kreis antippen für Details</div></div>
+            <div class="dart-hit-ranking"><h4>Am häufigsten getroffen</h4>${hitRanking.map(([label, count], index) => `<div><span>${index + 1}. ${escapeHtml(label)}</span><strong>${count}×</strong></div>`).join("")}</div>
+          </div>
           <div class="dart-throw-summary">
             <article><span>Gewertete Pfeile</span><strong>${rows.length.toLocaleString("de-DE")}</strong></article>
             <article><span>Lieblingsfeld</span><strong>${escapeHtml(favorite?.[0] || "–")}</strong><small>${favorite?.[1] || 0}× getroffen</small></article>
             <article><span>Häufigste 3er-Aufnahme</span><strong>${turnFavorite?.[0] ?? "–"}</strong><small>${turnFavorite ? `${turnFavorite[1]}× geworfen` : "Noch keine volle Aufnahme"}</small></article>
             <article><span>Miss-Quote</span><strong>${missRate.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</strong><small>${misses} von ${rows.length}</small></article>
+          </div>
+          <div class="dart-visual-insights">
+            <h4>📊 Trefferarten</h4>
+            <div class="dart-type-bars">${typeCounts.map(([label,count]) => `<div class="dart-type-row"><span>${label}</span><div class="dart-type-track"><div style="width:${rows.length ? count / rows.length * 100 : 0}%"></div></div><strong>${count}</strong></div>`).join("")}</div>
+            <p class="dart-type-note">Bester nicht überworfener Besuch: <strong>${bestTurn} Punkte</strong></p>
+            <p class="dart-type-note">🎲 ${escapeHtml(funFact)}</p>
           </div>
           <div class="dart-position-favorites">
             ${positionFavorites.map((favoriteAtPosition, index) => `<article><span>Dart ${index + 1}</span><strong>${escapeHtml(favoriteAtPosition?.[0] || "–")}</strong><small>${favoriteAtPosition ? `${favoriteAtPosition[1]}×` : "Noch offen"}</small></article>`).join("")}
@@ -197,10 +227,7 @@
             <article><span>Stärkstes Cricket-Feld</span><strong>${escapeHtml(cricketFavorite?.[0] || "–")}</strong><small>${cricketFavorite?.[1] || 0}× getroffen</small></article>
             <article><span>Außerhalb</span><strong>${(cricketRows.length - cricketHits.length).toLocaleString("de-DE")}</strong><small>Darts neben den Cricket-Feldern</small></article>
           </div>` : ""}
-          <div class="dart-board-layout">
-            <div><h4>Trefferkarte</h4><p>Je größer der Kreis, desto häufiger landet ihr dort – auch bei Miss.</p>${dartboard(rows)}<div id="dartBoardDetail" class="dart-board-detail" aria-live="polite">Kreis antippen für Details</div></div>
-            <div class="dart-hit-ranking"><h4>Am häufigsten getroffen</h4>${hitRanking.map(([label, count], index) => `<div><span>${index + 1}. ${escapeHtml(label)}</span><strong>${count}×</strong></div>`).join("")}</div>
-          </div>` : `<div class="dart-throw-empty"><strong>Noch kein Wurfprofil vorhanden.</strong><span>Die ersten Detaildaten entstehen automatisch mit der nächsten abgeschlossenen WRC-Caller-Partie.</span></div>`}
+` : `<div class="dart-throw-empty"><strong>Noch kein Wurfprofil vorhanden.</strong><span>Die ersten Detaildaten entstehen automatisch mit der nächsten abgeschlossenen WRC-Caller-Partie.</span></div>`}
       </section>`;
     bind(mount);
   }
