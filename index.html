@@ -275,8 +275,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
         </div>
 
 
-        <nav class="dart-cockpit-tabs" aria-label="Dart-Statistikbereiche"><button type="button" data-dart-cockpit="overview" aria-pressed="true">Übersicht</button><button type="button" data-dart-cockpit="players" aria-pressed="false">Spieler</button><button type="button" data-dart-cockpit="throws" aria-pressed="false">Würfe</button></nav>
-        <div data-dart-cockpit-panel="overview"><div id="dartStatsSummary" class="dart-stats-summary">
+        <nav class="dart-cockpit-tabs" aria-label="Dart-Statistikbereiche"><button type="button" data-dart-cockpit="throws" aria-pressed="true">🎯 Wurfprofil</button><button type="button" data-dart-cockpit="overview" aria-pressed="false">Übersicht</button><button type="button" data-dart-cockpit="players" aria-pressed="false">Spieler</button></nav>
+        <div data-dart-cockpit-panel="overview" hidden><div id="dartStatsSummary" class="dart-stats-summary">
           <div class="dart-stats-summary-card">
             <span>🎯 Partien</span>
             <strong>–</strong>
@@ -320,7 +320,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
           </div>
         </details>
 
-        </div><div data-dart-cockpit-panel="throws" hidden><div id="dartThrowStats"></div></div>
+        </div><div data-dart-cockpit-panel="throws"><div id="dartThrowStats"></div></div>
 
       </div>
 
