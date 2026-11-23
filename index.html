@@ -123,6 +123,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 .dart-win-track>div{height:100%;background:linear-gradient(90deg,#f4b65f,#f07864);border-radius:20px}
 .dart-player-placements summary,.dart-recent-details summary{cursor:pointer;padding:12px 4px;font-weight:700;min-height:44px}
 .dart-player-placements .dart-player-medals{margin:8px 0 12px}
+.dart-career-average{display:flex;flex-direction:column;gap:4px;margin:14px 0;padding:14px;border-radius:14px;background:rgba(56,189,248,.11);border:1px solid rgba(56,189,248,.3)}.dart-career-average strong{font-size:2rem;line-height:1.1;color:#7dd3fc}.dart-career-average small{color:#cbd5e1;font-size:.8rem}
 </style>
 </head>
 
@@ -417,6 +418,43 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
           ];
 
 
+          const careerAverages = Object.create(null);
+          try {
+            const gameModes = new Map(gameList.map(game => [String(game.id), String(game.mode || "")]));
+            const visits = new Map();
+            for (let from = 0; ; from += 1000) {
+              const { data, error: dartError } = await supabaseClient.from("dart_throws")
+                .select("game_id,player,turn_number,scored_value,is_bust")
+                .order("id", { ascending: true }).range(from, from + 999);
+              if (dartError) throw dartError;
+              (data || []).forEach(dart => {
+                if (!fixedPlayers.includes(dart.player)) return;
+                const mode = (gameModes.get(String(dart.game_id)) || "").toLowerCase();
+                if (!mode.includes("301") && !mode.includes("501")) return;
+                const key = [dart.game_id, dart.player, dart.turn_number].join(":");
+                const visit = visits.get(key) || { player: dart.player, darts: 0, points: 0, bust: false };
+                visit.darts++;
+                visit.points += Number(dart.scored_value || 0);
+                visit.bust ||= Boolean(dart.is_bust);
+                visits.set(key, visit);
+              });
+              if (!data || data.length < 1000) break;
+            }
+            const totals = Object.create(null);
+            visits.forEach(visit => {
+              const total = totals[visit.player] || { darts: 0, points: 0 };
+              total.darts += visit.darts;
+              total.points += visit.bust ? 0 : visit.points;
+              totals[visit.player] = total;
+            });
+            fixedPlayers.forEach(player => {
+              const total = totals[player];
+              careerAverages[player] = total?.darts ? (total.points * 3 / total.darts).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : null;
+            });
+          } catch (averageError) {
+            console.warn("Dart career average unavailable:", averageError);
+          }
+
           const stats = Object.create(null);
 
           players.forEach(player => {
@@ -593,6 +631,7 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
 
           playersElement.innerHTML = rankedPlayers
+            .filter(player => fixedPlayers.includes(player.player))
             .map(player => {
 
               const averagePlace =
@@ -632,7 +671,9 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
                             </div>
 
-                            </details><div class="dart-player-details">
+                            </details><div class="dart-career-average"><span>🎯 Karriere-Average · All Time</span><strong>${careerAverages[player.player] ?? "–"}</strong><small>3-Dart-Average · 301/501 · alle erfassten Caller-Würfe</small></div>
+
+                            <div class="dart-player-details">
 
                                 <div class="dart-player-detail">
                                     <span>🎯 Partien</span>
