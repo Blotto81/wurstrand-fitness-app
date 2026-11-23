@@ -2673,6 +2673,7 @@ background:#0f172a
       renderHeatmap();
       renderFunFacts();
       renderAchievements();
+      renderDashboardTeamMilestone();
       if (typeof WRCPost !== "undefined") {
         WRCPost.syncStreakMilestones(allEntries);
       }
@@ -3098,6 +3099,45 @@ background:#0f172a
         `Das neue gemeinsame Ziel liegt bei ${fmt(monthGoals[key] || 0, 0)} Punkten. ${getMonthTitle(previousKey)} bleibt in den ersten drei Tagen noch direkt erreichbar.`,
         { type: "goal" }
       );
+    }
+
+    function renderDashboardTeamMilestone() {
+      const card = document.getElementById("dashboardAchievementCard");
+      if (!card) return;
+      const key = selectedMonth();
+      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
+      const totals = {
+        steps: entries.reduce((sum, entry) => sum + (+entry.steps || 0), 0),
+        bike: entries.reduce((sum, entry) => sum + (+entry.bike || 0), 0),
+        squats: entries.reduce((sum, entry) => sum + (+entry.squats || 0), 0),
+        pushups: entries.reduce((sum, entry) => sum + (+entry.pushups || 0), 0)
+      };
+      const scales = {
+        steps: [10000,25000,50000,100000,250000,500000,1000000,2500000],
+        bike: [25,50,100,250,500,1000,2500],
+        squats: [100,250,500,1000,2500,5000,10000],
+        pushups: [50,100,250,500,1000,2500,5000]
+      };
+      const labels = {steps:"Schritte",bike:"Radkilometer",squats:"Kniebeugen",pushups:"Liegestütze"};
+      const candidates = Object.keys(totals).filter(type => totals[type] > 0).map(type => {
+        const target = scales[type].find(value => value > totals[type]);
+        return target ? {type,target,value:totals[type],ratio:totals[type]/target} : null;
+      }).filter(Boolean).sort((a,b) => b.ratio-a.ratio);
+      const next = candidates[0];
+      if (!next) {
+        card.hidden = true;
+        return;
+      }
+      card.hidden = false;
+      card.onclick = () => openAnalysisDetails("activityDistributionChart");
+      const title = document.getElementById("dashboardAchievementTitle");
+      const progress = document.getElementById("dashboardAchievementProgress");
+      const fill = document.getElementById("dashboardAchievementFill");
+      const kicker = card.querySelector("span");
+      if (kicker) kicker.textContent = "🤝 Gemeinsam zur nächsten Marke";
+      if (title) title.textContent = fmt(next.target,0) + " " + labels[next.type];
+      if (progress) progress.textContent = fmt(next.value,next.type==="bike"?1:0) + " geschafft · noch " + fmt(next.target-next.value,next.type==="bike"?1:0) + " im " + getMonthTitle(key);
+      if (fill) fill.style.width = Math.min(100,next.ratio*100) + "%";
     }
 
     function renderDashboardHighlight() {
