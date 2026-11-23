@@ -100,6 +100,11 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 .wrc-progress-track-labels{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:.75rem;opacity:.85}
 .wrc-progress-track-labels span:last-child{color:#f4c56d}
 .wrc-progress-rest{margin-top:3px;font-size:.85rem;opacity:.88}
+
+/* Die Analyse-Reiter bleiben auch auf kleinen Smartphones kompakt und gut bedienbar. */
+.analysis-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.analysis-nav-button{flex:1 0 auto;min-width:0;white-space:nowrap}
+@media(max-width:440px){.analysis-nav-button{font-size:.82rem;padding:10px 9px}}
 </style>
 </head>
 
@@ -1256,7 +1261,7 @@ background:#0f172a
       <div class="analysis-header">
         <div>
           <span class="analysis-kicker">WRC Analyse</span>
-          <h2>Was hinter euren Punkten steckt</h2>
+          <h2>Eure WRC in Zahlen</h2>
           <p class="sub">Vom Zielkurs bis zu euren stärksten Tagen – klar geordnet, ohne etwas auszublenden.</p>
         </div>
         <label class="analysis-month-control">
@@ -1267,11 +1272,11 @@ background:#0f172a
 
       <div class="analysis-nav" role="tablist" aria-label="Analysebereiche">
         <button class="analysis-nav-button active" type="button" data-analysis-tab="overview"
-          onclick="setAnalysisSection('overview', this)">Überblick</button>
+          onclick="setAnalysisSection('overview', this)">🎯 Monatsverlauf</button>
         <button class="analysis-nav-button" type="button" data-analysis-tab="development"
-          onclick="setAnalysisSection('development', this)">Entwicklung</button>
+          onclick="setAnalysisSection('development', this)">📈 Entwicklung</button>
         <button class="analysis-nav-button" type="button" data-analysis-tab="team"
-          onclick="setAnalysisSection('team', this)">Team &amp; Tage</button>
+          onclick="setAnalysisSection('team', this)">👥 Team &amp; Tage</button>
       </div>
 
       <section class="analysis-section active" data-analysis-section="overview">
@@ -2196,6 +2201,7 @@ background:#0f172a
 
       wrcUpdateQuickNavigation(id);
       if (id === "analyse") {
+        activeAnalysisSection = options.analysisSection || "overview";
         setTimeout(() => {
           setAnalysisSection(options.analysisSection || "overview", null, { history: false });
           renderAnalysisExtras();
@@ -2279,6 +2285,7 @@ background:#0f172a
         averageStats: "team",
         heatmap: "team"
       };
+      // Direkte Verlinkungen behalten ihre Zielreiter; reguläre Menüaufrufe starten im Monatsverlauf.
       const section = sections[targetId] || "overview";
       activeAnalysisSection = section;
       showTab("analyse", menuLinkForPanel("analyse"), { analysisSection: section });
@@ -3605,7 +3612,10 @@ background:#0f172a
       });
 
       document.querySelectorAll("[data-analysis-tab]").forEach(button => {
-        button.classList.toggle("active", button.dataset.analysisTab === section);
+        const selected = button.dataset.analysisTab === section;
+        button.classList.toggle("active", selected);
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
       });
 
       if (btn) btn.classList.add("active");
