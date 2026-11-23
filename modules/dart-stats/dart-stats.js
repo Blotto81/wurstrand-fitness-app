@@ -181,34 +181,36 @@
     const players = selectedPlayer === "all" ? PLAYERS : [selectedPlayer];
     const series = players.map(player => ({ player, games: averageSeries(player).slice(-10) })).filter(item => item.games.length);
     if (!series.length) return '<p class="dart-throw-empty">Noch keine Caller-Wurfdaten für einen Average-Verlauf.</p>';
-    const width = 680, height = 250, left = 42, right = 14, top = 18, bottom = 39;
+    const width = 720, height = 390, left = 60, right = 26, top = 28, bottom = 55;
     const max = Math.max(20, ...series.flatMap(item => item.games.map(game => game.average)));
     const ceiling = Math.ceil(max / 10) * 10;
-    const x = i => left + i * (width - left - right) / 9;
-    const y = value => top + (ceiling - value) / ceiling * (height - top - bottom);
-    const lines = [0, .25, .5, .75, 1].map(fraction => {
-      const value = ceiling * fraction;
-      return `<line x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}" stroke="#64748b" stroke-opacity=".35"/><text x="${left-7}" y="${y(value)+4}" text-anchor="end" fill="#cbd5e1" font-size="12">${Math.round(value)}</text>`;
+    const x = i => left + i * (width-left-right) / 9;
+    const y = value => top + (ceiling-value) / ceiling * (height-top-bottom);
+    const grid = [0,.25,.5,.75,1].map(f => {
+      const value = ceiling*f;
+      return `<line x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}" stroke="#64748b" stroke-opacity=".4"/><text x="${left-12}" y="${y(value)+6}" text-anchor="end" fill="#e2e8f0" font-size="19">${Math.round(value)}</text>`;
     }).join("");
     const plots = series.map(({player,games}) => {
       const color = COLORS[player] || "#facc15";
       const points = games.map((game,i) => [x(10-games.length+i),y(game.average)]);
-      const path = points.map(([px,py],i) => `${i ? "L":"M"}${px.toFixed(1)},${py.toFixed(1)}`).join(" ");
-      const circles = points.map(([px,py],i) => `<circle cx="${px}" cy="${py}" r="5" fill="${color}" stroke="#0f172a" stroke-width="2"><title>${escapeHtml(player)} · ${escapeHtml(games[i].date)} · ${games[i].average.toFixed(1)} Average</title></circle>`).join("");
-      return `<path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
+      const line = points.map(([px,py],i) => `${i?"L":"M"}${px.toFixed(1)},${py.toFixed(1)}`).join(" ");
+      const dots = points.map(([px,py],i) => `<circle cx="${px}" cy="${py}" r="7" fill="${color}" stroke="#0f172a" stroke-width="2"><title>${escapeHtml(player)} · ${escapeHtml(games[i].date)} · ${games[i].average.toFixed(1)} Punkte je 3 Darts</title></circle>`).join("");
+      const moving = games.map((game,i) => i < 2 ? null : games.slice(Math.max(0,i-4),i+1).reduce((sum,g)=>sum+g.average,0)/Math.min(5,i+1));
+      const trendLine = selectedPlayer !== "all" ? moving.map((value,i) => value === null ? "" : `${i===2?"M":"L"}${points[i][0].toFixed(1)},${y(value).toFixed(1)}`).join(" ") : "";
+      return `<path d="${line}" fill="none" stroke="${color}" stroke-width="4" stroke-linejoin="round"/>${dots}${trendLine ? `<path d="${trendLine}" fill="none" stroke="#facc15" stroke-width="5" stroke-dasharray="12 8" stroke-linecap="round"/>` : ""}`;
     }).join("");
-    const labels = Array.from({length:10},(_,i)=>`<text x="${x(i)}" y="${height-12}" text-anchor="middle" fill="#cbd5e1" font-size="12">${i+1}</text>`).join("");
+    const labels = Array.from({length:10},(_,i)=>`<text x="${x(i)}" y="${height-18}" text-anchor="middle" fill="#e2e8f0" font-size="18">${i+1}</text>`).join("");
     const legend = series.map(({player,games}) => `<span><i style="background:${COLORS[player] || "#facc15"}"></i>${escapeHtml(player)} · ${games.length} Partien</span>`).join("");
     const trend = selectedPlayer !== "all" ? (() => {
       const games = series[0]?.games || [];
-      if (games.length < 6) return "Für einen Formvergleich brauchen wir mindestens sechs Caller-Partien.";
+      if (games.length < 6) return "Für den Vergleich brauchen wir mindestens sechs Caller-Partien.";
       const last = games.slice(-5).reduce((sum,g)=>sum+g.average,0)/5;
       const before = games.slice(-10,-5);
       const prior = before.reduce((sum,g)=>sum+g.average,0)/before.length;
       const delta = last-prior;
-      return `Letzte 5: <strong>${last.toFixed(1)}</strong> · davor: ${prior.toFixed(1)} · <strong>${delta >= 0 ? "↗ +" : "↘ "}${delta.toFixed(1)}</strong>`;
-    })() : "Für den persönlichen Trend einen Spieler auswählen.";
-    return `<section class="dart-average-panel"><h3>📈 3-Dart-Average im Verlauf</h3><p>Je Spieler die letzten zehn Caller-Partien. Höher ist besser; Bust-Aufnahmen zählen mit 0 Punkten.</p><div class="dart-average-legend">${legend}</div><svg class="dart-average-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="3-Dart-Average je Partie, letzte zehn Partien pro Spieler">${lines}${plots}${labels}</svg><p class="dart-average-trend">${trend}</p></section>`;
+      return `Letzte 5 Spiele: <strong>${last.toFixed(1)}</strong> · vorher: ${prior.toFixed(1)} · <strong>${delta>=0?"↗ +":"↘ "}${delta.toFixed(1)}</strong>`;
+    })() : "Spieler auswählen, um zusätzlich die gelbe Formkurve (gleitender Durchschnitt) zu sehen.";
+    return `<section class="dart-average-panel"><h3>📈 Spiel-Average & Entwicklung</h3><p>Jeder Punkt ist der 3-Dart-Average einer kompletten Caller-Partie. Die gelbe Linie zeigt bei Einzelauswahl den gleitenden Durchschnitt über bis zu fünf Partien.</p><div class="dart-average-legend">${legend}${selectedPlayer!=="all" ? '<span><i style="background:#facc15"></i>Formkurve (5 Spiele)</span>' : ""}</div><div class="dart-average-chart-scroll"><svg class="dart-average-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Spiel-Average und Formkurve über die letzten zehn Caller-Partien">${grid}${plots}${labels}</svg></div><p class="dart-average-trend">${trend}</p></section>`;
   }
 
   function funAwards(rows) {
