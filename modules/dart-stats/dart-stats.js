@@ -150,6 +150,87 @@
     </section>`;
   }
 
+  function averageSeries(player) {
+    const gameById = new Map(cachedGames.map(game => [String(game.id), game]));
+    const grouped = new Map();
+    cachedThrows.forEach(dart => {
+      if (player !== "all" && dart.player !== player) return;
+      const id = String(dart.game_id);
+      if (!gameById.has(id)) return;
+      const key = player === "all" ? id + ":" + dart.player : id;
+      const group = grouped.get(key) || { game: gameById.get(id), player: dart.player, darts: [] };
+      group.darts.push(dart);
+      grouped.set(key, group);
+    });
+    return [...grouped.values()].map(group => {
+      const turns = new Map();
+      group.darts.forEach(dart => {
+        const key = String(dart.turn_number);
+        const turn = turns.get(key) || [];
+        turn.push(dart);
+        turns.set(key, turn);
+      });
+      const scored = [...turns.values()].reduce((total, turn) =>
+        total + (turn.some(d => d.is_bust) ? 0 : turn.reduce((sum, d) => sum + Number(d.scored_value || 0), 0)), 0);
+      return { ...group, average: group.darts.length ? scored * 3 / group.darts.length : 0,
+        date: String(group.game.game_date || group.game.created_at || "").slice(0, 10) };
+    }).sort((a,b) => a.date.localeCompare(b.date) || String(a.game.created_at || "").localeCompare(String(b.game.created_at || "")));
+  }
+
+  function averageChart() {
+    const players = selectedPlayer === "all" ? PLAYERS : [selectedPlayer];
+    const series = players.map(player => ({ player, games: averageSeries(player).slice(-10) })).filter(item => item.games.length);
+    if (!series.length) return '<p class="dart-throw-empty">Noch keine Caller-Wurfdaten für einen Average-Verlauf.</p>';
+    const width = 680, height = 250, left = 42, right = 14, top = 18, bottom = 39;
+    const max = Math.max(20, ...series.flatMap(item => item.games.map(game => game.average)));
+    const ceiling = Math.ceil(max / 10) * 10;
+    const x = i => left + i * (width - left - right) / 9;
+    const y = value => top + (ceiling - value) / ceiling * (height - top - bottom);
+    const lines = [0, .25, .5, .75, 1].map(fraction => {
+      const value = ceiling * fraction;
+      return `<line x1="${left}" y1="${y(value)}" x2="${width-right}" y2="${y(value)}" stroke="#64748b" stroke-opacity=".35"/><text x="${left-7}" y="${y(value)+4}" text-anchor="end" fill="#cbd5e1" font-size="12">${Math.round(value)}</text>`;
+    }).join("");
+    const plots = series.map(({player,games}) => {
+      const color = COLORS[player] || "#facc15";
+      const points = games.map((game,i) => [x(10-games.length+i),y(game.average)]);
+      const path = points.map(([px,py],i) => `${i ? "L":"M"}${px.toFixed(1)},${py.toFixed(1)}`).join(" ");
+      const circles = points.map(([px,py],i) => `<circle cx="${px}" cy="${py}" r="5" fill="${color}" stroke="#0f172a" stroke-width="2"><title>${escapeHtml(player)} · ${escapeHtml(games[i].date)} · ${games[i].average.toFixed(1)} Average</title></circle>`).join("");
+      return `<path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
+    }).join("");
+    const labels = Array.from({length:10},(_,i)=>`<text x="${x(i)}" y="${height-12}" text-anchor="middle" fill="#cbd5e1" font-size="12">${i+1}</text>`).join("");
+    const legend = series.map(({player,games}) => `<span><i style="background:${COLORS[player] || "#facc15"}"></i>${escapeHtml(player)} · ${games.length} Partien</span>`).join("");
+    const trend = selectedPlayer !== "all" ? (() => {
+      const games = series[0]?.games || [];
+      if (games.length < 6) return "Für einen Formvergleich brauchen wir mindestens sechs Caller-Partien.";
+      const last = games.slice(-5).reduce((sum,g)=>sum+g.average,0)/5;
+      const before = games.slice(-10,-5);
+      const prior = before.reduce((sum,g)=>sum+g.average,0)/before.length;
+      const delta = last-prior;
+      return `Letzte 5: <strong>${last.toFixed(1)}</strong> · davor: ${prior.toFixed(1)} · <strong>${delta >= 0 ? "↗ +" : "↘ "}${delta.toFixed(1)}</strong>`;
+    })() : "Für den persönlichen Trend einen Spieler auswählen.";
+    return `<section class="dart-average-panel"><h3>📈 3-Dart-Average im Verlauf</h3><p>Je Spieler die letzten zehn Caller-Partien. Höher ist besser; Bust-Aufnahmen zählen mit 0 Punkten.</p><div class="dart-average-legend">${legend}</div><svg class="dart-average-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="3-Dart-Average je Partie, letzte zehn Partien pro Spieler">${lines}${plots}${labels}</svg><p class="dart-average-trend">${trend}</p></section>`;
+  }
+
+  function funAwards(rows) {
+    const people = [...new Set(rows.map(d => d.player))];
+    if (!people.length) return "";
+    const stats = people.map(player => {
+      const darts = rows.filter(d => d.player === player);
+      const triples = darts.filter(d => Number(d.multiplier) === 3 && !d.is_miss).length;
+      const gameAverages = averageSeries(player).slice(-10);
+      const spread = gameAverages.length >= 3 ? Math.sqrt(gameAverages.reduce((sum,g) => sum + Math.pow(g.average - gameAverages.reduce((s,v)=>s+v.average,0)/gameAverages.length,2),0)/gameAverages.length) : Infinity;
+      const first = gameAverages.slice(-10,-5), last = gameAverages.slice(-5);
+      const gain = first.length && last.length === 5 ? last.reduce((s,g)=>s+g.average,0)/last.length - first.reduce((s,g)=>s+g.average,0)/first.length : -Infinity;
+      return {player, darts:darts.length, tripleRate:darts.length ? triples/darts.length : 0, spread, gain, games:gameAverages.length};
+    });
+    const eligible = stats.filter(s => s.darts >= 30);
+    const award = (title, item, description) => item ? `<article><span>${title}</span><strong>${escapeHtml(item.player)}</strong><small>${description(item)}</small></article>` : "";
+    const triple = eligible.slice().sort((a,b)=>b.tripleRate-a.tripleRate)[0];
+    const steady = eligible.filter(s=>s.games>=3).sort((a,b)=>a.spread-b.spread)[0];
+    const comeback = eligible.filter(s=>s.games>=6 && s.gain>0).sort((a,b)=>b.gain-a.gain)[0];
+    return `<section class="dart-awards"><h3>🌭 WRC Dart-Auszeichnungen</h3><p>Nur bei mindestens 30 protokollierten Pfeilen; Formpreise brauchen mehrere Partien.</p><div class="dart-award-grid">${award("🎯 Triple-Jäger",triple,s=>`${(s.tripleRate*100).toFixed(1)}% Triple-Treffer`)}${award("🧊 Konstanzmaschine",steady,s=>`Schwankung: ${s.spread.toFixed(1)} Average-Punkte`)}${award("🚀 Aufsteiger",comeback,s=>`+${s.gain.toFixed(1)} Average-Punkte` )}</div></section>`;
+  }
+
   function render() {
     const mount = document.getElementById("dartThrowStats");
     if (!mount) return;
@@ -200,6 +281,8 @@
           <div>${["all", ...players].map(player => `<button type="button" class="${selectedPlayer === player ? "selected" : ""}" data-dart-player="${escapeHtml(player)}"><i style="--dot:${COLORS[player] || "#facc15"}"></i>${player === "all" ? "Alle" : escapeHtml(player)}</button>`).join("")}</div>
           <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
         </div>
+        ${averageChart()}
+        ${funAwards(rows)}
         ${rows.length ? `
           ${` `}
           <div class="dart-board-layout">
