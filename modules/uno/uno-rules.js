@@ -33,8 +33,9 @@
   const $ = selector => book.querySelector(selector);
   function photo(card, large = false) {
     const src = data.images[card.id];
-    const rotated = data.photoCatalog[card.id]?.rotation === 90;
-    return `<div class="ur-photo${src ? ' ur-photo-original' : ''}${large ? ' ur-photo-large' : ''}"><div class="ur-photo-placeholder"${src ? ' hidden' : ''}><small>WRC · KARTENLEXIKON</small><span aria-hidden="true">${card.number ? esc(card.symbol) : '◇'}</span><strong>${esc(card.name)}</strong><small class="ur-placeholder-label">Platzhalter · kein Originalfoto</small></div>${src ? `<span class="ur-photo-media${rotated ? ' ur-photo-rotated' : ''}"><img src="${esc(src)}" alt="Originalfoto: ${esc(card.name)}${card.side ? ' · ' + (card.side === 'light' ? 'helle Seite' : 'dunkle Seite') : ''}" loading="${large ? 'eager' : 'lazy'}" decoding="async"></span>` : ''}</div>`;
+    const rotation = data.photoCatalog[card.id === 'classic-skip' ? 'flip-light-skip' : card.id]?.rotation;
+    const rotated = rotation === 90 || rotation === 270;
+    return `<div class="ur-photo${src ? ' ur-photo-original' : ''}${large ? ' ur-photo-large' : ''}"><div class="ur-photo-placeholder"${src ? ' hidden' : ''}><small>WRC · KARTENLEXIKON</small><span aria-hidden="true">${card.number ? esc(card.symbol) : '◇'}</span><strong>${esc(card.name)}</strong><small class="ur-placeholder-label">Platzhalter · kein Originalfoto</small></div>${src ? `<span class="ur-photo-media${rotated ? ' ur-photo-rotated' : ''}${rotation === 270 ? ' ur-photo-counterclockwise' : ''}"><img src="${esc(src)}" alt="Originalfoto: ${esc(card.name)}${card.side ? ' · ' + (card.side === 'light' ? 'helle Seite' : 'dunkle Seite') : ''}" loading="${large ? 'eager' : 'lazy'}" decoding="async"></span>` : ''}</div>`;
   }
   function bindImageFallback(parent) {
     parent.querySelectorAll('.ur-photo img').forEach(img => {

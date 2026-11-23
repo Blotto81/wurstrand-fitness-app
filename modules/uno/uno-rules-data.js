@@ -20,6 +20,73 @@
     'flip-light-draw1': { file: 'uno-flip-hell-plus1.png', points: 20 },
     'flip-dark-flip': { file: 'uno-flip-hell-flip.png', points: 50 }
   };
+  // Prepared photos: image metadata never changes card values.
+  const preparedPhotos = {
+    "classic-0": {
+        "file": "classic-0.webp"
+    },
+    "classic-draw2": {
+        "file": "classic-draw2.webp"
+    },
+    "classic-wild4": {
+        "file": "classic-wild4.webp"
+    },
+    "flip-dark-1": {
+        "file": "flip-dark-1.webp",
+        "rotation": 270
+    },
+    "flip-dark-2": {
+        "file": "flip-dark-2.webp"
+    },
+    "flip-dark-draw5": {
+        "file": "flip-dark-draw5.webp"
+    },
+    "flip-dark-flip": {
+        "file": "flip-dark-flip.webp"
+    },
+    "flip-dark-reverse": {
+        "file": "flip-dark-reverse.webp"
+    },
+    "flip-dark-skipall": {
+        "file": "flip-dark-skipall.webp"
+    },
+    "flip-dark-wild": {
+        "file": "flip-dark-wild.webp"
+    },
+    "flip-dark-wildcolor": {
+        "file": "flip-dark-wildcolor.webp"
+    },
+    "flip-light-1": {
+        "file": "flip-light-1.webp"
+    },
+    "flip-light-7": {
+        "file": "flip-light-7.webp"
+    },
+    "flip-light-draw1": {
+        "file": "flip-light-draw1.webp"
+    },
+    "flip-light-flip": {
+        "file": "flip-light-flip.webp",
+        "rotation": 270
+    },
+    "flip-light-reverse": {
+        "file": "flip-light-reverse.webp"
+    },
+    "flip-light-skip": {
+        "file": "flip-light-skip.webp",
+        "rotation": 270
+    },
+    "flip-light-wild": {
+        "file": "flip-light-wild.webp"
+    },
+    "flip-light-wild2": {
+        "file": "flip-light-wild2.webp",
+        "rotation": 270
+    }
+};
+  for (const [id, photo] of Object.entries(preparedPhotos)) {
+    photoCatalog[id] = { ...photoCatalog[id], ...photo, rotation: photo.rotation || 0 };
+  }
   const images = Object.fromEntries(Object.entries(photoCatalog).map(([id, photo]) =>
     [id, 'modules/uno/uno-rules-images/' + photo.file]));
   // The same Aussetzen card image is valid for Classic and Flip (light side).
@@ -66,7 +133,7 @@
     }
     // Explicit WRC decision, 2026-10-24: both Flip wild cards count 50.
     if (card.id === 'flip-light-wild') card.pointSource = 'WRC-Festlegung · 50 Punkte';
-    if (photoCatalog[card.id]) {
+    if (photoCatalog[card.id]?.points !== undefined) {
       card.points = photoCatalog[card.id].points;
       card.pointSource = 'WRC-Kartenübersicht';
     }
