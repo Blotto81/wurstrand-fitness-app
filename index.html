@@ -3184,11 +3184,28 @@ background:#0f172a
         pushups: [50,100,250,500,1000,2500,5000]
       };
       const labels = {steps:"Schritte",bike:"Radkilometer",squats:"Kniebeugen",pushups:"Liegestütze"};
-      const candidates = Object.keys(totals).filter(type => totals[type] > 0).map(type => {
-        const target = scales[type].find(value => value > totals[type]);
-        return target ? {type,target,value:totals[type],ratio:totals[type]/target} : null;
-      }).filter(Boolean).sort((a,b) => b.ratio-a.ratio);
-      const next = candidates[0];
+      // Replay shared daily entries so every device derives the same monthly challenge.
+      // Keep the target until reached, and celebrate through the completion day.
+      const daily = new Map();
+      entries.forEach(entry => {
+        const day = String(entry.date || "").slice(0,10);
+        const values = daily.get(day) || {steps:0,bike:0,squats:0,pushups:0};
+        Object.keys(values).forEach(type => values[type] += Number(entry[type]) || 0);
+        daily.set(day,values);
+      });
+      const running = {steps:0,bike:0,squats:0,pushups:0};
+      const choose = () => Object.keys(running).filter(type => running[type]>0).map(type => {
+        const target = scales[type].find(value => value > running[type]);
+        return target ? {type,target,ratio:running[type]/target} : null;
+      }).filter(Boolean).sort((a,b)=>b.ratio-a.ratio)[0] || null;
+      let goal = null, reachedDay = null;
+      for (const day of [...daily.keys()].sort()) {
+        if (reachedDay && day > reachedDay) { goal = choose(); reachedDay = null; }
+        Object.keys(running).forEach(type => running[type] += daily.get(day)[type]);
+        if (!goal) goal = choose();
+        if (goal && running[goal.type] >= goal.target && !reachedDay) reachedDay = day;
+      }
+      const next = goal ? {...goal,value:totals[goal.type],ratio:totals[goal.type]/goal.target} : null;
       if (!next) {
         card.hidden = true;
         return;
@@ -3199,9 +3216,9 @@ background:#0f172a
       const progress = document.getElementById("dashboardAchievementProgress");
       const fill = document.getElementById("dashboardAchievementFill");
       const kicker = card.querySelector("span");
-      if (kicker) kicker.textContent = "🤝 Gemeinsam zur nächsten Marke";
+      if (kicker) kicker.textContent = next.ratio >= 1 ? "🎉 Gemeinsam geschafft!" : "🤝 Gemeinsam zur nächsten Marke";
       if (title) title.textContent = fmt(next.target,0) + " " + labels[next.type];
-      if (progress) progress.textContent = fmt(next.value,next.type==="bike"?1:0) + " geschafft · noch " + fmt(next.target-next.value,next.type==="bike"?1:0) + " im " + getMonthTitle(key);
+      if (progress) progress.textContent = next.ratio >= 1 ? fmt(next.value,next.type==="bike"?1:0) + " geschafft · starkes Team!" : fmt(next.value,next.type==="bike"?1:0) + " geschafft · noch " + fmt(Math.max(0,next.target-next.value),next.type==="bike"?1:0) + " im " + getMonthTitle(key);
       if (fill) fill.style.width = Math.min(100,next.ratio*100) + "%";
     }
 
