@@ -3172,29 +3172,16 @@ background:#0f172a
       if (!card) return;
       const request = ++milestoneRequest;
       const key = selectedMonth();
-      const entries = allEntries.filter(entry => (entry.date || "").startsWith(key));
-      const totals = {
-        steps: entries.reduce((sum, entry) => sum + (+entry.steps || 0), 0),
-        bike: entries.reduce((sum, entry) => sum + (+entry.bike || 0), 0),
-        squats: entries.reduce((sum, entry) => sum + (+entry.squats || 0), 0),
-        pushups: entries.reduce((sum, entry) => sum + (+entry.pushups || 0), 0)
-      };
-      const scales = {
-        steps: [10000,25000,50000,100000,250000,500000,1000000,2500000],
-        bike: [25,50,100,250,500,1000,2500],
-        squats: [100,250,500,1000,2500,5000,10000],
-        pushups: [50,100,250,500,1000,2500,5000]
-      };
       const labels = {steps:"Schritte",bike:"Radkilometer",squats:"Kniebeugen",pushups:"Liegestütze"};
 
       card.hidden = true;
       if (key !== currentMonthKey()) return;
       try {
-        const {data,error} = await supabaseClient.rpc("wrc_team_milestone", {p_month:key,p_totals:totals});
+        const {data,error} = await supabaseClient.rpc("wrc_team_milestone", {p_month:key});
         if (request !== milestoneRequest || selectedMonth() !== key) return;
         if (error) throw error;
         if (!data || !labels[data.type]) return;
-        const next = {type:data.type,target:Number(data.target),value:totals[data.type]};
+        const next = {type:data.type,target:Number(data.target),value:Number(data.value)};
         next.ratio = next.value / next.target;
       card.hidden = false;
       card.onclick = () => openAnalysisDetails("activityDistributionChart");
@@ -3202,9 +3189,9 @@ background:#0f172a
       const progress = document.getElementById("dashboardAchievementProgress");
       const fill = document.getElementById("dashboardAchievementFill");
       const kicker = card.querySelector("span");
-      if (kicker) kicker.textContent = next.ratio >= 1 ? "🎉 Gemeinsam geschafft!" : "🤝 Gemeinsam zur nächsten Marke";
+      if (kicker) kicker.textContent = (next.ratio >= 1 ? "🎉 Gemeinsam geschafft!" : "🤝 Gemeinsam zur nächsten Marke") + (data.scope==="all" ? " · All-Time" : " · "+getMonthTitle(key));
       if (title) title.textContent = fmt(next.target,0) + " " + labels[next.type];
-      if (progress) progress.textContent = next.ratio >= 1 ? fmt(next.value,next.type==="bike"?1:0) + " geschafft · starkes Team!" : fmt(next.value,next.type==="bike"?1:0) + " geschafft · noch " + fmt(Math.max(0,next.target-next.value),next.type==="bike"?1:0) + " im " + getMonthTitle(key);
+      if (progress) progress.textContent = next.ratio >= 1 ? fmt(next.value,next.type==="bike"?1:0) + " geschafft · starkes Team!" : fmt(next.value,next.type==="bike"?1:0) + " geschafft · noch " + fmt(Math.max(0,next.target-next.value),next.type==="bike"?1:0);
       if (fill) fill.style.width = Math.min(100,next.ratio*100) + "%";
 
       } catch (error) {
