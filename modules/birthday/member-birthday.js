@@ -119,17 +119,9 @@
       render();
     } catch { /* An unavailable statistic is omitted, never estimated. */ }
   }
-  async function loadLifetime() {
-    const rows = [];
-    try {
-      for (let offset = 0; ; offset += 1000) {
-        const { data, error } = await supabaseClient.from("entries").select("*").order("date").order("person").range(offset, offset + 999);
-        if (error) return;
-        rows.push(...data);
-        if (data.length < 1000) break;
-      }
-      lifetimeEntries = cleanLoadedEntries(rows); render();
-    } catch { /* Keep a previously complete archive; never show a truncated total. */ }
+  function loadLifetime() {
+    lifetimeEntries = allEntries.slice();
+    render();
   }
   function confetti() {
     if (!dialog || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
