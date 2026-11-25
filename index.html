@@ -3167,6 +3167,14 @@ background:#0f172a
     }
 
     let milestoneRequest = 0;
+    // Refresh shared progress while the dashboard is visible, including other players' saves.
+    function refreshVisibleTeamMilestone() {
+      if (!document.hidden && document.getElementById("dashboard")?.classList.contains("active")) renderDashboardTeamMilestone();
+    }
+    document.addEventListener("visibilitychange", refreshVisibleTeamMilestone);
+    window.addEventListener("focus", refreshVisibleTeamMilestone);
+    setInterval(refreshVisibleTeamMilestone, 60000);
+
     async function renderDashboardTeamMilestone() {
       const card = document.getElementById("dashboardAchievementCard");
       if (!card) return;
