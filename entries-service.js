@@ -54,6 +54,15 @@
         return false;
       }
 
+      const { data: history, error: historyError } = await supabaseClient.rpc("wrc_historical_totals");
+      if (historyError || !history?.team || !history?.players || !history?.monthPoints) {
+        console.warn("WRC historical totals unavailable", historyError);
+        toast("Historische Daten konnten nicht geladen werden");
+        return false;
+      }
+      Object.assign(HISTORIC_TOTALS, history.team);
+      Object.assign(HISTORIC_PLAYER_TOTALS, history.players);
+      Object.assign(HISTORIC_MONTH_POINTS, history.monthPoints);
       allEntries = cleanLoadedEntries(rows);
       if (typeof WRCDashboardStories !== "undefined") WRCDashboardStories.onEntriesLoaded();
       if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onEntriesLoaded();
