@@ -400,9 +400,7 @@
     ];
     const duration = gameDurationLabel();
     if (duration) facts.push({ icon: "⏱️", label: "Spielzeit", value: duration, detail: `${state.mode} Straight Out` });
-    const funFact = pickGameFunFact();
-    if (funFact) facts.push(funFact);
-    return facts.slice(0, 5);
+    return [...facts, ...pickGameFunFact()];
   }
 
   function gameDurationLabel() {
@@ -423,7 +421,7 @@
 
   function pickGameFunFact() {
     const throws = state.throwLog || [];
-    if (!throws.length) return null;
+    if (!throws.length) return [];
     const misses = throws.filter(dart => dart.isMiss);
     const triples = throws.filter(dart => Number(dart.multiplier) === 3);
     const busts = throws.filter(dart => dart.isBust);
@@ -442,7 +440,26 @@
       playerDarts && { icon: "🏠", label: "Board-Stammgast", value: `${playerDarts.dartsThrown} Darts`, detail: playerDarts.name },
       { icon: "🧮", label: "Pfeil-Verbrauch", value: `${throws.length}`, detail: "Alle Darts dieser Partie" }
     ].filter(Boolean);
-    return candidates[throws.length % candidates.length];
+    const extra = [];
+    for (const p of state.players) {
+      const darts = throws.filter(d=>d.player===p.name);
+      let streak=0,best=0;
+      for(const d of darts){streak=d.isMiss?0:streak+1;best=Math.max(best,streak);}
+      if(best>=5)extra.push({icon:"🎯",label:"Trefferserie",value:best+" Darts",detail:p.name,weight:best>=10?8:4});
+      const t=darts.filter(d=>d.multiplier===3).length;
+      if(t>=2)extra.push({icon:"⚡",label:"Triple-Quote",value:Math.round(t/darts.length*100)+" %",detail:p.name+" · "+t+" Triple",weight:6});
+      const b=darts.filter(d=>d.isBust).length;
+      if(b>=2)extra.push({icon:"💥",label:"Pechvogel",value:b+" Busts",detail:p.name,weight:7});
+      const f=darts.filter(d=>d.baseValue===5).length;
+      if(f>=3)extra.push({icon:"🧲",label:"Fünfer-Magnet",value:f+" Treffer",detail:p.name,weight:5});
+    }
+    const winner=state.players.find(p=>p.name===state.winner?.name);
+    if(winner&&state.players.some(p=>finalAverage(p)>finalAverage(winner)))extra.push({icon:"🏆",label:"Überraschungssieger",value:winner.name,detail:"Sieg trotz niedrigerem Average",weight:9});
+    const pool=[...extra,...candidates.filter(c=>!/^0(?:×| Miss)/.test(c.value)).map(c=>({...c,weight:2}))];
+    pool.sort((a,b)=>b.weight-a.weight);
+    const chosen=[], labels=new Set(), people=new Set();
+    for(const c of pool){if(labels.has(c.label)||people.has(c.detail))continue;chosen.push(c);labels.add(c.label);people.add(c.detail);if(chosen.length===3)break;}
+    return chosen;
   }
 
   function checkoutSuggestion(remaining, dartsLeft) {
