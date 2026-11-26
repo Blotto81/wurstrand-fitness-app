@@ -19,14 +19,15 @@ function controls(mount,render,canEnd){
  const bar=mount.querySelector(".dart-caller-gamebar")||mount.querySelector(".dart-caller-shell");if(!bar)return;
  const div=document.createElement("div");div.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;padding:6px";
  div.innerHTML='<label><input type="checkbox" data-kb '+(s.active?'checked':'')+'> 🦵 Kniebeugen</label><label><input type="checkbox" data-guests '+(s.guests?'checked':'')+'> Gäste</label>'+(s.events.length&&canEnd?'<button type="button" data-end-kb>Dartabend beenden</button>':'');
- bar.after(div);
+ if(bar.matches(".dart-caller-shell"))bar.prepend(div);else bar.after(div);
  div.querySelector("[data-kb]").onchange=e=>{s.active=e.target.checked;save();render()};
  div.querySelector("[data-guests]").onchange=e=>{s.guests=e.target.checked;save();render()};
  div.querySelector("[data-end-kb]")?.addEventListener("click",async()=>{
  const names=[...new Set(s.events.flatMap(e=>[e.from,e.to]))];
  if(!confirm("Kniebeugen – Abschluss\n"+names.map(n=>n+": "+sum(n,"to")+" erhalten / "+sum(n,"from")+" verteilt").join("\n")+"\n\nDartabend speichern und Zähler zurücksetzen?"))return;
- const {error}=await supabaseClient.from("dart_fitness_sessions").insert({id:s.id,events:s.events});
- if(error&&error.code!=="23505"){alert("Speichern fehlgeschlagen. Zähler bleibt erhalten.");return}
+ const button=div.querySelector("[data-end-kb]");button.disabled=true;
+ let error;try{({error}=await supabaseClient.from("dart_fitness_sessions").insert({id:s.id,events:s.events}));}catch(e){error=e;}
+ if(error&&error.code!=="23505"){alert("Speichern fehlgeschlagen. Zähler bleibt erhalten.");button.disabled=false;return}
  s=fresh();save();render();window.WRCLoadDartThrowStats?.();
  });
 }
@@ -40,5 +41,5 @@ function stats(rows,selected,period){
  const rank=m=>[...m].sort((a,b)=>b[1]-a[1]);const top=m=>rank(m)[0];
  return '<section class="dart-visual-insights"><h4>🎯 Darts trifft Fitness</h4>'+(events.length?'<p>Gemeinsam '+events.reduce((n,e)=>n+e.count,0)+' Kniebeugen erspielt</p><p>😈 Kniebeugen-Terrorist: '+esc(top(given)[0])+' · '+top(given)[1]+'</p><p>🦵 Leidensmaschine: '+esc(top(received)[0])+' · '+top(received)[1]+'</p><p>🔥 Rekordabend: '+top(sessions)[1]+'</p>'+rank(pairs).map(([k,n])=>{const [a,b]=JSON.parse(k);return '<p>'+esc(a)+' → '+esc(b)+' · <strong>'+n+'</strong></p>'}).join(""):'<p>Noch keine abgeschlossenen Kniebeugen-Abende.</p>')+'</section>';
 }
-window.WRCDartFitness={add,undo,badge,controls,stats};
+window.WRCDartFitness={add,undo,badge,controls,stats,gameGiven:(game,name)=>s.events.filter(e=>e.game===game&&e.from===name).reduce((n,e)=>n+e.count,0)};
 })();
