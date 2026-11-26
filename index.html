@@ -1854,7 +1854,7 @@ background:#0f172a
     function currentMonthKey() {
       const d = new Date();
       const key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-      return monthGoals[key] ? key : "2026-05";
+      return key;
     }
 
     function selectedMonth() {
@@ -2408,6 +2408,21 @@ background:#0f172a
         o.innerText = p;
         select.appendChild(o);
       });
+    }
+
+    async function syncMonthGoals() {
+      const {data,error} = await supabaseClient.rpc("wrc_month_goals_current");
+      if (error || !data || !data[currentMonthKey()]) throw new Error("Monatsziele konnten nicht geladen werden");
+      const previous = document.getElementById("monthSelect")?.value;
+      const oldCurrent = Object.keys(monthGoals).filter(k=>k<=currentMonthKey()).sort().pop();
+      const changed = Object.keys(data).some(k=>monthGoals[k]!==data[k]);
+      Object.assign(monthGoals,data);
+      if (changed) {
+        initMonths();
+        initPlayerFilters();
+        initChartMonthFilter();
+        if (previous && previous!==oldCurrent && monthGoals[previous]) document.getElementById("monthSelect").value=previous;
+      }
     }
 
     function initMonths() {
