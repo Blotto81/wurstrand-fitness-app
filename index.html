@@ -1867,20 +1867,18 @@ background:#0f172a
     }
 
     function getMonthTitle(key) {
-      const titles = {
-        "2026-02": "Fitter Februar",
-        "2026-03": "Mächtiger März",
-        "2026-04": "Aktiver April",
-        "2026-05": "Mutiger Mai",
-        "2026-06": "Jubelnder Juni",
-        "2026-07": "Jäger Juli",
-        "2026-08": "Ausdauer-August",
-        "2026-09": "Starker September",
-        "2026-10": "Offensiver Oktober",
-        "2026-11": "Niemals-müde November",
-        "2026-12": "Dezember der Disziplin"
-      };
-      return titles[key] || "Wurstrand";
+      const titles = ["Jahresjäger Januar", "Fitter Februar", "Mächtiger März", "Aktiver April", "Mutiger Mai", "Jubelnder Juni", "Jäger Juli", "Ausdauer-August", "Starker September", "Offensiver Oktober", "Niemals-müde November", "Dezember der Disziplin"];
+      const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(key);
+      if (!match) return "Wurstrand";
+      const year = Number(match[1]), month = Number(match[2]);
+      const edition = year - (month === 1 ? 2027 : 2026) + 1;
+      if (edition < 1) return "Wurstrand";
+      if (edition === 1) return titles[month - 1];
+      let n = edition, roman = "";
+      for (const [value, symbol] of [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]]) {
+        while (n >= value) { roman += symbol; n -= value; }
+      }
+      return titles[month - 1] + " " + roman;
     }
 
     function getLastEntryDate(entries = allEntries) {
