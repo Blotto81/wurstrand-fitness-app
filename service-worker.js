@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v74";
+const CACHE_NAME = "wrc-app-v75";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -45,6 +45,7 @@ const APP_SHELL = [
   "./modules/dart-caller/dart-caller.css",
   "./modules/dart-caller/dart-caller-audio.js",
   "./modules/dart-caller/dart-caller.js",
+  "./modules/dart-caller/dart-fitness.js",
   "./modules/dart-caller/dart-cricket.css",
   "./modules/dart-caller/dart-cricket.js",
   "./modules/frisbee/frisbee.css",
