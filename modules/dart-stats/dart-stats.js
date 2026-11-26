@@ -13,6 +13,7 @@
   let averageView = "trend";
   let cachedThrows = [];
   let cachedGames = [];
+  let fitnessSessions = [];
 
   const escapeHtml = value => String(value)
     .replaceAll("&", "&amp;")
@@ -367,6 +368,7 @@
           </div>` : ""}
 ` : `<div class="dart-throw-empty"><strong>Noch kein Wurfprofil vorhanden.</strong><span>Die ersten Detaildaten entstehen automatisch mit der nächsten abgeschlossenen WRC-Caller-Partie.</span></div>`}
       </section>`;
+    mount.insertAdjacentHTML("beforeend",window.WRCDartFitness?.stats(fitnessSessions,selectedPlayers,selectedPeriod)||"");
     bind(mount);
   }
 
@@ -409,6 +411,7 @@
         fetchAll("dart_throws", "id,game_id,player,turn_number,dart_position,base_value,multiplier,scored_value,is_miss,is_bust,created_at", "id"),
         fetchAll("dart_games", "id,game_date,mode,created_at", "created_at")
       ]);
+      try { fitnessSessions=await fetchAll("dart_fitness_sessions","id,ended_at,events","ended_at"); } catch(e) { console.warn(e); }
       render();
     } catch (error) {
       console.error("DART THROW STATS ERROR:", error);
