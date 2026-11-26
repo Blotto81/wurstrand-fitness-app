@@ -2,6 +2,7 @@
 const key="wrc-dart-fitness-v1", members=["Thorsten","Basti","Marian","Fabi"];
 const fresh=()=>({id:crypto.randomUUID(),active:false,guests:false,events:[]});
 let s;try{s=JSON.parse(localStorage.getItem(key))||fresh()}catch{s=fresh()}
+let latest=null;
 const save=()=>localStorage.setItem(key,JSON.stringify(s));
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sum=(name,field)=>s.events.reduce((n,e)=>n+(e[field]===name?e.count:0),0);
@@ -10,16 +11,19 @@ function add({from,players,base,multiplier,total,previousTotal,closed=0,allClose
  let count=(multiplier===3&&base>=15&&base<=20||base===25&&multiplier===2)?5:0;
  count+=cricket? (closed===2?10:closed>0?5:0)+(allClosed?10:0) : previousTotal<75&&total>=75?5:0;
  if(!count)return;
- for(const to of players)if(to!==from&&(s.guests||members.includes(to)))s.events.push({from,to,count,mode,game,position,at:new Date().toISOString()});
+ const recipients=players.filter(to=>to!==from&&(s.guests||members.includes(to)));
+ for(const to of recipients)s.events.push({from,to,count,mode,game,position,at:new Date().toISOString()});
+ if(recipients.length)latest={from,recipients,count,game,position,at:Date.now()};
  save();
 }
-function undo(game,position){s.events=s.events.filter(e=>e.game!==game||e.position!==position);save()}
+function undo(game,position){if(latest?.game===game&&latest.position===position)latest=null;s.events=s.events.filter(e=>e.game!==game||e.position!==position);save()}
 function badge(name){return s.active&&(s.guests||members.includes(name))?' <small style="font-size:.72em;white-space:nowrap;opacity:.85">🦵 '+sum(name,"to")+'</small>':""}
 function controls(mount,render,canEnd){
  const bar=mount.querySelector(".dart-caller-gamebar")||mount.querySelector(".dart-caller-shell");if(!bar)return;
  const div=document.createElement("div");div.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;padding:6px";
  div.innerHTML='<label><input type="checkbox" data-kb '+(s.active?'checked':'')+'> 🦵 Kniebeugen</label><label><input type="checkbox" data-guests '+(s.guests?'checked':'')+'> Gäste</label>'+(s.events.length&&canEnd?'<button type="button" data-end-kb>Dartabend beenden</button>':'');
  if(bar.matches(".dart-caller-shell"))bar.prepend(div);else bar.after(div);
+ if(s.active&&latest&&Date.now()-latest.at<6500){const note=document.createElement("small");note.style.cssText="flex-basis:100%;color:#22c55e";note.textContent=latest.from+" verteilt: "+latest.recipients.map(n=>n+" +"+latest.count).join(" · ");div.append(note);setTimeout(()=>note.remove(),Math.max(0,6500-(Date.now()-latest.at)));}
  div.querySelector("[data-kb]").onchange=e=>{s.active=e.target.checked;save();render()};
  div.querySelector("[data-guests]").onchange=e=>{s.guests=e.target.checked;save();render()};
  div.querySelector("[data-end-kb]")?.addEventListener("click",async()=>{
@@ -28,7 +32,7 @@ function controls(mount,render,canEnd){
  const button=div.querySelector("[data-end-kb]");button.disabled=true;
  let error;try{({error}=await supabaseClient.from("dart_fitness_sessions").insert({id:s.id,events:s.events}));}catch(e){error=e;}
  if(error&&error.code!=="23505"){alert("Speichern fehlgeschlagen. Zähler bleibt erhalten.");button.disabled=false;return}
- s=fresh();save();render();window.WRCLoadDartThrowStats?.();
+ latest=null;s=fresh();save();render();window.WRCLoadDartThrowStats?.();
  });
 }
 function stats(rows,selected,period){
