@@ -68,6 +68,7 @@
       if (typeof WRCBonusStreaks !== "undefined") WRCBonusStreaks.onEntriesLoaded();
       rememberEntriesQuickstart(allEntries);
       await WRCBonusPoints.load();
+      try { await syncMonthGoals(); } catch (error) { console.warn(error); toast("Monatsziele konnten nicht aktualisiert werden"); }
       renderAll();
       WRCMemberBirthdays.onEntriesLoaded();
       WRCHolidays.onEntriesLoaded();
