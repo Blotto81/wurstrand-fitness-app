@@ -441,6 +441,8 @@
       { icon: "🧮", label: "Pfeil-Verbrauch", value: `${throws.length}`, detail: "Alle Darts dieser Partie" }
     ].filter(Boolean);
     const extra = [];
+    const fitness=state.players.map(p=>[p.name,window.WRCDartFitness?.gameGiven("x01:"+state.startedAt,p.name)||0]).sort((a,b)=>b[1]-a[1])[0];
+    if(fitness?.[1])extra.push({icon:"🦵",label:"Kniebeugen-Terrorist",value:fitness[1]+" verteilt",detail:fitness[0],weight:10});
     for (const p of state.players) {
       const darts = throws.filter(d=>d.player===p.name);
       let streak=0,best=0;
