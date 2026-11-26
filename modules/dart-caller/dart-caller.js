@@ -262,7 +262,7 @@
           <section class="dart-caller-scoreboard" aria-label="Spielstand" data-player-count="${state.players.length}">
             ${state.players.map((player, index) => `
               <article class="dart-caller-score ${index === state.currentPlayer ? "active" : ""} ${player.finished ? "finished" : ""}">
-                <span class="dart-caller-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}</span>
+                <span class="dart-caller-player-name" title="${escapeHtml(player.name)}">${escapeHtml(player.name)}${window.WRCDartFitness?.badge(player.name)||""}</span>
                 <span class="dart-caller-player-status">${player.finished ? `${player.place}. Platz` : index === state.currentPlayer ? "Am Board" : "Bereit"}</span>
                 <div class="dart-caller-score-ring">
                   <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
@@ -532,6 +532,7 @@
       });
     }
     bindEvents();
+    window.WRCDartFitness?.controls(mount,render,state.screen==="setup"||state.completed);
   }
 
   function bindEvents() {
@@ -777,6 +778,7 @@
       isMiss: base === 0,
       isBust: false
     });
+    window.WRCDartFitness?.add({from:player.name,players:state.players.map(p=>p.name),base,multiplier,total:state.darts.reduce((n,d)=>n+d.score,0),previousTotal:state.darts.reduce((n,d)=>n+d.score,0)-score,mode:String(state.mode),game:"x01:"+state.startedAt,position:state.throwLog.length});
     player.dartsThrown += 1;
 
     if (isThreeFives()) window.WRCDartCallerAudio?.playSpecial("threeFives", { playerName: player.name });
@@ -1057,6 +1059,7 @@
     window.WRCDartCallerAudio?.stop();
     const previous = state.undoStack.pop();
     if (!previous) return;
+    window.WRCDartFitness?.undo("x01:"+state.startedAt,state.throwLog.length);
     const savedGameId = state.savedGameId;
     if (savedGameId) highTurnHistory.delete(String(savedGameId));
     highTurnHistoryRequest += 1;
