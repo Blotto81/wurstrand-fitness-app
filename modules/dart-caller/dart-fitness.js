@@ -8,7 +8,7 @@ const sum=(name,field)=>s.events.reduce((n,e)=>n+(e[field]===name?e.count:0),0);
 function add({from,players,base,multiplier,total,previousTotal,closed=0,allClosed=false,cricket=false,mode,game,position}){
  if(!s.active||(!s.guests&&!members.includes(from)))return;
  let count=(multiplier===3&&base>=15&&base<=20||base===25&&multiplier===2)?5:0;
- count+=cricket? (closed===1?5:closed===2?10:0)+(allClosed?10:0) : previousTotal<75&&total>=75?5:0;
+ count+=cricket? (closed===2?10:closed>0?5:0)+(allClosed?10:0) : previousTotal<75&&total>=75?5:0;
  if(!count)return;
  for(const to of players)if(to!==from&&(s.guests||members.includes(to)))s.events.push({from,to,count,mode,game,position,at:new Date().toISOString()});
  save();
