@@ -1,0 +1,44 @@
+(() => {
+const key="wrc-dart-fitness-v1", members=["Thorsten","Basti","Marian","Fabi"];
+const fresh=()=>({id:crypto.randomUUID(),active:false,guests:false,events:[]});
+let s;try{s=JSON.parse(localStorage.getItem(key))||fresh()}catch{s=fresh()}
+const save=()=>localStorage.setItem(key,JSON.stringify(s));
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sum=(name,field)=>s.events.reduce((n,e)=>n+(e[field]===name?e.count:0),0);
+function add({from,players,base,multiplier,total,previousTotal,closed=0,allClosed=false,cricket=false,mode,game,position}){
+ if(!s.active||(!s.guests&&!members.includes(from)))return;
+ let count=(multiplier===3&&base>=15&&base<=20||base===25&&multiplier===2)?5:0;
+ count+=cricket? (closed===1?5:closed===2?10:0)+(allClosed?10:0) : previousTotal<75&&total>=75?5:0;
+ if(!count)return;
+ for(const to of players)if(to!==from&&(s.guests||members.includes(to)))s.events.push({from,to,count,mode,game,position,at:new Date().toISOString()});
+ save();
+}
+function undo(game,position){s.events=s.events.filter(e=>e.game!==game||e.position!==position);save()}
+function badge(name){return s.active&&(s.guests||members.includes(name))?' <small style="font-size:.72em;white-space:nowrap;opacity:.85">🦵 '+sum(name,"to")+'</small>':""}
+function controls(mount,render,canEnd){
+ const bar=mount.querySelector(".dart-caller-gamebar")||mount.querySelector(".dart-caller-shell");if(!bar)return;
+ const div=document.createElement("div");div.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;padding:6px";
+ div.innerHTML='<label><input type="checkbox" data-kb '+(s.active?'checked':'')+'> 🦵 Kniebeugen</label><label><input type="checkbox" data-guests '+(s.guests?'checked':'')+'> Gäste</label>'+(s.events.length&&canEnd?'<button type="button" data-end-kb>Dartabend beenden</button>':'');
+ bar.after(div);
+ div.querySelector("[data-kb]").onchange=e=>{s.active=e.target.checked;save();render()};
+ div.querySelector("[data-guests]").onchange=e=>{s.guests=e.target.checked;save();render()};
+ div.querySelector("[data-end-kb]")?.addEventListener("click",async()=>{
+ const names=[...new Set(s.events.flatMap(e=>[e.from,e.to]))];
+ if(!confirm("Kniebeugen – Abschluss\n"+names.map(n=>n+": "+sum(n,"to")+" erhalten / "+sum(n,"from")+" verteilt").join("\n")+"\n\nDartabend speichern und Zähler zurücksetzen?"))return;
+ const {error}=await supabaseClient.from("dart_fitness_sessions").insert({id:s.id,events:s.events});
+ if(error&&error.code!=="23505"){alert("Speichern fehlgeschlagen. Zähler bleibt erhalten.");return}
+ s=fresh();save();render();window.WRCLoadDartThrowStats?.();
+ });
+}
+function stats(rows,selected,period){
+ let events=rows.flatMap(r=>(r.events||[]).map(e=>({...e,session:r.id})));
+ if(period==="month"){const now=new Date();events=events.filter(e=>new Date(e.at).getMonth()===now.getMonth()&&new Date(e.at).getFullYear()===now.getFullYear())}
+ if(period==="last")events=events.filter(e=>e.session===rows[0]?.id);
+ if(selected)events=events.filter(e=>selected.has(e.from));
+ const pairs=new Map(),given=new Map(),received=new Map(),sessions=new Map();
+ for(const e of events){const k=JSON.stringify([e.from,e.to]);for(const [map,id] of [[pairs,k],[given,e.from],[received,e.to],[sessions,e.session]])map.set(id,(map.get(id)||0)+e.count)}
+ const rank=m=>[...m].sort((a,b)=>b[1]-a[1]);const top=m=>rank(m)[0];
+ return '<section class="dart-visual-insights"><h4>🎯 Darts trifft Fitness</h4>'+(events.length?'<p>Gemeinsam '+events.reduce((n,e)=>n+e.count,0)+' Kniebeugen erspielt</p><p>😈 Kniebeugen-Terrorist: '+esc(top(given)[0])+' · '+top(given)[1]+'</p><p>🦵 Leidensmaschine: '+esc(top(received)[0])+' · '+top(received)[1]+'</p><p>🔥 Rekordabend: '+top(sessions)[1]+'</p>'+rank(pairs).map(([k,n])=>{const [a,b]=JSON.parse(k);return '<p>'+esc(a)+' → '+esc(b)+' · <strong>'+n+'</strong></p>'}).join(""):'<p>Noch keine abgeschlossenen Kniebeugen-Abende.</p>')+'</section>';
+}
+window.WRCDartFitness={add,undo,badge,controls,stats};
+})();
