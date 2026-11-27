@@ -951,6 +951,7 @@
     turnTimer = null;
     state.completed = true;
     state.completedAt = Date.now();
+    window.WRCDartFitness?.record("x01:"+state.startedAt,String(state.mode),state.throwLog,[state.winner?.name].filter(Boolean));
     state.darts = [];
     state.lastInput = null;
     state.transition = null;
@@ -1078,7 +1079,7 @@
     window.WRCDartCallerAudio?.stop();
     const previous = state.undoStack.pop();
     if (!previous) return;
-    window.WRCDartFitness?.undo("x01:"+state.startedAt,state.throwLog.length);
+    window.WRCDartFitness?.undo("x01:"+state.startedAt,state.throwLog.length);window.WRCDartFitness?.forget("x01:"+state.startedAt);
     const savedGameId = state.savedGameId;
     if (savedGameId) highTurnHistory.delete(String(savedGameId));
     highTurnHistoryRequest += 1;
