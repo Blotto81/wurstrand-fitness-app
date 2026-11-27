@@ -2224,6 +2224,12 @@ background:#0f172a
       }
 
       if (id === "spieler") {
+        const select = document.getElementById("playerMonthSelect");
+        const current = currentMonthKey();
+        if (select) {
+          if (![...select.options].some(o => o.value === current)) select.add(new Option(getMonthTitle(current), current));
+          select.value = current;
+        }
         renderPlayerOverview();
       }
       if (id === "dartStatsPanel" && typeof window.WRCLoadDartThrowStats === "function") {
@@ -2412,7 +2418,7 @@ background:#0f172a
           `<option value="${key}">${getMonthTitle(key)}</option>`
         ).join("");
 
-        playerMonthSelect.value = selectedMonth();
+        playerMonthSelect.value = currentMonthKey();
       }
     }
 
