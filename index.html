@@ -5043,6 +5043,7 @@ background:#0f172a
         streakItem.innerHTML = exerciseStreak;
         motivation.appendChild(streakItem);
       }
+      let nextMarkCard = null;
       const levels = [10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000];
       const candidates = [
         {label:"Schritte",value:totals.steps,unit:" Schritte"},
@@ -5062,7 +5063,7 @@ background:#0f172a
         const milestoneInfo = document.createElement("small");
         milestoneInfo.textContent = "Noch " + fmt(next.target - next.value, next.label === "Rad" ? 1 : 0) + next.unit + " im gewählten Monat.";
         milestone.append(milestoneTitle,milestoneInfo);
-        motivation.appendChild(milestone);
+        nextMarkCard = milestone;
       }
       box.insertBefore(motivation, overview.nextSibling);
       // Show the all-time dart average on the main WRC player page as well.
@@ -5119,6 +5120,7 @@ background:#0f172a
       if (streak && streak !== metrics && streak !== games && streak !== record) {
         box.insertBefore(streak, overview.nextSibling);
       }
+      if (nextMarkCard) box.insertBefore(nextMarkCard, overview.nextSibling);
       wrap("👤 Meine Spielerkarte", [hero]);
       wrap("🏆 Meine Rekorde & Gesamtleistungen", [record]);
       wrap("📊 Meine ausführlichen Sportwerte", [metrics]);
