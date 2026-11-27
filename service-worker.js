@@ -1,4 +1,4 @@
-const CACHE_NAME = "wrc-app-v76";
+const CACHE_NAME = "wrc-app-v77";
 const APP_SHELL = [
   "./",
   "./index.html",
