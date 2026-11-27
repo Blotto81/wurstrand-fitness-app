@@ -285,6 +285,34 @@
     return `<section class="dart-awards"><h3>🌭 WRC Dart-Auszeichnungen</h3><p>Nur bei mindestens 30 protokollierten Pfeilen; Formpreise brauchen mehrere Partien.</p><div class="dart-award-grid">${award("🎯 Triple-Jäger",triple,s=>`${(s.tripleRate*100).toFixed(1)}% Triple-Treffer`)}${award("🧊 Konstanzmaschine",steady,s=>`Schwankung: ${s.spread.toFixed(1)} Average-Punkte`)}${award("🚀 Aufsteiger",comeback,s=>`+${s.gain.toFixed(1)} Average-Punkte` )}</div></section>`;
   }
 
+  function accuracyProfile(rows) {
+    const games=new Map(cachedGames.map(g=>[String(g.id),g]));
+    const pct=(n,d)=>d?100*n/d:0;
+    const fmt=n=>n.toFixed(1).replace(".",",")+" %";
+    function metrics(darts){
+      const visits=new Map();
+      for(const d of darts){
+        const mode=String(games.get(String(d.game_id))?.mode||"");
+        if(!/^(301|501)(?:\b|$)/.test(mode))continue;
+        const k=JSON.stringify([d.game_id,d.player,d.turn_number]);
+        visits.set(k,Boolean(visits.get(k)||d.is_bust));
+      }
+      const misses=darts.filter(d=>fieldLabel(d)==="Miss").length,busts=[...visits.values()].filter(Boolean).length;
+      return {darts:darts.length,misses,busts,visits:visits.size,miss:pct(misses,darts.length),bust:pct(busts,visits.size)};
+    }
+    const names=[...new Set(rows.map(d=>d.player))];
+    const people=names.map(name=>({name,...metrics(rows.filter(d=>d.player===name))}));
+    const total=metrics(rows);
+    const bar=(p,color)=>'<div style="height:10px;border-radius:8px;background:rgba(128,128,128,.18);overflow:hidden"><div style="height:100%;border-radius:8px;background:'+color+';width:'+Math.min(100,p)+'%"></div></div>';
+    const scale=Math.max(10,...people.map(p=>p.bust));
+    const list=(items,kind)=>items.map(p=>'<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:8px"><strong>'+escapeHtml(p.name)+'</strong><strong>'+(kind==="miss"?fmt(p.miss):p.visits?fmt(p.bust):"–")+'</strong></div>'+bar(kind==="miss"?p.miss:p.bust/scale*100,kind==="miss"?"#ef8b67":"#a78bfa")+'<small>'+ (kind==="miss"?p.misses+" Misses / "+p.darts+" Pfeile":p.busts+" Busts / "+p.visits+" Aufnahmen")+'</small></div>').join("");
+    const dates=[...new Set(rows.map(d=>games.get(String(d.game_id))?.game_date).filter(Boolean))].sort();
+    const daily=dates.map(date=>({date,...metrics(rows.filter(d=>games.get(String(d.game_id))?.game_date===date))}));
+    const latest=daily.at(-1), earlier=metrics(rows.filter(d=>games.get(String(d.game_id))?.game_date!==latest?.date));
+    const line=(key,color)=>{const data=daily.map((d,i)=>({x:25+i*250/Math.max(1,daily.length-1),y:105-d[key]*80/Math.max(10,...daily.flatMap(d=>[d.miss,d.bust])),d})).filter(p=>key!=="bust"||p.d.visits);return '<polyline fill="none" stroke="'+color+'" stroke-width="2.5" points="'+data.map(p=>p.x+','+p.y).join(" ")+'"/>'+data.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="'+color+'"><title>'+p.d.date+': '+fmt(p.d[key])+'</title></circle>').join("")};
+    return '<section class="dart-visual-insights"><h4>🎯 Treffsicherheit &amp; Überwerfen</h4><p>Misses: Anteil aller Pfeile · Busts: Anteil der 301/501-Aufnahmen</p><h4>Miss-Quote · '+fmt(total.miss)+'</h4>'+list(people.slice().sort((a,b)=>a.miss-b.miss),"miss")+'<h4>💥 Bust-Quote · '+(total.visits?fmt(total.bust):"–")+'</h4>'+list(people.filter(p=>p.visits).sort((a,b)=>b.bust-a.bust),"bust")+(daily.length>1?'<h4>📈 Entwicklung je Spieltag</h4><svg viewBox="0 0 300 130" width="100%" role="img" aria-label="Miss- und Bust-Quoten nach Spieltag"><path d="M25 25V105H275" stroke="currentColor" opacity=".3" fill="none"/>'+line("miss","#ef8b67")+line("bust","#a78bfa")+'<text x="25" y="122" font-size="9" fill="currentColor">'+daily[0].date.slice(5)+'</text><text x="275" y="122" text-anchor="end" font-size="9" fill="currentColor">'+latest.date.slice(5)+'</text></svg><p><span style="color:#ef8b67">●</span> Miss · <span style="color:#a78bfa">●</span> Bust</p><p>Letzter Spieltag: '+fmt(latest.miss)+' Miss · '+(latest.visits?fmt(latest.bust):"–")+' Bust<br>Frühere Spieltage: '+fmt(earlier.miss)+' Miss · '+(earlier.visits?fmt(earlier.bust):"–")+' Bust</p>':'')+'</section>';
+  }
+
   function render() {
     const mount = document.getElementById("dartThrowStats");
     if (!mount) return;
@@ -339,6 +367,7 @@
         </div>
         ${averageChart()}
         ${funAwards(rows)}
+        ${rows.length ? accuracyProfile(rows) : ""}
         ${rows.length ? `
           ${` `}
           <div class="dart-board-layout">
