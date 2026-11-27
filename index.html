@@ -162,8 +162,6 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
     <div class="drawer-divider"></div>
     <button class="drawer-link tab" onclick="showTab('recordsPanel',this); toggleMainMenu(false)">🏆 Rekorde</button>
-    <button class="drawer-link tab" onclick="showTab('cursesPanel',this); toggleMainMenu(false)">☠️ Verfluchte
-      Rekorde</button>
     <button class="drawer-link tab" onclick="showTab('funfactsPanel',this); toggleMainMenu(false)">😂 Fun Facts</button>
     <button class="drawer-link tab" onclick="showTab('bobPanel',this); toggleMainMenu(false)">🥸 B.o.B. – Best of Bärte</button>
 
@@ -902,6 +900,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
   </div>
 
   <div id="recordsPanel" class="panel">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><button type="button" id="recordNormalTab" aria-pressed="true" onclick="switchRecordView(false)">🏆 Rekorde</button><button type="button" id="recordCurseTab" aria-pressed="false" onclick="switchRecordView(true)">☠️ Verfluchte Rekorde</button></div>
+    <div id="normalRecordView">
 
     <div class="card">
 
@@ -968,30 +968,10 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
     </div>
 
-  </div>
-
-  <div id="cursesPanel" class="panel">
-
-    <div class="card">
-      <h3>☠️ Verfluchte Rekorde</h3>
-      <p class="sub">Die härtesten kleinen WRC-Fails – getrennt nach aktuellem Monat und All Time.</p>
-
-      <div class="grid grid2">
-
-        <div>
-          <h3>📅 Verfluchte Rekorde · Monat</h3>
-          <div id="monthCurses"></div>
-        </div>
-
-        <div>
-          <h3>🌍 Verfluchte Rekorde · All Time</h3>
-          <div id="alltimeCurses"></div>
-        </div>
-
-      </div>
-
     </div>
-
+    <div id="curseRecordView" hidden>
+      <div class="card"><h3>☠️ Verfluchte Rekorde</h3><div id="curseRecordCards" style="display:grid;gap:12px"></div><p class="sub">Monatsrekorde: nur abgeschlossene Monate mit verfügbaren Einzelbuchungen; Nullwerte bei einzelnen Aktivitäten zählen wie bisher nicht.</p></div>
+    </div>
   </div>
 
   <div id="eintragen" class="panel">
@@ -5336,17 +5316,22 @@ background:#0f172a
       return html || '<div class="sub">Noch keine verfluchten Rekorde.</div>';
     }
 
-    function renderCurses() {
-      const monthBox = document.getElementById("monthCurses");
-      const alltimeBox = document.getElementById("alltimeCurses");
-
-      if (monthBox) {
-        monthBox.innerHTML = getCurses(monthEntries());
-      }
-
-      if (alltimeBox) {
-        alltimeBox.innerHTML = getCurses(allEntries);
-      }
+    function switchRecordView(cursed){
+      document.getElementById("normalRecordView").hidden=cursed;
+      document.getElementById("curseRecordView").hidden=!cursed;
+      for(const [id,active] of [["recordNormalTab",!cursed],["recordCurseTab",cursed]]){const el=document.getElementById(id);el.setAttribute("aria-pressed",String(active));el.style.border=active?"2px solid "+(cursed?"#c084fc":"#e8c66c"):"";}
+    }
+    function renderCurses(){
+      const box=document.getElementById("curseRecordCards");if(!box)return;
+      const current=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Berlin",year:"numeric",month:"2-digit"}).format(new Date());
+      const valid=allEntries.filter(e=>e.date&&e.person&&e.date<=getLastEntryDate(allEntries));
+      const months=new Map(),teamMonths=new Map();
+      for(const e of valid){const month=e.date.slice(0,7);if(month>=current)continue;const key=JSON.stringify([month,e.person]);const t=months.get(key)||{month,person:e.person,steps:0,bike:0,squats:0,pushups:0};for(const k of ["steps","bike","squats","pushups"])t[k]+=+e[k]||0;months.set(key,t);teamMonths.set(month,(teamMonths.get(month)||0)+calcPoints(e).total)}
+      const teamDays=Object.entries(getDayTotals(valid)).map(([date,t])=>({date,points:t.points}));
+      const defs=[["🌀 Schwächster Teamtag","Schwächster Teammonat","points"],["🪨 Wenigste Schritte","Wenigste Schritte","steps"],["🚴 Kürzeste Fahrradfahrt","Wenigste Radkilometer","bike"],["🏋️ Kleinste Kniebeugen-Runde","Wenigste Kniebeugen","squats"],["💪 Kleinste Liegestütz-Runde","Wenigste Liegestütze","pushups"]];
+      box.replaceChildren();
+      for(const [title,monthTitle,k] of defs){const team=k==="points",dec=team||k==="bike"?1:0;const rounded=v=>Math.round(v*10**dec)/10**dec;const dayRows=team?teamDays:valid.filter(e=>+e[k]>0);const monthRows=team?[...teamMonths].map(([month,points])=>({month,points})):[...months.values()].filter(e=>e[k]>0);const card=document.createElement("div");card.className="mini";card.style.borderColor="#70404b";const h=document.createElement("div");h.className="l";h.textContent=title;card.append(h);const grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:8px";card.append(grid);
+      for(const [label,rows,monthly] of [["Tagesrekord",dayRows,false],["Monatsrekord",monthRows,true]]){const col=document.createElement("div");col.style.cssText="min-width:0;"+(monthly?"border-left:1px solid #70404b;padding-left:10px":"");const l=document.createElement("div");l.className="sub";l.textContent=label;l.style.color="#fca5a5";col.append(l);if(monthly)l.title=monthTitle;const min=rows.length?Math.min(...rows.map(e=>rounded(+e[k]||0))):null;const v=document.createElement("div");v.className="v";v.style.cssText="font-size:clamp(17px,5vw,25px);overflow-wrap:anywhere";v.textContent=min===null?"–":fmt(min,dec)+(team?" Pkt.":k==="bike"?" km":"");col.append(v);for(const e of rows.filter(e=>rounded(+e[k]||0)===min)){const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:5px;margin-top:6px";if(e.person){const a=document.createElement("span");a.className="wrc-player-avatar";a.style.cssText="width:30px;height:30px;flex:0 0 30px;border-color:#a855f7";const p=playerProfiles[e.person]||{};a.textContent=p.initials||e.person.slice(0,2);if(p.image){const img=document.createElement("img");img.src=p.image;img.alt=e.person;img.loading="lazy";img.onerror=()=>{a.textContent=e.person.slice(0,2)};a.replaceChildren(img)}row.append(a)}const info=document.createElement("div");info.className="sub";info.style.fontSize="11px";info.textContent=(e.person||"Team")+" · "+(monthly?new Date(e.month+"-15T12:00:00").toLocaleDateString("de-DE",{month:"short",year:"numeric"}):formatDate(e.date));row.append(info);if(!monthly){row.style.cursor="pointer";row.onclick=()=>jumpToDate(e.date)}col.append(row)}grid.append(col)}box.append(card)}
     }
 
     function maybeRandomFact() {
