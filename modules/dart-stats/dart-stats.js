@@ -360,12 +360,15 @@
       <section class="dart-throw-stats">
         <div class="dart-throw-heading"><div><span>WRC Caller</span><h3>🎯 Wurfprofil</h3><p>Jeder Pfeil erzählt ein kleines Stück Wahrheit.</p></div></div>
         <div class="dart-throw-filters" aria-label="Statistik filtern">
-          <p class="dart-filter-hint">Spieler (Mehrfachauswahl) – gilt für Average, Fun Facts und Trefferbild</p>
+          <p class="dart-filter-hint">Spieler auswählen – gilt für alle folgenden Statistikbereiche</p>
           <div>${["all", ...players].map(player => `<button type="button" aria-pressed="${player === "all" ? selectedPlayers === null : selectedPlayers === null || selectedPlayers.has(player)}" class="${player === "all" ? selectedPlayers === null ? "selected" : "" : selectedPlayers === null || selectedPlayers.has(player) ? "selected" : ""}" data-dart-player="${escapeHtml(player)}"><i style="--dot:${COLORS[player] || "#facc15"}"></i>${player === "all" ? "Alle" : escapeHtml(player)}</button>`).join("")}</div>
-          <p class="dart-filter-hint">Trefferbild-Zeitraum (unabhängig vom Average-Zeitfenster)</p>
-          <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
+
         </div>
         ${averageChart()}
+        <div class="dart-throw-filters" style="margin-top:20px;border-top:1px solid rgba(128,128,128,.35);padding-top:16px"><h3>🎯 Wurfprofil &amp; Trefferstatistik</h3>
+          <p class="dart-filter-hint">Zeitraum für Wurfprofil, Misses, Busts und Auszeichnungen</p>
+          <div>${[["all", "Gesamt"], ["month", "Dieser Monat"], ["last", "Letzte Partie"]].map(([value, label]) => `<button type="button" class="${selectedPeriod === value ? "selected" : ""}" data-dart-period="${value}">${label}</button>`).join("")}</div>
+        </div>
         ${funAwards(rows)}
         ${rows.length ? accuracyProfile(rows) : ""}
         ${rows.length ? `
