@@ -21,7 +21,7 @@ function badge(name){return s.active&&(s.guests||members.includes(name))?' <smal
 function controls(mount,render,canEnd){
  const bar=mount.querySelector(".dart-caller-gamebar")||mount.querySelector(".dart-caller-shell");if(!bar)return;
  const div=document.createElement("div");div.style.cssText="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;padding:6px";
- div.innerHTML='<label style="display:inline-flex;align-items:center;gap:7px"><input role="switch" aria-label="Kniebeugen aktivieren" type="checkbox" data-kb '+(s.active?'checked':'')+'> 🦵 Kniebeugen</label><label style="display:inline-flex;align-items:center;gap:7px"><input role="switch" aria-label="Gäste einbeziehen" type="checkbox" data-guests '+(s.guests?'checked':'')+'> Gäste einbeziehen</label>'+(s.events.length&&canEnd?'<button type="button" data-end-kb>Dartabend beenden</button>':'');
+ div.innerHTML='<label style="display:inline-flex;align-items:center;gap:7px"><input role="switch" aria-label="Kniebeugen aktivieren" type="checkbox" data-kb '+(s.active?'checked':'')+'> 🦵 Kniebeugen</label><label style="display:inline-flex;align-items:center;gap:7px"><input role="switch" aria-label="Gäste einbeziehen" type="checkbox" data-guests '+(s.guests?'checked':'')+'> Gäste einbeziehen</label>'+((s.active||s.events.length)&&canEnd?'<button type="button" data-end-kb>Dartabend beenden</button>':'');
  if(bar.matches(".dart-caller-shell"))bar.prepend(div);else bar.after(div);
  if(s.active&&latest&&Date.now()-latest.at<6500){const note=document.createElement("small");note.style.cssText="flex-basis:100%;color:#22c55e";note.textContent=latest.from+" verteilt: "+latest.recipients.map(n=>n+" +"+latest.count).join(" · ");div.append(note);setTimeout(()=>note.remove(),Math.max(0,6500-(Date.now()-latest.at)));}
  const style=document.createElement("style");style.textContent='input[data-kb],input[data-guests]{appearance:none;-webkit-appearance:none;width:40px;height:23px;border:1px solid #777;border-radius:20px;background:#52525b;position:relative;cursor:pointer;margin:0;flex-shrink:0;transition:background .15s}input[data-kb]:before,input[data-guests]:before{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}input[data-kb]:checked,input[data-guests]:checked{background:#16a34a;border-color:#16a34a}input[data-kb]:checked:before,input[data-guests]:checked:before{transform:translateX(17px)}input[data-kb]:focus-visible,input[data-guests]:focus-visible{outline:2px solid #60a5fa;outline-offset:3px}';div.append(style);
@@ -29,11 +29,21 @@ function controls(mount,render,canEnd){
  div.querySelector("[data-guests]").onchange=e=>{s.guests=e.target.checked;save();render()};
  div.querySelector("[data-end-kb]")?.addEventListener("click",async()=>{
  const names=[...new Set(s.events.flatMap(e=>[e.from,e.to]))];
- if(!confirm("Kniebeugen – Abschluss\n"+names.map(n=>n+": "+sum(n,"to")+" erhalten / "+sum(n,"from")+" verteilt").join("\n")+"\n\nDartabend speichern und Zähler zurücksetzen?"))return;
- const button=div.querySelector("[data-end-kb]");button.disabled=true;
+
+ const button=div.querySelector("[data-end-kb]");
+ const panel=document.createElement("section");panel.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:16px";
+ const allNames=[...new Set([...names,...members])];
+ const total=s.events.reduce((n,e)=>n+e.count,0);
+ const leader=names.slice().sort((a,b)=>sum(b,"from")-sum(a,"from"))[0];
+ panel.innerHTML='<div style="background:#18181b;color:#fff;border-radius:16px;padding:20px;width:min(100%,440px);max-height:85vh;overflow:auto"><h2>🎯 Dartabend – Abschluss</h2><p>🦵 '+total+' Kniebeugen insgesamt</p>'+allNames.map(n=>'<div style="padding:12px 0;border-bottom:1px solid #444"><strong>'+esc(n)+'</strong><div style="font-size:24px">🦵 '+sum(n,"to")+' erhalten</div><small>'+sum(n,"from")+' verteilt</small></div>').join("")+(leader?'<p>😈 Meiste verteilt: '+esc(leader)+' ('+sum(leader,"from")+')</p>':'')+'<p>Bitte Kniebeugen manuell eintragen. Erst beim Speichern wird der Zähler zurückgesetzt.</p><button class="dart-caller-primary" data-confirm-end>Speichern &amp; Dartabend beenden</button><button class="dart-caller-secondary" data-cancel-end>Zurück</button><p data-end-error role="alert"></p></div>';
+ document.body.append(panel);
+ panel.querySelector("[data-cancel-end]").onclick=()=>panel.remove();
+ panel.querySelector("[data-confirm-end]").onclick=async()=>{
+ const confirmButton=panel.querySelector("[data-confirm-end]");confirmButton.disabled=true;button.disabled=true;
  let error;try{({error}=await supabaseClient.from("dart_fitness_sessions").insert({id:s.id,events:s.events}));}catch(e){error=e;}
- if(error&&error.code!=="23505"){alert("Speichern fehlgeschlagen. Zähler bleibt erhalten.");button.disabled=false;return}
- latest=null;s=fresh();save();render();window.WRCLoadDartThrowStats?.();
+ if(error&&error.code!=="23505"){panel.querySelector("[data-end-error]").textContent="Speichern fehlgeschlagen. Zähler bleibt erhalten.";confirmButton.disabled=false;button.disabled=false;return}
+ panel.remove();latest=null;s=fresh();save();render();window.WRCLoadDartThrowStats?.();
+ };
  });
 }
 function stats(rows,selected,period){
