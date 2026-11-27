@@ -3451,7 +3451,7 @@ background:#0f172a
       let monthly=true;
       function draw(){
         body.replaceChildren();controls.replaceChildren();
-        for(const [label,m] of [["Tag",false],["Monat",true]]){const b=document.createElement("button");b.type="button";b.className="secondary";b.style.cssText="flex:1;padding:6px;min-height:0;"+(monthly===m?"border-color:#d4af37":"");b.textContent=label;b.setAttribute("aria-pressed",String(monthly===m));b.onclick=()=>{monthly=m;draw()};controls.append(b)}
+        for(const [label,m] of [["Tag",false],["Monat",true]]){const b=document.createElement("button");b.type="button";b.className="secondary";b.style.cssText="flex:1;padding:6px;min-height:0;"+(monthly===m?"background:"+(cursed?"#53376e":"#665324")+"!important;color:#fff!important;border:2px solid "+(cursed?"#c084fc":"#e8c66c")+"!important;":"background:#334155!important;color:#cbd5e1!important;border:2px solid transparent!important;");b.textContent=(monthly===m?"✓ ":"")+label;b.setAttribute("aria-pressed",String(monthly===m));b.onclick=()=>{monthly=m;draw()};controls.append(b)}
         const rows=(monthly?monthRows:dayRows).filter(e=>cursed||score(e)>0).slice().sort((a,b)=>(cursed?1:-1)*(score(a)-score(b)));
         const groups=[];for(const e of rows){const v=score(e);let g=groups.at(-1);if(!g||g.value!==v){if(groups.length===3)break;g={value:v,rows:[]};groups.push(g)}g.rows.push(e)}
         if(!groups.length){body.textContent="Noch keine Rekorde.";return}
