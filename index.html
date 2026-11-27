@@ -1803,9 +1803,7 @@ background:#0f172a
     }
 
     function currentMonthKey() {
-      const d = new Date();
-      const key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-      return key;
+      return new Intl.DateTimeFormat("sv-SE", {timeZone:"Europe/Berlin",year:"numeric",month:"2-digit"}).format(new Date());
     }
 
     function selectedMonth() {
@@ -2365,25 +2363,27 @@ background:#0f172a
       const {data,error} = await supabaseClient.rpc("wrc_month_goals_current");
       if (error || !data || !data[currentMonthKey()]) throw new Error("Monatsziele konnten nicht geladen werden");
       const previous = document.getElementById("monthSelect")?.value;
-      const oldCurrent = Object.keys(monthGoals).filter(k=>k<=currentMonthKey()).sort().pop();
+      const oldCurrent = currentMonthKey();
       const changed = Object.keys(data).some(k=>monthGoals[k]!==data[k]);
       Object.assign(monthGoals,data);
       if (changed) {
         initMonths();
         initPlayerFilters();
         initChartMonthFilter();
-        if (previous && previous!==oldCurrent && monthGoals[previous]) document.getElementById("monthSelect").value=previous;
+        if (monthArchiveChosen && previous && previous!==oldCurrent && monthGoals[previous]) document.getElementById("monthSelect").value=previous;
       }
     }
 
+    let monthArchiveChosen = false;
+    let openedMonthKey = currentMonthKey();
     function initMonths() {
       const select = document.getElementById("monthSelect");
       select.innerHTML = "";
 
-      Object.keys(monthGoals).forEach(key => {
+      [...new Set([...Object.keys(monthGoals),currentMonthKey()])].sort().forEach(key => {
         const o = document.createElement("option");
         o.value = key;
-        o.innerText = `${getMonthTitle(key)} · Ziel ${fmt(monthGoals[key])}`;
+        o.innerText = `${getMonthTitle(key)} · ${monthGoals[key] ? "Ziel "+fmt(monthGoals[key]) : "Ziel wird geladen"}`;
 
         if (key === currentMonthKey()) {
           o.selected = true;
@@ -2392,7 +2392,8 @@ background:#0f172a
         select.appendChild(o);
       });
 
-      select.addEventListener("change", renderAll);
+      select.value = currentMonthKey();
+      select.onchange = () => { monthArchiveChosen = true; renderAll(); };
     }
     function initPlayerFilters() {
       const playerSelect = document.getElementById("playerSelect");
@@ -2407,7 +2408,7 @@ background:#0f172a
       }
 
       if (playerMonthSelect) {
-        playerMonthSelect.innerHTML = Object.keys(monthGoals).map(key =>
+        playerMonthSelect.innerHTML = [...new Set([...Object.keys(monthGoals),currentMonthKey()])].sort().map(key =>
           `<option value="${key}">${getMonthTitle(key)}</option>`
         ).join("");
 
@@ -5444,6 +5445,8 @@ background:#0f172a
 
     window.addEventListener("pageshow", event => {
       if (event.persisted) {
+        monthArchiveChosen = false;
+        initMonths(); initPlayerFilters(); initChartMonthFilter(); renderAll();
         applyingWrcHistory = true;
         showTab("dashboard", menuLinkForPanel("dashboard"), { history: false });
         history.replaceState({
@@ -5454,6 +5457,13 @@ background:#0f172a
         applyingWrcHistory = false;
       }
       window.scrollTo(0, 0);
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if(document.hidden || openedMonthKey === currentMonthKey()) return;
+      openedMonthKey = currentMonthKey(); monthArchiveChosen = false;
+      initMonths(); initPlayerFilters(); initChartMonthFilter();
+      syncMonthGoals().catch(console.warn).finally(renderAll);
     });
 
     function toggleDrawerGroup(submenuId, arrowId) {
