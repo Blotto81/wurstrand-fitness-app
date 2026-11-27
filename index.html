@@ -963,39 +963,8 @@ body{padding-bottom:calc(77px + env(safe-area-inset-bottom))!important}
 
       <h3>👤 Einzel-Rekorde</h3>
 
-      <div class="grid grid3">
-
-        <div class="mini" style="cursor:pointer" onclick="jumpToDate(singleRecords.steps.date)">
-          <div class="l">👣 meiste Schritte</div>
-          <div class="v" id="singleSteps">0</div>
-          <div class="sub" id="singleStepsInfo">-</div>
-        </div>
-
-        <div class="mini" style="cursor:pointer" onclick="jumpToDate(singleRecords.bike.date)">
-          <div class="l">🚴 weiteste Fahrt</div>
-          <div class="v" id="singleBike">0 km</div>
-          <div class="sub" id="singleBikeInfo">-</div>
-        </div>
-
-        <div class="mini" style="cursor:pointer" onclick="jumpToDate(singleRecords.points.date)">
-          <div class="l">⚡ höchste Punktzahl</div>
-          <div class="v" id="singlePoints">0</div>
-          <div class="sub" id="singlePointsInfo">-</div>
-        </div>
-
-        <div class="mini" style="cursor:pointer" onclick="jumpToDate(singleRecords.squats.date)">
-          <div class="l">🦵 meiste Kniebeugen</div>
-          <div class="v" id="singleSquats">0</div>
-          <div class="sub" id="singleSquatsInfo">-</div>
-        </div>
-
-        <div class="mini" style="cursor:pointer" onclick="jumpToDate(singleRecords.pushups.date)">
-          <div class="l">💪 meiste Liegestütze</div>
-          <div class="v" id="singlePushups">0</div>
-          <div class="sub" id="singlePushupsInfo">-</div>
-        </div>
-
-      </div>
+      <div id="singleRecordCards" style="display:grid;gap:12px"></div>
+      <p class="sub">Monatsrekorde aus den verfügbaren Einzelbuchungen, inklusive laufendem Monat.</p>
 
     </div>
 
@@ -3485,45 +3454,18 @@ background:#0f172a
     }
 
     function renderSingleRecordBox(records) {
-      setText("singleSteps", fmt(records.steps.value));
-      setText(
-        "singleStepsInfo",
-        records.steps.date
-          ? `${records.steps.person} · ${formatDate(records.steps.date)}`
-          : "-"
-      );
-
-      setText("singleBike", fmt(records.bike.value, 1) + " km");
-      setText(
-        "singleBikeInfo",
-        records.bike.date
-          ? `${records.bike.person} · ${formatDate(records.bike.date)}`
-          : "-"
-      );
-
-      setText("singlePoints", fmt(records.points.value, 1));
-      setText(
-        "singlePointsInfo",
-        records.points.date
-          ? `${records.points.person} · ${formatDate(records.points.date)}`
-          : "-"
-      );
-
-      setText("singleSquats", fmt(records.squats.value));
-      setText(
-        "singleSquatsInfo",
-        records.squats.date
-          ? `${records.squats.person} · ${formatDate(records.squats.date)}`
-          : "-"
-      );
-
-      setText("singlePushups", fmt(records.pushups.value));
-      setText(
-        "singlePushupsInfo",
-        records.pushups.date
-          ? `${records.pushups.person} · ${formatDate(records.pushups.date)}`
-          : "-"
-      );
+      const box=document.getElementById("singleRecordCards"); if(!box)return;
+      const keys=["steps","bike","points","squats","pushups"];
+      const months=new Map();
+      for(const e of allEntries){if(!e.date||!e.person)continue;const month=e.date.slice(0,7),key=JSON.stringify([month,e.person]);const t=months.get(key)||{month,person:e.person,steps:0,bike:0,points:0,squats:0,pushups:0};for(const k of keys)t[k]+=k==="points"?calcPoints(e).total:(+e[k]||0);months.set(key,t)}
+      const labels=["👣 meiste Schritte","🚴 Radkilometer","⚡ höchste Punktzahl","🦵 meiste Kniebeugen","💪 meiste Liegestütze"];
+      const round=(v,k)=>Math.round(v*(k==="bike"||k==="points"?10:1))/(k==="bike"||k==="points"?10:1);
+      const avatar=(person)=>{const a=document.createElement("span");a.className="wrc-player-avatar";a.style.cssText="width:30px;height:30px;flex:0 0 30px";const p=playerProfiles[person]||{};a.textContent=p.initials||person.slice(0,2);if(p.image){const img=document.createElement("img");img.src=p.image;img.alt=person;img.loading="lazy";img.onerror=()=>{a.textContent=person.slice(0,2)};a.replaceChildren(img)}return a};
+      box.replaceChildren();
+      keys.forEach((k,i)=>{const card=document.createElement("div");card.className="mini";const title=document.createElement("div");title.className="l";title.textContent=labels[i];card.append(title);const grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:8px";card.append(grid);
+      const day=records[k],best=Math.max(0,...Array.from(months.values(),t=>round(t[k],k)));const monthly=[...months.values()].filter(t=>best>0&&round(t[k],k)===best);
+      const daily=allEntries.filter(e=>day.value>0&&round(k==="points"?calcPoints(e).total:(+e[k]||0),k)===round(day.value,k)).map(e=>({person:e.person,date:e.date}));if(!daily.length&&day.person)daily.push(day);
+      for(const [label,value,holders,isMonth] of [["Tagesrekord",day.value,daily,false],["Monatsrekord",best,monthly,true]]){const col=document.createElement("div");col.style.cssText="min-width:0;"+(isMonth?"border-left:1px solid #475569;padding-left:10px":"");const l=document.createElement("div");l.className="sub";l.style.color=isMonth?"#e8c66c":"";l.textContent=label;const v=document.createElement("div");v.className="v";v.style.cssText="font-size:clamp(17px,5vw,25px);overflow-wrap:anywhere";v.textContent=fmt(value,k==="bike"||k==="points"?1:0)+(k==="bike"?" km":"");col.append(l,v);for(const h of holders){const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:5px;margin-top:6px;min-width:0";const info=document.createElement("div");info.className="sub";info.style.cssText="font-size:11px;overflow-wrap:anywhere";const date=isMonth?new Date(h.month+"-15T12:00:00").toLocaleDateString("de-DE",{month:"short",year:"numeric"}):formatDate(h.date);info.textContent=h.person+" · "+date;row.append(avatar(h.person),info);if(!isMonth){row.style.cursor="pointer";row.onclick=()=>jumpToDate(h.date)}col.append(row)}grid.append(col)}box.append(card)});
     }
 
     function renderEntries() {
