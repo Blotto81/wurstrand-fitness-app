@@ -293,7 +293,7 @@
       const visits=new Map();
       for(const d of darts){
         const mode=String(games.get(String(d.game_id))?.mode||"");
-        if(!/^(301|501)(?:\b|$)/.test(mode))continue;
+        if(!/\b(301|501)\b/.test(mode))continue;
         const k=JSON.stringify([d.game_id,d.player,d.turn_number]);
         visits.set(k,Boolean(visits.get(k)||d.is_bust));
       }
@@ -303,14 +303,23 @@
     const names=[...new Set(rows.map(d=>d.player))];
     const people=names.map(name=>({name,...metrics(rows.filter(d=>d.player===name))}));
     const total=metrics(rows);
-    const bar=(p,color)=>'<div style="height:10px;border-radius:8px;background:rgba(128,128,128,.18);overflow:hidden"><div style="height:100%;border-radius:8px;background:'+color+';width:'+Math.min(100,p)+'%"></div></div>';
-    const scale=Math.max(10,...people.map(p=>p.bust));
-    const list=(items,kind)=>items.map(p=>'<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:8px"><strong>'+escapeHtml(p.name)+'</strong><strong>'+(kind==="miss"?fmt(p.miss):p.visits?fmt(p.bust):"–")+'</strong></div>'+bar(kind==="miss"?p.miss:p.bust/scale*100,kind==="miss"?"#ef8b67":"#a78bfa")+'<small>'+ (kind==="miss"?p.misses+" Misses / "+p.darts+" Pfeile":p.busts+" Busts / "+p.visits+" Aufnahmen")+'</small></div>').join("");
     const dates=[...new Set(rows.map(d=>games.get(String(d.game_id))?.game_date).filter(Boolean))].sort();
     const daily=dates.map(date=>({date,...metrics(rows.filter(d=>games.get(String(d.game_id))?.game_date===date))}));
-    const latest=daily.at(-1), earlier=metrics(rows.filter(d=>games.get(String(d.game_id))?.game_date!==latest?.date));
-    const line=(key,color)=>{const data=daily.map((d,i)=>({x:25+i*250/Math.max(1,daily.length-1),y:105-d[key]*80/Math.max(10,...daily.flatMap(d=>[d.miss,d.bust])),d})).filter(p=>key!=="bust"||p.d.visits);return '<polyline fill="none" stroke="'+color+'" stroke-width="2.5" points="'+data.map(p=>p.x+','+p.y).join(" ")+'"/>'+data.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="'+color+'"><title>'+p.d.date+': '+fmt(p.d[key])+'</title></circle>').join("")};
-    return '<section class="dart-visual-insights"><h4>🎯 Treffsicherheit &amp; Überwerfen</h4><p>Misses: Anteil aller Pfeile · Busts: Anteil der 301/501-Aufnahmen</p><h4>Miss-Quote · '+fmt(total.miss)+'</h4>'+list(people.slice().sort((a,b)=>a.miss-b.miss),"miss")+'<h4>💥 Bust-Quote · '+(total.visits?fmt(total.bust):"–")+'</h4>'+list(people.filter(p=>p.visits).sort((a,b)=>b.bust-a.bust),"bust")+(daily.length>1?'<h4>📈 Entwicklung je Spieltag</h4><svg viewBox="0 0 300 130" width="100%" role="img" aria-label="Miss- und Bust-Quoten nach Spieltag"><path d="M25 25V105H275" stroke="currentColor" opacity=".3" fill="none"/>'+line("miss","#ef8b67")+line("bust","#a78bfa")+'<text x="25" y="122" font-size="9" fill="currentColor">'+daily[0].date.slice(5)+'</text><text x="275" y="122" text-anchor="end" font-size="9" fill="currentColor">'+latest.date.slice(5)+'</text></svg><p><span style="color:#ef8b67">●</span> Miss · <span style="color:#a78bfa">●</span> Bust</p><p>Letzter Spieltag: '+fmt(latest.miss)+' Miss · '+(latest.visits?fmt(latest.bust):"–")+' Bust<br>Frühere Spieltage: '+fmt(earlier.miss)+' Miss · '+(earlier.visits?fmt(earlier.bust):"–")+' Bust</p>':'')+'</section>';
+    const latest=daily.at(-1),earlier=metrics(rows.filter(d=>games.get(String(d.game_id))?.game_date!==latest?.date));
+    const colors={miss:"#ef9675",bust:"#b5a0fa"};
+    const card="background:rgba(100,116,139,.13);border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:12px;min-width:0";
+    const grid="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px";
+    const value=(p,k)=>k==="bust"&&!p.visits?"–":fmt(p[k]);
+    const tile=(k,label,detail)=>'<div style="'+card+'"><small>'+label+'</small><div style="font-size:clamp(20px,5vw,30px);font-weight:800;color:'+colors[k]+'">'+value(total,k)+'</div><small>'+detail+'</small></div>';
+    const chart=k=>{
+      const data=daily.filter(d=>k==="miss"||d.visits);
+      if(data.length<2)return "";
+      const max=Math.max(5,Math.ceil(Math.max(...data.map(d=>d[k]))/5)*5);
+      const points=data.map((d,i)=>({x:38+i*250/(data.length-1),y:112-d[k]*90/max,d}));
+      return '<div style="'+card+';margin-top:10px"><strong>Entwicklung · '+(k==="miss"?"Miss":"Bust")+'</strong><svg viewBox="0 0 310 140" width="100%" role="img" aria-label="Quote je Spieltag">'+[0,max/2,max].map(n=>'<line x1="38" x2="288" y1="'+(112-n*90/max)+'" y2="'+(112-n*90/max)+'" stroke="currentColor" opacity=".18" stroke-dasharray="3 4"/><text x="32" y="'+(115-n*90/max)+'" text-anchor="end" font-size="9" fill="currentColor">'+n+'%</text>').join("")+'<polyline fill="none" stroke="'+colors[k]+'" stroke-width="2.5" points="'+points.map(p=>p.x+','+p.y).join(" ")+'"/>'+points.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="3" fill="'+colors[k]+'"><title>'+p.d.date+': '+fmt(p.d[k])+'</title></circle>').join("")+'<text x="38" y="130" font-size="9" fill="currentColor">'+data[0].date.slice(5)+'</text><text x="288" y="130" text-anchor="end" font-size="9" fill="currentColor">'+data.at(-1).date.slice(5)+'</text></svg></div>';
+    };
+    const compare=k=>{const ok=k==="miss"?earlier.darts&&latest?.darts:earlier.visits&&latest?.visits;const delta=ok?latest[k]-earlier[k]:null;return '<div style="'+card+'"><strong style="color:'+colors[k]+'">'+(k==="miss"?"Miss":"Bust")+'</strong><div><small>Früher</small> '+value(earlier,k)+'</div><div><small>Zuletzt</small> '+value(latest,k)+'</div>'+(delta===null?"":'<small style="color:'+(delta<0?"#4ade80":delta>0?"#fca5a5":"inherit")+'">'+(delta<0?"↓ ":delta>0?"↑ ":"")+Math.abs(delta).toFixed(1).replace(".",",")+' Prozentpunkte</small>')+'</div>'};
+    return '<section class="dart-visual-insights" style="padding:12px"><h4>🎯 Treffsicherheit &amp; Busts</h4><div style="'+grid+'">'+tile("miss","Miss-Quote",total.misses+" von "+total.darts+" Pfeilen")+tile("bust","Bust-Quote",total.visits?total.busts+" von "+total.visits+" Aufnahmen":"Keine 301/501-Aufnahmen")+'</div>'+(people.length>1?'<div style="'+card+';margin-top:10px"><strong>Spielervergleich</strong><div style="display:grid;grid-template-columns:minmax(0,1.2fr) 1fr 1fr;gap:8px;margin-top:8px"><small>Spieler</small><small style="color:'+colors.miss+'">Miss</small><small style="color:'+colors.bust+'">Bust</small>'+people.map(p=>'<strong style="overflow-wrap:anywhere">'+escapeHtml(p.name)+'</strong><span>'+value(p,"miss")+'</span><span>'+value(p,"bust")+'</span>').join("")+'</div></div>':"")+chart("miss")+chart("bust")+(daily.length>1?'<h4 style="margin:14px 0 8px">Letzter Spieltag im Vergleich</h4><div style="'+grid+'">'+compare("miss")+compare("bust")+'</div>':"")+'<small style="display:block;margin-top:10px;opacity:.75">Miss: Anteil aller Pfeile · Bust: Anteil der 301/501-Aufnahmen.</small></section>';
   }
 
   function render() {
