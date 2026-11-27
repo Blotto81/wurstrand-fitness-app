@@ -24,6 +24,7 @@ if (dartPanel) {
           <strong>Ergebnis erfassen</strong>
           <small>Ergebnisse der elektronischen Dartscheibe eintragen</small>
         </button>
+        <button type="button" id="openDartStatistics" class="dart-entry-choice"><span class="dart-entry-choice-icon">📊</span><strong>Dart-Statistiken</strong><small>Auswertungen, Rekorde und Wurfprofile ansehen</small></button>
       </div>
     </div>
 
@@ -259,6 +260,7 @@ if (dartPanel) {
     document.getElementById("dartStatsTab")?.click();
   };
 
+  document.getElementById("openDartStatistics").addEventListener("click", () => window.WRCOpenSharedDartStatistics());
   document.querySelector("[data-dart-back]").addEventListener("click", showDartSelection);
   window.WRCOpenDartSelection = showDartSelection;
 
