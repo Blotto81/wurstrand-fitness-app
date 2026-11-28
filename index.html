@@ -4539,7 +4539,7 @@ background:#0f172a
       const selectedDays = new Map([...days].filter(([date]) => date.startsWith(selectedMonth)));
       const pastMonths = new Map([...months].filter(([date]) => date < selectedMonth));
       const nowMonth = new Map([[selectedMonth, months.get(selectedMonth) || empty()]]);
-      const currentMonth = new Date().toISOString().slice(0,7);
+      const currentMonth = currentMonthKey();
       const completedMonths = new Map([...months].filter(([date]) => date < currentMonth));
       const prettyDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value) ? value.slice(8) + "." + value.slice(5,7) + "." + value.slice(0,4) : /^\d{4}-\d{2}$/.test(value) ? value.slice(5,7) + "/" + value.slice(0,4) : value;
       const cards = (map,monthly,challenge) => '<div class="wrc-record-list">' + metrics.map(([icon,label,k,dec,suffix]) => {
@@ -4550,7 +4550,7 @@ background:#0f172a
         return '<div class="wrc-record-row"><span class="wrc-record-name">' + icon + ' ' + label + '</span><span class="wrc-record-result"><strong>' + (record ? fmt(record.value,dec) + suffix : '—') + '</strong><small>' + (hint || (record ? prettyDate(record.date) : 'Noch kein Wert')) + '</small></span></div>';
       }).join("") + '</div>';
       return '<section data-player-record-mode="month"><p class="wrc-record-caption">Beste Einzeltage im ausgewählten Monat</p>' + cards(selectedDays,false,false) +
-        '<details class="wrc-record-challenge"><summary>🎯 Monatsrekord herausfordern</summary><p class="wrc-record-caption">Dein Monatsstand im Vergleich zu früheren Monaten</p>' + cards(nowMonth,true,true) + '</details></section>' +
+        '</section>' +
         '<section data-player-record-mode="all" hidden><p class="wrc-record-caption">Deine besten Einzeltage</p>' + cards(days,false,false) + '</section>' +
         '<section data-player-record-mode="bestmonths" hidden><p class="wrc-record-caption">Beste abgeschlossene Monate je Disziplin</p>' + cards(completedMonths,true,false) + '</section>';
     }
@@ -4875,8 +4875,7 @@ background:#0f172a
 
       box.innerHTML = `
       <div class="card" style="margin:16px 0;padding:16px;border:1px solid #b99858;border-radius:16px">
-        <button type="button" style="width:100%;padding:13px;border-radius:12px;font-weight:800;cursor:pointer;background:#493820;color:#fff0ca" aria-expanded="false" onclick="const x=this.nextElementSibling;x.hidden=!x.hidden;this.setAttribute('aria-expanded',String(!x.hidden))">📊 WRC – All Time ▾</button>
-        <div hidden style="padding-top:15px">
+        <div style="padding-top:4px">
           <div class="player-record-main-tabs" role="group" aria-label="WRC All Time Bereich" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
             <button type="button" aria-pressed="true" onclick="showPlayerAllTimeSection(this,'records')" style="padding:11px 7px;border-radius:10px;background:#493820;color:#fff0ca;font-weight:700">🏆 Rekordjagd</button>
             <button type="button" aria-pressed="false" onclick="showPlayerAllTimeSection(this,'totals')" style="padding:11px 7px;border-radius:10px;font-weight:700">📊 Gesamtleistungen</button>
@@ -4966,13 +4965,13 @@ background:#0f172a
         </div>
       </div>
     `;
-      wrcOrganizePlayerProfile(box, player, month, monthPlayer);
+      wrcOrganizePlayerProfile(box, player, month, monthPlayer, pct(monthPlayer.points, monthTeam.points), pct(allPlayer.points, allTeam.points), trendMarkup(playerWeekTrend, { decimals: 1 }));
       if (typeof WRCDaily !== "undefined") {
         WRCDaily.renderPlayerHistory();
       }
     }
 
-    function wrcOrganizePlayerProfile(box, player, month, totals) {
+    function wrcOrganizePlayerProfile(box, player, month, totals, monthShare, allShare, trend) {
       // Nur DOM-Struktur: bestehende Statistik- und Rekordberechnungen bleiben unverändert.
       const record = box.querySelector(".card");
       const hero = box.querySelector(".player-profile-hero");
@@ -5032,6 +5031,7 @@ background:#0f172a
       heading.append(avatar, headingCopy);
       overview.append(heading,list);
       box.prepend(overview);
+      hero?.querySelector(".player-profile-facts")?.remove();
       const playerEntries = allEntries.filter(entry => entry.person === player);
       const motivation = document.createElement("div");
       motivation.className = "wrc-player-motivation";
@@ -5121,6 +5121,27 @@ background:#0f172a
         box.insertBefore(streak, overview.nextSibling);
       }
       if (nextMarkCard) box.insertBefore(nextMarkCard, overview.nextSibling);
+      const sectionLabel = label => {const el=document.createElement("div");el.style.cssText="font-size:11px;letter-spacing:1.4px;font-weight:800;opacity:.7;margin:16px 0 6px";el.textContent=label;return el};
+      const share=document.createElement("div");share.className="wrc-player-motivation-item";
+      share.innerHTML='<strong>👥 Mein Anteil am Team</strong><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;text-align:center;gap:4px;margin-top:8px">'+[[monthShare,"Monat"],[allShare,"All Time"]].map(([v,label])=>'<div><svg viewBox="0 0 80 80" style="width:100%;max-width:76px"><circle cx="40" cy="40" r="32" fill="none" stroke="#334155" stroke-width="6"/><circle cx="40" cy="40" r="32" fill="none" stroke="#d4b66b" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+Math.max(0,Math.min(100,v))*2.01+' 201" transform="rotate(-90 40 40)"/><text x="40" y="45" text-anchor="middle" fill="currentColor" font-size="15" font-weight="bold">'+fmt(v,1)+'%</text></svg><small>'+label+'</small></div>').join("")+'<div style="min-width:0;overflow-wrap:anywhere">'+trend+'<small>Wochentrend</small></div></div>';
+      const challenge=document.createElement("details");challenge.className="wrc-player-section";challenge.innerHTML='<summary>🏆 Schlage deinen Monatsrekord!</summary>';
+      const challengeBody=document.createElement("div");challengeBody.className="wrc-player-section-body";
+      const historical=new Map();
+      for(const e of playerEntries){const m=e.date?.slice(0,7);if(!m||m>=month)continue;const t=historical.get(m)||{points:0,steps:0,bike:0,squats:0,pushups:0};t.points+=calcPoints(e).total;for(const k of ["steps","bike","squats","pushups"])t[k]+=Number(e[k])||0;historical.set(m,t)}
+      for(const [m,t] of historical)t.points+=WRCBonusPoints.points({person:player,key:m});
+      const challenges=[["⭐ Punkte","points",1,""],["👣 Schritte","steps",0,""],["🚴 Radkilometer","bike",1," km"],["🦵 Kniebeugen","squats",0,""],["💪 Liegestütze","pushups",0,""]].map(([label,k,dec,unit])=>({label,dec,unit,value:totals[k],target:Math.max(0,...[...historical.values()].map(t=>t[k]))})).sort((a,b)=>(b.target?b.value/b.target:-1)-(a.target?a.value/a.target:-1));
+      for(const c of challenges){const el=document.createElement("div");el.style.cssText="padding:10px 0;border-bottom:1px solid #475569";const v=fmt(c.value,c.dec)+c.unit;el.innerHTML='<strong>'+c.label+'</strong><small style="display:block">Aktuell: '+v+' · Rekord: '+(c.target?fmt(c.target,c.dec)+c.unit:"–")+'</small>'+(c.target?'<div style="height:7px;background:#334155;border-radius:8px;margin:8px 0"><div style="height:100%;border-radius:8px;background:#d4b66b;width:'+Math.min(100,c.value/c.target*100)+'%"></div></div><small>'+(c.value>c.target?"Neuer Rekord! 🏆":c.value===c.target?"Rekord eingestellt!":"Noch "+fmt(c.target-c.value,c.dec)+c.unit+" zum Rekord")+'</small>':'<small>Noch kein früherer Monatsrekord</small>');challengeBody.append(el)}
+      challenge.append(challengeBody);
+      const series=document.createElement("div");series.className="wrc-player-motivation-item";series.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:center";
+      if(streak&&streak!==metrics&&streak!==games&&streak!==record){streak.style.cssText+=";margin:0;min-width:0;padding:8px";series.append(streak)}
+      const training=motivation.querySelector(".wrc-player-motivation-item:not(.wrc-player-dart-average-link)");if(training){training.style.cssText="min-width:0;padding:4px";series.append(training)}
+      if(series.children.length===1)series.style.gridTemplateColumns="1fr";
+      if(nextMarkCard&&candidates.length){const progress=document.createElement("div");progress.style.cssText="height:7px;background:#334155;border-radius:8px;margin-top:8px";const fill=document.createElement("div");fill.style.cssText="height:100%;background:#d4b66b;border-radius:8px;width:"+Math.min(100,candidates[0].progress*100)+"%";progress.append(fill);nextMarkCard.append(progress)}
+      overview.before(sectionLabel("MEINE LEISTUNG"));overview.after(share);
+      share.after(sectionLabel("MEINE MOTIVATION"),...(nextMarkCard?[nextMarkCard]:[]),challenge,...(series.children.length?[series]:[]),sectionLabel("MEINE STATISTIKEN"),dartAverageCard);
+      motivation.remove();
+      record.style.margin="0";record.style.padding="8px";record.style.border="0";
+      const style=document.createElement("style");style.textContent='#playerStats .player-record-main-tabs button,#playerStats .player-record-tab{background:#334155!important;color:#e2e8f0!important;border:2px solid transparent!important;min-width:0;font-size:12px;padding:8px 5px!important}#playerStats .player-record-main-tabs button[aria-pressed="true"],#playerStats .player-record-tab[aria-pressed="true"]{background:#665324!important;color:white!important;border-color:#e8c66c!important}#playerStats button[aria-pressed="true"].player-record-tab::before,#playerStats .player-record-main-tabs button[aria-pressed="true"]::before{content:"✓ "}';box.append(style);
       wrap("👤 Meine Spielerkarte", [hero]);
       wrap("🏆 Meine Rekorde & Gesamtleistungen", [record]);
       wrap("📊 Meine ausführlichen Sportwerte", [metrics]);
